@@ -5,7 +5,7 @@
 ********************************************************************************
 ********************************************************************************
 **                                                                            **
-**               (C) All rights reserved. 2008-2015                           **
+**               (C) All rights reserved. 2008-2016                           **
 **                                                                            **
 **  The ITA-Toolbox  for MATLAB  is a non-commercial tool and should  only be **
 **  used for non-commercial work, e.g. self-study, research without financial **
@@ -45,15 +45,16 @@
 **      Head: Prof. Dr. rer. nat. Michael Vorlaender                          **
 **                                                                            **
 **    Active Developers:                                                      **
-**      Dipl.-Ing. Martin Guski                                               **
+	Dipl.-Ing. Ramona Bomhardt
 **      Dipl.-Ing. Johannes Klein                                             **
 **      Dipl.-Ing. Jan-Gerrit Richter                                         **
 **                                                                            **
 **    Former Developers:                                                      **
 **      Dr.-Ing. Pascal Dietrich                                              **
-**      Dipl.-Ing. Martin Pollow                                              **
+**      Dr.-Ing. Martin Guski                                                 **
 **      Dr.-Ing. Bruno Masiero                                                **
-**      Dipl.-Ing. Markus Mueller-Trapet                                      **
+**      Dr.-Ing. Markus Mueller-Trapet                                        **
+**      Dr.-Ing. Martin Pollow                                                **
 **      Dr.-Ing. Roman Scharrer                                               **
 **                                                                            **
 **   Contact: toolbox-dev@akustik.rwth-aachen.de                              **
