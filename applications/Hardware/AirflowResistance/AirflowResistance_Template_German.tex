@@ -1,0 +1,152 @@
+%% platzhalten <\nameDesPlatzhalters> wird von matlab ersetzt
+%
+\newcommand{\itaBriefkopfBild}{<\itaBriefkopfBild>}
+\newcommand{\datumDerMessung}{<\datumDerMessung>}
+\newcommand{\nameDesPruefers}{<\nameDesPruefers>}
+\newcommand{\nameDerProbe}{<\nameDerProbe>}
+\newcommand{\anzahlDerMessungen}{<\anzahlDerMessungen>}
+\newcommand{\beschreibungDesMaterials}{<\beschreibungDesMaterials>}
+\newcommand{\materialDicke}{<\materialDicke>}
+\newcommand{\materialGewicht}{<\materialGewicht>}
+\newcommand{\materialDichte}{<\materialDichte>}
+
+\newcommand{\strWidMittelwert}{<\strWidMittelwert>}
+\newcommand{\strWidStandardabweichung}{<\strWidStandardabweichung>}
+\newcommand{\spezStrWidMittelwert}{<\spezStrWidMittelwert>}
+\newcommand{\spezStrWidStandardabweichung}{<\spezStrWidStandardabweichung>}
+\newcommand{\laengenbezStrWidMittelwert}{<\laengenbezStrWidMittelwert>}
+\newcommand{\laengenbezStrWidStandardabweichung}{<\laengenbezStrWidStandardabweichung>}
+
+
+
+
+
+\newcommand{\itaBriefkopfBild}{KopfzeileGKB.png}
+\newcommand{\datumDerMessung}{03.01.2011}
+\newcommand{\nameDesPruefers}{Martin Guski}
+\newcommand{\nameDerProbe}{FlowTec Red}
+\newcommand{\anzahlDerMessungen}{9}
+\newcommand{\beschreibungDesMaterials}{	Die Probe wurde  so und so befestigt...}
+\newcommand{\materialDicke}{15 mm }
+\newcommand{\materialGewicht}{ 35 g}
+\newcommand{\materialDichte}{100 kg/m $^3$}
+
+\newcommand{\strWidMittelwert}{ 110 Pa s/m$^3$}
+\newcommand{\strWidStandardabweichung}{7}
+\newcommand{\spezStrWidMittelwert}{111 Pa s/m }
+\newcommand{\spezStrWidStandardabweichung}{12}
+\newcommand{\laengenbezStrWidMittelwert}{7.5 kPa s/m$^2$}
+\newcommand{\laengenbezStrWidStandardabweichung}{13}
+
+
+
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper, twoside, final]{scrartcl}
+\usepackage{graphicx}
+\usepackage[latin1]{inputenc}
+\usepackage{lscape}
+
+\pagestyle{plain}
+
+\setlength{\textwidth}{17.5cm}
+\setlength{\oddsidemargin}{-1cm}
+\setlength{\evensidemargin}{1cm}
+\setlength{\topmargin}{-2cm}
+\setlength{\headheight}{0cm}
+\setlength{\headsep}{0cm}
+\setlength{\footskip}{0cm}
+\setlength{\textheight}{27.5cm}
+
+\pagestyle{empty}
+
+
+
+\begin{document}
+
+\parindent 0pt 
+
+ \includegraphics[width=1.0\textwidth]{\itaBriefkopfBild}
+
+\begin{center}
+		\huge
+		Messprotokoll zur Messung des Strömungswiderstandes nach DIN EN 29053
+\end{center}
+
+
+\begin{tabular}{|p{0.43\textwidth}p{0.51\textwidth}|}\hline
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+% PRUEFEINRICHTUNG
+	\multicolumn{2}{|p{0.99\textwidth}|}{
+	\underline{Beschreibung der Prüfeinrichtung:} \newline
+		Die Messung des Strömungswiderstandes erfolgte gemäß DIN EN 29053 mit dem Luftwechselstromverfahren (Verfahren B) . Das zylindrische Prüfgefäß hat einen Durchmesser von ??? mm  und eine Höhe von ??? mm. }\\ 
+	&\\
+	
+					Prüfdatum: & \datumDerMessung \\
+		 Prüfer: & \nameDesPruefers\\ 
+	&\\
+	\hline \multicolumn{2}{c}{ }\\ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+% MATERIAL
+	\hline
+	\multicolumn{2}{|p{0.99\textwidth}|}{	
+	\underline{Beschreibung des zu untersuchenden Materials und der Prüfanordnung:}\newline
+	\beschreibungDesMaterials }\\
+	 & \\
+			Bezeichnung der untersuchten Probe: & \nameDerProbe \\ 
+			Dicke der Probe: & \materialDicke \\
+			Dichte der Probe: & \materialDichte \\
+			
+			Anzahl der Messungen: & \anzahlDerMessungen \\
+	
+	&\\
+	\hline
+	\multicolumn{2}{c}{ }\\ 
+	
+
+
+	
+	
+	
+\end{tabular}
+
+
+
+\begin{tabular}{|p{0.43\textwidth}p{0.21\textwidth}p{0.3\textwidth}|}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+% ERGEBNISSE
+	\hline
+	\multicolumn{3}{|p{0.99\textwidth}|}{
+			\underline{Ergebnisse der Messungen} \newline
+			Messung erfolgte einer linearen Strömungsgeschindigkeit von  u = bla, interp auf 0,5 mm/s 
+			}\\ 
+	&&\\
+		Strömungswiderstand: & \strWidMittelwert  & \strWidStandardabweichung \\
+		Spezifischer Strömungswiderstand: & \spezStrWidMittelwert & \spezStrWidStandardabweichung\\ 
+		Längenbezogener Strömungswiderstand. & \laengenbezStrWidMittelwert & \laengenbezStrWidStandardabweichung \\
+	&&\\
+ 	\hline 
+\end{tabular}
+
+
+\begin{itemize}
+	\item der hub
+	\item Fläche und Abmessungen  der Probe, 
+	\item befestigung der probe
+	\item DIN oder besser ISO?
+	\item Gewicht kann man weglassen, wa?
+	\item Frequenz von 2 Hz
+	\item Layout; mehr abstände einbauen
+	\item std ? s = ? 
+\end{itemize}
+
+\end{document}

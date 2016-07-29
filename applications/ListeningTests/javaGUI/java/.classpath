@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="bin/|data/|img/|jinput/|tests/" including="ita/|org/" kind="src" path=""/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/jangerrit/local/projekte/java/java/bin/jinput/jinput.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/jangerrit/local/projekte/java/java/bin/jinput"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/matlab/R2015b/java/jarext/jogl-all.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/matlab/R2015b/bin/glnxa64"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/home/matlab/R2015b/java/jarext/gluegen-rt.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/matlab/R2015b/bin/glnxa64"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin/java7"/>
+</classpath>

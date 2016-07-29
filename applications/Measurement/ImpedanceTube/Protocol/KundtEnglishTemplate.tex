@@ -1,0 +1,164 @@
+% platzhalten <\nameDesPlatzhalters> wird von matlab ersetzt
+
+\newcommand{\itaBriefkopfBild}{<\itaBriefkopfBild>}
+\newcommand{\datumDerMessung}{<\datumDerMessung>}
+\newcommand{\nameDesPruefers}{<\nameDesPruefers>}
+\newcommand{\temperaturInGradC}{<\temperaturInGradC>}
+\newcommand{\luftfeuchtigkeit}{<\luftfeuchtigkeit>}
+\newcommand{\nameDerProbe}{<\nameDerProbe>}
+\newcommand{\anzahlDerMessungen}{<\anzahlDerMessungen>}
+\newcommand{\samplesOderWiederholungen}{<\samplesOderWiederholungen>}
+\newcommand{\dateinameGrafik}{<\dateinameGrafik>}
+\newcommand{\smoothParameter}{<\smoothParameter>}
+\newcommand{\beschreibungDesMaterials}{<\beschreibungDesMaterials>}
+
+\newcommand{\terzWertA}{<\terzWertA>}  % 100
+\newcommand{\terzWertB}{<\terzWertB>}  % 125
+\newcommand{\terzWertC}{<\terzWertC>}  % 160
+\newcommand{\terzWertD}{<\terzWertD>}  % 200
+\newcommand{\terzWertE}{<\terzWertE>}  % 250
+\newcommand{\terzWertF}{<\terzWertF>}  % 315
+\newcommand{\terzWertG}{<\terzWertG>}  % 400
+\newcommand{\terzWertH}{<\terzWertH>}  % 500
+\newcommand{\terzWertI}{<\terzWertI>}  % 630
+\newcommand{\terzWertJ}{<\terzWertJ>}  % 800
+
+
+\newcommand{\terzWertK}{<\terzWertK>}  % 1000
+\newcommand{\terzWertL}{<\terzWertL>}  % 1250
+\newcommand{\terzWertM}{<\terzWertM>}  % 1600
+\newcommand{\terzWertN}{<\terzWertN>}  % 2000
+\newcommand{\terzWertO}{<\terzWertO>}  % 2500
+\newcommand{\terzWertP}{<\terzWertP>}  % 3150
+\newcommand{\terzWertQ}{<\terzWertQ>}  % 4000
+\newcommand{\terzWertR}{<\terzWertR>}  % 5000
+\newcommand{\terzWertS}{<\terzWertS>}  % 6300
+\newcommand{\terzWertT}{<\terzWertT>}  % 8000
+
+
+
+
+%\newcommand{\datumDerMessung}{22.11.2111}
+%\newcommand{\nameDesPruefers}{Martin Guski}
+%\newcommand{\temperaturInGradC}{21,5}
+%\newcommand{\luftfeuchtigkeit}{52,3}
+%\newcommand{\nameDerProbe}{NMC A}
+%\newcommand{\anzahlDerMessungen}{11}
+%\newcommand{\samplesOderWiederholungen}{Samples}
+%\newcommand{\dateinameGrafik}{NMC-A.png}
+%\newcommand{\smoothParameter}{12}
+%\newcommand{\beschreibungDesMaterials}{	Anthrazitfarbiger, teils geschlossen-poriger Zellschaum. Dicke ca. 52 mm
+%	Passgenaue Platzierung der Samples im Probenhalter mit dichtem Abschluss zur Wandung. 
+%	Einbau der Proben ohne Abstand vor dem schallharten Rohrabschluss.}
+%
+%\newcommand{\terzWertA}{0.01}  % 100
+%\newcommand{\terzWertB}{0.02}  % 125
+%\newcommand{\terzWertC}{0.03}  % 160
+%\newcommand{\terzWertD}{0.04}  % 200
+%\newcommand{\terzWertE}{0.05}  % 250
+%\newcommand{\terzWertF}{0.06}  % 315
+%\newcommand{\terzWertG}{0.07}  % 400
+%\newcommand{\terzWertH}{0.08}  % 500
+%\newcommand{\terzWertI}{0.09}  % 630
+%\newcommand{\terzWertJ}{0.10}  % 800
+%
+%
+%\newcommand{\terzWertK}{0.11}  % 1000
+%\newcommand{\terzWertL}{0.12}  % 1250
+%\newcommand{\terzWertM}{0.13}  % 1600
+%\newcommand{\terzWertN}{0.14}  % 2000
+%\newcommand{\terzWertO}{0.15}  % 2500
+%\newcommand{\terzWertP}{0.16}  % 3150
+%\newcommand{\terzWertQ}{0.17}  % 4000
+%\newcommand{\terzWertR}{0.18}  % 5000
+%\newcommand{\terzWertS}{0.19}  % 6300
+%\newcommand{\terzWertT}{0.20}  % 8000
+
+
+
+
+
+
+
+
+
+\documentclass[11pt,a4paper, twoside, final]{scrartcl}
+\usepackage{graphicx}
+\usepackage[latin1]{inputenc}
+\usepackage{lscape}
+
+\pagestyle{plain}
+
+\setlength{\textwidth}{17.5cm}
+\setlength{\oddsidemargin}{-1cm}
+\setlength{\evensidemargin}{1cm}
+\setlength{\topmargin}{-2cm}
+\setlength{\headheight}{0cm}
+\setlength{\headsep}{0cm}
+\setlength{\footskip}{0cm}
+\setlength{\textheight}{27.5cm}
+
+\pagestyle{empty}
+
+
+
+\begin{document}
+
+\parindent 0pt 
+
+ \includegraphics[width=1.0\textwidth]{\itaBriefkopfBild}
+
+\begin{center}
+	 \LARGE
+		Measurement report: Determination of sound absorption coefficient in the impedance tubes according to EN ISO 10534 part 2
+\end{center}
+
+\begin{tabular}{|p{0.43\textwidth}p{0.51\textwidth}|}\hline
+	\multicolumn{2}{|p{0.99\textwidth}|}{
+	\underline{Description of the test facility:} \newline
+Impedance  tube made of aluminum with a 2 inch bore diameter.  Specimen holder with an adjustable tubing end of a massive, sealed aluminum piston. Measurement tube with three microphone bores with a distance of 17mm and 110mm.
+Probe microphone picking up the sound field at the center of the tube. 
+Evaluable frequency range: approx. 100 Hz - 8 kHz by suppressing the first tube mode.  Broadband excitation by sine sweeps. Evaluation according to ISO10534-2 with the help of a FFT measurement technique developed at ITA.}\\ 
+	&\\
+		Test date: & \datumDerMessung \\
+		 Test Engineer: & \nameDesPruefers\\ 
+	\multicolumn{2}{|l|}{
+		Meteorological conditions:   \hspace{3.175cm} Temperature: \temperaturInGradC ~°C  \qquad  \qquad Humidity:  \luftfeuchtigkeit ~\% }\\ \hline 
+	
+	\multicolumn{2}{c}{ }\\ \hline
+
+
+	\multicolumn{2}{|p{0.99\textwidth}|}{	\underline{Description of the materials to be examined and the testing arrangement:}\newline
+	\beschreibungDesMaterials }\\
+	 & \\
+	Designation of the examined sample: & \nameDerProbe \\ 
+	Number of  \samplesOderWiederholungen : & \anzahlDerMessungen \\ \hline
+	
+\end{tabular}
+
+
+\begin{figure}[htbp]
+\centering
+		\includegraphics[width=1\textwidth]{\dateinameGrafik}
+	\caption{Mean value of the frequency-dependent absorption coefficient (solid curve) and standard deviation of measurement result (dotted curves). Calculation based on  the measurements of \anzahlDerMessungen \ \samplesOderWiederholungen \ . Curves smoothed by applying moving average: smoothing parameter \smoothParameter \ octave, Gaussian window. }
+	\label{fig:ZweiProben_gemittelt}
+\end{figure}
+
+\small
+\centering
+\begin{tabular}{|l||c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|} \hline
+ $f / [Hz]$  &  125  &  160  &  200  &  250  &  315  &  400  &  500  &  630  &  800  \\ 
+ $\alpha$     &  \terzWertB &  \terzWertC &  \terzWertD &  \terzWertE &  \terzWertF &  \terzWertG &  \terzWertH &  \terzWertI &  \terzWertJ  \\ \hline \hline 
+ $f / [Hz]$ &  1000 &  1250 &  1600 &  2000 &  2500 &  3150 &  4000 &  5000 &  6300   \\ 
+ $\alpha$   &  \terzWertK &  \terzWertL &  \terzWertM &  \terzWertN &  \terzWertO &  \terzWertP &  \terzWertQ &  \terzWertR &  \terzWertS   \\ \hline
+\end{tabular}
+\\
+
+%\vspace{2cm}
+%
+%Institut für Technische Akustik
+%Neustraße 50
+%52066 Aachen
+
+
+\end{document}

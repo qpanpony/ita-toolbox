@@ -1,0 +1,63 @@
+********************************************************************************
+********************************************************************************
+****               Applications for ITA-Toolbox for MATLAB               *******
+**** An Audio-Signal-Processing Toolbox for the needs of an Acoustician. *******
+********************************************************************************
+********************************************************************************
+**                                                                            **
+**               (C) All rights reserved. 2008-2015                           **
+**                                                                            **
+**  The ITA-Toolbox  for MATLAB  is a non-commercial tool and should  only be **
+**  used for non-commercial work, e.g. self-study, research without financial **
+**  profit. The  Institute of Technical Acoustics  at  RWTH Aachen University **
+**  (in the following short: ITA ) is not responsible for  any  damage caused **
+**  by the use of the ITA-Toolbox.                                            **
+**                                                                            **
+**  The ITA-Toolbox is provided as is, and the Institute does not offer any   **
+**  support for this Toolbox.  The source code may be edited.  Improvements   **
+**  should be send to the developer team  to be included in future versions   **
+**  of the ITA-Toolbox with acknowledgments to the editors.                   **
+**                                                                            **
+**  Users of ITA-Toolbox are kindly asked to add the following line in the    **
+**  Acknowledgments section in publications if the ITA-Toolbox was used in    **
+**  this particular work or research.                                         **
+**                                                                            **
+**  Text to add: "The ITA-Toolbox for MATLAB developed at the Institute of    **
+**  Technical Acoustics at RWTH Aachen has been used for data processing."    **
+**                                                                            **
+**  Distribution of the ITA-Toolbox without an official allowance by the      **
+**  Institute of Technial Acoustics is prohibited. The use of ITA-Toolbox     **
+**  for any profitable work, e.g. acoustic consulting, prototype developement **
+**  is prohibited as not officially allowed by the Institute of Technical     **
+**  Acoustics at RWTH Aachen University otherwise.                            **
+**                                                                            **
+**  It is prohibited to distribute THIS APPLICATIONS folder developed for the **
+**  ITA-Toolbox by the ITA under any circumstances.                           **
+**                                                                            **
+**  A free license key for the kernel can be obtained via                     **
+**                 http://ita-toolbox.org/                                    **
+**  for non-commercial use.                                                   **
+**                                                                            **
+********************************************************************************
+**                                                                            **
+**    Developed at the Institute of Technical Acoustics,                      **
+**      RWTH Aachen University, Kopernikusstr. 5, 52074 Aachen                **
+**      Head: Prof. Dr. rer. nat. Michael Vorlaender                          **
+**                                                                            **
+**    Active Developers:                                                      **
+**      Dipl.-Ing. Martin Guski                                               **
+**      Dipl.-Ing. Johannes Klein                                             **
+**      Dipl.-Ing. Jan-Gerrit Richter                                         **
+**                                                                            **
+**    Former Developers:                                                      **
+**      Dr.-Ing. Pascal Dietrich                                              **
+**      Dipl.-Ing. Martin Pollow                                              **
+**      Dr.-Ing. Bruno Masiero                                                **
+**      Dipl.-Ing. Markus Mueller-Trapet                                      **
+**      Dr.-Ing. Roman Scharrer                                               **
+**                                                                            **
+**   Contact: toolbox-dev@akustik.rwth-aachen.de                              **
+**                                                                            **
+********************************************************************************
+********************************************************************************
+

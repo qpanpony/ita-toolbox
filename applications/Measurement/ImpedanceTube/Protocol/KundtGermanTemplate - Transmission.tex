@@ -1,0 +1,165 @@
+% platzhalten <\nameDesPlatzhalters> wird von matlab ersetzt
+
+\newcommand{\itaBriefkopfBild}{<\itaBriefkopfBild>}
+\newcommand{\datumDerMessung}{<\datumDerMessung>}
+\newcommand{\nameDesPruefers}{<\nameDesPruefers>}
+\newcommand{\temperaturInGradC}{<\temperaturInGradC>}
+\newcommand{\luftfeuchtigkeit}{<\luftfeuchtigkeit>}
+\newcommand{\nameDerProbe}{<\nameDerProbe>}
+\newcommand{\anzahlDerMessungen}{<\anzahlDerMessungen>}
+\newcommand{\samplesOderWiederholungen}{<\samplesOderWiederholungen>}
+\newcommand{\dateinameGrafik}{<\dateinameGrafik>}
+\newcommand{\smoothParameter}{<\smoothParameter>}
+\newcommand{\beschreibungDesMaterials}{<\beschreibungDesMaterials>}
+
+\newcommand{\terzWertA}{<\terzWertA>}  % 100
+\newcommand{\terzWertB}{<\terzWertB>}  % 125
+\newcommand{\terzWertC}{<\terzWertC>}  % 160
+\newcommand{\terzWertD}{<\terzWertD>}  % 200
+\newcommand{\terzWertE}{<\terzWertE>}  % 250
+\newcommand{\terzWertF}{<\terzWertF>}  % 315
+\newcommand{\terzWertG}{<\terzWertG>}  % 400
+\newcommand{\terzWertH}{<\terzWertH>}  % 500
+\newcommand{\terzWertI}{<\terzWertI>}  % 630
+\newcommand{\terzWertJ}{<\terzWertJ>}  % 800
+
+
+\newcommand{\terzWertK}{<\terzWertK>}  % 1000
+\newcommand{\terzWertL}{<\terzWertL>}  % 1250
+\newcommand{\terzWertM}{<\terzWertM>}  % 1600
+\newcommand{\terzWertN}{<\terzWertN>}  % 2000
+\newcommand{\terzWertO}{<\terzWertO>}  % 2500
+\newcommand{\terzWertP}{<\terzWertP>}  % 3150
+\newcommand{\terzWertQ}{<\terzWertQ>}  % 4000
+\newcommand{\terzWertR}{<\terzWertR>}  % 5000
+\newcommand{\terzWertS}{<\terzWertS>}  % 6300
+\newcommand{\terzWertT}{<\terzWertT>}  % 8000
+
+
+
+
+%\newcommand{\datumDerMessung}{22.11.2111}
+%\newcommand{\nameDesPruefers}{Martin Guski}
+%\newcommand{\temperaturInGradC}{21,5}
+%\newcommand{\luftfeuchtigkeit}{52,3}
+%\newcommand{\nameDerProbe}{NMC A}
+%\newcommand{\anzahlDerMessungen}{11}
+%\newcommand{\samplesOderWiederholungen}{Samples}
+%\newcommand{\dateinameGrafik}{NMC-A.png}
+%\newcommand{\smoothParameter}{12}
+%\newcommand{\beschreibungDesMaterials}{	Anthrazitfarbiger, teils geschlossen-poriger Zellschaum. Dicke ca. 52 mm
+%	Passgenaue Platzierung der Samples im Probenhalter mit dichtem Abschluss zur Wandung. 
+%	Einbau der Proben ohne Abstand vor dem schallharten Rohrabschluss.}
+%
+%\newcommand{\terzWertA}{0.01}  % 100
+%\newcommand{\terzWertB}{0.02}  % 125
+%\newcommand{\terzWertC}{0.03}  % 160
+%\newcommand{\terzWertD}{0.04}  % 200
+%\newcommand{\terzWertE}{0.05}  % 250
+%\newcommand{\terzWertF}{0.06}  % 315
+%\newcommand{\terzWertG}{0.07}  % 400
+%\newcommand{\terzWertH}{0.08}  % 500
+%\newcommand{\terzWertI}{0.09}  % 630
+%\newcommand{\terzWertJ}{0.10}  % 800
+%
+%
+%\newcommand{\terzWertK}{0.11}  % 1000
+%\newcommand{\terzWertL}{0.12}  % 1250
+%\newcommand{\terzWertM}{0.13}  % 1600
+%\newcommand{\terzWertN}{0.14}  % 2000
+%\newcommand{\terzWertO}{0.15}  % 2500
+%\newcommand{\terzWertP}{0.16}  % 3150
+%\newcommand{\terzWertQ}{0.17}  % 4000
+%\newcommand{\terzWertR}{0.18}  % 5000
+%\newcommand{\terzWertS}{0.19}  % 6300
+%\newcommand{\terzWertT}{0.20}  % 8000
+
+
+\documentclass[11pt,a4paper, twoside, final]{scrartcl}
+\usepackage{graphicx}
+\usepackage[latin1]{inputenc}
+\usepackage{lscape}
+
+\pagestyle{plain}
+
+\setlength{\textwidth}{17.5cm}
+\setlength{\oddsidemargin}{-1cm}
+\setlength{\evensidemargin}{1cm}
+\setlength{\topmargin}{-2cm}
+\setlength{\headheight}{0cm}
+\setlength{\headsep}{0cm}
+\setlength{\footskip}{0cm}
+\setlength{\textheight}{27.5cm}
+
+\pagestyle{empty}
+
+
+
+\begin{document}
+
+\parindent 0pt 
+
+ \includegraphics[width=1.0\textwidth]{\itaBriefkopfBild}
+
+\begin{center}
+		\huge
+		Messprotokoll zur Messung des Transmissionsfaktors im Impedanzmessrohr
+\end{center}
+
+\begin{tabular}{|p{0.43\textwidth}p{0.51\textwidth}|}\hline
+	\multicolumn{2}{|p{0.99\textwidth}|}{
+	\underline{Beschreibung der Prüfeinrichtung:} \newline
+	Impedanzmessrohr mit 2 Zoll Bohrung aus Aluminium. Probenhalter mit verstellbarem Rohrabschluss durch massiven, abgedichteten Aluminiumkolben. Messrohr mit drei Mikrofonbohrungen mit 17~mm und 110~mm 	Distanz. Sondenmikrofon mit Abnahme des Schallfelds im Rohrmittelpunkt. Auswertbarer Frequenzbereich ca.~100 Hz bis 8 kHz durch Ausblendung der ersten zwei Rohrmode. Breitbandige Anregung mittels Sinus-Sweeps. Auswertung nach ISO 10534-2 mit Hilfe einer im ITA entwickelten FFT-Messtechnik.}\\ 
+	&\\
+		Prüfdatum: & \datumDerMessung \\
+		 Prüfer: & \nameDesPruefers\\ 
+	\multicolumn{2}{|l|}{
+		Meteorologische Bedingungen:   \hspace{2.5cm} Temperatur: \temperaturInGradC ~°C  \qquad  \qquad Luftfeuchtigkeit:  \luftfeuchtigkeit ~\% }\\ \hline 
+	
+	\multicolumn{2}{c}{ }\\ \hline
+
+
+	\multicolumn{2}{|p{0.99\textwidth}|}{	\underline{Beschreibung des zu untersuchenden Materials und der Prüfanordnung:}\newline
+	\beschreibungDesMaterials }\\
+	 & \\
+	Bezeichnung der untersuchten Probe: & \nameDerProbe \\ 
+	Anzahl der \samplesOderWiederholungen : & \anzahlDerMessungen \\ \hline
+	
+\end{tabular}
+
+
+\begin{figure}[htbp]
+\centering
+		\includegraphics[width=1\textwidth]{\dateinameGrafik}
+	\caption{Verlauf des Mittelwerts des frequenzabhängigen Transmissionsfaktors berechnet über \anzahlDerMessungen \ \samplesOderWiederholungen \ (durchgezogene Kurve) und Standardabweichung der Messergebnisse (gestrichelte Kurven). Kurven gleitend gemittelt: Glättungsparameter \smoothParameter \ Oktave, Gauß-Fenster}
+	\label{fig:ZweiProben_gemittelt}
+\end{figure}
+
+\small
+\centering
+\begin{tabular}{|l||c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|} \hline
+ $f / [Hz]$   &  125  &  160  &  200  &  250  &  315  &  400  &  500  &  630  &  800  \\ 
+ $\alpha$     &  \terzWertB &  \terzWertC &  \terzWertD &  \terzWertE &  \terzWertF &  \terzWertG &  \terzWertH &  \terzWertI &  \terzWertJ  \\ \hline \hline 
+ $f / [Hz]$ &  1000 &  1250 &  1600 &  2000 &  2500 &  3150 &  4000 &  5000 &  6300   \\ 
+ $\alpha$   &  \terzWertK &  \terzWertL &  \terzWertM &  \terzWertN &  \terzWertO &  \terzWertP &  \terzWertQ &  \terzWertR &  \terzWertS   \\ \hline
+\end{tabular}
+\\
+
+%\begin{tabular}{|l||*{20}{p{1.4em}|}} \hline
+% f/Hz&  100  &  125  &  160  &  200  &  250  &  315  &  400  &  500  &  630  &  800 &  1000 &  1250 &  1600 &  2000 &  2500 &  3150 &  4000 &  5000 &  6300 &  8000 \\ \hline
+% $\alpha$   &  0.06 &  0.08 &  0.11 &  0.15 &  0.26 &  0.47 &  0.81 &  0.90 &  0.66 &  0.46 &  0.42 &  0.58 &  0.64 &  0.59 &  0.58 &  0.68 &  0.72 &  0.84 &  0.86 &  0.81 \\ \hline
+%\end{tabular}
+%\\
+%
+%
+%
+%
+%
+%\vspace{2cm}
+%
+%Institut für Technische Akustik
+%Neustraße 50
+%52066 Aachen
+
+
+\end{document}

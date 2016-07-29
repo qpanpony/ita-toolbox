@@ -1,0 +1,105 @@
+% platzhalten <nameDesPlatzhalters> wird von matlab ersetzt
+
+
+
+
+\newcommand{\itaBriefkopfBild}{KopfzeileGKB.png}
+%\newcommand{\datumDerMessung}{22.11.2111}
+\newcommand{\nameDesPruefers}{Martin Guski}
+%\newcommand{\temperaturInGradC}{21,5}
+%\newcommand{\luftfeuchtigkeit}{52,3}\newcommand{\nameDerProbe}{NMC A}
+%\newcommand{\anzahlDerMessungen}{11}
+%\newcommand{\samplesOderWiederholungen}{Samples}
+%\newcommand{\dateinameGrafik}{alpha_aixFOAMDirektAufBoden.pdf}
+%\newcommand{\beschreibungDesMaterials}{	Anthrazitfarbiger, teils geschlossen-poriger Zellschaum. Dicke ca. 52 mm
+%	Passgenaue Platzierung der Samples im Probenhalter mit dichtem Abschluss zur Wandung. 
+%	Einbau der Proben ohne Abstand vor dem schallharten Rohrabschluss.}
+
+
+
+\documentclass[11pt,a4paper, twoside, final]{scrartcl}
+\usepackage{graphicx}
+\usepackage[latin1]{inputenc}
+\usepackage{lscape}
+
+\pagestyle{plain}
+
+\setlength{\textwidth}{17.5cm}
+\setlength{\oddsidemargin}{-1cm}
+\setlength{\evensidemargin}{1cm}
+\setlength{\topmargin}{-2cm}
+\setlength{\headheight}{0cm}
+\setlength{\headsep}{0cm}
+\setlength{\footskip}{0cm}
+\setlength{\textheight}{27.5cm}
+
+\pagestyle{empty}
+
+
+
+\begin{document}
+
+\parindent 0pt 
+
+ \includegraphics[width=1.0\textwidth]{\itaBriefkopfBild}
+
+\begin{center}
+		\huge
+		Messung der Schallabsorption in Hallräumen nach ISO 354
+\end{center}
+
+\begin{tabular}{p{0.43\textwidth}p{0.51\textwidth}}
+	\multicolumn{2}{p{0.99\textwidth}}{
+			\underline{Beschreibung der Prüfeinrichtung:} \newline
+			Hallraum des Instituts für Technische Akusik der RWTH-Aachen  
+	}\\ 
+	
+	
+	&\\
+		Hallraum Volumen:  		& 122.6 $m^3$ 						\\
+		Hallraum Oberfläche: 	& 177.6 $m^2$	            \\
+		Temperatur: 					&	<temperaturInGradC> ~°C \\
+		Luftfeuchtigkeit: 		& <luftfeuchtigkeit>  ~\% \\ 
+		Prüfdatum: 						& <datumDerMessung>       \\
+		Prüfer: 							& <nameDesPruefers>       \\ 
+	& \\
+		 		 
+	\multicolumn{2}{p{0.99\textwidth}}{	
+		\underline{Beschreibung des zu untersuchenden Materials und der Prüfanordnung:} 
+		} \\
+		
+	Bezeichnung der untersuchten Probe: & <NameDerProbe> \\  
+	 & \\
+	 
+	\multicolumn{2}{p{0.99\textwidth}}{	
+			<beschreibungDesMaterials> 
+	}\\
+	
+	
+	
+\end{tabular}
+
+
+
+% PLOT
+\begin{figure}[htbp]
+\centering
+		\includegraphics[width=1\textwidth]{<Dateiname der Grafik>}
+	\caption{<Bildunterschrift>}
+\end{figure}
+
+
+
+% TABELLE 
+\small
+\centering
+\begin{tabular}{lcccccccccccccccccccc}
+ $f / [Hz]$   & 100 &  125  &  160  &  200  &  250  &  315  &  400  &  500  &  630  &  800  \\  \hline 
+ $\alpha_S$     & <alpha_s_100>  & <alpha_s_125>  &  <alpha_s_160> &  <alpha_s_200> &  <alpha_s_250> &  <alpha_s_315> &  <alpha_s_400> &  <alpha_s_500> &  <alpha_s_630> & <alpha_s_800> \\ \\
+ $f / [Hz]$ &  1000 &  1250 &  1600 &  2000 &  2500 &  3150 &  4000 &  5000 &  6300  & 8000 \\ \hline
+ $\alpha_S$   &  <alpha_s_1000> &  <alpha_s_1250>  &  <alpha_s_1600>  & <alpha_s_2000> &  <alpha_s_2500> &  <alpha_s_3150> &  <alpha_s_4000> &  <alpha_s_5000> &  <alpha_s_6300> & <alpha_s_8000>   \\ 
+  
+\end{tabular}
+\\
+
+\end{document}

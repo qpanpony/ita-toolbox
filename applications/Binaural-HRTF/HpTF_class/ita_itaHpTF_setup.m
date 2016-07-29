@@ -1,0 +1,226 @@
+function obj = ita_itaHpTF_setup( obj )
+%ITA_ITAHPTF_SETUP - Generates GUI for itaHpTF_Measn
+%
+% Syntax: obj = ita_itaHpTF_setup( obj )
+%
+% Autor: Ramona Bomhardt -- Email: rbo@akustik.rwth-aachen.de
+% Created:  18-Feb-2014
+
+% <ITA-Toolbox>
+% This file is part of the ITA-Toolbox. Some rights reserved. 
+% You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder. 
+% </ITA-Toolbox>
+scrsz = get(0,'ScreenSize');
+h.fgh = figure('CloseRequestFcn',@my_closereq,...
+    'position',[ scrsz(3)/2-scrsz(3)/4,  scrsz(4)/2-scrsz(4)/4,...
+    scrsz(3)*0.25,          scrsz(4)*0.66]);%,'Visible','off');
+
+% Names of Subjects
+lPos = 50; rPos = scrsz(4)/4;
+txtW = 150;
+txtH = 20;
+lCol = scrsz(4)*0.66-70;
+diffCol = 40;
+%--------------------
+% Title
+%--------------------
+h.hTitle_txt     = uicontrol('Style','text',...
+    'String','Meas. Setup HpTF',...
+    'Position',[0,   lCol,   scrsz(3)*0.25,   txtH*3],...
+    'BackgroundColor', [0.8 0.8 0.8],...
+    'horizontalAlignment', 'center',...
+    'fontsize', 30);
+lCol = lCol-diffCol;
+
+%--------------------
+% HEADPHONE
+%--------------------
+lCol = lCol-diffCol;
+h.hHP_txt     = uicontrol('Style','text',...
+    'horizontalAlignment', 'left',...
+    'String','Headphone type:',...
+    'Position',[lPos,   lCol,   txtW,   txtH],...
+    'BackgroundColor', [0.8 0.8 0.8]);
+
+h.hHP_edit     = uicontrol('Style','edit',...
+    'String',obj.nameHP,...
+    'horizontalAlignment', 'left',...
+    'Position',[rPos,   lCol,   txtW,   txtH]);
+lCol = lCol-diffCol;
+
+%--------------------
+% MICROPHONE
+%--------------------
+lCol = lCol-diffCol;
+h.hMic_txt     = uicontrol('Style','text',...
+    'horizontalAlignment', 'left',...
+    'String','Microphone type:',...
+    'Position',[lPos,   lCol,   txtW,   txtH],...
+    'BackgroundColor', [0.8 0.8 0.8]);
+
+h.hMic_edit     = uicontrol('Style','edit',...
+    'String',obj.nameMic,...
+    'horizontalAlignment', 'left',...
+    'Position',[rPos,   lCol,   txtW,   txtH]);
+
+lCol = lCol-diffCol;
+h.hMic_Ref_txt     = uicontrol('Style','text',...
+    'horizontalAlignment', 'left',...
+    'String','Microphone Reference:',...
+    'Position',[lPos,   lCol,   txtW,   txtH],...
+    'BackgroundColor', [0.8 0.8 0.8]);
+
+h.hMicL_pb     = uicontrol('Style','pushbutton',...
+    'String','Mic L',...
+    'Position',[rPos,   lCol,   txtW,   txtH],...
+    'Callback',{@hMicL_pb});
+
+lCol = lCol-diffCol;
+h.hMicR_pb     = uicontrol('Style','pushbutton',...
+    'String','MicR',...
+    'Position',[rPos,   lCol,   txtW,   txtH],...
+    'Callback',{@hMicR_pb});
+lCol = lCol-diffCol;
+
+%--------------------
+% MEASUREMENTSETUP
+%--------------------
+lCol = lCol-diffCol;
+h.hMeas_txt     = uicontrol('Style','text',...
+    'horizontalAlignment', 'left',...
+    'String','Measurement Setup:',...
+    'Position',[lPos,   lCol,   txtW,   txtH],...
+    'BackgroundColor', [0.8 0.8 0.8]);
+
+h.hMeas_pb     = uicontrol('Style','pushbutton',...
+    'String','Init',...
+    'Position',[rPos,   lCol,   txtW/2-5,   txtH],...
+    'Callback',{@hMeasI_pb});
+
+h.hMeas_pb     = uicontrol('Style','pushbutton',...
+    'String','Load',...
+    'Position',[rPos+txtW/2+10,   lCol,   txtW/2-5,   txtH],...
+    'Callback',{@hMeasL_pb});
+lCol = lCol-diffCol;
+
+%--------------------
+% SUBJECT
+%--------------------
+lCol = lCol-diffCol;
+h.hSub_txt     = uicontrol('Style','text',...
+    'horizontalAlignment', 'left',...
+    'String','Subjects name:',...
+    'Position',[lPos,   lCol,   txtW,   txtH],...
+    'BackgroundColor', [0.8 0.8 0.8]);
+
+h.hSubj_edit     = uicontrol('Style','edit',...
+    'String',obj.nameSubj,...
+    'horizontalAlignment', 'left',...
+    'Position',[rPos,   lCol,   txtW,   txtH]);
+
+%--------------------
+% REPEAT
+%--------------------
+lCol = lCol-diffCol;
+h.hRep_txt     = uicontrol('Style','text',...
+    'horizontalAlignment', 'left',...
+    'String','Repetition(s):',...
+    'Position',[lPos,   lCol,   txtW,   txtH],...
+    'BackgroundColor', [0.8 0.8 0.8]);
+
+h.hRep_edit     = uicontrol('Style','edit',...
+    'String',obj.repeat,...
+    'horizontalAlignment', 'left',...
+    'Position',[rPos,   lCol,   txtW,   txtH]);
+
+
+%--------------------
+% SAVE
+%--------------------
+lCol = lCol-diffCol;
+h.hSave_txt     = uicontrol('Style','text',...
+    'horizontalAlignment', 'left',...
+    'String','Save Results:',...
+    'Position',[lPos,   lCol,   txtW,   txtH],...
+    'BackgroundColor', [0.8 0.8 0.8]);
+
+
+h.hSave_pb     = uicontrol('Style','pushbutton',...
+    'String','Path',...
+    'Position',[rPos,   lCol,   txtW,   txtH],...
+    'Callback',{@hSave_pb});
+
+%--------------------
+% Close & Cancel
+%--------------------
+lCol = lCol-2*diffCol;
+h.hClose_pb     = uicontrol('Style','pushbutton',...
+    'String','Start',...
+    'Position',[lPos,   lCol-txtH,   txtW,   2*txtH],...
+    'Callback',@hClose_pb,'UserData',obj);
+
+h.hCancel_pb     = uicontrol('Style','pushbutton',...
+    'String','Cancel',...
+    'Position',[rPos,   lCol-txtH,   txtW,   2*txtH],...
+    'Callback',@hCancel_pb,'UserData',obj);
+
+guidata(h.fgh,h);
+waitfor(h.fgh);
+
+    function hMeasI_pb(~,~)
+        obj.MSTF = ita_mstf_gui;
+    end
+
+    function hMeasL_pb(~,~)
+        [FileName,PathName] = uigetfile('*.ita','Select MS');
+        if PathName~=0
+            obj.MSTF = ita_read(fullfile(PathName,FileName));end
+    end
+
+    function hMicL_pb(~,~)
+        [FileName,PathName] = uigetfile('*.ita','Select LEFT mircophone');
+        if  PathName~=0
+            tmpL = ita_read(fullfile(PathName,FileName));
+            obj.mic.dimensions = 2;
+            obj.mic.freqData(:,1) = tmpL.ch(1).freqData;
+        end
+    end
+
+    function hMicR_pb(~,~)
+        [FileName,PathName] = uigetfile('*.ita','Select RIGHT mircophone');
+        if  PathName~=0
+            tmpL = ita_read(fullfile(PathName,FileName));
+            obj.mic.dimensions = 2;
+            obj.mic.freqData(:,2) = tmpL.ch(1).freqData;
+        end
+    end
+
+    function hSave_pb(~,~)
+        obj.savePath = uigetdir(obj.savePath);
+    end
+
+    function hClose_pb(h,~)
+        gd     = guidata(h);% current data
+        %obj    = get(gd.hClose_pb,'UserData');
+        
+        % read data from edits
+        obj.nameHP   = get(gd.hHP_edit,'String');
+        obj.nameMic  = get(gd.hMic_edit,'String');
+        obj.repeat   = str2double(get(gd.hRep_edit,'String'));
+        obj.nameSubj = get(gd.hSubj_edit,'String');
+        
+        delete(gd.fgh)
+    end
+
+    function hCancel_pb(h,~)
+        gd     = guidata(h);          % current data
+        obj = [];
+        delete(gd.fgh)
+    end
+
+    function my_closereq(h,~)
+        gd     = guidata(h);          % current data
+        obj = [];
+        delete(gd.fgh)
+    end
+end

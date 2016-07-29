@@ -1,0 +1,3 @@
+Contact:           fpa@akustik.rwth-aachen.de
+Description:       Matlab client for NatNet server applications (e.g. OptiTrack's Motive)
+Dependencies:      no dependencies

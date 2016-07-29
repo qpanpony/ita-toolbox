@@ -1,0 +1,38 @@
+﻿Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\.ita]
+@="ita_auto_file"
+
+[HKEY_CLASSES_ROOT\ita_auto_file]
+@=""
+"EditFlags"=dword:00000000
+"AlwaysShowExt"=""
+"BrowserFlags"=dword:00000008
+
+[HKEY_CLASSES_ROOT\ita_auto_file\DefaultIcon]
+@="ROBO_CONTROL_CENTER_PATH,0"
+
+[HKEY_CLASSES_ROOT\ita_auto_file\shell]
+@="Import_in_Matlab"
+
+[HKEY_CLASSES_ROOT\ita_auto_file\shell\Import_in_Matlab]
+@="Open in MATLAB (ita_read)"
+
+[HKEY_CLASSES_ROOT\ita_auto_file\shell\Import_in_Matlab\command]
+@="\"matlab.exe\" %1"
+
+[HKEY_CLASSES_ROOT\ita_auto_file\shell\Import_in_Matlab\ddeexec]
+@="ita_read('%1')"
+
+[HKEY_CLASSES_ROOT\ita_auto_file\shell\Import_in_Matlab\ddeexec\Application]
+@="ShellVerbs.MATLAB"
+
+[HKEY_CLASSES_ROOT\ita_auto_file\shell\Import_in_Matlab\ddeexec\Topic]
+@="system"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\.dat]
+@="ita_auto_file"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\.spk]
+@="ita_auto_file"
+

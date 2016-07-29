@@ -1,0 +1,3 @@
+Contact:           mgu@akustik.rwth-aachen.de, mar@akustik.rwth-aachen.de
+Description:       Measurement of airflow resistance
+Dependencies:      Measurement

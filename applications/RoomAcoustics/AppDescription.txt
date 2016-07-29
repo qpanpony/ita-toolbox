@@ -1,0 +1,3 @@
+Contact:           mgu@akustik.rwth-aachen.de
+Description:       Room Acoustic Parameters / Evaluation / Measurement
+Dependencies:      Measurement, Nonlinear, PoleZeroProny

@@ -1,0 +1,3 @@
+Contact:           rsc@akustik.rwth-aachen.de
+Description:       Phonak Project: Sound Field Classification
+Dependencies:      BinauralModel, RoomAcoustics

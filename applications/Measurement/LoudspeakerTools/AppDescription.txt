@@ -1,0 +1,3 @@
+Contact:           pdi@akustik.rwth-aachen.de
+Description:       Loudspeaker Measurement, Non-linearities, THD, etc.
+Dependencies:      Measurement, Nonlinear

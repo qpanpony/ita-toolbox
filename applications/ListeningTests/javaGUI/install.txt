@@ -1,0 +1,14 @@
+% to run, 
+% 1.    place file javaclasspath.txt into matlab basis folder (in
+%       documents)
+%       (http://www.mathworks.de/de/help/matlab/ref/javaclasspath.html#btnays7-1)
+%       (dynamic path does not work)
+%       In this path, the directory of the GUI needs to be present.
+%       also, a like to the jinput.jar needs to be present
+%       this is my javaclasspath.txt:
+%       /home/jangerrit/local/dokumente/svn/svnToolbox/applications/ListeningTests/javaGUI/java/bin/java7/
+%       d:/hg-toolbox/applications/ListeningTests/javaGUI/jinput/jinput.jar
+
+% 2.    to get matlab to load the stupid jinput.dlls they have to be copied into
+%       the matlab bin/arch folder
+%       the dlls are at the directory jinput/

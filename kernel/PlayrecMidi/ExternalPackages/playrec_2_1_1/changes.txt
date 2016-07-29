@@ -1,0 +1,26 @@
+2.1.1
+Fixed bug in scripts when building on Mac in Octave (ismac is not a builtin command).
+Fixed bug in scripts when there is no ASIO path detected and the GUI is being used.
+
+2.1.0
+Modified scripts to build in Matlab and Octave.
+Added more control of frames per buffer used by callback and latency.
+
+2.0.9
+Fixed bug with spaces in path.
+Changed all comments to use ANSI /* */ notation
+Added runtime information about APIs present and the number of devices
+Fixed compile error with some versions of MSVC due to length of string overviewString
+
+2.0.8
+Added missing file to compile list on Macs.
+Fixed bugs in compile script preventing compilation on MacIntel.
+Corrected bug in default latency returned by getDevices.
+Updated help and usage information.
+
+2.0.7
+Saved compile_playrec figure with backward compatibility for Matlab Version 6.
+Fixed library path inclusion bug in compile_playrec on Windows.
+
+2.0.6
+Initial public release
