@@ -1,0 +1,64 @@
+% platzhalten <\nameDesPlatzhalters> wird von matlab ersetzt
+
+\newcommand{\itaBriefkopfBild}{<\itaBriefkopfBild>}
+\newcommand{\datumDerMessung}{<\datumDerMessung>}
+% \newcommand{\nameDesPruefers}{<\nameDesPruefers>}
+\newcommand{\proband}{<\proband>}
+\newcommand{\kommentar}{<\kommentar>}
+\newcommand{\dateinameGrafik}{<\dateinameGrafik>}
+\newcommand{\geburtsDatum}{<\geburtsDatum>}
+
+
+\documentclass[11pt,a4paper, twoside, final]{scrartcl}
+\usepackage{graphicx}
+\usepackage[latin1]{inputenc}
+\usepackage{lscape}
+
+\pagestyle{plain}
+
+\setlength{\textwidth}{17.5cm}
+\setlength{\oddsidemargin}{-1cm}
+\setlength{\evensidemargin}{1cm}
+\setlength{\topmargin}{-2cm}
+\setlength{\headheight}{0cm}
+\setlength{\headsep}{0cm}
+\setlength{\footskip}{0cm}
+\setlength{\textheight}{27.5cm}
+
+\pagestyle{empty}
+
+
+\begin{document}
+
+\parindent 0pt 
+
+ \includegraphics[width=1.0\textwidth]{\itaBriefkopfBild}
+
+\begin{center}
+		\huge
+		Messprotokoll zur Messung der Hörkurve\\
+		nach DIN EN ISO 8253-1
+\end{center}
+
+\begin{tabular}{|p{0.43\textwidth}p{0.51\textwidth}|}\hline
+	\multicolumn{2}{|p{0.99\textwidth}|}{
+	Bitte beachten Sie, dass dieses Audiogramm nicht die Diagnose eines Arztes ersetzt. Es kann jedoch ein erster Hinweis auf eine Beeinträchtigung des Hörens sein.}\\ 
+	&\\
+		Prüfdatum: & \datumDerMessung \\
+  	 Name: & \proband\\ 
+  	   	 Geburtsdatum: & \geburtsDatum \\ 
+		 Kommentar: & \kommentar \\
+		\hline
+\end{tabular}
+
+
+\begin{figure}[htbp]
+\centering
+		\includegraphics[width=1\textwidth]{\dateinameGrafik}
+	\caption{Audiometrie von \proband}
+	\label{fig:ZweiProben_gemittelt}
+\end{figure}
+
+
+
+\end{document}

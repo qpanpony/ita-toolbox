@@ -1,0 +1,3 @@
+Contact:           mpo@akustik.rwth-aachen.de
+Description:       Balloon class for spherical measurement data
+Dependencies:      SourceTranslation, SphericalHarmonics

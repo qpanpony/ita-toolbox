@@ -1,0 +1,3 @@
+Contact:           mmt@akustik.rwth-aachen.de
+Description:       Communication with Arduino microcontrollers
+Dependencies:      no dependencies

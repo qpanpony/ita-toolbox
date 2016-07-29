@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<history>
+<session>
+<command>%-- Unknown Date --%</command>
+<command batch="1" error="true">global javaGUI;</command>
+<command batch="1" error="true" execution_time="92">javaGUI = itaListeningTestGUI;</command>
+<command execution_time="17">import ita.listeningTestGUI.*</command>
+<command error="true" execution_time="18">ita.listeningTestGUI.ListeningTestMain;</command>
+<command execution_time="73">javaclasspath</command>
+</session>
+<session>
+<command time_stamp="14ac4c72df8">%-- 07.01.2015 15:23:15 --%</command>
+<command execution_time="18">import ita.listeningTestGUI.*</command>
+<command batch="2">import net.java.games.*</command>
+<command batch="2" execution_time="27">import org.nicegamepads.*</command>
+<command error="true" execution_time="75">this.mGUI = ita.listeningTestGUI.ListeningTestMain;</command>
+<command batch="3" error="true">import ita.listeningTestGUI.*</command>
+<command batch="3" error="true">import net.java.games.*</command>
+<command batch="3" error="true">import org.nicegamepads.*</command>
+<command batch="3" error="true" execution_time="80">this.mGUI = ita.listeningTestGUI.ListeningTestMain;</command>
+<command execution_time="76">javaclasspath</command>
+</session>
+<session>
+<command time_stamp="14ac4ca9466">%-- 07.01.2015 15:26:58 --%</command>
+<command batch="4">import ita.listeningTestGUI.*</command>
+<command batch="4">import net.java.games.*</command>
+<command batch="4" execution_time="46">import org.nicegamepads.*</command>
+<command execution_time="24">import</command>
+<command error="true" execution_time="76">this.mGUI = ita.listeningTestGUI.ListeningTestMain;</command>
+<command error="true" execution_time="30">java.lang.System.load('java/bin/jinput/jinput_linux64.so')</command>
+<command error="true" execution_time="26">java.lang.System.load('/home/jangerrit/local/dokumente/svn/svnToolbox/applications/ListeningTests/javaGUI/java/bin/jinput/jinput_linux64.so')</command>
+<command execution_time="19">java.lang.System.load('/home/jangerrit/local/dokumente/svn/svnToolbox/applications/ListeningTests/javaGUI/java/bin/jinput/jinput-linux64.so')</command>
+<command error="true" execution_time="26">this.mGUI = ita.listeningTestGUI.ListeningTestMain;</command>
+</session>
+<session>
+<command time_stamp="14ac4df0fca">%-- 07.01.2015 15:49:21 --%</command>
+<command error="true" execution_time="476">ita_listeningtest_localization_basic</command>
+<command error="true" execution_time="230">ita_listeningtest_localization_example</command>
+<command error="true" execution_time="1017">ita_listeningtest_localization_basic</command>
+<command execution_time="41">ita_listeningtest_localization_basic_angela_eineHRTF</command>
+<command error="true" execution_time="614">ita_listeningtest_localization_basic</command>
+<command error="true" execution_time="28">createJavaBlockArrays</command>
+<command error="true" execution_time="2256">ita_listeningtest_localization_basic</command>
+<command error="true" execution_time="344">filepath</command>
+<command execution_time="817">ccx</command>
+<command execution_time="34">clear classes</command>
+</session>
+<session>
+<command time_stamp="14ac4ee3b5b">%-- 07.01.2015 16:05:55 --%</command>
+<command error="true" execution_time="1332">ita_listeningtest_localization_basic</command>
+<command execution_time="597">ccx</command>
+<command execution_time="41">clear classes</command>
+<command execution_time="1313">ita_listeningtest_localization_basic</command>
+<command error="true" execution_time="19">this.mFilePat</command>
+<command execution_time="18">this.mFilePath</command>
+<command execution_time="753">ccx</command>
+</session>
+<session>
+<command time_stamp="14ac4fff4ed">%-- 07.01.2015 16:25:16 --%</command>
+<command error="true" execution_time="1315">ita_listeningtest_localization_basic</command>
+<command execution_time="37">ita_listeningtest_localization_basic_angela_eineHRTF</command>
+<command error="true" execution_time="37">ita_listeningtest_localization_example</command>
+<command execution_time="155" repeat="2">compileListeningTestGUI</command>
+<command execution_time="23">system(cmd,'-echo')</command>
+<command execution_time="21">cmd</command>
+<command execution_time="162">ita_listeningtest_localization_example</command>
+<command error="true" execution_time="33">java version</command>
+<command error="true" execution_time="20">java --version</command>
+<command error="true" execution_time="21">version --java</command>
+<command execution_time="19">version</command>
+<command error="true" execution_time="21">java -version</command>
+<command execution_time="20">version -java</command>
+<command error="true" execution_time="33">compile</command>
+<command error="true" execution_time="26">compileListeningTestGUI</command>
+<command error="true" execution_time="141">compile</command>
+<command execution_time="146">compileListeningTestGUI</command>
+<command execution_time="23">cmd</command>
+<command execution_time="5430" repeat="2">compileListeningTestGUI</command>
+<command execution_time="147" repeat="2">ita_listeningtest_localization_example</command>
+<command execution_time="903">ccx</command>
+<command execution_time="868">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14cb2e5b32b">%-- 13.04.2015 15:09:00 --%</command>
+<command execution_time="16">global javaGUI;</command>
+<command error="true" execution_time="2269">javaGUI = itaListeningTestGUI;</command>
+<command execution_time="9">javaGUI.mGLMode = 0;</command>
+<command error="true" execution_time="231">abort = javaGUI.showAndStopTillUserReady();</command>
+</session>
+<session>
+<command time_stamp="14cb2f2465b">%-- 13.04.2015 15:22:44 --%</command>
+<command error="true" execution_time="2377">itaListeningTestGUI</command>
+<command error="true" execution_time="242">abort = javaGUI.showAndStopTillUserReady();</command>
+<command execution_time="15">javaGUI = ans;</command>
+<command error="true" execution_time="245">abort = javaGUI.showAndStopTillUserReady();</command>
+<command execution_time="908">ccx</command>
+<command execution_time="2076">javaGUI = itaListeningTestGUI;</command>
+<command error="true" execution_time="246">eventTest = this.mGUI.getEventObject;</command>
+<command error="true" execution_time="25">eventTest = javaGUI.</command>
+<command error="true" execution_time="34">eventTest = javaGUI.showAndStopTillUserReady</command>
+<command execution_time="888">ccx</command>
+<command execution_time="238" repeat="2">javaGUI = itaListeningTestGUI;</command>
+<command execution_time="17">get(eventTest)</command>
+<command batch="5" error="true">javaGUI = itaListeningTestGUI;</command>
+<command batch="5" error="true" execution_time="1793">javaGUI.mGLMode = 0;</command>
+<command error="true" execution_time="15143">javaGUI.showAndStopTillUserReady();</command>
+<command execution_time="818">ccx</command>
+<command error="true" execution_time="103">javaGUI.showAndStopTillUserReady();</command>
+<command batch="6">javaGUI = itaListeningTestGUI;</command>
+<command batch="6" execution_time="2063">javaGUI.mGLMode = 0;</command>
+<command batch="7" execution_time="5603" repeat="2">javaGUI.showAndStopTillUserReady();</command>
+</session>
+<session>
+<command time_stamp="14cb3039d53">%-- 13.04.2015 15:41:41 --%</command>
+<command error="true" execution_time="66259">ita_listeningtest_localization_example</command>
+<command execution_time="867">ccx</command>
+<command execution_time="2107">javaGUI = itaListeningTestGUI;</command>
+<command execution_time="9">javaGUI.mGLMode = 0;</command>
+<command error="true" execution_time="23">javaGUI.showAndStopTillUserReady();</command>
+<command batch="8" error="true">javaGUI = itaListeningTestGUI;</command>
+<command batch="8" error="true" execution_time="2156">javaGUI.mGLMode = 0;</command>
+<command batch="9">javaGUI.showAndStopTillUserReady();</command>
+<command batch="10" error="true">javaGUI = itaListeningTestGUI;</command>
+<command batch="10" error="true" execution_time="2180">javaGUI.mGLMode = 0;</command>
+<command execution_time="1559">javaGUI.showAndStopTillUserReady();</command>
+<command execution_time="842">ccx</command>
+<command execution_time="20">stimulusData = itaListeningTestStimulus;</command>
+<command batch="11" error="true">javaGUI = itaListeningTestGUI;</command>
+<command batch="11" error="true" execution_time="2315">javaGUI.mGLMode = 0;</command>
+<command execution_time="1526">javaGUI.showAndStopTillUserReady();</command>
+<command error="true" execution_time="111">ita_listeningtest_localization_basic</command>
+<command execution_time="601">ccx</command>
+<command error="true" execution_time="369">ita_gui</command>
+<command execution_time="488">ccx</command>
+<command execution_time="6865">ita_toolbox_gui</command>
+</session>
+<session>
+<command time_stamp="14cd5a14ad8">%-- 20.04.2015 09:01:00 --%</command>
+<command execution_time="47">javaclasspath</command>
+<command batch="12" error="true">javaGUI = itaListeningTestGUI;</command>
+<command batch="12" error="true" execution_time="107119">javaGUI.mGLMode = 0;</command>
+<command batch="13" execution_time="275075" repeat="2">javaGUI.showAndStopTillUserReady();</command>
+<command batch="14" error="true">javaGUI = itaListeningTestGUI;</command>
+<command batch="14" error="true" execution_time="33852">javaGUI.mGLMode = 0;</command>
+<command execution_time="13273" repeat="2">javaGUI.showAndStopTillUserReady();</command>
+<command execution_time="640">ccx</command>
+<command batch="15">javaGUI = itaListeningTestGUI;</command>
+<command batch="15" execution_time="2240">javaGUI.mGLMode = 0;</command>
+<command execution_time="9096" repeat="2">javaGUI.showAndStopTillUserReady();</command>
+</session>
+<session>
+<command time_stamp="14cd612fd4a">%-- 20.04.2015 11:05:11 --%</command>
+<command error="true" execution_time="461">ita_listeningtest_localization_basic</command>
+<command execution_time="680">ccx</command>
+<command error="true" execution_time="19558">ita_listeningtest_localization_basic</command>
+<command batch="16" error="true">javaGUI = itaListeningTestGUI;</command>
+<command batch="16" error="true" execution_time="2241">javaGUI.mGLMode = 0;</command>
+<command error="true" execution_time="36">java.library.path</command>
+</session>
+<session>
+<command time_stamp="14cd61b1d94">%-- 20.04.2015 11:14:04 --%</command>
+<command error="true" execution_time="11933">ita_listeningtest_localization_basic</command>
+<command execution_time="621">ccx</command>
+</session>
+<session>
+<command time_stamp="14cd61cdf29">%-- 20.04.2015 11:15:59 --%</command>
+<command error="true" execution_time="38106" repeat="2">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14cd65550b7">%-- 20.04.2015 12:17:38 --%</command>
+<command error="true" execution_time="31960" repeat="3">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14cd663c897">%-- 20.04.2015 12:33:26 --%</command>
+<command error="true" execution_time="766" repeat="5">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14cd66579d0">%-- 20.04.2015 12:35:17 --%</command>
+<command error="true" execution_time="766" repeat="7">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14cd6676fb5">%-- 20.04.2015 12:37:25 --%</command>
+<command error="true" execution_time="29917" repeat="12">ita_listeningtest_localization_basic</command>
+<command execution_time="15">test = ans;</command>
+<command execution_time="14">test</command>
+<command execution_time="12">test(1)</command>
+<command execution_time="18">test{1}</command>
+<command execution_time="13">test{2}</command>
+<command execution_time="13">test{3}</command>
+<command error="true" execution_time="6293" repeat="2">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14cd66d6fbd">%-- 20.04.2015 12:43:59 --%</command>
+<command error="true" execution_time="12908" repeat="3">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14cd66e32f9">%-- 20.04.2015 12:44:49 --%</command>
+<command batch="17" execution_time="12908" repeat="4">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14cdb90337c">%-- 21.04.2015 12:40:03 --%</command>
+<command execution_time="3944">ita_listeningtest_localization_basic</command>
+<command execution_time="1001">ccx</command>
+<command batch="18">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14cdc7be544">%-- 21.04.2015 16:57:29 --%</command>
+<command execution_time="2956" repeat="4">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14cdc828644">%-- 21.04.2015 17:04:44 --%</command>
+<command execution_time="32">ita_listeningtest_localization_basic_angela_eineHRTF</command>
+<command error="true" execution_time="43577">ita_listeningtest_localization_basic</command>
+<command execution_time="931">ccx</command>
+</session>
+<session>
+<command time_stamp="14cdc86724d">%-- 21.04.2015 17:09:01 --%</command>
+<command execution_time="2391" repeat="2">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14ce0370512">%-- 22.04.2015 10:20:44 --%</command>
+<command execution_time="26296" repeat="4">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14ce04353d2">%-- 22.04.2015 10:34:11 --%</command>
+<command execution_time="2993" repeat="8">ita_listeningtest_localization_basic</command>
+<command execution_time="922">ccx</command>
+</session>
+<session>
+<command time_stamp="14ce04735ea">%-- 22.04.2015 10:38:26 --%</command>
+<command execution_time="35">ita_listeningtest_localization_basic_angela_eineHRTF</command>
+<command batch="19">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14ce048b680">%-- 22.04.2015 10:40:04 --%</command>
+<command execution_time="3263" repeat="2">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14ce04b7dbb">%-- 22.04.2015 10:43:06 --%</command>
+<command error="true" execution_time="30995" repeat="3">ita_listeningtest_localization_basic</command>
+</session>
+<session>
+<command time_stamp="14ce0c874ba">%-- 22.04.2015 12:59:36 --%</command>
+<command execution_time="7137">ita_listeningtest_guiTest</command>
+<command error="true" execution_time="68843" repeat="3">ita_listeningtest_guiTest_liang</command>
+<command execution_time="1369">ccx</command>
+<command batch="20" error="true">ita_listeningtest_guiTest</command>
+<command batch="20" error="true" execution_time="64040">ita_listeningtest_guiTest</command>
+<command execution_time="182" repeat="2">javaGUI = itaListeningTestGUI;</command>
+</session>
+<session>
+<command time_stamp="14e53fda570">%-- 03.07.2015 14:56:49 --%</command>
+<command execution_time="112">ita_listeningtest_guiTest</command>
+<command execution_time="27">index = 1</command>
+<command execution_time="18547">results = javaGUI.startSingleTraining(azimuthDirections(index),elevationDirections(index),itaAudio());</command>
+<command execution_time="41">results</command>
+<command execution_time="181" repeat="2">ita_listeningtest_guiTest</command>
+<command execution_time="1226">ccx</command>
+</session>
+</history>

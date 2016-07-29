@@ -1,0 +1,4 @@
+[submodule "internal"]
+	path = internal
+	url = https://git.rwth-aachen.de/ita/toolbox-intern.git
+	branch = master

@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of openfile</title>
+  <meta name="keywords" content="openfile">
+  <meta name="description" content="Open a file in read/write mode, catching errors">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html &copy; 2003 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<!-- ../menu.html m2html --><!-- menu.html private -->
+<h1>openfile
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>Open a file in read/write mode, catching errors</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="box"><strong>function fid = openfile(filename,permission) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre class="comment">Open a file in read/write mode, catching errors
+  FID = OPENFILE(FILENAME,PERMISSION) opens file FILENAME
+  in PERMISSION mode ('r' or 'w') and return a file identifier FID.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../../matlabicon.gif)">
+<li><a href="../../m2html/m2html.html" class="code" title="function m2html(varargin)">m2html</a>	M2HTML - Documentation System for Matlab M-files in HTML</li><li><a href="mfileparse.html" class="code" title="function s = mfileparse(mfile, mdirs, names, options)">mfileparse</a>	Parsing of an M-file to obtain synopsis, help and references</li><li><a href="searchindex.html" class="code" title="function [s, freq] = searchindex(mfile, szmin)">searchindex</a>	Compute keywords statistics of an M-file</li></ul>
+<!-- crossreference -->
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function fid = openfile(filename,permission)</a>
+0002 <span class="comment">%Open a file in read/write mode, catching errors</span>
+0003 <span class="comment">%  FID = OPENFILE(FILENAME,PERMISSION) opens file FILENAME</span>
+0004 <span class="comment">%  in PERMISSION mode ('r' or 'w') and return a file identifier FID.</span>
+0005 
+0006 <span class="comment">%  Copyright (C) 2003 Guillaume Flandin &lt;Guillaume@artefact.tk&gt;</span>
+0007 <span class="comment">%  $Revision: 1.1 $Date: 2008-09-03 08:36:22 $</span>
+0008 
+0009 [fid, errmsg] = fopen(filename,permission);
+0010 <span class="keyword">if</span> ~isempty(errmsg)
+0011     <span class="keyword">switch</span> permission
+0012         <span class="keyword">case</span> <span class="string">'r'</span>
+0013             error(sprintf(<span class="string">'Cannot open %s in read mode.'</span>,filename));
+0014         <span class="keyword">case</span> <span class="string">'w'</span>
+0015             error(sprintf(<span class="string">'Cannot open %s in write mode.'</span>,filename));
+0016         <span class="keyword">otherwise</span>
+0017             error(errmsg);
+0018     <span class="keyword">end</span>
+0019 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Fri 22-Aug-2008 15:38:13 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" target="_parent">m2html</a></strong> &copy; 2003</address>
+</body>
+</html>

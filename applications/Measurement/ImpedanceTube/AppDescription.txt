@@ -1,0 +1,3 @@
+Contact:           mgu@akustik.rwth-aachen.de
+Description:       Measurement for Kundt's tube
+Dependencies:      Conversions, Measurement

@@ -1,0 +1,3 @@
+Contact:           mgu@akustik.rwth-aachen.de
+Description:       Various psycho-acoustic analysis (timevariant loudness, sharpness)
+Dependencies:      no dependencies

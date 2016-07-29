@@ -1,0 +1,3 @@
+Contact:           rsc
+Description:       basic GUI concept
+Dependencies:      

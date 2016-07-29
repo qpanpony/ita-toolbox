@@ -1,0 +1,22 @@
+! all lengths and dimensions in cm
+! scales are relative to default font height hei=0.3633 cm
+
+graphWidth = 13
+graphHeight = graphWidth/ratio
+
+titleDist = 0.3
+titleScale = 1
+axisLabelDist = 0.4
+axisLabelScale = 1
+axisTitleDist = axisLabelDist+titleDist
+axisTitleScale = 1
+
+axisWidth = 0.05
+lineWidth = 0.04
+markerSize = 0.2
+
+keyHei = 0.3
+keyDist = 0.1
+keyMargins = 0.12
+keyLineLength = 0.4
+keyColDist = 0.4
