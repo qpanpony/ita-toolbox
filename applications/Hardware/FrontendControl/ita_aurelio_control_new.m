@@ -266,9 +266,9 @@ par_value  = dec2hex(bin2dec(['0' HiPow AmpOn Bridge LoImp dBu26 AC mono])); % 0
 send_sysex(par_number, par_value, ch_number); %send to device
 
 if settings.Amp26dBu
-    settings.amp_gain = -20;
-else
     settings.amp_gain = 0;
+else
+    settings.amp_gain = -20;
 end
 
 
@@ -288,30 +288,30 @@ end
 function send_sysex(par_number, par_value, ch_number)
 
 % disp([par_number par_value ch_number])
-
-if ~isempty(ch_number) && numel(str2num(ch_number)) >= 2
-    ch_number = '7F';
-end
-%build complete sysex
-sys_hex = {};
-sys_hex{numel(sys_hex)+1} = par_number; % hex
-sys_hex{numel(sys_hex)+1} = par_value;  % hex
-if ~isempty(ch_number)
-    sys_hex{numel(sys_hex)+1} = ch_number;  % hex
-end
-
-for idx = 1:numel(sys_hex)
-    sys_dec(idx) = hex2dec( sys_hex{idx} );
-end
-
-% generate checksum
-checksum = sum(sys_dec);
-checksum = bin2dec(num2str(mod(str2double(dec2bin(checksum)), 10000000)));
-complete_sysex = [sys_dec checksum];
-
-%send sysex
-sysex = [hex2dec('F0') hex2dec('70') complete_sysex hex2dec('F7')]; %pre- post- ampel
-ita_midi(sysex,ita_preferences('out_midi_DeviceID'));
+% 
+% if ~isempty(ch_number) && numel(str2num(ch_number)) >= 2
+%     ch_number = '7F';
+% end
+% %build complete sysex
+% sys_hex = {};
+% sys_hex{numel(sys_hex)+1} = par_number; % hex
+% sys_hex{numel(sys_hex)+1} = par_value;  % hex
+% if ~isempty(ch_number)
+%     sys_hex{numel(sys_hex)+1} = ch_number;  % hex
+% end
+% 
+% for idx = 1:numel(sys_hex)
+%     sys_dec(idx) = hex2dec( sys_hex{idx} );
+% end
+% 
+% % generate checksum
+% checksum = sum(sys_dec);
+% checksum = bin2dec(num2str(mod(str2double(dec2bin(checksum)), 10000000)));
+% complete_sysex = [sys_dec checksum];
+% 
+% %send sysex
+% sysex = [hex2dec('F0') hex2dec('70') complete_sysex hex2dec('F7')]; %pre- post- ampel
+% ita_midi(sysex,ita_preferences('out_midi_DeviceID'));
 
 end
 
