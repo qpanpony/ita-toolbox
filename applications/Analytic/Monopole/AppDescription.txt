@@ -1,3 +1,0 @@
-Contact:           mmt@akustik.rwth-aachen.de
-Description:       Container for analytic functions
-Dependencies:      SphericalHarmonics
