@@ -39,9 +39,9 @@ end
 PlotSettings_colorTable = ita_preferences('colorTableName');
 
 %% Defining all the colors
-colorTable(1,:) = [1     0     0];
-colorTable(2,:) = [0.4000    0.4000    0.4000];
-colorTable(3,:) = [0     0     1];
+colorTable(2,:) = [1     0     0];
+colorTable(3,:) = [0.4000    0.4000    0.4000];
+colorTable(1,:) = [0     0     1];
 colorTable(4,:) = [1     0     1];
 colorTable(5,:) = [1.0000    0.4000         0];
 colorTable(6,:) = [0.2205    0.8775    0.7276];

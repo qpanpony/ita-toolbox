@@ -1,3 +1,0 @@
-Contact:          rbo@akustik.rwth-aachen.de
-Description:      handling for HRTF data
-Dependencies:      Analytic, BulkyAudioData, SphericalHarmonics, itaBinauralMonitoring, openDAFF

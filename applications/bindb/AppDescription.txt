@@ -1,3 +1,2 @@
 Contact:           rsc@akustik.rwth-aachen.de
 Description:       Database for (binaural) room impulse responses
-Dependencies:      Measurement, RoomAcoustics

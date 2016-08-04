@@ -1,3 +1,0 @@
-Contact:          rbo@akustik.rwth-aachen.de
-Description:      measurement/handling for HpTF data
-Dependencies:     Measurement
