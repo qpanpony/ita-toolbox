@@ -41,6 +41,8 @@ sArgs        = struct('pos1_data','itaAudio', 'bandwidth', 1/3,'squeezeFactor',0
 [input,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 %% Smooth Notches
+% sgolay = Savitzky-Golay filter. Only possible with Curve Fitting Toolbox.
+% ita_smooth will catch this.
 input_smooth = ita_smooth(input,sArgs.smoothType, sArgs.bandwidth, 'Abs+GDelay','sgolay',2);
 ratio = input/input_smooth;
 
