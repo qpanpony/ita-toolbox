@@ -20,7 +20,7 @@ function [] = daffv17_write( varargin )
 %                            'MPS' => Magnitude phase spectra,
 %                            'DFT' => discrete fourier spectra)
 %  datafunc     function    Data function (delivers the data for a direction)
-%  orient       vector-3    Orientation [yaw pitch roll] angles [°]        
+%  orient       vector-3    Orientation [yaw pitch roll] angles [ï¿½]        
 %  channels     int         Number of channels             
 %
 %  alphares     float       Resolution of alpha-angles
@@ -286,8 +286,10 @@ function [] = daffv17_write( varargin )
     
     if isfield(args, 'betares')
         args.betapoints = (betaspan / args.betares) + 1;
-        if (ceil(args.betapoints) ~= args.betapoints)
+        if (abs(ceil(args.betapoints)- args.betapoints) > 1e-14)
             error('Beta range and beta resolution are not an integer multiple')
+        else
+           args.betapoints = round(args.betapoints); 
         end
     else
         args.betares = betaspan / (args.betapoints-1);
@@ -361,17 +363,17 @@ function [] = daffv17_write( varargin )
     fprintf('Content type:       \t%s\n', contentStr);
     fprintf('Num channels:       \t%d\n', args.channels);
     fprintf('Num alpha points:   \t%d\n', args.alphapoints);
-    fprintf('Alpha range:        \t[%0.1f°, %0.1f°]\n', alphastart, alphaend);
-    fprintf('Alpha resolution:   \t%0.1f°\n', args.alphares);
+    fprintf('Alpha range:        \t[%0.1fï¿½, %0.1fï¿½]\n', alphastart, alphaend);
+    fprintf('Alpha resolution:   \t%0.1fï¿½\n', args.alphares);
 
     fprintf('Num beta points:   \t%d\n', args.betapoints);
-    fprintf('Beta range:        \t[%0.1f°, %0.1f°]\n', betastart, betaend);
-    fprintf('Beta resolution:   \t%0.1f°\n', args.betares);
+    fprintf('Beta range:        \t[%0.1fï¿½, %0.1fï¿½]\n', betastart, betaend);
+    fprintf('Beta resolution:   \t%0.1fï¿½\n', args.betares);
     
     fprintf('Measurement dist.: \t%0.2f m\n', args.mdist);
     fprintf('Reference value:   \t%+0.1f dB\n', args.reference);
 
-    fprintf('Orientation:       \t(Y%+0.1f°, P%+0.1f°, R%+0.1f°)\n', ...
+    fprintf('Orientation:       \t(Y%+0.1fï¿½, P%+0.1fï¿½, R%+0.1fï¿½)\n', ...
                  args.orient(1), args.orient(2), args.orient(3));
     
     if strcmp(args.content, 'IR')
@@ -439,20 +441,20 @@ function [] = daffv17_write( varargin )
                 [channels, filterlength] = size(data);
 
                 if( ~isa( data, 'double' ) )
-                    error( 'Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values', alpha, beta );
+                    error( 'Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values', alpha, beta );
                 end
                 
                 if isfield(props, 'samplerate')
                     if (samplerate ~= props.samplerate)
-                        error( 'Dataset (A%0.1f°, B%0.1f°): Sampling rate does not match', alpha, beta );
+                        error( 'Dataset (A%0.1fï¿½, B%0.1fï¿½): Sampling rate does not match', alpha, beta );
                     end
 
                     if (channels ~= args.channels)
-                        error( 'Dataset (A%0.1f°, B%0.1f°): Number of channels does not match', alpha, beta );
+                        error( 'Dataset (A%0.1fï¿½, B%0.1fï¿½): Number of channels does not match', alpha, beta );
                     end
 
                     if (filterlength ~= props.filterlength)
-                       error( 'Dataset (A%0.1f°, B%0.1f°): Filter length does not match', alpha, beta );
+                       error( 'Dataset (A%0.1fï¿½, B%0.1fï¿½): Filter length does not match', alpha, beta );
                     end
                 else
                     % Now set the global properties, if they have not been set yet
@@ -462,7 +464,7 @@ function [] = daffv17_write( varargin )
 
                     % Check filter length for 16-byte alignment
                     if( mod( filterlength, 4 ) ~= 0 )
-                        error( 'Dataset (A%0.1f°, B%0.1f°): Filter length is not a multiple of 4 (this is required for memory alignment)', alpha, beta );
+                        error( 'Dataset (A%0.1fï¿½, B%0.1fï¿½): Filter length is not a multiple of 4 (this is required for memory alignment)', alpha, beta );
                     end
 
                     fprintf('Global properties: Sampling rate = %d Hz, filter length = %d\n',...
@@ -538,33 +540,33 @@ function [] = daffv17_write( varargin )
                 [channels, numfreqs] = size(data);
 
                 if (class(data) ~= 'double')
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values') );
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values') );
                 end
                 
                 if isfield(props, 'freqs')
                     if (freqs ~= props.freqs)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Frequency support does not match', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Frequency support does not match', alpha, beta) );
                     end
 
                     if (channels ~= args.channels)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Number of channels does not match', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Number of channels does not match', alpha, beta) );
                     end
                 else
                     % Checks on the frequency support
                     if (numfreqs ~= size(freqs))
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Frequency support does not match', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Frequency support does not match', alpha, beta) );
                     end;
                     
                     if (min(freqs) <= 0)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Support frequencies must be greater zero', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Support frequencies must be greater zero', alpha, beta) );
                     end;
             
                     if (sort(freqs) ~= freqs)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Support frequencies must be stricly increasing', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Support frequencies must be stricly increasing', alpha, beta) );
                     end   
         
                     if (length(unique(freqs)) ~= length(freqs))
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Support frequencies must be unique', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Support frequencies must be unique', alpha, beta) );
                     end  
                     
                     % Now set the global properties, if they have not been set yet
@@ -577,7 +579,7 @@ function [] = daffv17_write( varargin )
 
                 % Important: Negative magnitudes are forbidden
                 if (min(min(data)) < 0)
-                    error( 'Dataset (A%0.1f°, B%0.1f°): Contains negative magnitudes', alpha, beta );
+                    error( 'Dataset (A%0.1fï¿½, B%0.1fï¿½): Contains negative magnitudes', alpha, beta );
                 end
                 
                 
@@ -605,29 +607,29 @@ function [] = daffv17_write( varargin )
                 [channels, numfreqs] = size(data);
 
                 if (class(data) ~= 'double')
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values') );
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values') );
                 end
                 
                 if isfield(props, 'freqs')
                     if (freqs ~= props.freqs)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Frequency support does not match', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Frequency support does not match', alpha, beta) );
                     end
 
                     if (channels ~= args.channels)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Number of channels does not match', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Number of channels does not match', alpha, beta) );
                     end
                 else
                     % Checks on the frequency support
                     if (min(freqs) <= 0)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Support frequencies must be greater zero', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Support frequencies must be greater zero', alpha, beta) );
                     end;
             
                     if (sort(freqs) ~= freqs)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Support frequencies must be stricly increasing', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Support frequencies must be stricly increasing', alpha, beta) );
                     end   
         
                     if (length(unique(freqs)) ~= length(freqs))
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Support frequencies must be unique', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Support frequencies must be unique', alpha, beta) );
                     end  
                     
                     % Now set the global properties, if they have not been set yet
@@ -640,7 +642,7 @@ function [] = daffv17_write( varargin )
 
                 % Important: Phases must range between +-pi
                 if (min(min(data)) < -pi) || (max(max(data)) > pi)
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): Phases must range between +-pi', alpha, beta) );
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Phases must range between +-pi', alpha, beta) );
                 end
                 
                 props.globalPeak = 0;
@@ -663,29 +665,29 @@ function [] = daffv17_write( varargin )
                 [channels, numfreqs] = size(data);
 
                 if (class(data) ~= 'double')
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values', alpha, beta) );
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values', alpha, beta) );
                 end
                 
                 if isfield(props, 'freqs')
                     if (freqs ~= props.freqs)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Frequency support does not match', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Frequency support does not match', alpha, beta) );
                     end
 
                     if (channels ~= args.channels)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Number of channels does not match', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Number of channels does not match', alpha, beta) );
                     end
                 else
                     % Checks on the frequency support
                     if (min(freqs) <= 0)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Support frequencies must be greater zero', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Support frequencies must be greater zero', alpha, beta) );
                     end;
             
                     if (sort(freqs) ~= freqs)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Support frequencies must be stricly increasing', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Support frequencies must be stricly increasing', alpha, beta) );
                     end   
         
                     if (length(unique(freqs)) ~= length(freqs))
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Support frequencies must be unique', alpha, beta) );
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Support frequencies must be unique', alpha, beta) );
                     end  
                     
                     % Now set the global properties, if they have not been set yet
@@ -718,31 +720,31 @@ function [] = daffv17_write( varargin )
                 [ channels, numDFTCoeffs ] = size( data );
 
                 if (class(data) ~= 'double')
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values', alpha, beta) );
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values', alpha, beta) );
                 end
                
                 % test something (TODO)
                 if (class(data) ~= 'double')
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values', alpha, beta) );
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values', alpha, beta) );
                 end
                 
                 if (class(isSymetric) ~= 'logical')
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): third parameter isSymetric must be logical', alpha, beta));
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): third parameter isSymetric must be logical', alpha, beta));
                 end
                 
                 if isfield( props, 'samplerate' )
                     if ( sampleRate ~= props.sampleRate )
-                        error( sprintf( 'Dataset (A%0.1f°, B%0.1f°): Sample rate does not match', alpha, beta ) );
+                        error( sprintf( 'Dataset (A%0.1fï¿½, B%0.1fï¿½): Sample rate does not match', alpha, beta ) );
                     end
                 end
                 
                 if isfield(props, 'numDFTCoeffs')
                     if (numDFTCoeffs ~= props.numDFTCoeffs)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Number of discrete fourier spectra coefficients is not constant', alpha, beta));
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Number of discrete fourier spectra coefficients is not constant', alpha, beta));
                     end
                 else
                     if (numDFTCoeffs <= 0)
-                        error( sprintf('Dataset (A%0.1f°, B%0.1f°): Number of discrete fourier spectra coefficients must be greater than zero', alpha, beta));
+                        error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Number of discrete fourier spectra coefficients must be greater than zero', alpha, beta));
                     end
                     
                     props.numDFTCoeffs = numDFTCoeffs;
@@ -994,13 +996,13 @@ function [] = daffv17_write( varargin )
                 [ data, ~, ~ ] = args.datafunc( alpha, beta, args.userdata );
 
                 if( ~isa( data, 'double' ) )
-                    error( 'Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values', alpha, beta );
+                    error( 'Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values', alpha, beta );
                 end
  
                 % Clipping check
                 peak = max(max(abs(data)));
                 if ((peak > 1) && (~args.quiet))
-                    warning( 'Dataset (A%0.1f°, B%0.1f°): Clipping occured (peak %0.3f)', alpha, beta, peak );
+                    warning( 'Dataset (A%0.1fï¿½, B%0.1fï¿½): Clipping occured (peak %0.3f)', alpha, beta, peak );
                 end
                    
                 for c=1:args.channels
@@ -1051,13 +1053,13 @@ function [] = daffv17_write( varargin )
                 [channels, numfreqs] = size(data);
 
                 if (class(data) ~= 'double')
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values') );
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values') );
                 end
  
                 % Clipping check
                 peak = max(max(data));
                 if ((peak > 1) && (~args.quiet))
-                    warning( sprintf('Dataset (A%0.1f°, B%0.1f°): Clipping occured (peak %0.3f)', alpha, beta, peak) );
+                    warning( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Clipping occured (peak %0.3f)', alpha, beta, peak) );
                 end
                    
                 %x{a,b}.dataOffset = zeros(1, args.channels); 
@@ -1094,7 +1096,7 @@ function [] = daffv17_write( varargin )
                 [channels, numfreqs] = size(data);
 
                 if (class(data) ~= 'double')
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values') );
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values') );
                 end
                    
                 %x{a,b}.dataOffset = zeros(1, args.channels); TODO
@@ -1130,7 +1132,7 @@ function [] = daffv17_write( varargin )
                 [ channels, numfreqs ] = size( data );
 
                 if (class(data) ~= 'double')
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values') );
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values') );
                 end
                    
                 %x{a,b}.dataOffset = zeros(1, args.channels); TODO
@@ -1170,7 +1172,7 @@ function [] = daffv17_write( varargin )
                 [ channels, numfreqs ] = size( data );
 
                 if (class(data) ~= 'double')
-                    error( sprintf('Dataset (A%0.1f°, B%0.1f°): Data function must deliver double values') );
+                    error( sprintf('Dataset (A%0.1fï¿½, B%0.1fï¿½): Data function must deliver double values') );
                 end
                    
                 %x{a,b}.dataOffset = zeros(1, args.channels); TODO
