@@ -11,7 +11,7 @@ function ita_tools_aliasing_demo
 %% data
 
 data.freqRange = [10 450];
-data.freqValue = data.freqRange(2)/2;
+data.freqValue = 75;
 data.phaseValue = 0;
 
 data.mainSineFreq = 100;
@@ -40,7 +40,7 @@ h.ax_pos3d       = axes('Parent', h.f, 'outerposition', [-0.1 -0.05 1 1.1]);
 
 % h.pb_exportResults = uicontrol('style', 'pushbutton', 'parent', h.f, 'units', 'normalized', 'position', [9.1 2.6  1.8 0.5]/20, 'callback',@exportSearchResult, 'string', 'export  all results');
 
-h.freqSlider = uicontrol('style', 'slider', 'parent', h.f, 'units', 'normalized', 'position', [17 11  1.8 0.5]/20, 'callback',@freqSliderCallback);
+h.freqSlider = uicontrol('style', 'slider', 'parent', h.f,'units', 'normalized', 'position', [17 11  1.8 0.5]/20, 'callback',@freqSliderCallback);
 h.freqEdit = uicontrol('style', 'edit', 'parent', h.f, 'units', 'normalized', 'position', [17 10.4  1.8 0.5]/20,'string',num2str(data.freqValue) , 'callback',@freqEditCallback);
 h.hzText = uicontrol('style', 'text', 'parent', h.f, 'units', 'normalized', 'position', [18.45 10.5  0.3 0.3]/20,'string','Hz');
 h.freqInfoText = uicontrol('style', 'text', 'parent', h.f, 'units', 'normalized', 'position', [17 11.5  1.8 0.3]/20,'string','Sampling Frequency');
@@ -66,13 +66,14 @@ h.interpolatedEdit = uicontrol('style', 'edit', 'parent', h.f, 'units', 'normali
 h.interpolatedInfoText = uicontrol('style', 'text', 'parent', h.f, 'units', 'normalized', 'position', [17 7.5  1.8 0.3]/20,'string','Reconstructed Sine');
 h.hzText = uicontrol('style', 'text', 'parent', h.f, 'units', 'normalized', 'position', [18.45 7.1  0.3 0.3]/20,'string','Hz');
 
-
+h.showPlotCheckbox = uicontrol('style', 'checkbox','parent', h.f, 'units', 'normalized', 'position', [17 13.5  1.8 0.5]/20,'string','Plot sine' , 'callback',@sineCheckboxCallback);
 h.samplingCheckbox = uicontrol('style', 'checkbox', 'parent', h.f, 'units', 'normalized', 'position', [17 13  1.8 0.5]/20,'string','Plot sampling points' , 'callback',@samplingCheckboxCallback);
 h.reconstructedCheckbox = uicontrol('style', 'checkbox', 'parent', h.f, 'units', 'normalized', 'position',   [17 12.5  1.8 0.5]/20,'string','Plot reconstructed sine' , 'callback',@reconstructedCheckboxCallback);
 
 data.plotSampling = 0;
 data.plotReconstructed = 0;
-
+data.plotSine = 0;
+data.sinePlot = 0;
 guiData.handles = h;
 guiData.data    = data;
 
@@ -81,12 +82,12 @@ guiData.data    = data;
 guidata(h.f, guiData)
 
 
-populateGUI(guiData)
+populateGUI(guiData);
 
 end
 
 
-function populateGUI(guiData)
+function guiData = populateGUI(guiData)
 
     data = guiData.data;
     h = guiData.handles;
@@ -102,8 +103,9 @@ function populateGUI(guiData)
     sineTime = sine.timeData;
     % cut to 5 waves
     sineTime = sineTime(1:(calculateWaves/sineFreq*masterSamplingFreq));
-
-    data.sinePlot = plot(h.ax_pos3d,sineTime,'LineWidth',4);
+    if data.plotSine
+        data.sinePlot = plot(h.ax_pos3d,sineTime,'LineWidth',4,'Color',[0 0 1]);
+    end
     hold all
     data.xAxis = 1:size(sineTime);
     
@@ -150,6 +152,12 @@ function guiData = newPlot(guiData)
        data.interpolatedPlot = 0;
     end
     
+    if data.plotSine == 0
+       if data.sinePlot ~= 0
+        delete(data.sinePlot)
+       end
+       data.sinePlot = 0;
+    end
     
     masterSamplingFreq = data.masterSamplingFrequency;
     calculateWaves = data.calculateWaves;
@@ -218,6 +226,8 @@ function freqEditCallback(hObject,~)
     % calculate the frequency from the value and the data.freqRange
     guiData.data.freqValue = str2double(get(hObject,'String'));
     set(guiData.handles.freqEdit,'string',num2str(guiData.data.freqValue));
+    set(guiData.handles.freqSlider,'Value',guiData.data.freqValue);
+    
     guiData = newPlot(guiData);
     
     guidata(hObject, guiData);
@@ -237,6 +247,18 @@ function phaseSliderCallback(hObject, ~)
     guidata(hObject, guiData);
 
 end
+
+function sineCheckboxCallback(hObject,~)
+    guiData = guidata(hObject);
+    
+    % calculate the frequency from the value and the data.freqRange
+    realValue = get(hObject,'Value');
+    guiData.data.plotSine = realValue;
+    guiData = populateGUI(guiData);
+    
+    guidata(hObject, guiData);
+end
+
 
 function samplingCheckboxCallback(hObject,~)
     guiData = guidata(hObject);
