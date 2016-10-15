@@ -41,13 +41,17 @@ function varargout = surf(this, varargin)
 narginchk(1,inf);
 
 defaultProperties = {'EdgeAlpha',0, 'FaceColor', 'interp'};
-sArgs        = struct('pos1_data','double', 'radius', [],defaultProperties{:},'parent',[]);
+sArgs        = struct('pos1_data','double', 'radius', [],'magnitude',0,defaultProperties{:},'parent',[]);
 if ~isempty(varargin)
     [data,sArgs] = ita_parse_arguments(sArgs,varargin); 
 end
 
 numArgIn = nargin;
 
+
+if sArgs.magnitude
+   data = abs(data); 
+end
 
 %% now set r and color according to the input variables
 
