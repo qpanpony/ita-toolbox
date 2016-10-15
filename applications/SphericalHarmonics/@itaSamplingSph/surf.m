@@ -6,10 +6,17 @@ function varargout = surf(this, varargin)
 % </ITA-Toolbox>
 
 
+% sArgs        = struct('pos1_data','double', 'parent', 0);
+% [input,sArgs] = ita_parse_arguments(sArgs,varargin); 
+
+
+numArgIn = nargin;
+
+
 titleString = [];
 
 uniformPlot = 0;
-numArgIn = nargin;
+
 % this is the plot to a uniform sphere
 if numArgIn == 3 && varargin{1} == 1
     tmp = varargin{2};

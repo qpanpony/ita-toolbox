@@ -41,21 +41,37 @@ function varargout = surf(this, varargin)
 narginchk(1,inf);
 
 defaultProperties = {'EdgeAlpha',0, 'FaceColor', 'interp'};
+sArgs        = struct('pos1_data','double', 'radius', [],defaultProperties{:},'parent',[]);
+if ~isempty(varargin)
+    [data,sArgs] = ita_parse_arguments(sArgs,varargin); 
+end
+
+numArgIn = nargin;
 
 
 %% now set r and color according to the input variables
 
 % there is three options for the colorbar settings:
 %   geometry / complex / magnitude
-
-if nargin == 1 || (nargin > 1 && ischar(varargin{1}))
+% % check for a parent jri: I would like to make this pretty, but i don't
+% % have time
+% parent = 0;
+% if numel(varargin) && strcmpi(data,'Parent')
+%     parent = varargin{2};
+%     varargin = varargin(3:end);
+% end
+if (numArgIn == 1)
     % only coordinates given
     r = this.r;
     color = zeros(size(r));
     colorbar_settings = 'geometry';    
-elseif nargin > 1 && isnumeric(varargin{1})
+else
     % also a radius is given
-    r = varargin{1}(:);
+    if ~isempty(sArgs.radius)
+        r = sArgs.radius;
+    else
+        r = data; 
+    end
     isComplex = ~all(isreal(r));% & min(r(:)) < 0;
     if isComplex
         % if the radius is complex, set the color
@@ -69,40 +85,37 @@ elseif nargin > 1 && isnumeric(varargin{1})
     end
     r = abs(r);
     
-    if nargin > 2 && isnumeric(varargin{2})
+    if ~isempty(sArgs.radius)
         % if a color is given explicitly
         % negative radii are set to 0
         if sum(abs(imag(r))) > 0, ita_verbose_info('ignoring imaginary part of radius'); end
         r = max(real(r),0);
-        color = varargin{2}.';
+        color = data.';
         % use the magnitude of complex data
         if ~all(isreal(color))
             color = abs(color);
         end        
         
         colorbar_settings = 'magnitude';
-        % set varargin for the built-in function
-        varargin = varargin(3:end);
-    else
-        varargin = varargin(2:end);
     end
-elseif nargin > 2 && isa(varargin{1},'itaSuper')
-    varargout{1} = surf(this, varargin{1}.freq2value(varargin{2}), varargin{3:end});
-    title([' f = ' num2str(varargin{2}) 'Hz '])
-    if ~nargout, varargout = {}; end
-    return;
+% elseif numArgIn > 2 && isa(data,'itaSuper')
+%     varargout{1} = surf(this, data.freq2value(varargin{2}), varargin{3:end});
+%     title([' f = ' num2str(varargin{2}) 'Hz '])
+%     if ~nargout, varargout = {}; end
+%     return;
 end
 
 % define how big the patches can get
-if numel(varargin) && strcmpi(varargin{1},'plop')
+if numel(varargin) && strcmpi(data,'plop')
     maxAreaVertex = varargin{2};
     varargin = varargin(3:end);
 else
     maxAreaVertex = 0;
 end
 
+
 % set a hull if no is explicitly given
-if numel(varargin) && strcmpi(varargin{1},'hull')
+if numel(varargin) && strcmpi(data,'hull')
     hull = varargin{2};
     if any(size(hull,2) ~= 3)
         error('something wrong with the hull in itaCoordinates.surf');
@@ -153,7 +166,11 @@ if maxAreaVertex > 0
 end
 
 % plot the surface
-hFig = trisurf(hull, this.x, this.y, this.z);
+if sArgs.parent ~= 0
+    hFig = trisurf(hull, this.x, this.y, this.z,'Parent',sArgs.parent);
+else
+    hFig = trisurf(hull, this.x, this.y, this.z);   
+end
 % jri: matlab 2014b interpolation changed: interpolation between cvalues
 % leads to breaks in plot: set rgbValues only in complex plots
 if (strcmp(colorbar_settings,'complex'))
@@ -164,9 +181,9 @@ else
 end
 set(gca,'SortMethod','depth'); % replaced set(gca,'DrawMode','fast'); % this avoids a MATLAB segfault (?? only for renderer painters)
 set(hFig, defaultProperties{:});
-if numel(varargin)
-    set(hFig, varargin{:});
-end
+% if numel(varargin)
+%     set(hFig, varargin{:});
+% end
 
 switch colorbar_settings
     case 'geometry'
