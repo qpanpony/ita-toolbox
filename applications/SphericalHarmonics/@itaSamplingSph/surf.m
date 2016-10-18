@@ -39,7 +39,7 @@ if numel(varargin{1}) > 0 &&...
         % change to complex drawing mode, if complex base is used
         varargin{1}(1) = varargin{1}(1) + 1i * eps;
     end
-    disp(['plotting SH-coefficients up to order ' num2str(this.nmax)]);
+    ita_verbose_info(['plotting SH-coefficients up to order ' num2str(this.nmax)],2);
     nmaxVec = ceil(sqrt(nSHData)-1);
     titleString = ['Spherical Harmonics coefficients, nmax = ' num2str(nmaxVec) '/' num2str(this.nmax) ' (data/grid)'];
 end
