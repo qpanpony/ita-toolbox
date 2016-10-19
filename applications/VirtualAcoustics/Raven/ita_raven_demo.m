@@ -8,7 +8,7 @@
 
 %% Projektdatei einlesen
 % project laden
-rpf = RavenProject('..\RavenInput\Classroom\trilateration.rpf');
+rpf = itaRavenProject('..\RavenInput\Classroom\trilateration.rpf');
 
 
 %% Simulationsparameter einstellen

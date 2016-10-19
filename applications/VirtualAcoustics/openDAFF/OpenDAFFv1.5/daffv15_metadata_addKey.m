@@ -9,11 +9,11 @@ function [ metadata ] = daffv15_metadata_addKey(metadata, keyname, datatype, val
 % You can find the license for this m-file in the application folder.
 % </ITA-Toolbox>
 
-    if (~isempty(metadata))
-        if (~isstruct(metadata)), error(['[' mfilename '] Wrong datatype for metadata']); end;
-    else
+%     if (~isempty(metadata))
+%         if (~isstruct(metadata)), error(['[' mfilename '] Wrong datatype for metadata']); end;
+%     else
         metadata = struct('name', {}, 'datatype', {}, 'value', {});
-    end
+%     end
     
     if (~ischar(keyname)), error(['[' mfilename '] Key name must be a string']); end;
     

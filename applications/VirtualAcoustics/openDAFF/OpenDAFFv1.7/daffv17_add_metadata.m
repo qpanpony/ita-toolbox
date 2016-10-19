@@ -43,9 +43,9 @@ function [ metadata ] = daffv17_add_metadata(metadata, keyname, datatype, value)
            
        case 'STRING'
            if (~ischar(value)), error(['[' mfilename '] Value must be a string for string keys']); end; 
-           metadata(end+1) = struct('name', keyname, 'datatype', 3, 'value', value);                 
+           metadata(end+1) = struct('name', keyname, 'datatype', 3, 'value', value);
            
        otherwise
-           error( [ 'Unrecognized value type "' datatype '", use BOOL INT FLOAT or STRING' ] );
+           error( [ 'Unrecognized value type "' datatype '", use BOOL INT FLOAT or STRING' ] );		   
    end
 end

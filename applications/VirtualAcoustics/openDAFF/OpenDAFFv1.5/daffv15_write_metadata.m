@@ -26,10 +26,10 @@ function [ ] = daffv15_write_metadata( fid, metadata )
     % Check old metadata format and convert (for convenience)
     if nkeys == 1
         metadata_new_format = [];
-        fieldnames( metadata );
-        for i=1:length( fieldnames )
-            name = filednames( i );
-            value = metadata.(name);
+        metadata_fieldnames = fieldnames( metadata );
+        for i=1:length(metadata_fieldnames)
+            name = metadata_fieldnames{i};
+            eval([' value = metadata.' name ]);
             type = '';
             
             % Logical scalar (DAFF_BOOL)
@@ -56,7 +56,7 @@ function [ ] = daffv15_write_metadata( fid, metadata )
                 error( 'Unsupported datatype %s for key ''%s'' in metadata', class( value ), name );
             end
             
-            daffv15_metadata_addKey( metatada_new_format, name, type, value );
+            metadata_new_format = daffv15_metadata_addKey( metadata_new_format, name, type, value );
         end
         
         metadata = metadata_new_format;

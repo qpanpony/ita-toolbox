@@ -40,7 +40,7 @@ dataUnit = sofaObj.(sprintf('%s_Units',coordinateType));
 coordinates = itaCoordinates(size(data,1));
 switch dataType
     case 'cartesian'
-        if strcmpi(dataUnit,'meter')
+        if strcmpi(dataUnit,'meter')||strcmpi(dataUnit,'metre')
             coordinates.x = data(:,1);
             coordinates.y = data(:,2);
             coordinates.z = data(:,3);    

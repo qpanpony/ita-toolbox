@@ -45,9 +45,10 @@
 **      Head: Prof. Dr. rer. nat. Michael Vorlaender                          **
 **                                                                            **
 **    Active Developers:                                                      **
-	Dipl.-Ing. Ramona Bomhardt
-**      Dipl.-Ing. Johannes Klein                                             **
-**      Dipl.-Ing. Jan-Gerrit Richter                                         **
+**      M.Sc.       Marco Berzborn                                            **
+**  	Dipl.-Ing.  Ramona Bomhardt                                           **
+**      Dipl.-Ing.  Johannes Klein                                            **
+**      Dipl.-Ing.  Jan-Gerrit Richter                                        **
 **                                                                            **
 **    Former Developers:                                                      **
 **      Dr.-Ing. Pascal Dietrich                                              **
