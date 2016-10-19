@@ -1195,6 +1195,99 @@ classdef  itaHRTF < itaAudio
         
         function plot_freqSlice(varargin)
             % init
+            sArgs       = struct('pos1_data','itaHRTF', 'earSide', 'L','plane','horizontal','axes_handle',gca);
+            [this,sArgs]= ita_parse_arguments(sArgs,varargin);
+            ah          = sArgs.axes_handle;        
+            
+            phiC_deg    = rad2deg(unique(round(this.phi_Unique*100)/100));
+            thetaC_deg  = rad2deg(unique(round(this.theta_Unique*100)/100));
+            
+            % create slice
+            if numel(thetaC_deg)>1 && numel( phiC_deg)>1
+                ita_verbose_info(' More than one elevation in this object!', 0);
+                if strcmp(sArgs.plane,'horizontal')
+                    thetaC_deg  = 90;
+                    thisC       = this.sphericalSlice('theta_deg', thetaC_deg);
+                elseif strcmp(sArgs.plane,'median')
+                    phiC_deg    = 0;
+                    thisC       = this.sphericalSlice('phi_deg', phiC_deg);
+                end
+            else thisC = this;
+            end
+            
+            % multi defined coordinates
+            if numel(phiC_deg)<thisC.dirCoord.nPoints && numel(thetaC_deg) ==1
+                ita_verbose_info(' Coordinates are not unique!', 0);
+                [~,ia] = unique(thisC.dirCoord.phi,'stable');
+                thisC = thisC.direction(ia);
+            elseif numel(thetaC_deg)<thisC.dirCoord.nPoints && numel(phiC_deg) ==1
+                ita_verbose_info(' Coordinates are not unique!', 0);
+                [~,ia] = unique(thisC.dirCoord.theta,'stable');
+                thisC = thisC.direction(ia);
+            end
+            
+            % sort phi from lowest to highest
+            if  numel( phiC_deg)>1
+                [~,idxPhiS] = sort(thisC.dirCoord.phi_deg);
+                thisCs = thisC.direction(idxPhiS);
+                yticks = round(min(rad2deg(thisCs.phi_Unique))/10)*10:30:round(max(rad2deg(thisCs.phi_Unique))/10)*10;
+            else
+                [~,idxPhiS] = sort(thisC.dirCoord.theta_deg);
+                thisCs = thisC.direction(idxPhiS);
+                yticks = round(min(rad2deg(thisCs.theta_Unique))/10)*10:30: round(max(rad2deg(thisCs.theta_Unique))/10)*10;
+            end
+            
+            % theta or phi slice
+            earSidePlot = sArgs.earSide;
+            if numel(phiC_deg)>1,
+                xData = phiC_deg;
+                strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) '°'];
+                strXlabel = '\phi in Degree';
+            else
+                xData = thetaC_deg;
+                strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) '°'];
+                strXlabel = '\theta in Degree';
+            end
+            
+            % Plot properties
+%             position = get(0,'ScreenSize');
+%             figure
+%             set(gcf,'Position',[10 50 position(3:4)*0.85]);
+            
+            idxfMax = find(this.freqVector>2e4,1,'first');
+            if isempty(idxfMax), idxfMax = this.nBins; end
+            fMax = thisCs.freqVector(idxfMax);
+            [tick, lab] = ita_plottools_ticks('log');
+                       
+            data_dB= thisCs.freqData_dB;
+            cMax = max(max(data_dB(2:idxfMax,:)));
+            cMin = min(min(data_dB(2:idxfMax,:)))*0.5;
+            
+            pcolor(ah, thisCs.freqVector,xData,data_dB(:,thisCs.EarSide == earSidePlot)');
+            [xticks, xlabels] = ita_plottools_ticks('log');
+            
+            set(ah,'xTick',xticks,'xticklabel',xlabels)
+            set(ah,'yTick',yticks,'xticklabel',yticks)
+                       
+            caxis([cMin cMax]);
+            set(ah, 'XScale', 'log')
+            
+            title(strTitle)
+            
+            shading interp
+            cb  = colorbar;            
+            zlab = get(cb,'ylabel'); 
+            set(zlab,'String','Level in [dB]'); 
+
+            set(ah,'xtick',tick,'xticklabel',lab)
+            xlabel('Frequency in Hertz');xlim([thisCs.freqVector(2) fMax ]);
+            ylabel(strXlabel);
+            
+            grid on;set(ah,'layer','top')
+        end
+        
+         function plot_timeSlice(varargin)
+            % init
             sArgs       = struct('pos1_data','itaHRTF', 'earSide', 'L','plane','horizontal');
             [this,sArgs]= ita_parse_arguments(sArgs,varargin);
                        
@@ -1240,11 +1333,11 @@ classdef  itaHRTF < itaAudio
             earSidePlot = sArgs.earSide;
             if numel(phiC_deg)>1,
                 xData = phiC_deg;
-                strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) 'ï¿½'];
+                strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) '°'];
                 strXlabel = '\phi in Degree';
             else
                 xData = thetaC_deg;
-                strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) 'ï¿½'];
+                strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) '°'];
                 strXlabel = '\theta in Degree';
             end
             
@@ -1258,11 +1351,11 @@ classdef  itaHRTF < itaAudio
             fMax = thisCs.freqVector(idxfMax);
             [tick, lab] = ita_plottools_ticks('log');
                        
-            data_dB= thisCs.freqData_dB;
+            data_dB= thisCs.timeData;
             cMax = max(max(data_dB(2:idxfMax,:)));
             cMin = min(min(data_dB(2:idxfMax,:)))*0.5;
             
-            pcolor(thisCs.freqVector,xData,data_dB(:,thisCs.EarSide == earSidePlot)');
+            pcolor(thisCs.timeVector,xData,data_dB(:,thisCs.EarSide == earSidePlot)');
             [xticks, xlabels] = ita_plottools_ticks('log');
             
             set(gca,'xTick',xticks,'xticklabel',xlabels)
@@ -1283,7 +1376,7 @@ classdef  itaHRTF < itaAudio
             ylabel(strXlabel);
             
             grid on;set(gca,'layer','top')
-        end
+        end  
         
         %% Jan's Functions
         
