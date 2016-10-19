@@ -1,4 +1,4 @@
-classdef itaRavenProject < itaHandle
+classdef itaRavenProject < handle
     %RavenProject - The class for working with RAVEN.
     % This class allows you to create configurations of settings, to
     % run simulations and to retrieve the results.
@@ -30,7 +30,7 @@ classdef itaRavenProject < itaHandle
 	%				  Lukas Aspöck (las@akustik.rwth-aachen.de)
     % Version:        0.1
     % First release:  01.11.10
-    % Last revision:  14.07.16
+    % Last revision:  12.09.16
     % Copyright:      Institute of Technical Acoustics, RWTH Aachen University
     %
 
@@ -192,7 +192,7 @@ classdef itaRavenProject < itaHandle
     %---------------------- PUBLIC METHODS -------------------------------%
     methods
         %------------------------------------------------------------------
-        function obj = RavenProject(raven_project_file)
+        function obj = itaRavenProject(raven_project_file)
             %RavenProject - constructor
             % To Create a new project with empty default configuration.
             %
@@ -219,6 +219,10 @@ classdef itaRavenProject < itaHandle
             else
                 error('No raven project file given or file not found.');
             end
+        end
+        
+        function delete(obj)
+            obj.deleteResultsInRavenFolder();
         end
         
         %------------------------------------------------------------------
@@ -381,6 +385,54 @@ classdef itaRavenProject < itaHandle
         end
         
         %------------------------------------------------------------------
+        function runNoGathering(obj)
+            % basicly the same as the run method, but without the call of
+            % obj.gatherResults();
+            
+            obj.simulationDone = false;
+            
+            if obj.projectLoaded
+                savedProjectName = obj.projectName;
+                
+                obj.projectID = datestr(now, 30);
+                obj.projectTag = [obj.projectName obj.projectID];
+                
+                % give the project name a date and time string to help to identify the results
+                obj.setProjectName(obj.projectTag);
+                
+                % set filter length to the length of the reverberation
+                %                 obj.setFilterLengthToReverbTime();
+                
+                % run the simulation
+                disp(['Running simulation... (' obj.ravenExe ')']);
+                if exist(obj.ravenLogFile, 'file')
+                    delete(obj.ravenLogFile);
+                end
+                %                 system([obj.ravenExe ' "' obj.ravenProjectFile '" >> ' obj.ravenLogFile]);
+                dos([obj.ravenExe ' "' obj.ravenProjectFile '"'], '-echo');
+                disp('Done.');
+                
+                % restore the initial project name
+                obj.setProjectName(savedProjectName);
+                
+                % gather results
+                disp('This function does _not_ gather the results. Please provide arguments to getWallHitLogBand(band)');
+%                 obj.gatherResults();
+%                 disp('Done.');
+                
+                obj.simulationDone = true;
+                
+                % delete results in raven folder structure -> they are copied now into this class
+%                 if (obj.keepOutputFiles == 0)
+%                     obj.deleteResultsInRavenFolder();
+%                 end
+            else
+                disp('No projected defined yet.');
+            end
+            
+        end
+        
+        %------------------------------------------------------------------
         function numReceivers = createReceiverArray(obj, xpositions, zpositions, yheight)
             numReceivers = numel(xpositions) * numel(zpositions);
             [obj.uniformReceiverGridX, obj.uniformReceiverGridZ] = meshgrid(xpositions, zpositions);
@@ -524,6 +576,33 @@ classdef itaRavenProject < itaHandle
                     obj.model.plotModel(tgtAxes, comp2axesMapping, wireframe);
                 end
             end
+            % plot source and receivers
+            spos = obj.getSourcePosition;
+            snames = obj.getSourceNames;
+            
+            rpos = obj.getReceiverPosition;
+            rnames = obj.getReceiverNames;
+            
+            plot3(spos(:,3),spos(:,1),spos(:,2),'marker','o','markersize',9,'linestyle','none','linewidth',1.5)
+            plot3(rpos(:,3),rpos(:,1),rpos(:,2),'marker','x','markersize',9,'linestyle','none','linewidth',1.5)
+            
+            % plot view/up vectors (red/green) of receivers
+            sview = obj.getSourceViewVectors;
+            sup = obj.getSourceUpVectors;
+            
+            quiver3(spos(:,3),spos(:,1),spos(:,2),0.5*sview(:,3),0.5*sview(:,1),0.5*sview(:,2),'color','r','maxheadsize',1.5,'linewidth',1.5);
+            quiver3(spos(:,3),spos(:,1),spos(:,2),0.5*sup(:,3),0.5*sup(:,1),0.5*sup(:,2),'color','g','maxheadsize',1.5,'linewidth',1.5);
+            
+            % plot view/up vectors (red/green) of receivers
+            rview = obj.getReceiverViewVectors;
+            rup = obj.getReceiverUpVectors;
+            
+            quiver3(rpos(:,3),rpos(:,1),rpos(:,2),0.5*rview(:,3),0.5*rview(:,1),0.5*rview(:,2),'color','r','maxheadsize',1.5,'linewidth',1.5);
+            quiver3(rpos(:,3),rpos(:,1),rpos(:,2),0.5*rup(:,3),0.5*rup(:,1),0.5*rup(:,2),'color','g','maxheadsize',1.5,'linewidth',1.5);
+            
+            % plot names
+            text(spos(:,3)+0.2,spos(:,1),spos(:,2),snames)
+            text(rpos(:,3)+0.2,rpos(:,1),rpos(:,2),rnames)
         end
         
         % [Global] %
@@ -689,6 +768,11 @@ classdef itaRavenProject < itaHandle
             obj.rpf_ini.SetValues('Rooms', 'noAirAbsorption', 1);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
+        
+        %------------------------------------------------------------------
+        function airAbsEnabled = getAirAbsorptionEnabled(obj)
+            airAbsEnabled = ~obj.rpf_ini.GetValues('Rooms', 'noAirAbsorption', 0);
+        end        
         
         % [PrimarySources] %
         %------------------------------------------------------------------
@@ -1056,7 +1140,7 @@ classdef itaRavenProject < itaHandle
         end        
         
         %------------------------------------------------------------------
-        function setTimeSlotLength(obj, slotlength)
+        function setTimeSlotLength(obj, slotlength)   % set timeslot lengt in ms !
             obj.timeSlotLength = slotlength;
             obj.rpf_ini.SetValues('RayTracing', 'timeResolution_DetectionSphere', slotlength);
             obj.rpf_ini.SetValues('RayTracing', 'timeResolution_Portal', slotlength);
@@ -1215,19 +1299,19 @@ classdef itaRavenProject < itaHandle
             % print header
             fprintf(fid, '[Material]\r\n');
             fprintf(fid, ['name=' matname '\r\n']);
-            fprintf(fid, 'notes=Generated by MATLAB script (SPE)\r\n');
+            fprintf(fid, ['notes=Generated/Modified by MATLAB script (' datestr(now) ')\r\n']);
             
             % parse input data
             if length(alpha) == 1
                 alpha = ones(1,31) * alpha;
             elseif length(alpha) ~= 31 && length(alpha) ~= 10
-                disp('ERROR! alpha has to be either of size=1 or size=31.');
+                disp('ERROR! alpha has to be a vector with the length 1,10, or 31.');
                 return;
             end
             if length(scatter) == 1
                 scatter = ones(1,31) * scatter;
             elseif length(scatter) ~= 31 && length(scatter) ~= 10
-                disp('ERROR! scatter has to be either of size=1 or size=31.');
+                disp('ERROR! scatter has to be a vector with the length 1,10, or 31.');
                 return;
             end
             
@@ -3118,15 +3202,23 @@ classdef itaRavenProject < itaHandle
                 newMaterialNames = materialNames;
             end
             
-            % calculate new absorption values for the variable model to match the reverberation time of the target model (default values by eyring)
-            [A, S] = roommodel.getEquivalentAbsorptionArea();
-            if numel(targetReverbTime) == 10
-                A = A(3:3:end);   % go to octave resolution
+            % calculate new absorption values for the variable model to match the reverberation time of the target model (default values by eyring including air abs)
+            [A, S] = roommodel.getEquivalentAbsorptionArea_eyring();
+            if (obj.getAirAbsorptionEnabled)
+                 airAbscoeffs = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
+            else
+                airAbscoeffs = zeros(1,31); 
             end
-            alphas_default = 1 - exp(-0.163 * roommodel.getVolume() ./ (S .* targetReverbTime));
-            alphas_alt = A/S;
-            alphas_neu = 1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:));
+            equivalentAirAbsorptionArea = 4* roommodel.getVolume() * airAbscoeffs;
             
+            if numel(targetReverbTime) == 10 % go to octave resolution
+                A = A(3:3:end);   
+                equivalentAirAbsorptionArea = equivalentAirAbsorptionArea(3:3:end);
+            end
+            alphas_default = 1 - exp(((-0.163 * roommodel.getVolume() ./ targetReverbTime) - equivalentAirAbsorptionArea)/(S));
+            alphas_alt = (A+equivalentAirAbsorptionArea)/S;
+            alphas_neu = 1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:));
+                      
             absorptionFactors = alphas_neu(:) ./ alphas_alt(:);
             absorptionFactors(isnan(absorptionFactors)) = 1;
             absorptionFactors(isinf(absorptionFactors)) = 999;
@@ -3169,6 +3261,15 @@ classdef itaRavenProject < itaHandle
                 nRT = numel(targetReverbTime);
                 plot(1:nRT, targetReverbTime, 1:nRT, thisReverbTime, 1:nRT, newReverbTime);
                 legend('Target RT', 'RT before', 'RT after');
+                
+                ylabel('T30 [s]');
+                xlabel('Frequency band [Hz]');
+                ylim([0 1.1*max(targetReverbTime)]);             
+                
+                ax = gca; 
+                ax.XTickLabel = {32 63 125 250 500 1000 2000 4000 8000 16000}; 
+                grid on;
+
             else
                 newReverbTime = [];
             end
@@ -3596,7 +3697,8 @@ classdef itaRavenProject < itaHandle
                     continue;
                 end
                 
-%                 [wavedata{sourceID+1, receiverID+1}, obj.sampleRate,~] = wavread(filename{i});
+                % LAS: wavread is not supported by Matlab versions newer than 2015a
+        %        [wavedata{sourceID+1, receiverID+1}, obj.sampleRate,~] = wavread(filename{i});
                 [wavedata{sourceID+1, receiverID+1}, obj.sampleRate] = audioread(filename{i});
                 
                 
@@ -4299,6 +4401,47 @@ classdef itaRavenProject < itaHandle
             end
         end
         
+        
+        %------------------------------------------------------------------
+        function getWallHitLogBand(obj,iBand)
+            
+            if obj.logPerformance
+                obj.initPerformanceData;
+            end
+            
+            disp('gatherResultsBand is called.');
+
+            if ~isnumeric(iBand)
+                error('Your argument has to be numeric and positive scalar.');
+            end
+            
+            if obj.exportWallHitLog
+                wall_files_IS = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'WallHitLog_', ['_IS.log']}, '.log');
+                wall_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'WallHitLog_', ['[' num2str(iBand-1) ']_RT.log']}, '.log');
+                
+                % read the wall hit logs back from disk
+                obj.wallHitLog_IS = obj.readWallHitLog_IS(wall_files_IS);
+                [obj.wallHitLog_RT, obj.initialParticleEnergy] = obj.readWallHitLog_RT(wall_files_RT);
+            else
+                obj.wallHitLog_IS = [];
+                obj.wallHitLog_RT = [];
+                obj.initialParticleEnergy = [];
+            end
+            
+            if obj.exportPlaneWaveList
+                planewave_files_IS = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'PlaneWaves_', ['_IS.txt']}, '.txt');
+                planewave_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'PlaneWaves_', ['[' num2str(iBand-1) ']_RT.txt']}, '.txt');
+                
+                % read the plane wave lists back from disk
+                obj.planeWaveList_IS = obj.readPlaneWaveList(planewave_files_IS);
+                obj.planeWaveList_RT = obj.readPlaneWaveList(planewave_files_RT);
+            else
+                obj.planeWaveList_IS = [];
+                obj.planeWaveList_RT = [];
+            end
+            
+            disp(['Successfully gathered results from band ' num2str(iBand)]);
+        end
     end % public methods
     
     %---------------------- PRIVATE METHODS ------------------------------%
@@ -4721,7 +4864,38 @@ classdef itaRavenProject < itaHandle
                 disp('Error in RavenProject.powerSpectrum2energySpectrum: Unknown frequency resolution.');
                 energySpectrum = [];
             end
-        end        
+        end
+        
+        %------------------------------------------------------------------
+        function thisReverbTime = getT30_fromBinauralImpulseResponse(brir)            
+            if ~iscell(brir)
+                brir = {brir};
+            end
+            
+            thisReverbTime = cell(numel(brir), 1);
+                      
+            for i = 1 : numel(brir)
+                if ~isempty(brir{i})
+                    disp('third-octave filtering');
+                    brir{i} = ita_mpb_filter(brir{i}, '3-oct');
+
+                    disp('schroeder decay curve and reverberation time');
+                    thisReverbTime{i} = ita_roomacoustics_reverberation_time(brir{i}, 'edc_type','normal');
+
+                    disp('average left and right ear''s reverberation time');
+                    if numel(thisReverbTime{i}) > 1
+                        thisReverbTime{i} = mean(thisReverbTime{i});
+                    end
+                    thisReverbTime{i} = mean([thisReverbTime{i}.freqData(1:2:60) thisReverbTime{i}.freqData(2:2:60)], 2);                    
+                else
+                    thisReverbTime{i} = [];
+                end
+            end
+            
+            if numel(thisReverbTime) == 1
+                thisReverbTime = thisReverbTime{1};
+            end               
+        end
         
         %------------------------------------------------------------------
         function value_out = averageAfterDIN(values_in, afterDIN)

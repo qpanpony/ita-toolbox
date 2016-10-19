@@ -60,6 +60,20 @@ classdef itaHpTF_Audio < itaHpTF
                     this = varargin;
                 elseif isa(varargin{1},'itaHpTF_MS')
                     this.init = varargin{1};
+                    
+                 elseif nargin ==1 && isstruct(varargin{1}) % only for loading
+                    obj = varargin{1};
+                    this.data = obj.data;
+                    
+                    this.signalType = 'energy';
+                    % additional itaHRTF data
+                    objFNsaved = this.propertiesSaved;
+                    objFNload = this.propertiesLoad;
+                             
+                    for i1 = 1:numel(objFNload)
+                        this.(objFNload{i1}) = obj.(objFNsaved{i1});
+                    end
+
                 end
             end
         end
@@ -254,11 +268,13 @@ classdef itaHpTF_Audio < itaHpTF
         end
         
         function result = propertiesSaved
-            result = {'TF','fLower','fUpper','method','normalized','smoothing'};
+            result = {'nameHP','nameMic','nameSubj','repeat','mic','savePath',...
+                'TF','fLower','fUpper','method','normalized','smoothing'};
         end
         
         function result = propertiesLoad
-            result = {'mTF','m_fUpper','m_fLower','mMethod','mNormalized','mSmoothing'};
+            result = {'nameHP','nameMic','nameSubj','repeat','mic','savePath',...
+                'mTF','m_fUpper','m_fLower','mMethod','mNormalized','mSmoothing'};
         end
         
         function result = propertiesMethod
