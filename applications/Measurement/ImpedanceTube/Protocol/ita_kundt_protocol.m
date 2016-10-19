@@ -120,7 +120,7 @@ end
 datumDerMessung = datestr(x(1).datenum, 'dd.mm.yyyy');
 
 % TODO: in GUI auswählen
-protocolPath = [ita_toolbox_path filesep 'applications' filesep 'Kundt' filesep 'Protocol' filesep];
+protocolPath = [ita_toolbox_path filesep 'applications' filesep 'Measurement' filesep 'ImpedanceTube' filesep 'Protocol' filesep];
 
 if strcmpi(protocolLanguage, 'german')
     templateFileName = [protocolPath 'KundtGermanTemplate.tex'];
