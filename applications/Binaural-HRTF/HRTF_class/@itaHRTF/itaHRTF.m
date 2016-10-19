@@ -619,6 +619,14 @@ classdef  itaHRTF < itaAudio
             end
         end
         
+        function thetaUni = theta_UniqueDeg(this,varargin)
+            thetaUni = rad2deg(theta_Unique(this,varargin));
+        end
+        
+        function phiUni = phi_UniqueDeg(this,varargin)
+            phiUni = rad2deg(phi_Unique(this,varargin));
+        end
+        
         function slice = sphericalSlice(this,dirID,dir_deg)
             % dir in degree
             % dirID [phi, theta]
