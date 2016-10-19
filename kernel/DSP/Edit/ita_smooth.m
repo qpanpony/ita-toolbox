@@ -317,7 +317,7 @@ for ind = 1:numel(audioObject)
                 case 'abs+phase'
                     for k=1:channels
                         SignalCentAbs    = interp1(freq,   abs(audioObj.freqData(:,k)), fCent);
-                        SignalCentPhase  = interp1(freq, angle(audioObj.freqData(:,k)), fCent); 
+                        SignalCentPhase  = interp1(freq, unwrap(angle(audioObj.freqData(:,k))), fCent); 
                         signalCentSmoothAbs   = feval(smooth_helper, SignalCentAbs  , span, smooth_opt{:});
                         signalCentSmoothPhase = feval(smooth_helper, SignalCentPhase, span, smooth_opt{:});
                         absOut           = interp1(fCent(2:end), signalCentSmoothAbs(2:end), freq(2:end), 'spline');
@@ -420,7 +420,7 @@ for ind = 1:numel(audioObject)
                 
                 case 'abs+phase'
                     signalAbs = abs(audioObj.freqData);
-                    signalPhase = angle(audioObj.freqData);
+                    signalPhase = unwrap(angle(audioObj.freqData));
                     for k=1:nBins
                         absOut(k,:) = 1./(upperBoundaryBins(k)-lowerBoundaryBins(k)+1) .* ...
                             sum(signalAbs(lowerBoundaryBins(k):upperBoundaryBins(k),:), 1);

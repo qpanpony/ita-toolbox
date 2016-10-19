@@ -5,7 +5,7 @@ function varargout = ita_toolbox_setup(varargin)
 %  Call: ita_toolbox_setup
 %
 %   See also ita_toolbox_documentation.
-%fdjksajödkflj
+
 %   Reference page in Help browser
 %      <a href="matlab:doc ita_toolbox_setup">doc ita_toolbox_setup</a>
 %

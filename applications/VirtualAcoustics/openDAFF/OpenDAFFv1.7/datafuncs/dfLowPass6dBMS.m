@@ -12,7 +12,7 @@ function [ freqs, mags, metadata ] = dfLowPass6dBMS( ~, ~, ~ )
     
     for c=1:channels
         for f=1:length(freqs)
-            mags(c,f) = 1/(2*f);
+            mags(c,f) = 1/(2^(2*(f-1)));
         end
     end   
 end

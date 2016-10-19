@@ -9,9 +9,10 @@ tGuessSd    = 3;
 q           = QuestCreate(tGuess,tGuessSd,pThreshold,beta,delta,gamma);
 q.normalizePdf = 1; 
 
-trialsDesired=40;
+trialsDesired=20;
 
 wrongRight={'wrong','right'};
+res         = ones(trialsDesired,1);
 
 for k=1:trialsDesired
 	% Get recommended level.  Choose your favorite algorithm.
@@ -20,10 +21,12 @@ for k=1:trialsDesired
 % 	tTest=QuestMode(q);		% Recommended by Watson & Pelli (1983)
 	
 %   HERE IS MY CODE
-    response = round(rand(1,1));
+    %response = round(rand(1,1));
 
+    response  = res(k);
+    
     q=QuestUpdate(q,tTest,response); % Add the new datum (actual test intensity and observer response) to the database.
-    disp(num2str(q.xThreshold))
+    disp(num2str(tTest))
 end
 
 % Ask Quest for the final estimate of threshold.

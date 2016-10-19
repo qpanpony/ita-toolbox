@@ -19,22 +19,24 @@ function [] = daffv17_convert_from_daffv15( daffv15_input_file_path, daffv17_out
     metadata_v17 = daffv17_add_metadata( metadata_v17, 'Converter', 'String', 'Converted from DAFF version 1.5' );
     metadata_v17 = daffv17_add_metadata( metadata_v17, 'Date of conversion', 'String', date );
     
-   metadata_v15 = DAFFv15( 'getMetadata', h );
+    metadata_v15 = DAFFv15( 'getMetadata', h );
    
-   metadata_field_names = fieldnames( metadata_v15 );
-   for i = size( metadata_field_names, 1 )
-       key = metadata_field_names{i};
-       val = metadata_v15.( key );
-       if isnumeric( val )
-           val = num2str( val );
+    metadata_field_names = fieldnames( metadata_v15 );
+    if size( metadata_field_names, 1 )
+       for i = size( metadata_field_names, 1 )
+           key = metadata_field_names{i};
+           val = metadata_v15.( key );
+           if isnumeric( val )
+               val = num2str( val );
+           end
+           metadata_v17 = daffv17_add_metadata( metadata_v17, key, 'String', val );
        end
-       metadata_v17 = daffv17_add_metadata( metadata_v17, key, 'String', val );
-   end
+    end
    
     
     switch( props.contentType )
-        case { 'ms', 'mps', 'ps' }
-    daffv17_write( 'filename', daffv17_output_file_path, ...                
+    case { 'ms', 'mps', 'ps' }
+	daffv17_write( 'filename', daffv17_output_file_path, ...                
                 'metadata', metadata_v17, ...
                 'datafunc', @dfConvertFromDAFFv15MS, ...
                 'userdata', h, ...

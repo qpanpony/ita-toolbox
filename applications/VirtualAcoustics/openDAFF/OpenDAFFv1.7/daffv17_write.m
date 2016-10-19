@@ -260,12 +260,12 @@ function [] = daffv17_write( varargin )
     end
     
     if isfield(args, 'alphares')
-        args.alphapoints = alphaspan / args.alphares;
-        if abs( args.alphapoints - args.alphapoints ) > eps
-            error( 'Alpha range and alpha resolution are not an integer multiple' )
+        args.alphapoints = round(alphaspan / args.alphares);
+        if (ceil(args.alphapoints) ~= args.alphapoints)
+            error('Alpha range and alpha resolution are not an integer multiple')
         end
     else
-        args.alphares = alphaspan / args.alphapoints;
+        args.alphares = round(alphaspan / args.alphapoints);
     end
    
     % Beta points and resolution
@@ -285,11 +285,9 @@ function [] = daffv17_write( varargin )
     end
     
     if isfield(args, 'betares')
-        args.betapoints = (betaspan / args.betares) + 1;
-        if (abs(ceil(args.betapoints)- args.betapoints) > 1e-14)
+        args.betapoints = round((betaspan / args.betares) + 1);
+        if (ceil(args.betapoints) ~= args.betapoints)
             error('Beta range and beta resolution are not an integer multiple')
-        else
-           args.betapoints = round(args.betapoints); 
         end
     else
         args.betares = betaspan / (args.betapoints-1);
@@ -417,9 +415,7 @@ function [] = daffv17_write( varargin )
     props.transformSize = 0;
     
     % Generate a list of all individual input data sets
-    % note: use round here to avoid errors if alphapoints are not exactly
-    % integers but within epsilon
-    x = cell( round( args.alphapoints ), round( args.betapoints ), args.channels );
+    x = cell( args.alphapoints, args.betapoints, args.channels );
     for b=1:args.betapoints
         beta = betastart + (b-1)*args.betares;
         
@@ -933,7 +929,7 @@ function [] = daffv17_write( varargin )
         % Number of frequencies
         fwrite(fid, props.numDFTCoeffs, 'int32');
         fwrite(fid, props.transformSize, 'int32');
-        fwrite(fid, props.sampleRate, 'float32');
+        fwrite(fid, props.sampleRate, 'int32');
         fwrite(fid, props.globalPeak, 'float32');
     end  
     
