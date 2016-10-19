@@ -1,6 +1,6 @@
 % 5x5 degree grid resolution
-alpha_res = 5; 
-beta_res = 5;
+alpha_res = 15; 
+beta_res = 15;
 
 channels = 1;
 default_orient = [0 0 0]; % yaw pitch roll @ +Y+X-Z (OpenGL)

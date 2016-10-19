@@ -12,7 +12,7 @@ function [ freqs, mags, metadata ] = dfLowPass3dBMS( ~, ~, ~ )
     
     for c=1:channels
         for f=1:length(freqs)
-            mags(c,f) = 1/f;
+            mags(c,f) = 1/2^(f-1); % Magnitude is a factor > 0
         end
     end   
 end
