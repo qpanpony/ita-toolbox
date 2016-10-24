@@ -1,50 +1,63 @@
 classdef itaVA < handle
-    %ITAVA Remote interface for VA real-time auralization servers
+    %ITAVA Remote network interface to VA (Virtual Acoustics), the real-time 
+    %auralization software made by ITA.
     %
     %   This class realizes a remote connection to a VA real-time
     %   auralization server and implements the full VA core interface
-    %   in Matlab. This way you connect to an auralization server
-    %   and control all of its features to perform a real-time
-    %   auralization. In order to get understand to the concepts behind VA
-    %   please refer to the VA documentation.
+    %   in Matlab. You can connect to to the server
+    %   and control all of its features to perform real-time
+    %   auralization, including live tracking if available.
+    %   In order to get understand to the concepts behind VA
+    %   please refer to the VA documentation or have a look at the example scripts.
     %
-    %   Usage & examples:
+    %   See also: itaVA_example_simple, itaVA_example_tracked_listener,
+    %   itaVA_example_generic_path_renderer, itaVA_example_random_numbers
+    %
+    %   Quick usage:
     %
     %   - Create an interface and connect to the server running on the
     %     same computer (localhost)
     %
-    %     va = itaVA('localhost');
+    %     va = itaVA;
+    %     va.connect;
     %
     %     If no error occurs, you can then use the interface to work with
-    %     the VA server. Best practice is to reset it first:
+    %     the VA server.
     %
-    %     va.reset
-    %
-    %     Then you can call other methods. For instance create a sound
+    %     Now, you can call other methods. For instance create a sound
     %     source:
     %
-    %     sourceID = va.createSoundSource('Virtual sound source')
+    %     sourceID = va.createSoundSource( 'My Matlab virtual sound source' )
     %
     %     When everything is done, do not forget to close the connection.
     %     You can call disconnect on the instance or simply clear it:
     %
     %     clear va
     %
-    %   - You can find more examples in the demo files
-    %
-    %   Questions? Contact the author: Frank.Wefers@akustik.rwth-aachen.de
-    %
-    %   Otherwise => Enjoy!
     %
     
     properties(Hidden = true, Access = private)
         handle = int32(0); % Connection handle
-        
+                
         % Connection defaults
         DEFAULT_SERVER_PORT = 12340;
     end
     
     methods(Static)
+        
+        function [ ok ] = check_for_mex_file()
+            % Checks if VAMatlab executable can be found.
+            if ~exist( 'VAMatlab', 'var' )
+                disp( 'Matlab binding for VA not complete (missing VAMatlab executable).' )
+                ok = false;
+                
+                % file dialog
+                
+            else
+                ok = true;
+            end
+        end
+        
         function [version] = getVersion()
             % Return the version of the VA Matlab interface
             %
@@ -55,6 +68,11 @@ classdef itaVA < handle
             % Return values:
             %
             % 	version  [string]  Version string
+            
+            if ~itaVA.check_for_mex_file()
+                error( 'Matlab binding for VA requires VAMatlab executable.' );
+            end
+
             version = VAMatlab('getVersion');
         end
         
@@ -74,6 +92,11 @@ classdef itaVA < handle
             % - If you do not want any messages from the extension
             %   set the verbose mode to 'quiet'
             %
+            
+            if ~itaVA.check_for_mex_file()
+                error( 'Matlab binding for VA requires VAMatlab executable.' );
+            end
+
             VAMatlab('setVerboseMode', mode);
         end
     end
@@ -100,6 +123,10 @@ classdef itaVA < handle
             %            core = itaVA('localhost:12340');
             %
             
+            if ~itaVA.check_for_mex_file()
+                error( 'Matlab binding for VA requires VAMatlab executable.' );
+            end
+        
             if (nargin > 0)
                 this.connect(addressstring)
             end
