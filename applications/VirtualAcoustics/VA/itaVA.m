@@ -47,12 +47,14 @@ classdef itaVA < handle
         
         function [ ok ] = check_for_mex_file()
             % Checks if VAMatlab executable can be found.
-            if ~exist( 'VAMatlab', 'var' )
+            if ~exist( 'VAMatlab', 'file' )
                 disp( 'Matlab binding for VA not complete (missing VAMatlab executable).' )
-                ok = false;
                 
                 % file dialog
+                itaVA_setup()
                 
+                % Re-check
+                ok = exist( 'VAMatlab', 'file' ) > 0;
             else
                 ok = true;
             end
