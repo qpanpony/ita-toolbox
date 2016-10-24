@@ -58,15 +58,27 @@ handles.output = hObject;
 % Update handles structure
 guidata(hObject, handles);
 
+% VAMatlab
 current_va_mex_dir = which( 'VAMatlab' );
-
 if ~isempty( current_va_mex_dir )
     [ va_mex_path, ~, ~ ] = fileparts( current_va_mex_dir );
-    set( handles.va_search_dir, 'String', fullfile( va_mex_path, '..' ) );
+    [ va_path, ~, ~ ] = fileparts( va_mex_path );
+    set( handles.va_search_dir, 'String', fullfile( va_path ) );
+    
+    set( handles.edit_vamatlab_full_path, 'String', current_va_mex_dir )
+    v = VAMatlab( 'getVersion' );
+    set( handles.edit_vamatlab_version, 'String', v )
 end
 
-% UIWAIT makes itaVA_setup wait for user response (see UIRESUME)
-% uiwait(handles.figure1);
+% VAServer
+current_va_server_dir = which( 'VAServer.exe' );
+if ~isempty( current_va_server_dir )
+    set( handles.edit_vaserver_full_path, 'String', current_va_server_dir )
+    [ ~, v ] = system( [ current_va_server_dir ' --version' ] );
+    set( handles.edit_vaserver_version, 'String', strcat( v ) )
+end
+
+uiwait( handles.figure1 );
 
 
 % --- Outputs from this function are returned to the command line.
@@ -77,7 +89,9 @@ function varargout = itaVA_setup_OutputFcn(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 
 % Get default command line output from handles structure
-varargout{1} = handles.output;
+if ~isempty( handles )
+    varargout{1} = handles.output;
+end
 
 
 % --- Executes on button press in pushbutton_close.
@@ -197,8 +211,8 @@ if vaserver_found
     end
     vaserver_path = fullfile( vaserver_dir, 'VAServer.exe' );
     set( handles.edit_vaserver_full_path, 'String', vaserver_path )
-    v = system( [ vaserver_path ' --version' ] );
-    set( handles.edit_vamatlab_version, 'String', v )
+    [ ~, v ] = system( [ vaserver_path ' --version' ] );
+    set( handles.edit_vaserver_version, 'String', strcat( v ) )
 else
     set( handles.edit_vaserver_full_path, 'String', 'not found' )
 end
@@ -210,6 +224,10 @@ va_component_dir = '';
 if exist( fullfile( va_search_dir, component ), 'file' )
     found = true;
     va_component_dir = fullfile( va_search_dir ); % Base path is one folder up
+end
+
+if isempty( va_search_dir )
+    return % something went wrong
 end
 
 if ~found && recursive
