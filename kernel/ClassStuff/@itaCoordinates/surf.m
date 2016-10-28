@@ -74,7 +74,7 @@ else
     if ~isempty(sArgs.radius)
         r = sArgs.radius;
     else
-        r = data; 
+        r = data.'; 
     end
     isComplex = ~all(isreal(r));% & min(r(:)) < 0;
     if isComplex

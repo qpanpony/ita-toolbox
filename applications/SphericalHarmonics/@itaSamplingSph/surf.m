@@ -10,8 +10,7 @@ function varargout = surf(this, varargin)
 % [input,sArgs] = ita_parse_arguments(sArgs,varargin); 
 
 
-numArgIn = nargin;
-
+titleString = [];
 
 % check if SH coefs are given
 if numel(varargin{1}) > 0 &&...
@@ -25,7 +24,6 @@ if numel(varargin{1}) > 0 &&...
     nSHGrid = size(this.Y,2);
     nSHData = size(varargin{1}(:),1);
     if nSHGrid ~= nSHData
-%             error('the spherical harmonics dimensions don''t fit');            
         % TODO make autofit
         if nSHGrid > nSHData
             varargin{1} = [varargin{1}(:); zeros(nSHGrid - nSHData,1)];
@@ -49,7 +47,7 @@ end
 hFig = {surf@itaCoordinates(this, varargin{:})};
 
 % set title
-if numel(titleString)
+if ~isempty(titleString)
     title(titleString);
 end
 

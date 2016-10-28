@@ -1,12 +1,12 @@
-function ita_aureliocontrol_gui_new(varargin)
-% ita_aureliocontrol_gui_new - gui for aurelio remote control
+function ita_aureliocontrol_gui(varargin)
+% ITA_AURELIOCONTROL_GUI - gui for aurelio remote control
 
 % <ITA-Toolbox>
 % This file is part of the application RoboAurelioModulITAControl for the ITA-Toolbox. All rights reserved.
 % You can find the license for this m-file in the application folder.
 % </ITA-Toolbox>
 
-[currentSettings, presetNames, currentPresetNumber,presetChanged] = ita_aurelio_control_new('getSettings');
+oldSettings = ita_aurelio_control('getSettings');
 persistent hFigure
 
 %% nice gui settings
@@ -14,7 +14,7 @@ gui_bg_color  = [0.8 0.8 0.8];
 
 if nargin == 0
     width  = 440;
-    height = 640;
+    height = 540;
     
     mpos = get(0,'Monitor'); %try to position in the middle of the screen
     w_position = (mpos(1,length(mpos)-1)/2)-(width/2);
@@ -59,8 +59,6 @@ ver_space = 0.5;
 
 button_height = 1.5;
 button_width = 20;
-button_space = 0.125;
-lower_space = 0.25;
 
 for ch_idx = 1:2
     %% FEED
@@ -68,8 +66,7 @@ for ch_idx = 1:2
     
     nameStr = {'NONE','Pol','Pha','P+P','icp','all'};
     nButtons = length(nameStr);
-    
-    InputFeed{ch_idx}.Size = [button_width+1 (nButtons+1) * (button_height+button_space)];
+    InputFeed{ch_idx}.Size = [button_width+1 (nButtons+1) * (button_height)];
     InputFeed{ch_idx}.Position = [hor_start ver_start InputFeed{ch_idx}.Size];
     InputFeed{ch_idx}.h = uibuttongroup(...
         'Parent',hFigure,...
@@ -83,9 +80,8 @@ for ch_idx = 1:2
         'SelectedObject',[],...
         'SelectionChangeFcn',@InputFeedCallback,...
         'OldSelectedObject',[]);
-
     
-    position =  [lower_space button_space button_width button_height];
+    position =  [0 0 button_width button_height];
     for button_idx = 1:nButtons
         InputFeed{ch_idx}.hButton(button_idx) = uicontrol(...
             'Parent',InputFeed{ch_idx}.h,...
@@ -96,15 +92,15 @@ for ch_idx = 1:2
             'String',nameStr{button_idx},...
             'Style','togglebutton',...
             'UserData',userdata,...
-            'Value',strcmpi(nameStr{button_idx},currentSettings.ch(ch_idx).inputfeed),...
+            'Value',strcmpi(nameStr{button_idx},oldSettings.ch(ch_idx).inputfeed),...
             'Tag','togglebuttonNorm');
-        position = position + [0 button_height+button_space 0 0];
+        position = position + [0 button_height 0 0];
     end
     
     %% INPUT SELECT
     nameStr = {'Lemo','XLR','gnd','BNC'};
     nButtons = length(nameStr);
-    InputSelect{ch_idx}.Size = [button_width+1 (nButtons+1) * (button_height+button_space)];
+    InputSelect{ch_idx}.Size = [button_width+1 (nButtons+1) * (button_height)];
     InputSelect{ch_idx}.Position = [InputFeed{ch_idx}.Position(1)  InputFeed{ch_idx}.Position(2)+ InputFeed{ch_idx}.Position(4)+ver_space InputSelect{ch_idx}.Size];
     InputSelect{ch_idx}.h = uibuttongroup(...
         'Parent',hFigure,...
@@ -119,7 +115,7 @@ for ch_idx = 1:2
         'SelectionChangeFcn',@InputSelectCallback,...
         'OldSelectedObject',[]);
     
-    position =  [lower_space button_space button_width button_height];
+    position =  [0 0 button_width button_height];
     for button_idx = 1:nButtons
         InputSelect{ch_idx}.hButton(button_idx) = uicontrol(...
             'Parent',InputSelect{ch_idx}.h,...
@@ -129,9 +125,9 @@ for ch_idx = 1:2
             'String',nameStr{button_idx},...
             'UserData',userdata,...
             'Style','togglebutton',...
-            'Value',strcmpi(nameStr{button_idx},currentSettings.ch(ch_idx).inputselect),...
+            'Value',strcmpi(nameStr{button_idx},oldSettings.ch(ch_idx).inputselect),...
             'Tag','togglebuttonNorm');
-        position = position + [0 button_height+button_space 0 0];
+        position = position + [0 button_height 0 0];
     end
     
     %% INPUT RANGE
@@ -139,7 +135,7 @@ for ch_idx = 1:2
     nameStr = cellstr(num2str(inputRange_vec'));
     nButtons = length(nameStr);
     
-    InputRange{ch_idx}.Size = [button_width+1 (nButtons+1) * (button_height+button_space)];
+    InputRange{ch_idx}.Size = [button_width+1 (nButtons+1) * (button_height)];
     InputRange{ch_idx}.Position = [InputSelect{ch_idx}.Position(1)  InputSelect{ch_idx}.Position(2)+ InputSelect{ch_idx}.Position(4)+ver_space InputRange{ch_idx}.Size];
     InputRange{ch_idx}.h = uibuttongroup(...
         'Parent',hFigure,...
@@ -154,7 +150,7 @@ for ch_idx = 1:2
         'SelectionChangeFcn',@InputRangeCallback,...
         'OldSelectedObject',[]);
     
-    position =  [lower_space button_space button_width button_height];
+    position =  [0 0 button_width button_height];
     for button_idx = 1:nButtons
         InputRange{ch_idx}.hButton(button_idx) = uicontrol(...
             'Parent',InputRange{ch_idx}.h,...
@@ -165,9 +161,9 @@ for ch_idx = 1:2
             'BackgroundColor',[0.1 0.9 0.1],...
             'UserData',userdata,...
             'Style','togglebutton',...
-            'Value',currentSettings.ch(ch_idx).inputrange == inputRange_vec(button_idx),...
+            'Value',oldSettings.ch(ch_idx).inputrange == inputRange_vec(button_idx),...
             'Tag','togglebuttonNorm');
-        position = position + [0 button_height+button_space 0 0];
+        position = position + [0 button_height 0 0];
     end
     
     hor_start = hor_start + button_width + hor_space;
@@ -196,7 +192,7 @@ argCell{ele} = {'mode','norm'};
 %% generate modebuttons
 InputFeed = InputFeed(1);
 nButtons = length(nameStr);
-InputFeed{1}.Size = [button_width+1 (nButtons+1) * (button_height+button_space)];
+InputFeed{1}.Size = [button_width+1 (nButtons+1) * (button_height)];
 InputFeed{1}.Position = [hor_start+1 ver_start InputFeed{1}.Size];
 InputFeed{1}.h = uibuttongroup(...
     'Parent',hFigure,...
@@ -208,10 +204,9 @@ InputFeed{1}.h = uibuttongroup(...
     'Position',InputFeed{1}.Position,...
     'BackgroundColor',gui_bg_color,...
     'SelectedObject',[],...
-    'OldSelectedObject',[], ...
-    'SelectionChangeFcn',@modePushButtonCallback);
+    'OldSelectedObject',[]);
 ch_idx = 1;
-position =  [lower_space button_space  button_width button_height];
+position =  [0 0 button_width button_height];
 for button_idx = 1:nButtons
     userdata = argCell{button_idx};
     ControlButton{ch_idx}.hButton(button_idx) = uicontrol(...
@@ -220,11 +215,12 @@ for button_idx = 1:nButtons
         'FontSize',10,...
         'Position',position,...
         'String',nameStr{button_idx},...
-        'Style','togglebutton',...
+        'Style','pushbutton',...
+        'Callback',@modePushButtonCallback,...
         'UserData',userdata,...
-        'Value',strcmpi(currentSettings.mode,argCell{button_idx}{2}),...
+        'Value',0,...
         'Tag','');
-    position = position + [0 button_height+button_space 0 0];
+    position = position + [0 button_height 0 0];
 end
 
 
@@ -234,44 +230,39 @@ argCell = {};
 ele = 1;
 nameStr{ele} = {'Init'};
 argCell{ele} = {'init'};
-tooltip{ele} = {'Reinitialize the Aurelio'};
 % ele = ele + 1;
 % nameStr{ele} = {['Reset']};
 % argCell{ele} = {'Reset'};
 ele = ele + 1;
-nameStr{ele} = {'Use Amplifier'};
+nameStr{ele} = {'Amplifier'};
 argCell{ele} = {'Amplifier'};
-tooltip{ele} = {'Turn the amplifier on'};
 ele = ele + 1;
-% nameStr{ele} = {'NoAmplifier'};
-% argCell{ele} = {'NoAmplifier'};
-% ele = ele + 1;
-nameStr{ele} = {'Amp +20dB'};
+nameStr{ele} = {'NoAmplifier'};
+argCell{ele} = {'NoAmplifier'};
+ele = ele + 1;
+nameStr{ele} = {'Amp26dBu'};
 argCell{ele} = {'Amp26dBu'};
-tooltip{ele} = {'Amp + 20 dB'};
 ele = ele + 1;
-% nameStr{ele} = {'Amp06dBu'};
-% argCell{ele} = {'Amp06dBu'};
-% ele = ele + 1;
+nameStr{ele} = {'Amp06dBu'};
+argCell{ele} = {'Amp06dBu'};
+ele = ele + 1;
 nameStr{ele} = {'AmpHighPower'};
 argCell{ele} = {'AmpHighPower'};
-tooltip{ele} = {'Activate High power Amp'};
 ele = ele + 1;
-% nameStr{ele} = {'AmpLowPower'};
-% argCell{ele} = {'AmpLowPower'};
-% ele = ele + 1;
+nameStr{ele} = {'AmpLowPower'};
+argCell{ele} = {'AmpLowPower'};
+ele = ele + 1;
 nameStr{ele} = {'GroundLift'};
-argCell{ele} = {'groundLift'};
-tooltip{ele} = {'Use ground lift'};
-% ele = ele + 1;
-% nameStr{ele} = {'NoGroundLift'};
-% argCell{ele} = {'NoGroundLift'};
+argCell{ele} = {'GroundLift'};
+ele = ele + 1;
+nameStr{ele} = {'NoGroundLift'};
+argCell{ele} = {'NoGroundLift'};
 
 
 %% controlbuttons (push)
 nButtons = length(nameStr);
 
-InputFeed{1}.Size = [button_width+1 (nButtons+1) * (button_height+button_space)];
+InputFeed{1}.Size = [button_width+1 (nButtons+1) * (button_height)];
 InputFeed{1}.Position = [InputFeed{1}.Position(1)  InputFeed{1}.Position(2)+ InputFeed{1}.Position(4)+ver_space InputFeed{1}.Size];
 %     InputFeed{ch_idx}.Position = [hor_start ver_start InputFeed{ch_idx}.Size];
 InputFeed{1}.h = uipanel(...
@@ -285,10 +276,8 @@ InputFeed{1}.h = uipanel(...
     'BackgroundColor',gui_bg_color);
 
 
-position =  [lower_space button_space  button_width button_height];
-
-% checkboxes
-for button_idx = 2:length(nameStr)
+position =  [0 0 button_width button_height];
+for button_idx = 1:length(nameStr)
     userdata = argCell{button_idx};
     ControlButton{ch_idx}.hButton(button_idx) = uicontrol(...
         'Units','characters',...
@@ -296,62 +285,36 @@ for button_idx = 2:length(nameStr)
         'FontSize',10,...
         'Position',[position],...
         'String',nameStr{button_idx},...
-        'Style','checkbox',...
-        'Callback',@controlCheckboxCallback,...
+        'Style','pushbutton',...
+        'Callback',@controlPushButtonCallback,...
         'UserData',userdata,...
-        'Value',currentSettings.(argCell{button_idx}{1}),...
-        'Tag','', ...
-        'Tooltip',tooltip{button_idx}{1});
-    position = position + [0 button_height+button_space 0 0];
+        'Value',0,...
+        'Tag','');
+    position = position + [0 button_height 0 0];
 end
-
-% init button
-userdata = argCell{1};
-ControlButton{ch_idx}.hButton(1) = uicontrol(...
-    'Units','characters',...
-    'Parent',InputFeed{1}.h,...
-    'FontSize',10,...
-    'Position',[position],...
-    'String',nameStr{1},...
-    'Style','pushbutton',...
-    'Callback',@controlPushButtonCallback,...
-    'UserData',userdata,...
-    'Value',0,...
-    'Tag','');
-position = position + [0 button_height+button_space 0 0];
 
 
 %% sampling rate
 nameStr = {};
 argCell = {};
 ele = 1;
-nameStr{ele} = {'44100'};
-argCell{ele} = {44100};
-ele = ele + 1;
-nameStr{ele} = {'48000'};
-argCell{ele} = {48000};
+nameStr{ele} = {'96000'};
+argCell{ele} = {96000};
 ele = ele + 1;
 nameStr{ele} = {'88200'};
 argCell{ele} = {88200};
 ele = ele + 1;
-nameStr{ele} = {'96000'};
-argCell{ele} = {96000};
+nameStr{ele} = {'48000'};
+argCell{ele} = {48000};
 ele = ele + 1;
+nameStr{ele} = {'44100'};
+argCell{ele} = {44100};
 
 
-samplingValue = 0;
-for index = 1:length(nameStr)
-   if argCell{index}{1} == currentSettings.samplingRate
-       samplingValue = index;
-   end
-end
-
-
-nameStr = {'44100','48000','88200','96000'};
 %% controlbuttons (push)
-nButtons = 1;
+nButtons = length(nameStr);
 
-InputFeed{1}.Size = [button_width+1 (nButtons+1) * (button_height+button_space)];
+InputFeed{1}.Size = [button_width+1 (nButtons+1) * (button_height)];
 InputFeed{1}.Position = [InputFeed{1}.Position(1)  InputFeed{1}.Position(2)+ InputFeed{1}.Position(4)+ver_space InputFeed{1}.Size];
 %     InputFeed{ch_idx}.Position = [hor_start ver_start InputFeed{ch_idx}.Size];
 InputFeed{1}.h = uipanel(...
@@ -361,90 +324,36 @@ InputFeed{1}.h = uipanel(...
     'Title','SamplingRate',...
     'Tag','Mode',...
     'Clipping','on',...
-    'Position',InputFeed{1}.Position,...
+    'Position',InputFeed{ch_idx}.Position,...
     'BackgroundColor',gui_bg_color);
 
-position =  [lower_space button_space  button_width button_height];
-ControlButton{1}.hButton(1) = uicontrol(...
-    'Units','characters',...
-    'Parent',InputFeed{1}.h,...
-    'FontSize',10,...
-    'Position',position,...
-    'String',nameStr,...
-    'Style','popupmenu',...
-    'Callback',@samplingRateButtonCallback,...
-    'UserData',[],...
-    'Value',samplingValue,...
-    'Tag','');
-position = position + [0 button_height+button_space 0 0];
 
-
-
-%% presets
-nButtons = 2;
-
-
-% to get it up top to align with InputRange box, get its position and size
-inputHeight = InputRange{1}.Position(2) + InputRange{1}.Size(2);
-
-
-InputFeed{1}.Size = [button_width+1 (nButtons+1) * (button_height+button_space)];
-InputFeed{1}.Position = [InputFeed{1}.Position(1)  inputHeight - InputFeed{1}.Size(2)  InputFeed{1}.Size];
-%     InputFeed{ch_idx}.Position = [hor_start ver_start InputFeed{ch_idx}.Size];
-InputFeed{1}.h = uipanel(...
-    'Parent',hFigure,...
-    'Units','characters',...
-    'FontSize',10,...
-    'Title','Settings Presets',...
-    'Tag','Mode',...
-    'Clipping','on',...
-    'Position',InputFeed{1}.Position,...
-    'BackgroundColor',gui_bg_color);
-
-position =  [lower_space button_space  button_width button_height];
-PresetButton{1}.hButton(1) = uicontrol(...
+position =  [0 0 button_width button_height];
+for button_idx = 1:length(nameStr)
+    userdata = argCell{button_idx};
+    ControlButton{ch_idx}.hButton(button_idx) = uicontrol(...
         'Units','characters',...
         'Parent',InputFeed{1}.h,...
         'FontSize',10,...
-        'Position',[position],...
-        'String','Save',...
+        'Position',position,...
+        'String',nameStr{button_idx},...
         'Style','pushbutton',...
-        'Callback',@presetSaveCallback,...
+        'Callback',@samplingRateButtonCallback,...
         'UserData',userdata,...
+        'Value',0,...
         'Tag','');
-position = position + [0 button_height+button_space 0 0];
-
-names = presetNames;
-
-if ~presetChanged
-    popupValue = currentPresetNumber;
-else
-    currentSettings = {'currentSettings'};
-    names = [presetNames currentSettings];
-    popupValue = length(names); 
+    position = position + [0 button_height 0 0];
 end
-
-PresetMenu{ch_idx}.hButton(1) = uicontrol(...
-    'Units','characters',...
-    'Parent',InputFeed{1}.h,...
-    'FontSize',10,...
-    'Position',position,...
-    'String',names,...
-    'Style','popupmenu',...
-    'Callback',@presetMenuCallback,...
-    'UserData',[],...
-    'Value',popupValue,...
-    'Tag','');
 
 
 %% callback functions
 
     function modePushButtonCallback(h,event)
-        userdata = getfield(get(event.NewValue),'UserData');
+        userdata = getfield(get(h),'UserData');
         argCell = userdata;
         if ~isempty(argCell)
-            ita_aurelio_control_new(argCell{:});
-            ita_aureliocontrol_gui_new('init');
+            ita_aurelio_control(argCell{:});
+            ita_aureliocontrol_gui('init');
         end
     end
 
@@ -460,46 +369,20 @@ PresetMenu{ch_idx}.hButton(1) = uicontrol(...
                 else
                     davolume = davolume + 1;
                 end
-                ita_aurelio_control_new('davolume',davolume);
+                ita_aurelio_control('davolume',davolume);
                 %                 set(event.NewValue,'UserData',argCell);
             else
-                ita_aurelio_control_new(argCell{:});
-                ita_aureliocontrol_gui_new('init');
+                ita_aurelio_control(argCell{:});
+                ita_aureliocontrol_gui('init');
             end
         end
     end
 
-    function controlCheckboxCallback(h,event)
-        argCell = getfield(get(h),'UserData');
-        if ~isempty(argCell)
-            if strfind(argCell{1},'davolume')
-                a = ita_modulita_control('getSettings');
-                davolume = a.davolume;
-                if strfind(argCell{1},'--')
-                    davolume = davolume - 1;
-                else
-                    davolume = davolume + 1;
-                end
-                ita_aurelio_control_new('davolume',davolume);
-                %                 set(event.NewValue,'UserData',argCell);
-            else
-                argCell{end+1} = get(h,'Value');
-                ita_aurelio_control_new(argCell{:});
-                ita_aureliocontrol_gui_new('init');
-            end
-        end    
-        
-    end
-   
 
     function samplingRateButtonCallback(h,event)
-        value = get(h,'Value');
-        strings = get(h,'String');
-        
-        argCell{1} = str2num(strings{value});
+        argCell = getfield(get(h),'UserData');
         if ~isempty(argCell)
-            ita_aurelio_control_new('samplingRate',argCell{1});
-            ita_aureliocontrol_gui_new('init');
+            ita_aurelio_control('samplingRate',argCell{1});
         end
     end
 
@@ -507,16 +390,14 @@ PresetMenu{ch_idx}.hButton(1) = uicontrol(...
     function InputSelectCallback(h,event)
         userdata = getfield(get(event.NewValue),'UserData');
         inputselect = getfield(get(event.NewValue),'String');
-        ita_aurelio_control_new('channel',userdata.ch,'input',inputselect);
-        ita_aureliocontrol_gui_new('init');
+        ita_aurelio_control('channel',userdata.ch,'input',inputselect);
     end
 
 
     function InputFeedCallback(h,event)
         userdata = getfield(get(event.NewValue),'UserData');
         inputfeed = getfield(get(event.NewValue),'String');
-        ita_aurelio_control_new('channel',userdata.ch,'feed',inputfeed);
-        ita_aureliocontrol_gui_new('init');
+        ita_aurelio_control('channel',userdata.ch,'feed',inputfeed);
     end
 
 
@@ -524,57 +405,7 @@ PresetMenu{ch_idx}.hButton(1) = uicontrol(...
         userdata = getfield(get(event.NewValue),'UserData');
         value = getfield(get(event.NewValue),'String');
         inputrange = str2num(value); %#ok<ST2NM>
-        ita_aurelio_control_new('channel',userdata.ch,'inputrange',inputrange);
-        ita_aureliocontrol_gui_new('init');
+        ita_aurelio_control('channel',userdata.ch,'inputrange',inputrange);
     end
-
-
-    function presetMenuCallback(h,event)
-        value = get(h,'Value');
-        strings = get(h,'String');
-        
-        if value <= length(strings)
-            ita_aurelio_control_new('setPreset',1,'presetName',strings{value});
-            ita_aureliocontrol_gui_new('init');
-        end
-        
-    end
-
-
-    function presetSaveCallback(h,event)
-        
-        isValidName = 0;
-        abort = 0;
-        inputString = 'Please give a preset name';
-        while ~isValidName
-            newTitle = inputdlg(inputString,'New Preset');
-            if ~isempty(newTitle)
-                if ~isempty(newTitle{1})
-                    isValidName = 1;
-                    % check if the name is already in use
-                    for index = 1:length(presetNames)
-                        if strcmp(newTitle{1},presetNames{index})
-                            isValidName = 0;
-                            inputString = 'Name already in use:';
-                        end
-                    end
-                else
-                    % ok but no name
-                    isValidName = 0;
-                    inputString = 'Name was empty. Please give a name:';
-                end
-            else
-               % abort case
-               abort = 1;
-               isValidName = 1;
-            end
-        end
-      
-        if ~abort
-            ita_aurelio_control_new('savePreset',1,'presetName',newTitle{1});
-            ita_aureliocontrol_gui_new('init');
-        end
-    end
-
 
 end
