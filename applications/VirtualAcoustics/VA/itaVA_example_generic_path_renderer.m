@@ -2,7 +2,7 @@
 
 va = itaVA( 'localhost' )
 va.reset();
-X = va.createAudiofileSignalSource( '$(VADataDir)\Audiofiles\Bauer.wav' );
+X = va.createAudiofileSignalSource( 'Audiofiles/Bauer.wav' );
 va.setAudiofileSignalSourcePlaybackAction( X, 'play' );
 va.setAudiofileSignalSourceIsLooping( X, true );
 S = va.createSoundSource( 'itaVA_Source' );
@@ -14,7 +14,7 @@ mMods = va.enumerateModules;
 
 modname = 'none';
 for n = size( mMods, 1 )
-    if strcmp( 'GenericPath', mMods(n).name(1:11) )
+    if strcmp( 'PrototypeGenericPath', mMods(n).name( 1:size( 'PrototypeGenericPath', 2 ) ) )
         modname = mMods(n).name;
         break; % use first one found
     end
