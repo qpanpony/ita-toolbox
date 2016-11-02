@@ -15,15 +15,16 @@ function ita_generate_documentation(varargin)
 %
 % Author: Pascal Dietrich -- Email: pdi@akustik.rwth-aachen.de
 % Created:  17-Apr-2009
-% Edited: 18-May-2012 Tumbrägel
+% Edited: 18-May-2012 Tumbrï¿½gel
 
 
 % pdi not for preferences
 sArgs = struct('rootpath',ita_toolbox_path);
 sArgs = ita_parse_arguments(sArgs,varargin);
 
+currentDir = pwd;
 
-%generate helpbrowser html files - Tumbrägel 05/2012:
+%generate helpbrowser html files - Tumbrï¿½gel 05/2012:
 ita_generate_helpOverview(sArgs.rootpath); 
 
 fullpath = sArgs.rootpath;
@@ -81,7 +82,17 @@ m2html('mfiles',outpathList, 'htmldir',docFolder, 'recursive','off', 'source','o
 toc
 
 %% Build search database for helpdesk
+% switching to basic rendering to fix bug with builddocsearchdb
+webutils.htmlrenderer('basic');
+% switching seems to take a while sometimes
+pause(5);
 if nargin == 0
     builddocsearchdb( [fullpath filesep 'HTML' ] ); %generate help search
     rehash toolboxcache
 end
+% switch back to standard renderer
+webutils.htmlrenderer('default');
+
+
+%% Go back to the last working directory
+cd(currentDir)
