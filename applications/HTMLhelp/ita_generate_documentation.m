@@ -37,12 +37,6 @@ outpathStr  = [];
 outpathList = [];
 tokenIdx    = [0 findstr(pathStr,pathsep)];
 
-if isunix
-    separator = ':';
-else
-    separator = ';';
-end
-
 for idx=1:(length(tokenIdx)-1)
    tokenCell{idx} = pathStr(tokenIdx(idx)+1:tokenIdx(idx+1)-1); %get single folder name
    isIgnore = false;
@@ -51,7 +45,7 @@ for idx=1:(length(tokenIdx)-1)
        isIgnore     = ~isempty(foundIdx) || isIgnore;
     end
    if ~isIgnore %add string token
-       outpathStr   = [outpathStr separator tokenCell{idx}]; %#ok<*AGROW>
+       outpathStr   = [outpathStr,pathsep,tokenCell{idx}]; %#ok<*AGROW>
        idxITA = findstr(tokenCell{idx},prefixToolbox); %pdi
        outpathList  = [outpathList; {tokenCell{idx}(idxITA:end)}]; %throw away 'C:\...' until ITA-TB path
    end  
