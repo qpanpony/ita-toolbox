@@ -12,7 +12,7 @@ if nargin == 1
     mode = varargin{1};
 end
 
-a_im = importdata(which('toolbox_bg.png'));
+a_im = importdata(which('ita_toolbox_logo_lightgrey.jpg'));
 graph_size = size(a_im);
 graph_size = [graph_size(1) graph_size(2)];
 axes();

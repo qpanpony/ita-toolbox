@@ -23,7 +23,7 @@ function varargout = ita_beam_calibrate_array_positions(varargin)
 %  See also:
 %   ita_toolbox_gui, ita_read, ita_write, ita_generate
 %
-%   Reference page in Help browser 
+%   Reference page in Help browser
 %        <a href="matlab:doc ita_beam_calibrate_array_positions">doc ita_beam_calibrate_array_positions</a>
 
 % <ITA-Toolbox>
@@ -33,90 +33,62 @@ function varargout = ita_beam_calibrate_array_positions(varargin)
 
 
 % Author:  Adrian Fazekas / Markus Mueller Trapet -- Email: mmt@akustik.rwth-aachen.de
-% Created: 30-Aug-2010    / 08-Sep-2011 
+% Created: 30-Aug-2010    / 08-Sep-2011
 
 %% Initialization and Input Parsing
-sArgs        = struct('pos1_chImpResp','itaAudio', 'pos2_recPos','itaMicArray','pos3_sourcePos','itaMicArray','statMicInd', [],'winTime',[],'freqInterv',[1000,4000],'speedOfSound',343);
-[chImpResp,recPos,sourcePos,sArgs] = ita_parse_arguments(sArgs,varargin); 
+sArgs        = struct('pos1_chImpResp','itaAudio', 'pos2_recPos','itaMicArray','pos3_sourcePos','itaMicArray','statMicInd', [],'freqInterv',[1000,4000],'speedOfSound',343);
+[chImpResp,recPos,sourcePos,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 %%
 if numel(chImpResp) ~= sourcePos.nPoints
     error('ITA_CALIBRATE_POS: Number of itaAudio objects must coincide with number of source nodes ');
 else
     tic;
-    %groupDelays = ita_groupdelay_ita(ita_time_window(chImpResp,[0.001 0.0015],'time','channeladaptive',true));
-    %meanDelays = mean(groupDelays.freq2value(sArgs.freqInterv));
-    
-    %vdDist = meanDelays * 343;
-    
-    %mdMeasuredDist = reshape(vdDist,recPos.nPoints, sourcePos.nPoints);
-    %mdMeasuredDist = mdMeasuredDist';
-    
-    mdMeasuredDist = zeros(sourcePos.nPoints,recPos.nPoints);
+    measuredDist = zeros(recPos.nPoints,sourcePos.nPoints);
     for i = 1:length(chImpResp)
         if (chImpResp(i).nChannels ~= recPos.nPoints)
             error(['ITA_CALIBRATE_POS: Number of channels of itaAudio object ',num2str(i),' must be equal to number of microphone nodes'])
         else
-        
-        groupDelays = ita_groupdelay_ita(ita_time_window(chImpResp(i),[0.001 0.0015],'time','channeladaptive',true));
-        meanDelays = mean(groupDelays.freq2value(sArgs.freqInterv(1),sArgs.freqInterv(2)));
-        mdMeasuredDist(i,:)  = meanDelays * sArgs.speedOfSound;
+%             res_win = ita_time_window(ita_filter_bandpass(chImpResp(i),'lower',sArgs.freqInterv(1),'zerophase'),[0.2 0.4].*1e-3,'channeladaptive');
+%             measuredDist(:,i)  = mean(freq2value(ita_groupdelay_ita(res_win),sArgs.freqInterv)) * sArgs.speedOfSound;
+            res_filt = ita_filter_bandpass(chImpResp(i),'lower',sArgs.freqInterv(1),'zerophase');
+            measuredDist(:,i)  = ita_start_IR(res_filt)/res_filt.samplingRate * sArgs.speedOfSound;
         end
     end
-    tWinElapsed = toc;
+    toc;
 end
 
-miPos = [recPos.cart; sourcePos.cart];
 tic;
-[miOptPos resnorm] = runNonlinOpt(miPos, mdMeasuredDist,sArgs.statMicInd); %#ok<NASGU>
-tOptElapsed = toc;
+[optRecPos, optSrcPos] = runNonlinOpt(recPos.cart, sourcePos.cart, measuredDist,sArgs.statMicInd);
+toc;
 
 %% Set Output
-varargout(1) = {miOptPos}; 
-varargout(2) = {tWinElapsed};
-varargout(3) = {tOptElapsed};
+varargout(1) = {optRecPos};
+varargout(2) = {optSrcPos};
 
 end %end function
 
 
 %% Subfunctions
-function [x,fval] =  runNonlinOpt(miPos,mdMeasuredDist,viStatInd)
+function [optRec,optSrc,fval] =  runNonlinOpt(recPos,srcPos,mdMeasuredDist,statInd)
 
-nPoints = size(miPos,1);
-nSource = size(mdMeasuredDist,1);
-nRec = size(mdMeasuredDist,2);
+nRecs = size(recPos,1);
+miStatZ = recPos(:,3);
+miStatPos = recPos(statInd,:);
 
-logStatInd = false(1,nPoints);
-logStatInd(viStatInd) = 1;
+options = optimset('TolFun', 1e-15, 'TolX', 1e-4, 'Display','on','Algorithm','levenberg-marquardt','MaxFunEvals',60000);
+[res,fval] = lsqnonlin(@distDiffFun,[recPos; srcPos],[],[],options);
 
-miDynPos = miPos(~logStatInd,:);
-miStatPos = miPos(logStatInd,:);
-
-options = optimset('TolFun', 1e-15,'Display','on','Algorithm','levenberg-marquardt','MaxFunEvals',60000);
-[res,fval] = lsqnonlin(@distDiffFun,miDynPos,[],[],options);
-
-x = zeros(nPoints,3);
-x(logStatInd,:) = miStatPos;
-x(~logStatInd,:) = res;
+optRec = res(1:nRecs,:);
+optRec(statInd,:) = miStatPos;
+optSrc = res(nRecs+1:end,:);
 
 % Nested function that computes the objective function
     function res = distDiffFun(miInpPos)
         
-        miCoord = zeros(nPoints,3);
-        miCoord(logStatInd,:) = miStatPos;
-        miCoord(~logStatInd,:) = miInpPos;
-        
+        miInpPos(statInd,:) = miStatPos;
+        miInpPos(1:nRecs,3) = miStatZ;
         %Calculate the distances from the sources to the microphones
-        mdXDiff = repmat(miCoord(1:nRec,1)',[nSource 1]) - repmat(miCoord(nRec + 1:nPoints,1),[1 nRec]);
-        mdYDiff = repmat(miCoord(1:nRec,2)',[nSource 1]) - repmat(miCoord(nRec + 1:nPoints,2),[1 nRec]);
-        mdZDiff = repmat(miCoord(1:nRec,3)',[nSource 1]) - repmat(miCoord(nRec + 1:nPoints,3),[1 nRec]);
-        
-        
-        %Transform the cartesian coordinates of the differences into spherical
-        %coordinates
-        [mdTheta mdPhi mdRDiff] = cart2sph(mdXDiff(:), mdYDiff(:), mdZDiff(:)); %#ok<ASGLU>
-        mdEstDistance = reshape(mdRDiff, [nSource nRec]);
-        %res = mdDistance;
-        res = mdEstDistance - mdMeasuredDist;     
+        res = mean(abs(pdist2(miInpPos(1:nRecs,:),miInpPos(nRecs+1:end,:)) - mdMeasuredDist),2);
     end
 end
