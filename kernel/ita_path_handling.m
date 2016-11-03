@@ -55,6 +55,9 @@ if save_state == 1
         userpath('reset');
     end
     userfolder =  evalin('base','userpath');
+    if strcmp(userfolder(end),pathsep)
+        userfolder = userfolder(1:end-1);
+    end
     savepath(fullfile(userfolder,'pathdef.m'));
     try
         copyfile(fullfile(fullpath,'kernel','StandardRoutines','ita_startup.m'), fullfile(userfolder,'startup.m'))
