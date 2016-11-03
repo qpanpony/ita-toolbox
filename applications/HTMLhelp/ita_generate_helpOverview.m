@@ -368,5 +368,4 @@ kernelHTML = [kernelHTML '</table>' kernelHTML_end];
 ita_writeHTML([folder filesep 'HTML' filesep 'kernel.html'],kernelHTML)
 
 cd(oldfolder);
-disp('****** PLEASE RESTART MATLAB TO GET AN ENTRY "RWTH ITA TOOLBOX" IN YOUR MATLAB HELP BROWSER ******')
 end

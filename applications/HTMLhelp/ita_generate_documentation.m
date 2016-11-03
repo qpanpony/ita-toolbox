@@ -27,13 +27,11 @@ currentDir = pwd;
 %generate helpbrowser html files - Tumbr�gel 05/2012:
 ita_generate_helpOverview(sArgs.rootpath); 
 
-fullpath = sArgs.rootpath;
-cd(fullpath)
-disp(fullpath)
+cd(sArgs.rootpath)
 %% Get folders for m2html
 ignoreList  = {'.svn','private','tmp','prop-base','props','text-base','template','doc','GuiCallbacks'};
-pathStr = genpath(fullpath); %generates folderlist with ';' to seperate folders
-prefixToolbox = fliplr(strtok(fliplr(fullpath),filesep)); %get Toolbox folder name
+pathStr = genpath(sArgs.rootpath); %generates folderlist with ';' to seperate folders
+prefixToolbox = fliplr(strtok(fliplr(sArgs.rootpath),filesep)); %get Toolbox folder name
 
 outpathStr  = [];
 outpathList = [];
@@ -61,20 +59,19 @@ end
 
 % delete old one first
 graphInst = ita_preferences('isGraphVizInstalled');
-cd(fullpath)
-cd ..
 
 if ischar(graphInst), graphInst = str2double(graphInst); end;
 
 %% ignorelist -- doc - guicallbacks - externalpackages
-
 if graphInst
     graphState = 'on';
-    disp('with GraphViz')
+    disp('Generating with GraphViz')
 else
     graphState = 'off';
 end
-docFolder = [fullpath filesep 'HTML' filesep 'doc'];
+docFolder = [sArgs.rootpath filesep 'HTML' filesep 'doc'];
+% cd required for m2html
+cd ..
 tic
 m2html('mfiles',outpathList, 'htmldir',docFolder, 'recursive','off', 'source','off', 'syntaxHighlighting','on', ...
     'global','on', 'globalHypertextLinks','on', 'todo','on', ...
@@ -85,14 +82,14 @@ toc
 % switching to basic rendering to fix bug with builddocsearchdb
 webutils.htmlrenderer('basic');
 % switching seems to take a while sometimes
-pause(5);
+pause(1);
 if nargin == 0
-    builddocsearchdb( [fullpath filesep 'HTML' ] ); %generate help search
+    builddocsearchdb( [sArgs.rootpath filesep 'HTML' ] ); %generate help search
     rehash toolboxcache
 end
 % switch back to standard renderer
 webutils.htmlrenderer('default');
 
-
+ita_verbose_info('Please restart MATLAB if the MATLAB ITA Toolbox entry does not show in the documentation browser.',0);
 %% Go back to the last working directory
 cd(currentDir)
