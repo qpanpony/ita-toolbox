@@ -58,11 +58,11 @@ classdef itaRavenProject < handle
     
     properties (GetAccess = 'public', SetAccess = 'private')
         % raven
-        ravenExe64 = '..\bin64\RavenConsole64.exe'
-        ravenExe32 = '..\bin32\RavenConsole.exe'
+
         ravenExe
         ravenLogFile = 'RavenLog.txt'
         ravenProjectFile
+        ravenIniFile
         projectName
         
         % general
@@ -152,7 +152,12 @@ classdef itaRavenProject < handle
     end
 	
     properties (GetAccess = 'private', SetAccess = 'private')
+        
+        ravenExe64 = '..\bin64\RavenConsole64.exe'
+        ravenExe32 = '..\bin32\RavenConsole.exe'
+        
         rpf_ini
+        raven_ini
         projectID
         projectTag
         
@@ -214,6 +219,47 @@ classdef itaRavenProject < handle
                 error('Only Windows OS are supported.');
             end
             
+            itaRavenProjectPath = which('itaRavenProject.m');
+            obj.ravenIniFile = [ itaRavenProjectPath(1:end-9) '.ini'];
+            
+            ravenIniExists = exist(obj.ravenIniFile,'file');
+            
+            if (ravenIniExists)
+                    % load path from itaRaven.ini
+                    obj.raven_ini = IniConfig();
+                    obj.raven_ini.ReadFile(obj.ravenIniFile);
+                    obj.ravenExe         = obj.raven_ini.GetValues('Global', 'PathRavenExe', obj.ravenExe);
+                    obj.raven_ini.WriteFile(obj.ravenIniFile);
+            end        
+                    
+            if (~exist(obj.ravenExe,'file'))
+
+                    % neither the default raven console or the path in
+                    % itaRaven.ini was not found, try to locate
+                    % RavenConsole
+                    locatedRavenExe = which(obj.ravenExe(10:end));
+        
+                    if isempty(locatedRavenExe) 
+                        disp('[itaRaven]: No raven binary was found! Please select path to RavenConsole.exe!');
+                        [ selectedRavenExe, selectedRavenPath] = uigetfile('*.exe',' No raven binary was found! Please select path to RavenConsole.exe');
+                        obj.ravenExe = [ selectedRavenPath selectedRavenExe];
+                    else
+                        obj.ravenExe = locatedRavenExe;
+                    end
+                    
+                    if (~ravenIniExists)
+                        obj.raven_ini = IniConfig();
+%                         obj.raven_ini.ReadFile(obj.ravenIniFile);
+                        obj.raven_ini.AddSections({'Global'});
+                        obj.raven_ini.AddKeys('Global', {'PathRavenExe'}, {obj.ravenExe});
+                    else
+                        obj.raven_ini.SetValues('Global', {'PathRavenExe'}, {obj.ravenExe});
+                    end
+                    obj.raven_ini.WriteFile(obj.ravenIniFile);
+                       
+            end
+                      
+            % check if raven project file exists
             if (nargin > 0) && exist(raven_project_file, 'file')
                 obj.loadRavenConfig(raven_project_file);
             else
@@ -228,6 +274,16 @@ classdef itaRavenProject < handle
         %------------------------------------------------------------------
         function setRavenExe(obj, newRavenExe)
             obj.ravenExe = newRavenExe;
+
+            if (exist(obj.ravenIniFile,'file'))
+                obj.raven_ini.SetValues('Global', {'PathRavenExe'}, {obj.ravenExe});
+                obj.raven_ini.WriteFile(obj.ravenIniFile);
+            else
+                obj.raven_ini = IniConfig();
+                obj.raven_ini.AddSections({'Global'});
+                obj.raven_ini.AddKeys('Global', {'PathRavenExe'}, {obj.ravenExe});
+            end
+                                            
         end
         
         %------------------------------------------------------------------
@@ -235,7 +291,12 @@ classdef itaRavenProject < handle
             %loadRavenConfig - Reads an existing raven project file
             %
             
-            obj.ravenProjectFile = filename;
+            % change relative to absolute path
+            if (~strcmp(filename(2),':'))
+                obj.ravenProjectFile = [pwd '\' filename];
+            else
+                obj.ravenProjectFile = filename;
+            end
             
             obj.rpf_ini = IniConfig();
             obj.rpf_ini.ReadFile(filename);
@@ -262,6 +323,16 @@ classdef itaRavenProject < handle
             obj.accelerationType    = obj.rpf_ini.GetValues('Global', 'accelerationType', 0);   % default 0 = MODE_BSP
             obj.logPerformance      = obj.rpf_ini.GetValues('Global', 'logPerformance', 0);
             obj.keepOutputFiles     = obj.rpf_ini.GetValues('Global', 'keepOutputFiles', 0);
+            
+            % change relative to absolute paths
+            if obj.ravenExe(2) == ':' % absolute path
+                ravenBasePath = fileparts(fileparts(obj.ravenExe)); % base path of raven
+                
+                if (strcmp(obj.pathResults(1:2),'..')), obj.pathResults = [ ravenBasePath obj.pathResults(3:end) ]; end
+                if (strcmp(obj.pathDirectivities(1:2),'..')), obj.pathDirectivities = [ ravenBasePath obj.pathDirectivities(3:end) ]; end
+                if (strcmp(obj.pathMaterials(1:2),'..')), obj.pathMaterials = [ ravenBasePath obj.pathMaterials(3:end) ]; end
+                if (strcmp(obj.fileHRTF(1:2),'..')), obj.fileHRTF = [ ravenBasePath obj.fileHRTF(3:end) ]; end               
+            end
             
             % [Rooms] %
             model_string            = obj.rpf_ini.GetValues('Rooms',  'Model');
@@ -361,8 +432,11 @@ classdef itaRavenProject < handle
                     delete(obj.ravenLogFile);
                 end
                 %                 system([obj.ravenExe ' "' obj.ravenProjectFile '" >> ' obj.ravenLogFile]);
+                prevPath = pwd;
+                cd(fileparts(obj.ravenExe));
                 dos([obj.ravenExe ' "' obj.ravenProjectFile '"'], '-echo');
                 disp('Done.');
+                cd(prevPath);
                 
                 % restore the initial project name
                 obj.setProjectName(savedProjectName);
@@ -431,6 +505,19 @@ classdef itaRavenProject < handle
             end
             
         end
+        
+                %------------------------------------------------------------------
+        function openOutputFolder(obj)
+            % opens the output folder in windows explorer
+                
+            if (exist(obj.pathResults,'dir'))
+                dos(['C:\Windows\Explorer.exe ' obj.pathResults]);
+            else
+                disp('Output Folder does not exist!');
+            end
+            
+        end
+        
         
         %------------------------------------------------------------------
         function numReceivers = createReceiverArray(obj, xpositions, zpositions, yheight)
@@ -1639,7 +1726,7 @@ classdef itaRavenProject < handle
         %------------------------------------------------------------------
         function binauralPoissonSequenceitaAudio = getBinauralPoissonSequenceItaAudio(obj)
             
-            data = load('..\RavenOutput\binauralPoissonNoiseProcess.txt');
+            data = load([ obj.pathResults '\binauralPoissonNoiseProcess.txt']);
             
             binauralPoissonSequenceitaAudio = itaAudio;
             binauralPoissonSequenceitaAudio.samplingRate = obj.sampleRate;
