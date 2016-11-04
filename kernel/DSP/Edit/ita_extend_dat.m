@@ -79,11 +79,13 @@ else
         %extend data
         number_zeros           = new_number_samples - asData.nSamples;
         newSize = size(asData.time);
-        newSize(1) = number_zeros;
+        newSize(1) = new_number_samples;
         if sArgs.nozero
             asData.time             = [asData.time; bsxfun(@times,ones(newSize,asData.dataTypeOutput),asData.time(end,:))];
         else %normal case
-            asData.time             = [asData.time; zeros(newSize,asData.dataTypeOutput)];
+            tmp = zeros(newSize,asData.dataTypeOutput);
+            tmp(1:asData.nSamples,:)             = asData.time;
+            asData.time = tmp;
         end
         
     end
