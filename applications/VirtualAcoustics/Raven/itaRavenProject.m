@@ -409,6 +409,16 @@ classdef itaRavenProject < handle
             obj.loadRavenConfig(filename);
         end
         
+                %------------------------------------------------------------------
+        function saveRavenConfig(obj, filename)
+            %saveRavenConfig - Saves the current object in a (different)
+            %raven project file. Can be used as a log if various
+            %simulations are run with multiple configurations
+            %
+            obj.rpf_ini.WriteFile(filename);
+
+        end
+        
         %------------------------------------------------------------------
         function run(obj)
             
