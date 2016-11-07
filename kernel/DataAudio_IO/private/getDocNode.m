@@ -51,9 +51,19 @@ fVec = transFunc.freqVector;
 fVec2 = inputImp.freqVector;
 
 if ~areIdenticalFreqVecs(fVec, fVec2)
-    error('Data files have no identical frequency vectors!')
-%     ita_interpolate_spk()
+    if(length(fVec) < length(fVec2))
+        transFunc = ita_interpolate_spk(transFunc,inputImp.fftDegree);
+    else 
+        inputImp = ita_interpolate_spk(inputImp,transFunc.fftDegree);
+    end
 end
+
+fVec = transFunc.freqVector;
+fVec2 = inputImp.freqVector;
+if ~areIdenticalFreqVecs(fVec, fVec2)
+    error('Data files have no identical frequency vectors!')
+end
+
 
 transFunc = transFunc.freqData;
 inputImp = inputImp.freqData;
