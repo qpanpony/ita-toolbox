@@ -266,7 +266,7 @@ if playback
     if verboseMode==2, ita_metainfo_show_channelnames(data); end;
     
     %% Check levels - Normalizing
-    peak_value = max(abs(data.timeData(:)));
+    peak_value = max(max(abs(data.timeData)));
     if (peak_value > 1) || (normalize_output)
         ita_verbose_info('Oh Lord! Levels too high for playback. Normalizing...',0)
         data = ita_normalize_dat(data); %PDI: bugfix, there was no 'data =' on the left handside

@@ -14,7 +14,9 @@ function varargout = ita_demosound(varargin)
 % Author: Pascal Dietrich -- Email: pdi@akustik.rwth-aachen.de
 % Created:  16-Aug-2011 
 
-result = ita_read('itademosong.ita');
+result = ita_resample(ita_read('itademosong.ita'),ita_preferences('samplingRate'));
+% make even samples
+result.nSamples = floor(result.nSamples/2)*2;
 
 %% Find output parameters
 varargout(1) = {result};

@@ -18,7 +18,7 @@ function varargout = ita_path_handling(varargin)
 if nargin > 0
     error('There should not be any input arguments to ita_path_handling');
 end
-ignoreList  = {'.svn','private','tmp','prop-base','props','text-base','template','doc'};
+ignoreList  = {'.git','.svn','private','tmp','prop-base','props','text-base','template','doc'};
 
 %% toolbox prefix string
 fullpath = ita_toolbox_path();
@@ -55,10 +55,12 @@ if save_state == 1
         userpath('reset');
     end
     userfolder =  evalin('base','userpath');
-    userfolder = userfolder(1:end-1);
-    savepath([userfolder filesep 'pathdef.m']);
+    if strcmp(userfolder(end),pathsep)
+        userfolder = userfolder(1:end-1);
+    end
+    savepath(fullfile(userfolder,'pathdef.m'));
     try
-        copyfile([fullpath filesep 'kernel' filesep 'StandardRoutines' filesep 'ita_startup.m'], [userfolder filesep 'startup.m'] )
+        copyfile(fullfile(fullpath,'kernel','StandardRoutines','ita_startup.m'), fullfile(userfolder,'startup.m'))
     catch theError
         ita_verbose_info('ita_path_handling:writing pathdef unsuccessful, because:',0);
         disp(theError.message);
