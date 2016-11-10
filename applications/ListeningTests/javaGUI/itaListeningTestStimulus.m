@@ -32,7 +32,8 @@ classdef itaListeningTestStimulus
     properties
         UseHRTF = 1;
         UseHeadphoneEquilization = 1;
-        
+        UseSoundLevelVariation = 1;
+     %TODO UseTracker = 1;
         HRTFFile;
 
         StimulusFile;
@@ -47,11 +48,12 @@ classdef itaListeningTestStimulus
         mHRTF;
         mHeadphoneEquilization;
         mStimulus;
+        hrtfmerge;
     end
 
 %% methods
     methods
-        function returnSignal = getStimulusForDirection(this,azimuth, elevation)
+        function returnSignal = getStimulusForDirection(this,azimuth, elevation, soundLevel)
             
             returnSignal = this.mStimulus;
             
@@ -60,13 +62,18 @@ classdef itaListeningTestStimulus
                 returnSignal = this.convoleSignals(returnSignal,HRTF);
             end
             
-            if (this.UseHeadphoneEquilization)
+            if (this.UseHeadphoneEquilization == 1)
                 returnSignal = this.convoleSignals(returnSignal,this.mHeadphoneEquilization);
             end
             
-            % TODO: Better normalization
-            %returnSignal = returnSignal./256;
             
+            if (this.UseSoundLevelVariation == 1)
+                returnSignal = returnSignal./soundLevel;
+            end
+                
+                
+            % TODO: Better normalization
+%             returnSignal = returnSignal./64;
         end
     end
     
@@ -81,18 +88,16 @@ classdef itaListeningTestStimulus
         end
         
         function HRTF = getHRTFForDirection(this,azimuth,elevation)
-            
-%             this.mHRTF
+%             hrtf = this.hrtfmerge;
+%             coords = hrtf.channelCoordinates;
 %             targetCoord = itaCoordinates(1);
 %             targetCoord.phi_deg = azimuth;
 %             targetCoord.theta_deg = elevation;
 %             targetCoord.r = 1;
-            if isa(hrtf,'itaHRTF')
-                HRTF = hrtf.findnearestHRTF(targetCoord);
-            else
-                index = coords.findnearest(targetCoord);
-                HRTF = this.mHRTF(ceil(index/2));
-            end
+%             index = coords.findnearest(targetCoord);
+%             HRTF = this.mHRTF(ceil(index/2));
+            hrtf = this.hrtfmerge.findnearestHRTF(elevation,azimuth);
+            HRTF = hrtf.itaHRTF2itaAudio;
         end
         
     end
@@ -113,32 +118,29 @@ classdef itaListeningTestStimulus
 
             % load the HRTF data
             HRTF = ita_read(value);
-            mergeHRTF = merge(HRTF);
-            maxValue = max(max(abs(mergeHRTF.freqData)));
-            for index = 1:length(HRTF)
-                HRTF(index).freqData = HRTF(index).freqData./maxValue;
-%                 HRTF(index).signalType = 'energy';
-            end
+            % TODO: normalization
+%             mergeHRTF = merge(HRTF);
+%             maxValue = max(max(abs(mergeHRTF.freqData)));
+%             for index = 1:length(HRTF)
+%                 HRTF(index).freqData = HRTF(index).freqData./maxValue;
+% %                 HRTF(index).signalType = 'energy';
+%             end
             this.mHRTF = HRTF;
-            this.hrtfmerge = itaHRTF(this.mHRTF);
+            this.hrtfmerge = itaHRTF(merge(this.mHRTF));
+            
         end
 
         function result = get.StimulusFile(this)
             result = this.StimulusFile;
         end
         function this = set.StimulusFile(this,value)
-            if ~(isa(value,'itaAudio'))
+            this.StimulusFile = value;
             
-                this.StimulusFile = value;
-
-                % read the simulus file
-                this.mStimulus = ita_read(value);
-            else
-                this.mStimulus = value;
-            end
+            % read the simulus file
+            this.mStimulus = ita_read(value);
             
             % normalize
-            this.mStimulus.timeData = this.mStimulus.timeData./max(abs(this.mStimulus.timeData));
+%             this.mStimulus.timeData = this.mStimulus.timeData./max(abs(this.mStimulus.timeData));
             
         end    
 
@@ -150,7 +152,8 @@ classdef itaListeningTestStimulus
 
             % read the file
             headphoneEquilization = ita_read(value);
-            headphoneEquilization.freqData = headphoneEquilization.freqData./max(max(abs(headphoneEquilization.freqData)));
+            % TODO: normalization
+            %headphoneEquilization.freqData = headphoneEquilization.freqData./max(max(abs(headphoneEquilization.freqData)));
             this.mHeadphoneEquilization = headphoneEquilization;
         end
     end

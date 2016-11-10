@@ -1378,10 +1378,6 @@ classdef  itaHRTF < itaAudio
             grid on;set(gca,'layer','top')
         end  
         
-        %% Jan's Functions
-        
-        
-        function      writeDAFFFile(this, filePath)
             % writes DAFF file to hard disc
             %
             % Input: filePath / fileName (string)
