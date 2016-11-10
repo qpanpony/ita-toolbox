@@ -1,4 +1,4 @@
-function [ data, samplerate, metadata ] = dfitaHRIR( alpha, beta, itaHRTF_obj )
+function [ data, samplerate, metadata ] = dfitaHRIRDAFFDataFunc( alpha, beta, itaHRTF_obj )
 
     samplerate = itaHRTF_obj.samplingRate;    
     
@@ -6,7 +6,7 @@ function [ data, samplerate, metadata ] = dfitaHRIR( alpha, beta, itaHRTF_obj )
     
     % DAFF requires data alignment by multiple of 4
     nResidual = mod( hrtf.nSamples, 4 );
-    data = [ hrtf.timeData', zeros( hrtf.nChannels, nResidual ) ];
+    data = [ hrtf.timeData', zeros( hrtf.nChannels, 4 - nResidual ) ];
     
     metadata = [];
 end
