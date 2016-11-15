@@ -18,15 +18,10 @@ nSH = (nmax+1).^2;
 
 filename = ['/Womersley/md' num2str(nmax,'%02d') '.' num2str(nSH,'%04d')];
 
-% filepath = '~/MATLAB/Griddata';
-% if ~exist(filepath,'dir')
-%     error(['Griddata folder missing: ' filepath])
-    url = 'http://www.ita-toolbox.org/Griddata';
-    hyper = str2num(urlread([url filename])); %#ok<ST2NM>
-% else
-%     hyper = load([filepath filename]);
-% end
+url = 'http://www.ita-toolbox.org/Griddata';
+hyper = str2num(urlread([url filename])); %#ok<ST2NM>
 
 s = itaSamplingSph(hyper(:,1:3),'cart');
+s.r = ones(s.nPoints,1);
 s.weights = hyper(:,4);
 s.nmax = nmax;
