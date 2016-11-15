@@ -8,33 +8,28 @@ function varargout = ita_beam_beamforming(varargin)
 %
 %  types:
 %           (1) conventional           -- default
-%           (2) conventional           w/o autospectra
-%           (3) minimum-variance distortionless response
-%           (4) MUSIC
-%           (5) CLEAN                  w/o autospectra
-%           (6) CLEAN-SC               w/o autospectra
-%           (7) Orthogonal Beamforming
-%           (8) Functional Beamforming
+%           (2) Minimum-Variance Distortionless Response (MVDR)
+%           (3) MUSIC
+%           (4) Subspace Beamforming
+%           (5) Functional Beamforming
+%           (6) CLEAN
+%           (7) CLEAN-SC
+%           (8) DAMAS
+%           (9) SparseDAMAS
 %
-%  The returned  contains the result mapped onto the scanning mesh
+%
+%  The returned object contains the result mapped onto the scanning mesh
 %  for direct plotting.
 %
 %  Syntax: beam = ita_beam_beamforming(array,p,scanmesh,options)
 %  Options (default):
-%  'type' (1):                                  (1) conventional           -- default
-%                                               (2) conventional           w/o autospectra
-%                                               (3) minimum-variance distortionless response
-%                                               (4) eigenanalysis
-%                                               (5) CLEAN                  w/o autospectra
+%  'type' (1):
+%  'wavetype' (2):                            (1) infinite distance focus (plane waves)
+%                                             (2) finite distance focus (spherical waves)
 %
-%  'wavetype' (2):                              (1) infinite distance focus (plane waves)
-%                                               (2) finite distance focus (spherical waves)
+%  'mic_radius' (0):                          used for mic directivity error
+%  'soundspeed' (double(ita_constants('c'))): soundspeed
 %
-%  'mic_radius' (0):                            used for mic directivity error
-%  'soundspeed' (double(ita_constants('c'))):   soundspeed
-%
-%
-%  See also ita_beam_beamforming.m
 %
 %   Reference page in Help browser
 %        <a href="matlab:doc ita_beam_beamforming">doc ita_beam_beamforming</a>
@@ -46,235 +41,94 @@ function varargout = ita_beam_beamforming(varargin)
 
 
 % Author: MMT -- Email: mmt@akustik.rwth-aachen.de
-% Created:  22-Jan-2009
+% Created:  22-Jan-2009 / re-implementation:  02-Nov-2016
 
 %% Get ITA Toolbox preferences and Function String
 verboseMode  = ita_preferences('verboseMode');  %#ok<NASGU> Use to show additional information for the user
 thisFuncStr  = [upper(mfilename) ':'];     % Use to show warnings or infos in this functions
 
 %% Initialization and Input Parsing
-sArgs        = struct('pos1_array','itaMicArray','pos2_p','itaSuper','pos3_scanmesh','itaCoordinates','type',ita_beam_evaluatePreferences('Method'),'wavetype',ita_beam_evaluatePreferences('ManifoldType'),'mic_radius',0,'soundspeed',double(ita_constants('c')));
+sArgs = struct('pos1_array','itaMicArray','pos2_p','itaSuper','pos3_scanmesh','itaCoordinates','type',ita_beam_evaluatePreferences('Method'),'wavetype',ita_beam_evaluatePreferences('SteeringType'),'soundspeed',double(ita_constants('c')),'exp_alpha',0.1,'steeringVector',[],'CSM',itaSuper());
 [array,p,scanmesh,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 %% Preparations
-if numel(sArgs.type) > 1
-    v = sArgs.type;
-    varargin{5} = 99;
-    sArgs.type = 99;
-end
-
-switch sArgs.type
-    case 1
-        typeStr = 'Conventional Delay-and-Sum';
-    case 2
-        typeStr = 'Conventional Delay-and-Sum w/o Autospectra';
-    case 3
-        typeStr = 'Minimum-Variance Distortionless Response';
-    case 4
-        typeStr = 'MUSIC';
-    case 5
-        typeStr = 'CLEAN w/o Autospectra';
-    case 6
-        typeStr = 'CLEAN-SC w/o Autospectra';
-    case 7
-        typeStr = 'Orthogonal Beamforming';
-    case 8
-        typeStr = 'Functional Beamforming';
-    case 10
-        typeStr = 'Delay-and-Sum with mic directivity';
-    case 99
-        typeStr = 'Delay-and-Sum with precomputed manifoldVector';
-    otherwise
-        typeStr = 'unknown type';
-end
-
-f         = p.freqVector;
-k         = 2*pi.*f./sArgs.soundspeed;
-p_vec     = p.freq.';
+f = p.freqVector;
+k = 2*pi.*f./sArgs.soundspeed;
+P = p.freq.';
 
 % positions of array microphones
-arrayPositions  = array.cart.';
-weights = array.w(:);
+arrayPositions = array.cart;
 
 % coordinates of the scan points
-nodes   = scanmesh.ID(:); % nodeIDs
-scanPositions = scanmesh.cart.';
-nScanPoints = size(scanPositions,2); % # scan points
+nodes          = scanmesh.ID(:); % nodeIDs
+scanPositions  = scanmesh.cart;
+nScanPoints    = size(scanPositions,1); % # scan points
 
-B = zeros(nScanPoints,p.nBins); % result
-nMics = size(p_vec,1); % # of mics or channels
+if isempty(sArgs.steeringVector)
+    steeringVector = ita_beam_steeringVector(k,arrayPositions,scanPositions,sArgs.wavetype);
+    steeringVector = permute(steeringVector,[2 3 1]);
+else
+    steeringVector = sArgs.steeringVector;
+end
+
+B      = zeros(nScanPoints,p.nBins); % result
+nMics  = size(P,1); % # of mics or channels
+if isempty(sArgs.CSM)
+    CSM = zeros(nMics,nMics,p.nBins); % result
+    exp_alpha = 1.0;
+else
+    CSM = permute(sArgs.CSM.freq,[2 3 1]);
+    exp_alpha = sArgs.exp_alpha;
+end
+idxVec = zeros(16,p.nBins);
 
 %% do the actual computation
-ita_verbose_info([thisFuncStr 'Computing beamforming using type ''' typeStr ''''],1);
 %
-switch sArgs.type
-    case 1 % delay-and-sum
-        for iFreq = 1:p.nBins
-            v = bsxfun(@times,weights(:),manifoldVector(k(iFreq),arrayPositions,scanPositions,sArgs.wavetype));
-            B(:,iFreq) = bsxfun(@rdivide,v,sum(abs(v).^2))'*p_vec(:,iFreq);
-        end
-    case 2 % delay-and-sum w/o autospectra
-        E = ones(nMics) - eye(nMics);
-        for iFreq = 1:p.nBins
-            R = E.*(p_vec(:,iFreq)*p_vec(:,iFreq)');
-            v = bsxfun(@times,weights(:),manifoldVector(k(iFreq),arrayPositions,scanPositions,sArgs.wavetype));
-            for iScanPoint = 1:nScanPoints
-                w = v(:,iScanPoint)./sum(abs(v(:,iScanPoint)).^2);
-                B(iScanPoint,iFreq) = w'*R*w;
-            end
-        end
-        B = abs(B);
-    case 3 % capon (MVDR)
-        for iFreq = 1:p.nBins
-            R = p_vec(:,iFreq)*p_vec(:,iFreq)';
-            S = csvd(R);
-            Rinv = (R + 1e-6.*max(S(:))*eye(nMics))^(-1);
-            v = manifoldVector(k(iFreq),arrayPositions,scanPositions,sArgs.wavetype);
-            for iScanPoint = 1:nScanPoints
-                v(:,iScanPoint) = v(:,iScanPoint)./sum(abs(v(:,iScanPoint)).^2);
-                w = (Rinv*v(:,iScanPoint))./(v(:,iScanPoint)'*Rinv*v(:,iScanPoint));
-                B(iScanPoint,iFreq) = w'*R*w;
-            end
-        end
-        B = abs(B);
-    case 4 % MUSIC
-        for iFreq=1:p.nBins
-            R = p_vec(:,iFreq)*p_vec(:,iFreq)';
-            [U,S,V] = csvd(R);
-            sigIdx = rank(R,max(S(:))./1000); % 60 dB dynamic
-            R = eye(nMics) - U(:,1:sigIdx)*U(:,1:sigIdx)';
-            v = bsxfun(@times,weights,manifoldVector(k(iFreq),arrayPositions,scanPositions,sArgs.wavetype));
-            for iScanPoint=1:nScanPoints
-                w = v(:,iScanPoint)./sum(abs(v(:,iScanPoint)).^2);
-                B(iScanPoint,iFreq) = 1./(w'*R*w);
-            end
-        end
-        B = abs(B);
-    case 5 % CLEAN w/o autospectra
-        safetyFactor = 0.1;
-        E = ones(nMics) - eye(nMics);
-        for iFreq = 1:p.nBins
-            R = E.*(p_vec(:,iFreq)*p_vec(:,iFreq)');
-            Rlast = R;
-            v = manifoldVector(k(iFreq),arrayPositions,scanPositions,sArgs.wavetype);
-            B_0 = zeros(1,nScanPoints);
-            for iScanPoint = 1:nScanPoints
-                w = v(:,iScanPoint)./sum(abs(v(:,iScanPoint)).^2);
-                B_0(iScanPoint) = w'*R*w;
-            end
-            iter = 0;
-            while ((sum(abs(R(:))) <= sum(abs(Rlast(:)))) && (iter < 20))
-                iter = iter + 1;
-                [B0_max,maxIdx] = max(abs(B_0));
-                B(maxIdx,iFreq) = B(maxIdx,iFreq) + B0_max;
-                Rlast = R;
-                R = Rlast - safetyFactor.*B0_max*(v(:,maxIdx)*v(:,maxIdx)');
-                for iScanPoint = 1:nScanPoints
-                    w = v(:,iScanPoint)./sum(abs(v(:,iScanPoint)).^2);
-                    B_0(iScanPoint) = w'*R*w;
-                end
-            end
-        end
-    case 6 % CLEAN-SC w/o autospectra
-        safetyFactor = 1;
-        E = ones(nMics) - eye(nMics);
-        for iFreq = 1:p.nBins
-            R = E.*(p_vec(:,iFreq)*p_vec(:,iFreq)');
-            Rlast = R;
-            v = manifoldVector(k(iFreq),arrayPositions,scanPositions,sArgs.wavetype);
-            B_0 = zeros(1,nScanPoints);
-            for iScanPoint = 1:nScanPoints
-                w = v(:,iScanPoint)./sum(abs(v(:,iScanPoint)).^2);
-                B_0(iScanPoint) = w'*R*w;
-            end
-            iter = 0;
-            while ((sum(abs(R(:))) <= sum(abs(Rlast(:)))) && (iter < 20))
-                iter = iter + 1;
-                [B0_max,maxIdx] = max(abs(B_0));
-                B(maxIdx,iFreq) = B(maxIdx,iFreq) + B0_max;
-                Rlast = R;
-                w_max = v(:,maxIdx)./sum(abs(v(:,maxIdx)).^2);
-                h = v(:,maxIdx);
-                for iIterH = 1:5
-                    % h = R*w_max./B0_max; % for full matrix
-                    h = 1./sqrt(1 + w_max'*diag(abs(h).^2)*w_max).*(R*w_max./B0_max + diag(abs(h).^2)*w_max);
-                end
-                R = Rlast - safetyFactor.*B0_max*(h*h');
-                for iScanPoint = 1:nScanPoints
-                    w = v(:,iScanPoint)./sum(abs(v(:,iScanPoint)).^2);
-                    B_0(iScanPoint) = w'*R*w;
-                end
-            end
-        end
-    case 7 % Orthogonal Beamforming
-        for iFreq=1:p.nBins
-            R = p_vec(:,iFreq)*p_vec(:,iFreq)';
-            [U,S,V] = csvd(R);
-            sigIdx = 10; % rank(R,max(S).*1e-6); % 120 dB dynamic
-            v = bsxfun(@times,weights,manifoldVector(k(iFreq),arrayPositions,scanPositions,sArgs.wavetype));
-            B_0 = zeros(1,nScanPoints);
-            for iEigen = 1:sigIdx
-                R = U(:,iEigen)*S(iEigen)*U(:,iEigen)';
-                for iScanPoint=1:nScanPoints
-                    w = v(:,iScanPoint)./sum(abs(v(:,iScanPoint)).^2);
-                    B_0(iScanPoint) = w'*R*w;
-                end
-                [B0_max,maxIdx] = max(abs(B_0));
-                B(maxIdx,iFreq) = B(maxIdx,iFreq) + B0_max;
-            end
-        end
-    case 8 % Functional Beamforming
-        for iFreq=1:p.nBins
-            nu = 10;
-            R = p_vec(:,iFreq)*p_vec(:,iFreq)';
-            [U,S,V] = csvd(R);
-            R = U*diag(S.^(1/nu))*V';
-            v = bsxfun(@times,weights,manifoldVector(k(iFreq),arrayPositions,scanPositions,sArgs.wavetype));
-            for iScanPoint=1:nScanPoints
-                w = v(:,iScanPoint)./sum(abs(v(:,iScanPoint)).^2);
-                B(iScanPoint,iFreq) = abs(w'*R*w).^nu;
-            end
-        end
-    case 10 % delay-and-sum with microphone directivity
-        theta = (0:180).';
-        sintheta = sin(theta.*pi/180);
-        b = sArgs.mic_radius*0.0254;
-        [sintheta,K] = ndgrid(sintheta,k(:).');
-        u = K.*b.*sintheta;
-        G = 2.*besselj(1,u)./u; G(isnan(G) == 1) = 1;
-        err = abs(G);
-        micerr = zeros(p.nBins,nMics,nScanPoints);
-        for iMic = 1:nMics
-            tmp = array.n(iMic) - scanmesh;
-            tmpTheta = round(tmp.theta.*180/pi)+1;
-            for iScanPoint = 1:nScanPoints
-                micerr(:,iMic,iScanPoint) = err(tmpTheta(iScanPoint),:).';
-            end
-        end
-        for iFreq= 1:p.nBins
-            v = squeeze(micerr(iFreq,:,:)).*bsxfun(@times,weights,manifoldVector(k(iFreq),arrayPositions,scanPositions,sArgs.wavetype));
-            B(:,iFreq) = bsxfun(@rdivide,v,sum(abs(v).^2))'*p_vec(:,iFreq);
-        end
-    case 99 % Delay-and-Sum with precomputed manifoldVectors
-        for iFreq= 1:p.nBins
-            w_vecs = bsxfun(@rdivide,weights,squeeze(v(iFreq,:,:)));
-            B(:,iFreq) = bsxfun(@rdivide,w_vecs,sum(abs(w_vecs).^2))'*p_vec(:,iFreq);
-        end
+if ~sArgs.type
+    typeStr = 'Delay-and-Sum w/o CSM';
+    ita_verbose_info([thisFuncStr 'Computing beamforming using type ''' typeStr ''''],1);
+    B = squeeze(abs(sum(bsxfun(@times,conj(permute(steeringVector,[3 1 2])),P.'),2)).^2);
+else
+    switch sArgs.type
+    case 1
+        functionHandle = @delayAndSum;
+        typeStr = 'Conventional Delay-and-Sum';
+    case 2
+        functionHandle = @MVDR;
+        typeStr = 'MVDR';
+    case 3
+        functionHandle = @MUSIC;
+        typeStr = 'MUSIC';
+    case 4
+        functionHandle = @SubspaceBeam;
+        typeStr = 'Subspace Beamforming';
+    case 5
+        functionHandle = @FunctionalBeam;
+        typeStr = 'Functional Beamforming';
+    case 6
+        functionHandle = @CLEAN;
+        typeStr = 'CLEAN';
+    case 7
+        functionHandle = @CLEAN_SC;
+        typeStr = 'CLEAN-SC';
+    case 8
+        functionHandle = @DAMAS;
+        typeStr = 'DAMAS';
+    case 9
+        functionHandle = @SparseDAMAS;
+        typeStr = 'SparseDAMAS';
     otherwise
-        B = nan(nScanPoints,p.nBins);
+        error('unknown beamforming type');
+    end
+    ita_verbose_info([thisFuncStr 'Computing beamforming using type ''' typeStr ''''],1);
+    % now do this for each frequency
+    for iFreq = 1:size(CSM,3)
+        [B(:,iFreq),CSM(:,:,iFreq),idxVec(:,iFreq)] = functionHandle(CSM(:,:,iFreq),P(:,iFreq),steeringVector(:,:,iFreq),exp_alpha);
+    end
 end
 
-% all algorithms except the Delay-and-Sum give power output
-if ~ismember(sArgs.type,[1,10,99])
-    B = sqrt(B);
-end
-
-
-% c is the scaling factor to compensate for the beam width of the
-% beamformer c^2 = 2.94 * (D*f/c)^2
-% tmp = array - itaCoordinates(mean(array.cart));
-% D = 2.*(max(max(abs(tmp.x(:))),max(abs(tmp.y(:)))));
-% B = bsxfun(@times,B,sqrt(2.94).*(D.*k(:).'./(2*pi)));
+% correct to obtain source strengths
+B = sqrt(max(0,real(B))).*4*pi;
 
 % create the audio object
 if isa(p,'itaAudio')
@@ -292,5 +146,206 @@ B = ita_mapDataToMesh(B,scanmesh);
 B = ita_metainfo_add_historyline(B,mfilename,varargin);
 
 varargout(1) = {B};
+if nargout == 2
+    % create the audio object
+    if isa(p,'itaAudio')
+        CSM = itaAudio(permute(CSM,[3 1 2]),p.samplingRate,'freq');
+    else
+        CSM = itaResult(permute(CSM,[3 1 2]),f,'freq');
+    end
+    varargout(2) = {CSM};
+end
 %end function
 end
+
+%% beamforming subfunctions
+%% 1
+function [B,CSM,idxVec] = delayAndSum(CSM,P,manifoldVector,exp_alpha)
+    CSM = (1-exp_alpha).*CSM + exp_alpha.*(P*P');
+    B = sum(conj(manifoldVector).*(CSM*manifoldVector),1).';
+    idxVec = zeros(16,1);
+    [~,maxIdx] = max(B);
+    idxVec(1) = 1;
+    idxVec(2) = maxIdx;
+end % delay and sum
+
+%% 2
+function [B,CSM,idxVec] = MVDR(CSM,P,manifoldVector,exp_alpha)
+    % inverse of CSM with diagonal loading
+    CSM = (1-exp_alpha).*CSM + exp_alpha.*(P*P');
+    [U,s] = eig(CSM);
+    s = flip(diag(s));
+    U = flip(U,2);
+    CSMinv = U*diag(1./(1e-3.*max(s) + s))*U';
+    B = sum(conj(manifoldVector).*(CSMinv*manifoldVector),1).';
+    B = 1./abs(squeeze(sum(abs(manifoldVector).^2).^2).'.*B);
+    idxVec = zeros(16,1);
+    [~,maxIdx] = max(B);
+    idxVec(1) = 1;
+    idxVec(2) = maxIdx;
+end % MVDR
+
+%% 3
+function [B,CSM,idxVec] = MUSIC(CSM,P,manifoldVector,exp_alpha)
+    % projection onto noise subspace, no level information left
+    nMics = size(manifoldVector,1);
+    CSM = (1-exp_alpha).*CSM + exp_alpha.*(P*P');
+    [U,s] = eig(CSM);
+    s = flip(diag(s));
+    U = flip(U,2);
+    sigIdx = find(s > max(s).*1e-3,1,'last'); % 60 dB dynamic
+    CSM_M = eye(nMics) - U(:,1:sigIdx)*U(:,1:sigIdx)';
+    B = 1./sum(conj(manifoldVector).*(CSM_M*manifoldVector),1).';
+    idxVec = zeros(16,1);
+    [~,maxIdx] = max(B);
+    idxVec(1) = 1;
+    idxVec(2) = maxIdx;
+end % MUSIC
+
+%% 4
+function [B,CSM,idxVec] = SubspaceBeam(CSM,P,manifoldVector,exp_alpha)
+    % separate source types through eigendecomposition
+    CSM = (1-exp_alpha).*CSM + exp_alpha.*(P*P');
+    [U,s] = eig(CSM);
+    s = flip(diag(s));
+    U = flip(U,2);
+    sigIdx = min(find(s > max(s).*1e-3,1,'last'),15); % 60 dB dynamic
+    idxVec = zeros(16,1);
+    if ~isempty(sigIdx)
+        idxVec(1) = sigIdx;
+    end
+    B = zeros(size(manifoldVector,2),1);
+    for iEigen = 1:sigIdx
+        CSM_e = U(:,iEigen)*s(iEigen)*U(:,iEigen)';
+        B_0 = real(sum(conj(manifoldVector).*(CSM_e*manifoldVector),1));
+        [B0_max,maxIdx] = max(B_0);
+        idxVec(iEigen+1) = maxIdx;
+        B(maxIdx) = B(maxIdx) + B0_max;
+    end
+end % Subspace beamforming
+
+%% 5
+function [B,CSM,idxVec] = FunctionalBeam(CSM,P,manifoldVector,exp_alpha)
+    % better localisation by raising eigenvales by a power factor
+    nu = 20;
+    CSM = (1-exp_alpha).*CSM + exp_alpha.*(P*P');
+    [U,s] = eig(CSM);
+    s = flip(diag(s));
+    U = flip(U,2);
+    sigIdx = find(s > max(s).*1e-3,1,'last'); % 60 dB dynamic
+    CSM_f = U(:,1:sigIdx)*diag(s(1:sigIdx).^(1/nu))*U(:,1:sigIdx)';
+    B = sum(conj(manifoldVector).*(CSM_f*manifoldVector),1).';
+    B = abs((squeeze(sum(abs(manifoldVector).^2,1)).'.^(1-nu)).*real(B).^nu);
+    idxVec = zeros(16,1);
+    [~,maxIdx] = max(B);
+    idxVec(1) = 1;
+    idxVec(2) = maxIdx;
+end % Functional beamforming
+
+%% 6
+function [B,CSM,idxVec] = CLEAN(CSM,P,manifoldVector,exp_alpha)
+    % iteratively remove source contributions
+    % start iterative process
+    safetyFactor = 0.6;
+    CSM = (1-exp_alpha).*CSM + exp_alpha.*(P*P');
+    % original delay and sum map (dirty map)
+    B_c = real(sum(conj(manifoldVector).*(CSM*manifoldVector),1)).';
+    Bsum = 2*sum(abs(B_c));
+    iter = 0;
+    B = zeros(size(B_c));
+    idxVec = zeros(16,1);
+    while (all(B_c >= 0) && (sum(abs(B_c)) < Bsum) && (iter < 15))
+        iter = iter + 1;
+        [B0_max,maxIdx] = max(safetyFactor.*B_c);
+        B(maxIdx) = B(maxIdx) + B0_max;
+        idxVec(iter+1) = maxIdx;
+        Bsum = sum(abs(B_c));
+        % remove source contribution of this iteration
+        w_max = manifoldVector(:,maxIdx)./sum(abs(manifoldVector(:,maxIdx)).^2);
+        B_c = B_c - B0_max.*abs(manifoldVector'*w_max).^2;
+    end
+    idxVec(1) = iter;
+    B = B./safetyFactor;
+end % CLEAN
+
+%% 7
+function [B,CSM,idxVec] = CLEAN_SC(CSM,P,manifoldVector,exp_alpha)
+    % iteratively remove source contributions, include source coherence information
+    % start iterative process
+    safetyFactor = 0.6;
+    CSM = (1-exp_alpha).*CSM + exp_alpha.*(P*P');
+    CSM_c = CSM;
+    B_c = real(sum(conj(manifoldVector).*(CSM*manifoldVector),1)).';
+    Bsum = 2*sum(B_c);
+    iter = 0;
+    B = zeros(size(B_c));
+    idxVec = zeros(16,1);
+    while (all(B_c >= 0) && (sum(B_c) < Bsum) && (iter < 15))
+        iter = iter + 1;
+        [B0_max,maxIdx] = max(safetyFactor.*B_c);
+        B(maxIdx) = B(maxIdx) + B0_max;
+        idxVec(iter+1) = maxIdx;
+        Bsum = sum(B_c);
+        h = CSM_c*manifoldVector(:,maxIdx)./B0_max; % for full CSM
+        CSM_c = CSM_c - B0_max.*(h*h');
+        % remove source contribution of this iteration
+        % B_c = real(sum(conj(v).*(CSM_c*v),1));
+        B_c = B_c - B0_max.*abs(manifoldVector'*h).^2;
+    end
+    idxVec(1) = iter;
+    B = B./safetyFactor;
+end % CLEAN-SC
+
+%% 8 DAMAS
+function [B,CSM,idxVec] = DAMAS(CSM,P,manifoldVector,exp_alpha)
+    % deconvolution approach, solve iteratively (Gauss-Seidel method)
+    nScan = size(manifoldVector,2);
+    CSM = (1-exp_alpha).*CSM + exp_alpha.*(P*P');
+    CSM_c = CSM;
+    % original delay and sum map (dirty map)
+    b = real(sum(conj(manifoldVector).*(CSM_c*manifoldVector),1)).';
+    % get a guess for initial x
+    x = 0.*b;
+    [maxVal,maxIdx] = max(b);
+    x(maxIdx) = maxVal;
+    % solve A*x = b using Gauss-Seidel method
+    A = zeros(nScan,nScan);
+    for iScan = 1:nScan
+        A(:,iScan) = abs(manifoldVector'*manifoldVector(:,iScan)./sum(abs(manifoldVector(:,iScan)).^2)).^2;
+    end
+    %     B(:,iFreq) = gauss_seidel(A,b,x,1e-3,5000,0);
+    B = max(0,lsqr(A,b,1e-3,50,[],[],x));
+%     B = lsqnonneg(A,b);
+    B(isinf(B)) = 0;
+    idxVec = zeros(16,1);
+    [~,maxIdx] = max(B);
+    idxVec(1) = 1;
+    idxVec(2) = maxIdx;
+end % DAMAS
+
+%% 9 Sparse DAMAS
+function [B,CSM,idxVec] = SparseDAMAS(CSM,P,manifoldVector,exp_alpha)
+    % deconvolution approach, solve iteratively with sparse constraint (FOCUSS)
+    % start iterative process
+    nScan = size(manifoldVector,2);
+    % original delay and sum map (dirty map)
+    CSM = (1-exp_alpha).*CSM + exp_alpha.*(P*P');
+    CSM_c = CSM;
+    % original delay and sum map (dirty map)
+    b = real(sum(conj(manifoldVector).*(CSM_c*manifoldVector),1)).';
+    % get a guess for initial x
+    x = 0.*b;
+    [maxVal,maxIdx] = max(b);
+    x(maxIdx) = maxVal;
+    A = zeros(nScan,nScan);
+    for iScan = 1:nScan
+        A(:,iScan) = abs(manifoldVector'*manifoldVector(:,iScan)./sum(abs(manifoldVector(:,iScan)).^2)).^2;
+    end
+    % solve A*x = b using FOCUSS method (sparse solution)
+    B = focuss(A,b,x,1e-3,100,0);
+    B(isinf(B)) = 0;
+    idxVec = zeros(16,1);
+    [~,maxIdx] = max(B);
+    idxVec(1) = 1;
+    idxVec(2) = maxIdx;
+end % SparseDAMAS

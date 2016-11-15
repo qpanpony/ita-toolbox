@@ -33,13 +33,13 @@ function varargout = ita_beam_simulate(varargin)
 thisFuncStr  = [upper(mfilename) ':'];     %#ok<NASGU> % Use to show warnings or infos in this functions
 
 %% Initialization and Input Parsing
-sArgs        = struct('pos1_array','itaMicArray','source',itaMicArray([0.2,0.2,-1],'cart'),'type',ita_beam_evaluatePreferences('Method'),'SNR',Inf,'sigmaArray',0,'soundspeed',double(ita_constants('c')),'wavetype',ita_beam_evaluatePreferences('ManifoldType'));
+sArgs        = struct('pos1_array','itaMicArray','source',itaMicArray([0.2,0.2,-1],'cart'),'type',ita_beam_evaluatePreferences('Method'),'SNR',Inf,'sigmaArray',0,'soundspeed',double(ita_constants('c')),'wavetype',ita_beam_evaluatePreferences('SteeringType'));
 [array,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 %% Body
 d = abs(mean(array.z)-mean(sArgs.source.z)); % distance between array and sources
 width_max = max(4*max(abs([sArgs.source.x(:).',sArgs.source.y(:).'])),0.1*ceil(10*tan(20*pi/180)*2*d)); % maximum scan width for 20 degree opening angle
-N = min(2601,((ceil(ceil(width_max/0.01)/2)*2)+1)^2); % number of scanpoints
+N = min(625,((ceil(ceil(width_max/0.01)/2)*2)+1)^2); % number of scanpoints
 resolution = 1e-3*round(1e3*width_max/(sqrt(N)-1)); % resolution in x,y directions
 % create a mesh of scanpoints
 Scanmesh = ita_beam_makeArray('grid','Nx',sqrt(N),'Ny',sqrt(N),'dx',resolution,'dy',resolution);
@@ -63,12 +63,12 @@ if numel(sArgs.source.w) > 1
     amplitudes = amplitudes.*exp(1i*2*pi.*rand(numel(sArgs.source.w),1));
     for i=1:nFreqs % for each frequency
         % create pressure vector as superposition of all sources
-        freqData(i,:) = sum(bsxfun(@times,amplitudes,manifoldVector(k(i),array.cart.',sArgs.source.cart.',2).'));
+        freqData(i,:) = sum(bsxfun(@times,amplitudes,squeeze(ita_beam_steeringVector(k(i),array.cart,sArgs.source.cart,2)).'));
     end
 else
     for i=1:nFreqs % for each frequency
         % create pressure vector for the single source
-        freqData(i,:) = amplitudes.*manifoldVector(k(i),array.cart.',sArgs.source.cart.',2).';
+        freqData(i,:) = amplitudes.*squeeze(ita_beam_steeringVector(k(i),array.cart,sArgs.source.cart,2)).';
     end
 end
 
@@ -106,14 +106,6 @@ p.userData = {'nodeN',array.ID(:)};
 
 %% array imperfections
 array.cart = array.cart + sArgs.sigmaArray.*randn(size(array.cart));
-
-%% use precomputed manifold vectors for sArgs.type 99
-if sArgs.type == 99
-    sArgs.type = zeros(p.nBins,array.nPoints,Scanmesh.nPoints);
-    for i = 1:p.nBins
-        sArgs.type(i,:,:) = manifoldVector(k(i),array.cart.',Scanmesh.cart.',sArgs.wavetype);
-    end
-end
 
 %% do the beamforming
 result = ita_beam_beamforming(array,p,Scanmesh,'type',sArgs.type,'wavetype',sArgs.wavetype);
