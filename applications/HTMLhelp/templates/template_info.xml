@@ -1,0 +1,46 @@
+<productinfo
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="optional">
+    <?xml-stylesheet type="text/xsl" href="optional"?>
+    
+    <matlabrelease>R14</matlabrelease>
+    <name>RWTH ITA</name>
+    <type>toolbox</type>
+    <icon>../pics/ITA16x16.gif</icon>
+    
+    <help_location>./</help_location>
+    
+    <list>
+        
+        <listitem>
+            <label>ITA-Toolbox Setup</label>
+            <callback>ita_toolbox_setup</callback>
+            <icon>$toolbox/matlab/icons/greencircleicon.gif</icon>
+        </listitem>
+        
+        <listitem>
+            <label>Overview in Helpbrowser</label>
+            <callback>web index.html -helpbrowser</callback>
+            <icon>$toolbox/matlab/icons/book_mat.gif</icon>
+        </listitem>
+        
+        <listitem>
+            <label>Getting Started (PDF)</label>
+            <callback>open('ITA_Toolbox_Getting_Started.pdf');</callback>
+            <icon>$toolbox/matlab/icons/pdficon.gif</icon>
+        </listitem>
+        
+        <listitem>
+            <label>Web Site (ITA - RWTH Aachen)</label>
+            <callback>web http://www.akustik.rwth-aachen.de -browser;</callback>
+            <icon>$docroot/techdoc/matlab_env/examples/webicon.gif</icon>
+        </listitem>
+		<listitem>
+            <label>ITA-Toolbox Website</label>
+            <callback>web http://www.ita-toolbox.org -browser;</callback>
+            <icon>$docroot/techdoc/matlab_env/examples/webicon.gif</icon>
+        </listitem>
+        
+    </list>
+    
+</productinfo>

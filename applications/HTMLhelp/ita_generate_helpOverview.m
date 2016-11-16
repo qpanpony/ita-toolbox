@@ -166,6 +166,8 @@ app_demoHTML = [app_demoHTML, app_demoHTML_end];
 ita_writeHTML([folder filesep 'HTML' filesep 'helptoc.xml'],helpXML) %overwrite old file
 ita_writeHTML([folder filesep 'HTML' filesep 'index_demos.html'],index_demoHTML)
 ita_writeHTML([folder filesep 'HTML' filesep 'application_demos.html'],app_demoHTML);
+copyfile(fullfile(ita_toolbox_path,'applications','HTMLhelp','templates','template_info.xml'), ...
+	fullfile(folder, 'HTML','info.xml'));
 
 %% generate Class/App Documentation in Help Browser
 % - Tumbrgel 05/2012
