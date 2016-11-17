@@ -292,17 +292,27 @@ classdef itaOptitrack < handle
             
             % Check if NatNet dll's are existing
             if ~exist(Optitrack_obj.dllPath,'dir')
+                
+                % download NatNet version
+                url = 'http://s3.amazonaws.com/naturalpoint/software/NatNetSDK/NatNet_SDK_2.10.zip';
+                
+                try
+                    % check Internet connection
+                    urljava = java.net.URL(url);
+                    openStream(urljava);                  
+                catch
+                    error('[itaOptitrack] No Internet connection. Missing NatNet SDK cannot be downloaded.')
+                end
+                
                 % create directory
                 mkdir(Optitrack_obj.dllPath)
                 
-                fprintf( '[itaOptitrack] NatNet SDK not found. Installing.' );
+                fprintf( '[itaOptitrack] Cannot find NatNet SDK on computer. Downloading.' );
                 
                 try
-                    % download NatNet version
-                    url = 'http://s3.amazonaws.com/naturalpoint/software/NatNetSDK/NatNet_SDK_2.10.zip';
                     websave(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'),url);
                 catch
-                    error(['[itaOptitrack] Download of NatNet SDK from ',url,' failed. Please update url in line 302.'])
+                    error(['[itaOptitrack] Download of NatNet SDK from ',url,' failed. Please update URL (l.297) and version (l.320, l.324).'])
                 end
                 
                 % unzip
@@ -313,7 +323,7 @@ classdef itaOptitrack < handle
                 fprintf('.\n')
                 delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'))
                 
-                fprintf( '[itaOptitrack] NatNet SDK has been successfully installed.\n' );
+                fprintf( '[itaOptitrack] NatNet SDK has been successfully downloaded.\n' );
 
             end
             
@@ -323,7 +333,7 @@ classdef itaOptitrack < handle
             Optitrack_obj.theClient     = NatNetML.NatNetClientML(0); % Input = iConnectionType: 0 = Multicast, 1 = Unicast
             version                     = Optitrack_obj.theClient.NatNetVersion();
             fprintf( '[itaOptitrack] Initialization succeeded.\n' );
-            fprintf( '[itaOptitrack] NatNetML Client Version : %d.%d.%d.%d\n', version(1), version(2), version(3), version(4) );
+            fprintf( '[itaOptitrack] NatNetML Client Version: %d.%d.%d.%d\n', version(1), version(2), version(3), version(4) );
             
             Optitrack_obj.isInitialized = true;
             
