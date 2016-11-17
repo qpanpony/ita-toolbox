@@ -137,12 +137,13 @@ for idxRun = 1:sArgs.nRuns
     equalizationRadSource = 2;
     
     % room transfer function (free field assumption at this point)
-    Psi = sph_transfer_path(posReceiver,receiverNmax,posSource,sourceNmax,kVec,...
+    Psi = sph_transfer_path(posReceiver,receiverNmaxAlias,posSource,sourceNmaxAlias,kVec,...
         'r',distSourceReceiver,'r_eq',equalizationRadSource,'norm',false);
-    PsiAliasReceiver = sph_transfer_path(posReceiver,receiverNmaxAlias,posSource,sourceNmax,kVec,...
-        'r',distSourceReceiver,'r_eq',equalizationRadSource,'norm',false);
-    PsiAliasSource = sph_transfer_path(posReceiver,receiverNmax,posSource,sourceNmaxAlias,kVec,...
-        'r',distSourceReceiver,'r_eq',equalizationRadSource,'norm',false);
+
+    PsiAliasReceiver = Psi(1:(receiverNmaxAlias+1)^2,1:(sourceNmax+1)^2,:);
+    PsiAliasSource = Psi(1:(receiverNmax+1)^2,1:(sourceNmaxAlias+1)^2,:);
+    Psi = Psi(1:(receiverNmax+1)^2,1:(sourceNmax+1)^2,:);
+    
     
     if ~isempty(samplingDisplacement) && isempty(SNR)
         % rest happens inside loop, only here in case of an error
@@ -178,7 +179,7 @@ for idxRun = 1:sArgs.nRuns
             if isempty(dirMeasurementFile)
                 sourceBalias = ita_sph_modal_strength(sourceSampling,sourceNmaxAlias,kVec(idxFreq),'rigid','transducer','ls');
                 sourceB = sourceBalias(1:(sourceNmax+1)^2,1:(sourceNmax+1)^2);
-                if numel(unique(sourceSampling.r)) == 1;
+                if numel(unique(sourceSampling.r)) == 1
                     Msource = sourceB * (sourceG.'.*sourceY');
                 else
                     Msource = sourceB .* (sourceG.'.*sourceY');
@@ -237,7 +238,7 @@ for idxRun = 1:sArgs.nRuns
         % alias error needed here since antialias bf needs them and parfor
         % requires the variables to be initialized
         if simSMA
-            if numel(unique(receiverSampling.r)) == 1;
+            if numel(unique(receiverSampling.r)) == 1
                 EreceiverAlias = receiverYalias*receiverBalias;
             else
                 EreceiverAlias = receiverYalias.*receiverBalias;
@@ -542,7 +543,7 @@ data = fft(data);
 if isEven
     data = data(1:(nSamples+2)/2,:,:);
 else
-    display('MBE_FFT:: Be careful with odd numbers of time samples!');
+    disp('MBE_FFT:: Be careful with odd numbers of time samples!');
     data = data(1:(nSamples+1)/2,:,:);
 end
 
