@@ -115,7 +115,7 @@ for idx = 1:length(field_token)
     token = field_token{idx};
     if numel(token) >= 5 % RSC - support for arguments shorter than 5 elements
         if strcmpi(token(1:3),'pos') && strcmpi(token(5),'_')
-            pos_num      = str2double(token(4)); %this is the fixed position number in the argument list
+            pos_num      = sscanf(token(4),'%d'); %this is the fixed position number in the argument list
             token_new    = token(6:end); %get rid off prefix
             if pos_num <= numel(Arguments) % rsc - check if enough arguments are given
                 value        = Arguments{pos_num}; %get value/object
