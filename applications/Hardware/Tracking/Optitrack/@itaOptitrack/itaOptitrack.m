@@ -259,7 +259,7 @@ classdef itaOptitrack < handle
     end
     
     properties(SetAccess = 'private', GetAccess = 'private')
-        dllPath          = fullfile(ita_toolbox_path,'applications','Tracking','Optitrack','NatNet_SDK_2-7/lib/x64','NatNetML.dll'); % path to NatNet SDK
+        dllPath          = fullfile(ita_toolbox_path,'applications/Hardware/Tracking/Optitrack/NatNetSDK'); % path to itaOptitrack
         timerData        = [];    % Matlab timer handle
         singleShot       = 0;     % only log 1 frame of tracking data (e.g. for geometric measurement purposes)
         correctRowIdx    = 1;     % idx to fill up Optitrack_obj.rigidBodyLogData.data ignoring duplicate frames
@@ -290,7 +290,34 @@ classdef itaOptitrack < handle
             Optitrack_obj.ip          = char(sArgs.ip);
             Optitrack_obj.port        = char(sArgs.port);
             
-            NET.addAssembly(Optitrack_obj.dllPath);
+            % Check if NatNet dll's are existing
+            if ~exist(Optitrack_obj.dllPath,'dir')
+                % create directory
+                mkdir(Optitrack_obj.dllPath)
+                
+                fprintf( '[itaOptitrack] NatNet SDK not found. Installing.' );
+                
+                try
+                    % download NatNet version
+                    url = 'http://s3.amazonaws.com/naturalpoint/software/NatNetSDK/NatNet_SDK_2.10.zip';
+                    websave(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'),url);
+                catch
+                    error(['[itaOptitrack] Download of NatNet SDK from ',url,' failed. Please update url in line 302.'])
+                end
+                
+                % unzip
+                fprintf('.')
+                unzip(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'),fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10'));
+                
+                % delete zip file
+                fprintf('.\n')
+                delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'))
+                
+                fprintf( '[itaOptitrack] NatNet SDK has been successfully installed.\n' );
+
+            end
+            
+            NET.addAssembly(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetML.dll'));
             
             % Create an instance of a NatNet client
             Optitrack_obj.theClient     = NatNetML.NatNetClientML(0); % Input = iConnectionType: 0 = Multicast, 1 = Unicast
