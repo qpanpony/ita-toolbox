@@ -2,9 +2,9 @@ classdef itaOptitrack < handle
     
     % class itaOptitrack
     %
-    %   Constructs an itaOptitrack object which is able to communicate with a
-    %   NatNet server application (e.g. Motive). It can be used to log 
-    %   tracking data to be further processed or saved in Matlab.
+    %   Constructs an itaOptitrack object to communicate with a NatNet server 
+    %   application (e.g. Motive). Can be used to log tracking data for further 
+    %   usage in Matlab.
     %
     %   For proper functionality:
     %   (1) Run Optitrack's Motive tracker software
@@ -198,7 +198,7 @@ classdef itaOptitrack < handle
     %        as the orientation of the head-mounted rigid body is changed.
     %
     % Author:  Florian Pausch, fpa@akustik.rwth-aachen.de
-    % Version: 2016-06-21
+    % Version: 2016-11-18
     %
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.
@@ -297,23 +297,20 @@ classdef itaOptitrack < handle
                 url = 'http://s3.amazonaws.com/naturalpoint/software/NatNetSDK/NatNet_SDK_2.10.zip';
                 
                 try
-                    % check Internet connection
+                    % check Internet connection and if url is existing
                     urljava = java.net.URL(url);
-                    openStream(urljava);                  
+                    openStream(urljava);
                 catch
-                    error('[itaOptitrack] No Internet connection. Missing NatNet SDK cannot be downloaded.')
+                    % url is not existing or computer is not connected to Internet
+                    error(['[itaOptitrack] No Internet connection or, ',url,' does not exist. Missing NatNet SDK cannot be downloaded. Please update URL (l.297) and version (l. 313/317/321).'])
                 end
-                
+                    
                 % create directory
                 mkdir(Optitrack_obj.dllPath)
                 
-                fprintf( '[itaOptitrack] Cannot find NatNet SDK on computer. Downloading.' );
+                fprintf( '[itaOptitrack] Cannot find NatNet SDK. Downloading...' );
                 
-                try
-                    websave(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'),url);
-                catch
-                    error(['[itaOptitrack] Download of NatNet SDK from ',url,' failed. Please update URL (l.297) and version (l.320, l.324).'])
-                end
+                websave(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'),url);
                 
                 % unzip
                 fprintf('.')
