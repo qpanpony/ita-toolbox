@@ -2,9 +2,9 @@ classdef itaOptitrack < handle
     
     % class itaOptitrack
     %
-    %   Constructs an itaOptitrack object which is able to communicate with a
-    %   NatNet server application (e.g. Motive). It can be used to log 
-    %   tracking data to be further processed or saved in Matlab.
+    %   Constructs an itaOptitrack object to communicate with a NatNet server 
+    %   application (e.g. Motive). Can be used to log tracking data for further 
+    %   usage in Matlab.
     %
     %   For proper functionality:
     %   (1) Run Optitrack's Motive tracker software
@@ -198,7 +198,7 @@ classdef itaOptitrack < handle
     %        as the orientation of the head-mounted rigid body is changed.
     %
     % Author:  Florian Pausch, fpa@akustik.rwth-aachen.de
-    % Version: 2016-06-21
+    % Version: 2016-11-18
     %
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.
@@ -259,7 +259,7 @@ classdef itaOptitrack < handle
     end
     
     properties(SetAccess = 'private', GetAccess = 'private')
-        dllPath          = fullfile(ita_toolbox_path,'applications','Tracking','Optitrack','NatNet_SDK_2-7/lib/x64','NatNetML.dll'); % path to NatNet SDK
+        dllPath          = fullfile(ita_toolbox_path,'applications/Hardware/Tracking/Optitrack/NatNetSDK'); % path to itaOptitrack
         timerData        = [];    % Matlab timer handle
         singleShot       = 0;     % only log 1 frame of tracking data (e.g. for geometric measurement purposes)
         correctRowIdx    = 1;     % idx to fill up Optitrack_obj.rigidBodyLogData.data ignoring duplicate frames
@@ -290,13 +290,47 @@ classdef itaOptitrack < handle
             Optitrack_obj.ip          = char(sArgs.ip);
             Optitrack_obj.port        = char(sArgs.port);
             
-            NET.addAssembly(Optitrack_obj.dllPath);
+            % Check if NatNet dll's are existing
+            if ~exist(Optitrack_obj.dllPath,'dir')
+                
+                % download NatNet version
+                url = 'http://s3.amazonaws.com/naturalpoint/software/NatNetSDK/NatNet_SDK_2.10.zip';
+                
+                try
+                    % check Internet connection and if url is existing
+                    urljava = java.net.URL(url);
+                    openStream(urljava);
+                catch
+                    % url is not existing or computer is not connected to Internet
+                    error(['[itaOptitrack] No Internet connection or, ',url,' does not exist. Missing NatNet SDK cannot be downloaded. Please update URL (l.297) and version (l. 313/317/321).'])
+                end
+                    
+                % create directory
+                mkdir(Optitrack_obj.dllPath)
+                
+                fprintf( '[itaOptitrack] Cannot find NatNet SDK. Downloading...' );
+                
+                websave(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'),url);
+                
+                % unzip
+                fprintf('.')
+                unzip(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'),fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10'));
+                
+                % delete zip file
+                fprintf('.\n')
+                delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'))
+                
+                fprintf( '[itaOptitrack] NatNet SDK has been successfully downloaded.\n' );
+
+            end
+            
+            NET.addAssembly(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetML.dll'));
             
             % Create an instance of a NatNet client
             Optitrack_obj.theClient     = NatNetML.NatNetClientML(0); % Input = iConnectionType: 0 = Multicast, 1 = Unicast
             version                     = Optitrack_obj.theClient.NatNetVersion();
             fprintf( '[itaOptitrack] Initialization succeeded.\n' );
-            fprintf( '[itaOptitrack] NatNetML Client Version : %d.%d.%d.%d\n', version(1), version(2), version(3), version(4) );
+            fprintf( '[itaOptitrack] NatNetML Client Version: %d.%d.%d.%d\n', version(1), version(2), version(3), version(4) );
             
             Optitrack_obj.isInitialized = true;
             
