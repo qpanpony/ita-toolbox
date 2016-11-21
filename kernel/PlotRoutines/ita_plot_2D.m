@@ -135,7 +135,7 @@ switch sArgs.plotType
             tmp = 10*round(0.1*magMax)+10;
             sArgs.plotRange = [tmp-sArgs.plotRange tmp];
         end
-        plotData(plotData < sArgs.plotRange(1)) = -inf;
+        plotData(plotData < sArgs.plotRange(1)) = tmp-500;
         % colorbar limits
         lim1 = sArgs.plotRange(1);
         lim2 = sArgs.plotRange(2);

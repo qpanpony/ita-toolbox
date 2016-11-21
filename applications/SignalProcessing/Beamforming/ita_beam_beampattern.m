@@ -41,13 +41,12 @@ function varargout = ita_beam_beampattern(varargin)
 % Modified: 07-Jan-2014 ('plotRange', 'plotCoord' - tumbraegel)
 
 %% Initialization and Input Parsing
-sArgs = struct('pos1_array','itaMicArray','pos2_f','numeric','pos3_steering_th','numeric','pos4_steering_phi','numeric','plotPlane','none','plotType','mag','plotRange',[], 'plotCoord', 'polar', 'wavetype',ita_beam_evaluatePreferences('ManifoldType'),'lineStyle','-');
+sArgs = struct('pos1_array','itaMicArray','pos2_f','numeric','pos3_steering_th','numeric','pos4_steering_phi','numeric','plotPlane','none','plotType','mag','plotRange',[], 'plotCoord', 'polar', 'wavetype',ita_beam_evaluatePreferences('SteeringType'),'lineStyle','-');
 [array,f,steering_th,steering_phi,sArgs] = ita_parse_arguments(sArgs,varargin);
     
 %% do the calculation
 % positions of array microphones
-arrayPositions = array.cart.';
-weights = array.w(:);
+arrayPositions = array.cart;
 
 % make a matrix with spherical coordinates for the unit sphere with
 % given angular resolution
@@ -56,19 +55,20 @@ R = 1;
 scanGrid = ita_generateSampling_equiangular(resolution,resolution);
 theta = unique(scanGrid.theta);
 phi = unique(scanGrid.phi);
-scanPositions = R.*scanGrid.cart.';
+scanPositions = R.*scanGrid.cart;
 
 % create steering vector with given steering angles
-steer_vec = [sin((0+steering_th)*pi/180)*cos((0+steering_phi)*pi/180);...
-    sin((0+steering_th)*pi/180)*sin((0+steering_phi)*pi/180);...
+steer_vec = [sin((0+steering_th)*pi/180)*cos((0+steering_phi)*pi/180),...
+    sin((0+steering_th)*pi/180)*sin((0+steering_phi)*pi/180),...
     cos((0+steering_th)*pi/180)];
 
 k = 2*pi*f/double(ita_constants('c'));
 % create manifold vector for the spherical grid ...
-v = manifoldVector(k,arrayPositions,scanPositions,sArgs.wavetype);
+v = squeeze(ita_beam_steeringVector(k,arrayPositions,scanPositions,sArgs.wavetype));
 % ... and multiply with the manifold vector for the steering
 % direction to get the beampattern
-v = v'*(weights(:).*manifoldVector(k,arrayPositions,steer_vec,sArgs.wavetype));
+v_steer = ita_beam_steeringVector(k,arrayPositions,steer_vec,sArgs.wavetype).';
+v = v'*v_steer./sum(abs(v_steer).^2);
 
 B = reshape(v,numel(theta),numel(phi));
 B = B./max(abs(B(:))); % normalize to maximum
