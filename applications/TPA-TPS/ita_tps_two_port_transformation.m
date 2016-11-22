@@ -18,7 +18,6 @@ function [Ys_incl Fb_iso] = ita_tps_two_port_transformation(Ys, Fb, A, B, C, D)
 % Author: Pascal Dietrich -- Email: pdi@akustik.rwth-aachen.de
 % Created:  03-Aug-2011 
 
-%% Formula derived by pdi - see report BOSCH 2011
 % id = 0 * Ys * pinv(Ys) + eye(size(Ys));
 
 % Ys_incl = (D - C * pinv(A)*B) * pinv(Ys) * pinv(pinv(Ys) - pinv(A) * B) * (Ys - pinv(D)*C) * pinv(A-B*pinv(D)*C);
