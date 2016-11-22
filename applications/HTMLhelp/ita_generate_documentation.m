@@ -29,24 +29,24 @@ ita_generate_helpOverview(sArgs.rootpath);
 
 cd(sArgs.rootpath)
 %% Get folders for m2html
-ignoreList  = {'.svn','private','tmp','prop-base','props','text-base','template','doc','GuiCallbacks'};
+ignoreList  = {'.svn','.git','private','tmp','prop-base','props','text-base','template','doc','GuiCallbacks'};
 pathStr = genpath(sArgs.rootpath); %generates folderlist with ';' to seperate folders
 prefixToolbox = fliplr(strtok(fliplr(sArgs.rootpath),filesep)); %get Toolbox folder name
 
 outpathStr  = [];
 outpathList = [];
-tokenIdx    = [0 findstr(pathStr,pathsep)];
+tokenIdx    = [0 strfind(pathStr,pathsep)];
 
 for idx=1:(length(tokenIdx)-1)
    tokenCell{idx} = pathStr(tokenIdx(idx)+1:tokenIdx(idx+1)-1); %get single folder name
    isIgnore = false;
    for ignIdx = 1:length(ignoreList)
-       foundIdx     = findstr(tokenCell{idx},ignoreList{ignIdx}); %folder in ignore list?
+       foundIdx     = strfind(tokenCell{idx},ignoreList{ignIdx}); %folder in ignore list?
        isIgnore     = ~isempty(foundIdx) || isIgnore;
     end
    if ~isIgnore %add string token
        outpathStr   = [outpathStr,pathsep,tokenCell{idx}]; %#ok<*AGROW>
-       idxITA = findstr(tokenCell{idx},prefixToolbox); %pdi
+       idxITA = strfind(tokenCell{idx},prefixToolbox); %pdi
        outpathList  = [outpathList; {tokenCell{idx}(idxITA:end)}]; %throw away 'C:\...' until ITA-TB path
    end  
 end
@@ -63,7 +63,8 @@ if graphInst
 else
     graphState = 'off';
 end
-docFolder = [sArgs.rootpath filesep 'HTML' filesep 'doc'];
+htmlFolder = fullfile(sArgs.rootpath, 'HTML');
+docFolder = fullfile(htmlFolder, 'doc');
 % cd required for m2html
 cd ..
 tic
@@ -75,10 +76,13 @@ toc
 %% Build search database for helpdesk
 % switching to basic rendering to fix bug with builddocsearchdb
 webutils.htmlrenderer('basic');
+% MATLAB requires the html files to be in its search path
+addpath(htmlFolder, docFolder);
+savepath;
 % switching seems to take a while sometimes
 pause(1);
 if nargin == 0
-    builddocsearchdb( [sArgs.rootpath filesep 'HTML' ] ); %generate help search
+    builddocsearchdb(htmlFolder); %generate help search
     rehash toolboxcache
 end
 % switch back to standard renderer
