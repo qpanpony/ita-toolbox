@@ -15,65 +15,58 @@ function ita_generate_documentation(varargin)
 %
 % Author: Pascal Dietrich -- Email: pdi@akustik.rwth-aachen.de
 % Created:  17-Apr-2009
-% Edited: 18-May-2012 Tumbrägel
+% Edited: 18-May-2012 Tumbrï¿½gel
 
 
 % pdi not for preferences
 sArgs = struct('rootpath',ita_toolbox_path);
 sArgs = ita_parse_arguments(sArgs,varargin);
 
+currentDir = pwd;
 
-%generate helpbrowser html files - Tumbrägel 05/2012:
+%generate helpbrowser html files - Tumbrï¿½gel 05/2012:
 ita_generate_helpOverview(sArgs.rootpath); 
 
-fullpath = sArgs.rootpath;
-cd(fullpath)
-disp(fullpath)
+cd(sArgs.rootpath)
 %% Get folders for m2html
-ignoreList  = {'.svn','private','tmp','prop-base','props','text-base','template','doc','GuiCallbacks'};
-pathStr = genpath(fullpath); %generates folderlist with ';' to seperate folders
-prefixToolbox = fliplr(strtok(fliplr(fullpath),filesep)); %get Toolbox folder name
+ignoreList  = {'.svn','.git','private','tmp','prop-base','props','text-base','template','doc','GuiCallbacks'};
+pathStr = genpath(sArgs.rootpath); %generates folderlist with ';' to seperate folders
+prefixToolbox = fliplr(strtok(fliplr(sArgs.rootpath),filesep)); %get Toolbox folder name
 
 outpathStr  = [];
 outpathList = [];
-tokenIdx    = [0 findstr(pathStr,pathsep)];
-
-if isunix
-    separator = ':';
-else
-    separator = ';';
-end
+tokenIdx    = [0 strfind(pathStr,pathsep)];
 
 for idx=1:(length(tokenIdx)-1)
    tokenCell{idx} = pathStr(tokenIdx(idx)+1:tokenIdx(idx+1)-1); %get single folder name
    isIgnore = false;
    for ignIdx = 1:length(ignoreList)
-       foundIdx     = findstr(tokenCell{idx},ignoreList{ignIdx}); %folder in ignore list?
+       foundIdx     = strfind(tokenCell{idx},ignoreList{ignIdx}); %folder in ignore list?
        isIgnore     = ~isempty(foundIdx) || isIgnore;
     end
    if ~isIgnore %add string token
-       outpathStr   = [outpathStr separator tokenCell{idx}]; %#ok<*AGROW>
-       idxITA = findstr(tokenCell{idx},prefixToolbox); %pdi
+       outpathStr   = [outpathStr,pathsep,tokenCell{idx}]; %#ok<*AGROW>
+       idxITA = strfind(tokenCell{idx},prefixToolbox); %pdi
        outpathList  = [outpathList; {tokenCell{idx}(idxITA:end)}]; %throw away 'C:\...' until ITA-TB path
    end  
 end
 
 % delete old one first
 graphInst = ita_preferences('isGraphVizInstalled');
-cd(fullpath)
-cd ..
 
 if ischar(graphInst), graphInst = str2double(graphInst); end;
 
 %% ignorelist -- doc - guicallbacks - externalpackages
-
 if graphInst
     graphState = 'on';
-    disp('with GraphViz')
+    disp('Generating with GraphViz')
 else
     graphState = 'off';
 end
-docFolder = [fullpath filesep 'HTML' filesep 'doc'];
+htmlFolder = fullfile(sArgs.rootpath, 'HTML');
+docFolder = fullfile(htmlFolder, 'doc');
+% cd required for m2html
+cd ..
 tic
 m2html('mfiles',outpathList, 'htmldir',docFolder, 'recursive','off', 'source','off', 'syntaxHighlighting','on', ...
     'global','on', 'globalHypertextLinks','on', 'todo','on', ...
@@ -81,7 +74,20 @@ m2html('mfiles',outpathList, 'htmldir',docFolder, 'recursive','off', 'source','o
 toc
 
 %% Build search database for helpdesk
+% switching to basic rendering to fix bug with builddocsearchdb
+webutils.htmlrenderer('basic');
+% MATLAB requires the html files to be in its search path
+addpath(htmlFolder, docFolder);
+savepath;
+% switching seems to take a while sometimes
+pause(1);
 if nargin == 0
-    builddocsearchdb( [fullpath filesep 'HTML' ] ); %generate help search
+    builddocsearchdb(htmlFolder); %generate help search
     rehash toolboxcache
 end
+% switch back to standard renderer
+webutils.htmlrenderer('default');
+
+ita_verbose_info('Please restart MATLAB if the MATLAB ITA Toolbox entry does not show in the documentation browser.',0);
+%% Go back to the last working directory
+cd(currentDir)

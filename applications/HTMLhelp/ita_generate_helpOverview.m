@@ -26,22 +26,24 @@ function ita_generate_helpOverview(folder)
 % 2. open index.html and look for insertion point with ita_openHTML
 % 3. looks for avaliable tutorials in Toolbox Folder (tutorials)
 % 4. Generate helptoc.xml and index_demo.html->link existing tutorials
-%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
 % 1. ....
-oldfolder = cd;
-pos = strfind(folder,filesep);
-toolboxFolderName = folder(pos(end)+1:end);
+oldfolder = pwd;
+[~, toolboxFolderName] = fileparts(folder);
+templateFolder = fullfile(ita_toolbox_path, 'applications', 'HTMLhelp', 'templates');
+htmlFolder = fullfile(folder, 'HTML');
+[helpXML_begin, helpXML_end] = ita_openHTML(fullfile(templateFolder, 'template_helptoc.xml'));
 
-[helpXML_begin, helpXML_end] = ita_openHTML([ita_toolbox_path filesep 'applications' filesep 'HTMLhelp' filesep 'templates' filesep 'template_helptoc.xml']);
 % 2. ....
-[index_demoHTML_begin, index_demoHTML_end] = ita_openHTML([ita_toolbox_path filesep 'applications' filesep 'HTMLhelp' filesep 'templates' filesep 'template_index_demos.html']);
+[index_demoHTML_begin, index_demoHTML_end] = ita_openHTML(fullfile(templateFolder, 'template_index_demos.html'));
+
 % 3. ....
 cd(folder);
 tutFiles = rdir(['**' filesep 'ita_tutorial*.m']); %search for tutorial files
 
 % 4. ....
-helpXML = [helpXML_begin]; %now build a new helptoc.xml
-index_demoHTML = [index_demoHTML_begin]; %now build a new index_demo.html
+helpXML = helpXML_begin; %now build a new helptoc.xml
+index_demoHTML = index_demoHTML_begin; %now build a new index_demo.html
 idxApp=1;
 appDemo=[];
 for idx = 1:length(tutFiles)
@@ -50,7 +52,9 @@ for idx = 1:length(tutFiles)
             continue
         end
     end
-    tutFiles(idx).html = publish(tutFiles(idx).name,struct('evalCode',false,'outputDir',[folder filesep 'HTML' filesep 'tutorials']));%finally generate linked HTML File
+	%finally generate linked HTML File
+    tutFiles(idx).html = publish(tutFiles(idx).name, struct('evalCode', false, 'outputDir', ...
+		fullfile(htmlFolder, 'tutorials')));
     pos = strfind(tutFiles(idx).html,toolboxFolderName);
     tutFiles(idx).html = tutFiles(idx).html(pos(1)+length(toolboxFolderName)+1:end);
     tutFiles(idx).html = strrep(tutFiles(idx).html,filesep,'/');%conversion for html
@@ -75,7 +79,6 @@ for idx = 1:length(tutFiles)
     
     if isempty(app)
         % generate new helptoc.xml
-        fileLocationHTML = strrep(tutFiles(idx).name,filesep,'/');%conversion for html
         helpXML = [helpXML,...
             '        <tocitem target="../',...
             tutFiles(idx).html,...
@@ -83,7 +86,7 @@ for idx = 1:length(tutFiles)
             tutFiles(idx).comment,...
             '</tocitem>',...
             sprintf('\n'),...
-            ];
+            ]; %#ok<AGROW>
         % generate new index_demo.html
         index_demoHTML = [index_demoHTML,...
             '  <tr>',...
@@ -107,23 +110,23 @@ for idx = 1:length(tutFiles)
             sprintf('\n'),...
             '  </tr>',...
             sprintf('\n'),...
-            ];
+            ]; %#ok<AGROW>
     else
-        appDemo{idxApp} = tutFiles(idx);
+        appDemo{idxApp} = tutFiles(idx); %#ok<AGROW>
         idxApp = idxApp+1;
     end
 end
 % now put all application demos in helptoc.xml + application_demo.html file:
-[app_demoHTML_begin app_demoHTML_end] = ita_openHTML([ita_toolbox_path filesep 'applications' filesep 'HTMLhelp' filesep 'templates' filesep 'template_application_demos.html']);
-app_demoHTML = [app_demoHTML_begin];
+[app_demoHTML_begin, app_demoHTML_end] = ita_openHTML(fullfile(templateFolder, 'template_application_demos.html'));
+app_demoHTML = app_demoHTML_begin;
 if ~isempty(appDemo)
     %XML File:
     helpXML = [helpXML,...
         '        <tocitem target="application_demos.html" image="HelpIcon.EXAMPLES">Application Demos',...
         sprintf('\n')];
     for idx = 1:length(appDemo)
-        fileLocationHTML = strrep(appDemo{idx}.name,filesep,'/');
-        appDemo{idx}.name = appDemo{idx}.name(14:end); %no "/applications/" in front of the name
+		% no "/applications/" in front of the name 
+        appDemo{idx}.name = appDemo{idx}.name(14:end); %#ok<AGROW>
         helpXML = [helpXML,...
             '           <tocitem target="../',...
             appDemo{idx}.html,...
@@ -131,7 +134,7 @@ if ~isempty(appDemo)
             appDemo{idx}.comment,...
             '</tocitem>',...
             sprintf('\n'),...
-            ];
+            ]; %#ok<AGROW>
         
         %HTML File:
         app_demoHTML = [app_demoHTML,...
@@ -156,16 +159,18 @@ if ~isempty(appDemo)
             sprintf('\n'),...
             '  </tr>',...
             sprintf('\n'),...
-            ];
+            ]; %#ok<AGROW>
     end
     helpXML = [helpXML, '        </tocitem>'];
 end
 helpXML = [helpXML, helpXML_end]; %put code after insertion point at the end
 index_demoHTML = [index_demoHTML, index_demoHTML_end];
 app_demoHTML = [app_demoHTML, app_demoHTML_end];
-ita_writeHTML([folder filesep 'HTML' filesep 'helptoc.xml'],helpXML) %overwrite old file
-ita_writeHTML([folder filesep 'HTML' filesep 'index_demos.html'],index_demoHTML)
-ita_writeHTML([folder filesep 'HTML' filesep 'application_demos.html'],app_demoHTML);
+ita_writeHTML(fullfile(htmlFolder, 'helptoc.xml'),helpXML); %overwrite old file
+ita_writeHTML(fullfile(htmlFolder, 'index_demos.html'),index_demoHTML);
+ita_writeHTML(fullfile(htmlFolder, 'application_demos.html'),app_demoHTML);
+% copy the info xml file as required since MATLAB R2014b
+copyfile(fullfile(templateFolder,'template_info.xml'), fullfile(htmlFolder, 'info.xml'));
 
 %% generate Class/App Documentation in Help Browser
 % - Tumbrgel 05/2012
@@ -188,13 +193,13 @@ for idx = 1:(double('Z')-offset)
             fileseps = strfind(currentCharFiles(idxY).name,filesep); %search all '\' to get filenameend
             app = strfind(currentCharFiles(idxY).name,'applications'); % sort apps in another list
             if isempty(app)
-                nFileList{idxNfile} = currentCharFiles(idxY).name((fileseps(end)+1):end);
+                nFileList{idxNfile} = currentCharFiles(idxY).name((fileseps(end)+1):end); %#ok<AGROW>
                 idxNfile=idxNfile+1;
             else
-                appFileName{idxApp} = currentCharFiles(idxY).name((fileseps(end)+1):end);
+                appFileName{idxApp} = currentCharFiles(idxY).name((fileseps(end)+1):end); %#ok<AGROW>
                 appTempName = currentCharFiles(idxY).name(app+length('applications')+1:end);
                 filesepApp = strfind(appTempName,filesep);
-                appName{idxApp} = appTempName(1:filesepApp(1)-1);
+                appName{idxApp} = appTempName(1:filesepApp(1)-1); %#ok<AGROW>
                 idxApp=idxApp+1;
             end
         end
@@ -208,8 +213,8 @@ end
 %% 2.
 % -> edit classes.html
 %get template_classes.html content:
-[classesHTML_begin classesHTML_end] = ita_openHTML([ita_toolbox_path filesep 'applications' filesep 'HTMLhelp' filesep 'templates' filesep 'template_classes.html']);
-classesHTML= [classesHTML_begin];
+[classesHTML_begin, classesHTML_end] = ita_openHTML(fullfile(templateFolder, 'template_classes.html'));
+classesHTML= classesHTML_begin;
 for idx = 1:length(nFileList)
     classesHTML = [classesHTML,...
         '<a href="matlab:doc ',...
@@ -218,7 +223,7 @@ for idx = 1:length(nFileList)
         nFileList{idx}(1:end-2),...
         '</a><br>',...
         sprintf('\n')
-        ];
+        ]; %#ok<AGROW>
 end
 if ~isempty(appName)
     classesHTML = [classesHTML '<br><br>The following classes are app-classes<br>' sprintf('\n')];
@@ -232,7 +237,7 @@ if ~isempty(appName)
                     appFileName{appIdx(idx)}(1:end-2),...
                     '</a><br>',...
                     sprintf('\n')
-                    ];
+                    ]; %#ok<AGROW>
             else %next App headline+file
                 classesHTML = [classesHTML,...
                     '<br>',...
@@ -244,7 +249,7 @@ if ~isempty(appName)
                     appFileName{appIdx(idx)}(1:end-2),...
                     '</a><br>',...
                     sprintf('\n')
-                    ];
+                    ]; %#ok<AGROW>
             end
         else %first App headline+file
             classesHTML = [classesHTML,...
@@ -257,17 +262,17 @@ if ~isempty(appName)
                 appFileName{appIdx(idx)}(1:end-2),...
                 '</a><br>',...
                 sprintf('\n')
-                ];
+                ]; %#ok<AGROW>
         end
     end
 end
 classesHTML=[classesHTML, '<br>', sprintf('\n'), classesHTML_end];
 %write edited file
-ita_writeHTML([folder filesep 'HTML' filesep 'classes.html'],classesHTML)
+ita_writeHTML(fullfile(htmlFolder, 'classes.html'), classesHTML);
 
 % -> edit apps.html
-[appsHTML_begin appsHTML_end] = ita_openHTML([ita_toolbox_path filesep 'applications' filesep 'HTMLhelp' filesep 'templates' filesep 'template_apps.html']);
-appsHTML= [appsHTML_begin];
+[appsHTML_begin, appsHTML_end] = ita_openHTML(fullfile(templateFolder, 'template_apps.html'));
+appsHTML= appsHTML_begin;
 %%%%%%%%%%%%%%%%%%%
 appfolder = rdir([folder filesep '**' filesep 'ita_apps.m']);
 if isempty(appfolder)
@@ -309,17 +314,17 @@ else
             '<td width="100"><a href="file:///', appDocumentationFile,'">', appname, '</a></td>', sprintf('\n'),...
             '<td>', data, sprintf('\n'),...
             '</td>',sprintf('\n'),...
-            '</tr>', sprintf('\n')];
+            '</tr>', sprintf('\n')]; %#ok<AGROW>
     end
     appsHTML = [appsHTML '</table>' appsHTML_end];
 end
 
 %write edited file
-ita_writeHTML([folder filesep 'HTML' filesep 'apps.html'],appsHTML)
+ita_writeHTML(fullfile(htmlFolder, 'apps.html'), appsHTML);
 
 %% Generate Kernel Documentation
-[kernelHTML_begin kernelHTML_end] = ita_openHTML([ita_toolbox_path filesep 'applications' filesep 'HTMLhelp' filesep 'templates' filesep 'template_kernel.html']);
-kernelHTML= [kernelHTML_begin];
+[kernelHTML_begin, kernelHTML_end] = ita_openHTML(fullfile(templateFolder, 'template_kernel.html'));
+kernelHTML= kernelHTML_begin;
 kernelList = rdir([folder filesep 'kernel' filesep '**' filesep 'KernelDescription.txt']);
 
 kernelHTML = [kernelHTML '<table border="2">' sprintf('\n')];
@@ -328,9 +333,9 @@ for idx = 1:numel(kernelList)
     % get Kernelfoldername
     kernelDescriptionPath = kernelList(idx).name;
     pos = strfind(kernelDescriptionPath,'kernel');
-    kernelName{idx} = kernelDescriptionPath(pos(1)+7:end);
+    kernelName{idx} = kernelDescriptionPath(pos(1)+7:end); %#ok<AGROW>
     pos = strfind(kernelName{idx},'KernelDescription.txt');
-    kernelName{idx} = kernelName{idx}(1:pos(1)-2);
+    kernelName{idx} = kernelName{idx}(1:pos(1)-2); %#ok<AGROW>
     
     %get m2html documentation fileposition:
     pos = strfind(kernelDescriptionPath,'kernel');
@@ -362,11 +367,10 @@ for idx = 1:numel(kernelList)
         '<td width="100"><a href="file:///', kernelDocumentationFile,'">', kernelName{idx}, '</a></td>', sprintf('\n'),...
         '<td>', data, sprintf('\n'),...
         '</td>',sprintf('\n'),...
-        '</tr>', sprintf('\n')];
+        '</tr>', sprintf('\n')]; %#ok<AGROW>
 end
 kernelHTML = [kernelHTML '</table>' kernelHTML_end];
-ita_writeHTML([folder filesep 'HTML' filesep 'kernel.html'],kernelHTML)
+ita_writeHTML(fullfile(htmlFolder, 'kernel.html'), kernelHTML);
 
 cd(oldfolder);
-disp('****** PLEASE RESTART MATLAB TO GET AN ENTRY "RWTH ITA TOOLBOX" IN YOUR MATLAB HELP BROWSER ******')
 end
