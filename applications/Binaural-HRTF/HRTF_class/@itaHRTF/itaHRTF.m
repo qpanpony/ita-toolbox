@@ -103,7 +103,7 @@ classdef  itaHRTF < itaAudio
     end
     
     properties (Dependent = true, SetAccess = private)
-        openDaff2itaHRTF;
+        openDAFF2itaHRTF;
         itaAudio2itaHRTF;
         init;
         hdf2itaHRTF;
@@ -133,7 +133,7 @@ classdef  itaHRTF < itaAudio
                 end
                 % openDaff input
                 if ~isempty(find(strcmpi(varargin,'Daff')==1, 1))
-                        this.openDaff2itaHRTF = varargin{find(strcmpi(varargin,'Daff')==1)+1};
+                        this.openDAFF2itaHRTF = varargin{find(strcmpi(varargin,'Daff')==1)+1};
                 end
                 % hdf5 input
                 if ~isempty(find(strcmpi(varargin,'hdf5')==1, 1))
@@ -351,19 +351,44 @@ classdef  itaHRTF < itaAudio
             end
         end
         
-        function this = set.openDaff2itaHRTF(this,pathDaff)
-            handleDaff = DAFF('open',pathDaff);
-            props = DAFF('getProperties', handleDaff);
-                        
-            counter = 1;
-            data = zeros(props.filterLength,props.numRecords*2,'double' ) ;
-            coordDaff = zeros(props.numRecords,2) ;
-            for iDir = 1:props.numRecords
-                data(:,[counter counter+1]) = DAFF('getRecordByIndex', handleDaff,iDir)';
-                %coordDaff(iDir,:) = DAFF('getRecordCoords', handleDaff, 'object', iDir)';
-                coordDaff(iDir,:) = DAFF('getRecordCoords', handleDaff, 'data', iDir)';
-                counter= counter+2;
+        function this = set.openDAFF2itaHRTF( this, daff_file_path )
+            
+            try_daff_old_version = false;
+            
+            % First try new version (v17)
+            try
+                handleDaff = DAFFv17( 'open', daff_file_path );
+                props = DAFFv17( 'getProperties', handleDaff);
+
+                counter = 1;
+                data = zeros(props.filterLength,props.numRecords*2,'double' ) ;
+                coordDaff = zeros(props.numRecords,2) ;
+                for iDir = 1:props.numRecords
+                    data(:,[counter counter+1]) = DAFFv17( 'getRecordByIndex', handleDaff,iDir )';
+                    coordDaff(iDir,:) = DAFFv17( 'getRecordCoords', handleDaff, 'data', iDir )';
+                    counter= counter+2;
+                end
+            catch
+                disp( 'Could not read DAFF file right away, falling back to old version and retrying ...' );
+                try_daff_old_version = true;
             end
+
+            if try_daff_old_version
+                % Old version (v15)
+                handleDaff = DAFFv15( 'open',daff_file_path);
+                props = DAFFv15( 'getProperties', handleDaff);
+
+                counter = 1;
+                data = zeros(props.filterLength,props.numRecords*2,'double' ) ;
+                coordDaff = zeros(props.numRecords,2) ;
+                for iDir = 1:props.numRecords
+                    data(:,[counter counter+1]) = DAFFv15( 'getRecordByIndex', handleDaff,iDir )';
+                    coordDaff(iDir,:) = DAFFv15( 'getRecordCoords', handleDaff, 'data', iDir )';
+                    counter= counter+2;
+                end
+            end
+
+            % Proceed (version independent)
             
             phiM = coordDaff(:,1)*pi/180;
             %phiM = mod(coordDaff(:,1),360)*pi/180;
