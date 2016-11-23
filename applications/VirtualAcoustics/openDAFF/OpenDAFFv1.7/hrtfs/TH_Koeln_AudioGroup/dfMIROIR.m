@@ -1,10 +1,8 @@
-function [ data, sampleRate, isSymetric, metadata ] = dfMIRODFT( alpha, beta, miro_obj )
+function [ data, samplerate, metadata ] = dfMIROIR( alpha, beta, miro_obj )
 
-    isSymetric = true;
-    
-    sampleRate = miro_obj.fs;
+    samplerate = miro_obj.fs;
     if ~isempty( miro_obj.resampleToFS )
-        sampleRate = miro_obj.resampleToFS;
+        samplerate = miro_obj.resampleToFS;
     end
     if strcmp( miro_obj.angles, 'DEG' )
         [ irID, azimuth, elevation ] = closestIr( miro_obj, alpha, beta );
@@ -15,11 +13,11 @@ function [ data, sampleRate, isSymetric, metadata ] = dfMIRODFT( alpha, beta, mi
         
     nResidual = mod( size( hrir, 1 ), 4 );
     if nResidual > 0
-        data = fft( [ hrir' zeros( 2, 4 - nResidual ) ] );
+        data = [ hrir' zeros( 2, 4 - nResidual ) ];
     else
-        data = fft( hrir' );
+        data = hrir';
     end
-        
+    
     metadata = [];
     if strcmp( miro_obj.angles, 'RAD' )
         azimuth = rad2deg( azimuth );
