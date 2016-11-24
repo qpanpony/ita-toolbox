@@ -35,33 +35,42 @@ function [ ] = daffv15_write_metadata( fid, metadata )
             % Logical scalar (DAFF_BOOL)
             if islogical(value) && isscalar(value)
                 type = 'BOOL';
+                datatype = 0;
             end
 
             % Integer scalar (DAFF_INT)
             if isinteger(value) && isfinite(value) && isreal(value) && isscalar(value)
                 type = 'INT';
+                datatype = 1;
             end
 
             % Floating point scalar (DAFF_FLOAT)
             if isfloat(value) && isfinite(value) && isreal(value) && isscalar(value)
                 type = 'FLOAT';
+                datatype = 2;
             end        
 
             % String (DAFF_STRING)
             if ischar( value )
                 type = 'STRING';
+                datatype = 3;
             end
             
             if isempty( type )
                 error( 'Unsupported datatype %s for key ''%s'' in metadata', class( value ), name );
             end
             
-            metadata_new_format = daffv15_metadata_addKey( metadata_new_format, name, type, value );
+            %metadata_new_format = daffv15_metadata_addKey( metadata_new_format, name, type, value );
+            metadata_new_format(i).name = name;
+            metadata_new_format(i).datatype = datatype;
+            metadata_new_format(i).value = value;
         end
         
         metadata = metadata_new_format;
     end        
         
+    nkeys = length( metadata );
+    
     % Number of keys
     fwrite( fid, nkeys, 'int32' );
         
