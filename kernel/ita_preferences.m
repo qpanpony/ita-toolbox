@@ -121,7 +121,7 @@ elseif nargin == 1
     elseif iscellstr(varargin{1})
         input = varargin{1};
         for idx = 1:numel(input)
-            varargout{idx} = ita_preferences(input{idx});
+            varargout{idx} = ita_preferences(input{idx}); %#ok<AGROW>
         end
         return
     elseif isstruct(varargin{1}) % All setting as a struct
@@ -136,32 +136,36 @@ elseif nargin == 1
     %get value from global variable
     value = eval(global_preference_name);
     if isempty(value)
-        if any(strcmpi(defined_preferences(:,1),preference_name)) && (any(strcmpi(defined_preferences(strcmpi(defined_preferences(:,1),preference_name),3),'LicenseFile')) || strcmpi(defined_preferences(strcmpi(defined_preferences(:,1),preference_name),3),'*LicenseFile'))  % Read from license file
-            if isempty(userInfo) % Check if global is set
-                userInfo = ita_licensefile_read; %Read from licensefile
-            end
-            if isempty(userInfo) || numel(fieldnames(userInfo)) == 0 % Check if read from licensefile was successfull
-                ita_verbose_info('License file is empty or does not exist',2) % ToDo: Increase verbose level after everything is checked
-            else
-                userInfo.AuthorStr = userInfo.Name; %Backward compatibility
-                userInfo.EmailStr = userInfo.EMail; %Backward compatibility
+        if any(strcmpi(defined_preferences(:,1),preference_name))
+            % Read from git configuration, but only if name and email
+            % haven't been set already or are the same as the default
+            % values given in ita_defined_preferences
+            if isempty(userInfo) && (strcmp(preference_name,'AuthorStr') || strcmp(preference_name,'EmailStr'))
+                if ispref('RWTH_ITA_ToolboxPrefs',preference_name)
+                    if isempty(getpref('RWTH_ITA_ToolboxPrefs',preference_name)) ||  ...
+                            strcmp(getpref('RWTH_ITA_ToolboxPrefs',preference_name),'@') 
+                        userInfo = ita_git_read_config;
+                        
+                    else
+                        userInfo.(preference_name) = getpref('RWTH_ITA_ToolboxPrefs',preference_name);
+                    end
+                else
+                    userInfo = ita_git_read_config;
+                end            
             end
             if isfield(userInfo,preference_name)
                 value = userInfo.(preference_name);
                 eval([global_preference_name ' = value;']); %Set global for faster access the next time
-            else % ToDo: This can be cleaned up as soon as everyone has a new license
-                %error('Value not found in license file');
+                setpref('RWTH_ITA_ToolboxPrefs',preference_name, value);
+            else
                 if ispref('RWTH_ITA_ToolboxPrefs',preference_name) % try to read preference
                     value = getpref('RWTH_ITA_ToolboxPrefs',preference_name);
-                else %default
-                    any(strcmpi(defined_preferences(:,1),preference_name))
+                else
+                    % return default values if preferences is not set
                     is_defined = strcmpi(defined_preferences(:,1),preference_name);
                     [idx,jdx]  = find(is_defined,1);
                     value = defined_preferences{idx,jdx+1};
                 end
-                eval([global_preference_name ' = value;']);
-                ita_verbose_info('Reading passphrase from preferences. This will be switched off in the future',2) % ToDo: Increase verbose level after everything is checked
-                ita_verbose_info('!!! Please ask for a new license !!!',2) % ToDo: Increase verbose level after everything is checked
                 eval([global_preference_name ' = value;']); %Set global for faster access the next time
             end
             
@@ -306,7 +310,7 @@ if samplingRateChanged
         % seems to work this way, tell portaudio the sampling rate ...
         playrec('init',sr,playID,recID);
         % ... but then kill the playrec part in matlab
-        clear mex;
+        clear mex; %#ok<CLMEX>
     end
 end
 
@@ -318,7 +322,7 @@ elseif nargout == 0
     if nargin == 0
         %show gui
         ita_verbose_info('ita_preferences::clearing mex functions first...',2);
-        clear mex %clear for playrec & pdi
+        clear mex %#ok<CLMEX> %clear for playrec & pdi
         if usejava('jvm') %Only if jvm available (non_cluster)
             ita_preferences_gui_tabs(defined_preferences,tab_names);
         else
