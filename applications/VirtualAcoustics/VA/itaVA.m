@@ -1088,6 +1088,24 @@ classdef itaVA < handle
 		[dGain] = VAMatlab('getRenderingModuleGain', this.handle, sModuleID);
 	end
 
+	function [] = getRenderingModules(this, bFilterEnabled)
+		% Get list of rendering modules
+		%
+		% Parameters:
+		%
+		% 	bFilterEnabled [boolean-1x1] Filter activated (true) (optional, default: 1)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		if ~exist('bFilterEnabled','var'), bFilterEnabled = 1; end
+		VAMatlab('getRenderingModules', this.handle, bFilterEnabled);
+	end
+
 	function [dGain] = getReproductionModuleGain(this, sModuleID)
 		% Returns the reproduction module output gain
 		%
@@ -1103,6 +1121,24 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		[dGain] = VAMatlab('getReproductionModuleGain', this.handle, sModuleID);
+	end
+
+	function [] = getReproductionModules(this, bFilterEnabled)
+		% Get list of rendering modules
+		%
+		% Parameters:
+		%
+		% 	bFilterEnabled [boolean-1x1] Filter activated (true) (optional, default: 1)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		if ~exist('bFilterEnabled','var'), bFilterEnabled = 1; end
+		VAMatlab('getReproductionModules', this.handle, bFilterEnabled);
 	end
 
 	function [info] = getSceneInfo(this)
