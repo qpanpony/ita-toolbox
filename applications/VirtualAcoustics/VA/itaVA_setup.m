@@ -75,7 +75,15 @@ current_va_server_dir = which( 'VAServer.exe' );
 if ~isempty( current_va_server_dir )
     set( handles.edit_vaserver_full_path, 'String', current_va_server_dir )
     [ ~, v ] = system( [ current_va_server_dir ' --version' ] );
-    set( handles.edit_vaserver_version, 'String', strcat( v ) )
+    vs = strsplit( v, '\n' );
+    for i = 1:numel( vs )
+        vss = vs{ 1, i };
+        if numel( vss ) > 6
+            if strcmpi( vss( 1:6 ), 'VACore' )
+                set( handles.edit_vaserver_version, 'String', strcat( vs( i ) ) )
+            end
+        end
+    end
 end
 
 uiwait( handles.figure1 );
@@ -212,7 +220,15 @@ if vaserver_found
     vaserver_path = fullfile( vaserver_dir, 'VAServer.exe' );
     set( handles.edit_vaserver_full_path, 'String', vaserver_path )
     [ ~, v ] = system( [ vaserver_path ' --version' ] );
-    set( handles.edit_vaserver_version, 'String', strcat( v ) )
+    vs = strsplit( v, '\n' );
+    for i = 1:numel( vs )
+        vss = vs{ 1, i };
+        if numel( vss ) > 6
+            if strcmpi( vss( 1:6 ), 'VACore' )
+                set( handles.edit_vaserver_version, 'String', strcat( vs( i ) ) )
+            end
+        end
+    end
 else
     set( handles.edit_vaserver_full_path, 'String', 'not found' )
 end
