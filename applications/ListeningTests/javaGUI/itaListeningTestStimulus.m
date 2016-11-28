@@ -48,7 +48,6 @@ classdef itaListeningTestStimulus
         mHRTF;
         mHeadphoneEquilization;
         mStimulus;
-        hrtfmerge;
     end
 
 %% methods
@@ -96,7 +95,7 @@ classdef itaListeningTestStimulus
 %             targetCoord.r = 1;
 %             index = coords.findnearest(targetCoord);
 %             HRTF = this.mHRTF(ceil(index/2));
-            hrtf = this.hrtfmerge.findnearestHRTF(elevation,azimuth);
+            hrtf = this.mHRTF.findnearestHRTF(elevation,azimuth);
             HRTF = hrtf.itaHRTF2itaAudio;
         end
         
@@ -114,19 +113,37 @@ classdef itaListeningTestStimulus
             result = this.HRTFFile;
         end
         function this = set.HRTFFile(this,value)
-            this.HRTFFile = value;
+            
+            if isa(value,'itaAudio')
+                this.HRTFFile = '';
+                
+                this.mHRTF = itaHRTF(merge(value));  
+                
+                return
+            end
+            
+            if isa(value,'itaHRTF')
+                this.HRTFFile = '';
+                
+                this.mHRTF = value;   
+                
+                return
+            end
+            
+            if ischar(value)
+                try
+                    this.HRTFFile = value;
 
-            % load the HRTF data
-            HRTF = ita_read(value);
-            % TODO: normalization
-%             mergeHRTF = merge(HRTF);
-%             maxValue = max(max(abs(mergeHRTF.freqData)));
-%             for index = 1:length(HRTF)
-%                 HRTF(index).freqData = HRTF(index).freqData./maxValue;
-% %                 HRTF(index).signalType = 'energy';
-%             end
-            this.mHRTF = HRTF;
-            this.hrtfmerge = itaHRTF(merge(this.mHRTF));
+                    HRTF = ita_read(value);
+                    
+                catch e
+                    
+                end
+                
+                return
+            end
+                     
+            error('Not a valid type');
             
         end
 
@@ -134,13 +151,27 @@ classdef itaListeningTestStimulus
             result = this.StimulusFile;
         end
         function this = set.StimulusFile(this,value)
-            this.StimulusFile = value;
             
-            % read the simulus file
-            this.mStimulus = ita_read(value);
+            if isa(value,'itaAudio')
+                this.StimulusFile = '';
+                
+                this.mStimulus = value;  
+                
+                return
+            end
             
-            % normalize
-%             this.mStimulus.timeData = this.mStimulus.timeData./max(abs(this.mStimulus.timeData));
+            
+            if ischar(value)
+                try
+                    this.StimulusFile = value;
+                    this.mStimulus = ita_read(value);                 
+                catch e
+                    
+                end
+                return
+            end
+            
+            error('Not a valid type');
             
         end    
 
@@ -148,13 +179,30 @@ classdef itaListeningTestStimulus
             result = this.HeadphoneEquilizationFile;
         end
         function this = set.HeadphoneEquilizationFile(this,value)
-            this.HeadphoneEquilizationFile = value;
+            
+            if isa(value,'itaAudio')
+                this.HeadphoneEquilizationFile = '';
+                
+                this.mHeadphoneEquilization = value;  
+                
+                return
+            end
+            
+            
+            if ischar(value)
+                try
+                    this.HeadphoneEquilizationFile = value;
+                    this.mHeadphoneEquilization = ita_read(value);                 
+                catch e
+                    
+                end
+                return
+            end
+            
+            error('Not a valid type');
+            
+            
 
-            % read the file
-            headphoneEquilization = ita_read(value);
-            % TODO: normalization
-            %headphoneEquilization.freqData = headphoneEquilization.freqData./max(max(abs(headphoneEquilization.freqData)));
-            this.mHeadphoneEquilization = headphoneEquilization;
         end
     end
 end
