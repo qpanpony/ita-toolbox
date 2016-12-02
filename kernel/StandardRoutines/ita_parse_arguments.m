@@ -105,6 +105,7 @@ else
 end
 varargout = {};
 pos_num   = 0;  % needed for meaningful error messages
+notFoundCell = {};
 
 %% check field names for fixed position tokens
 field_token    = fieldnames(inStruct);
@@ -115,7 +116,7 @@ for idx = 1:length(field_token)
     token = field_token{idx};
     if numel(token) >= 5 % RSC - support for arguments shorter than 5 elements
         if strcmpi(token(1:3),'pos') && strcmpi(token(5),'_')
-            pos_num      = sscanf(token(4),'%d'); %this is the fixed position number in the argument list
+            pos_num      = sscanf(token(4),'%d'); %this is the fixed position number in the argument list            
             token_new    = token(6:end); %get rid off prefix
             if pos_num <= numel(Arguments) % rsc - check if enough arguments are given
                 value        = Arguments{pos_num}; %get value/object
@@ -237,6 +238,8 @@ Arguments = newArguments;
 nArguments = length(Arguments);
 fieldNamesInStruct = fieldnames(inStruct);
 idx = 1;
+notFoundArguments = 0;
+
 while (idx <= nArguments) % go through all arguments
 %     if ~ischar(Arguments{idx}), error([thisFuncStr 'The arguments specified to call "' callFuncStr '" are not correct. Check the arguments, the corresponding values and the order.']); end;
     if ~ischar(Arguments{idx})
@@ -285,13 +288,26 @@ while (idx <= nArguments) % go through all arguments
             end
         end
     else
-        error([thisFuncStr callFuncStr 'There is no entry in the struct for this argument: ' lower(Arguments{idx})]);
+        notFoundArguments = 1;
+        % this handles the case that some arguments are not found
+        notFoundCell{end+1} =  Arguments{idx};
+        idx = idx + 1;
+        if idx <= nArguments
+            notFoundCell{end+1} =  Arguments{idx};
+            idx = idx + 1;
+        end
+        
     end
 end
 
+if notFoundArguments == 1
+    ita_verbose_info([thisFuncStr callFuncStr 'Some arguments could not be found in the struct. They are returned separately.'],0);
+end
+
+
 %% search for pseudo boolean - also done when no arguments specified
 cFieldNames = fieldnames(inStruct);
-for idx = 1:length(cFieldNames);
+for idx = 1:length(cFieldNames)
     if ischar(inStruct.(cFieldNames{idx}))
         if sum(strcmpi(inStruct.(cFieldNames{idx}),{'on','true'}))
             inStruct.(cFieldNames{idx}) = true;
@@ -302,6 +318,6 @@ for idx = 1:length(cFieldNames);
 end
 
 %% Output parameters
-varargout = [varargout {inStruct}]; %#ok<VARARG>
+varargout = [varargout {inStruct} {notFoundCell}]; %#ok<VARARG>
 
 end
