@@ -1,4 +1,4 @@
-function [out1,out2,out3] = ginput(arg1)
+function [out1,out2,out3] = ginput_job(arg1)
 %GINPUT Graphical input from mouse.
 %   [X,Y] = GINPUT(N) gets N points from the current axes and returns
 %   the X- and Y-coordinates in length N vectors X and Y.  The cursor
@@ -72,7 +72,7 @@ else
         how_many = -1;
         b = [];
     else
-        how_many = arg1;
+        how_many = arg1.Number;
         b = [];
         if  ischar(how_many) ...
                 || size(how_many,1) ~= 1 || size(how_many,2) ~= 1 ...
