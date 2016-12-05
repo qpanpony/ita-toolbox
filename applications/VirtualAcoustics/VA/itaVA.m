@@ -1088,7 +1088,7 @@ classdef itaVA < handle
 		[dGain] = VAMatlab('getRenderingModuleGain', this.handle, sModuleID);
 	end
 
-	function [] = getRenderingModules(this, bFilterEnabled)
+	function [renderers] = getRenderingModules(this, bFilterEnabled)
 		% Get list of rendering modules
 		%
 		% Parameters:
@@ -1097,13 +1097,13 @@ classdef itaVA < handle
 		%
 		% Return values:
 		%
-		% 	None
+		% 	renderers [cell-array of struct-1x1] Renderer infos (names, descriptions, etc.)
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('bFilterEnabled','var'), bFilterEnabled = 1; end
-		VAMatlab('getRenderingModules', this.handle, bFilterEnabled);
+		[renderers] = VAMatlab('getRenderingModules', this.handle, bFilterEnabled);
 	end
 
 	function [dGain] = getReproductionModuleGain(this, sModuleID)
@@ -1123,7 +1123,7 @@ classdef itaVA < handle
 		[dGain] = VAMatlab('getReproductionModuleGain', this.handle, sModuleID);
 	end
 
-	function [] = getReproductionModules(this, bFilterEnabled)
+	function [reproductionmodules] = getReproductionModules(this, bFilterEnabled)
 		% Get list of rendering modules
 		%
 		% Parameters:
@@ -1132,13 +1132,13 @@ classdef itaVA < handle
 		%
 		% Return values:
 		%
-		% 	None
+		% 	reproductionmodules [cell-array of struct-1x1] Reproduction module infos (names, descriptions, etc.)
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('bFilterEnabled','var'), bFilterEnabled = 1; end
-		VAMatlab('getReproductionModules', this.handle, bFilterEnabled);
+		[reproductionmodules] = VAMatlab('getReproductionModules', this.handle, bFilterEnabled);
 	end
 
 	function [info] = getSceneInfo(this)

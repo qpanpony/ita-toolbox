@@ -134,7 +134,7 @@ classdef itaListeningTestStimulus
                 try
                     this.HRTFFile = value;
 
-                    HRTF = ita_read(value);
+                    this.mHRTF = ita_read(value);
                     
                 catch e
                     
