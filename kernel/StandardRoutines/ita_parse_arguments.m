@@ -192,8 +192,7 @@ for idx = 1:length(field_token)
                         
                     case {'vector'}
                         if ~isvector(value)
-                            error([thisFuncStr callFuncStr 'Type does not match requirements, should be a vector but is:'])
-                            disp(value)
+                            error([thisFuncStr callFuncStr 'Type does not match requirements, should be a vector but is:', class(value)])
                         end
                     case {'char','string'} % pdi - I need this case
                         if ~ischar(value)
@@ -290,10 +289,10 @@ while (idx <= nArguments) % go through all arguments
     else
         notFoundArguments = 1;
         % this handles the case that some arguments are not found
-        notFoundCell{end+1} =  Arguments{idx};
+        notFoundCell{end+1} =  Arguments{idx};%#ok<AGROW>
         idx = idx + 1;
         if idx <= nArguments
-            notFoundCell{end+1} =  Arguments{idx};
+            notFoundCell{end+1} =  Arguments{idx};%#ok<AGROW>
             idx = idx + 1;
         end
         
