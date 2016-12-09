@@ -332,6 +332,8 @@ classdef itaRavenProject < handle
                 if (strcmp(obj.pathDirectivities(1:2),'..')), obj.pathDirectivities = [ ravenBasePath obj.pathDirectivities(3:end) ]; end
                 if (strcmp(obj.pathMaterials(1:2),'..')), obj.pathMaterials = [ ravenBasePath obj.pathMaterials(3:end) ]; end
                 if (strcmp(obj.fileHRTF(1:2),'..')), obj.fileHRTF = [ ravenBasePath obj.fileHRTF(3:end) ]; end               
+                
+
             end
             
             % [Rooms] %
@@ -346,6 +348,7 @@ classdef itaRavenProject < handle
                 end
             end
             
+
 
             
             % [PrimarySources] %
@@ -707,6 +710,95 @@ classdef itaRavenProject < handle
             text(spos(:,3)+0.2,spos(:,1),spos(:,2),snames)
             text(rpos(:,3)+0.2,rpos(:,1),rpos(:,2),rnames)
         end
+        
+        %------------------------------------------------------------------
+        function plotMaterialsAbsorption(obj, exportPlot)
+            
+            if nargin < 2
+                exportPlot = false;
+            end
+            
+            
+            freqVector = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 500 630 800 1000 1250 1600 2000 2500 3150 4000 5000 6300 8000 10000 12500 16000 20000];
+            freqLabel3rdVisual = { '', '', '31.5 Hz', '', '', '' '', '  ', '  125 Hz', ' ', ' ', ...
+                '', ' ', ' ', '  500 Hz', ' ', '  ', '', '', ' ', '   2 kHz', ...
+                ' ', '', '', '', '', '   8 kHz', '  ', '', '', '20 kHz'};
+
+            yticks = { '0.0','', '0.20','','0.40','','0.60','','0.80','','1.0'};
+
+            allMaterials = obj.getRoomMaterialNames;
+            numberMaterials = length(allMaterials);
+
+            currentMaterial = itaResult;
+            currentMaterial.freqVector = freqVector;
+            currentMaterial.freqData = [];
+
+            for i=1:numberMaterials
+                [absorp scatter ] = obj.getMaterial(allMaterials{i});
+                currentMaterial.freqData = [ currentMaterial.freqData absorp' ];
+                allMaterials{i} = strrep(allMaterials{i},'_', ' ');
+            end
+
+            currentMaterial.channelNames = allMaterials;
+            currentMaterial.allowDBPlot = false;
+            currentMaterial.pf;
+            title('');
+            ylabel('Absorption coefficient');
+            xlabel('Frequency in Hz');
+            set(gca,'XLim',[63 20000]);
+            set(gca,'YLim',[0 1]);
+
+            fileName = obj.projectName;
+
+            if (exportPlot)
+              saveas(gcf,[ obj.pathResults '\' fileName '_Abs.png']);
+            end
+        end
+        
+        %------------------------------------------------------------------
+        function plotMaterialsScattering(obj, exportPlot)
+            if nargin < 2
+                exportPlot = false;
+            end
+            
+            
+            freqVector = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 500 630 800 1000 1250 1600 2000 2500 3150 4000 5000 6300 8000 10000 12500 16000 20000];
+            freqLabel3rdVisual = { '', '', '31.5 Hz', '', '', '' '', '  ', '  125 Hz', ' ', ' ', ...
+                '', ' ', ' ', '  500 Hz', ' ', '  ', '', '', ' ', '   2 kHz', ...
+                ' ', '', '', '', '', '   8 kHz', '  ', '', '', '20 kHz'};
+
+            yticks = { '0.0','', '0.20','','0.40','','0.60','','0.80','','1.0'};
+
+            allMaterials = obj.getRoomMaterialNames;
+            numberMaterials = length(allMaterials);
+
+            currentMaterial = itaResult;
+            currentMaterial.freqVector = freqVector;
+            currentMaterial.freqData = [];
+
+            for i=1:numberMaterials
+                [absorp scatter ] = obj.getMaterial(allMaterials{i});
+                currentMaterial.freqData = [ currentMaterial.freqData scatter' ];
+                allMaterials{i} = strrep(allMaterials{i},'_', ' ');
+            end
+
+            currentMaterial.channelNames = allMaterials;
+            currentMaterial.allowDBPlot = false;
+            currentMaterial.pf;
+            title('');
+            ylabel('Scattering coefficient');
+            xlabel('Frequency in Hz');
+            set(gca,'XLim',[63 20000]);
+            set(gca,'YLim',[0 1]);
+
+            fileName = obj.projectName;
+
+            if (exportPlot)
+              saveas(gcf,[ obj.pathResults '\' fileName '_Scat.png']);
+            end
+        end
+        
+        
         
         % [Global] %
         %------------------------------------------------------------------
