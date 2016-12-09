@@ -340,7 +340,13 @@ classdef itaRavenProject < handle
             obj.modelFileList       = obj.modelFileList{1}; % textscan implementation issue
             if numel(obj.modelFileList) == 1
                 obj.modelFileList = obj.modelFileList{1};   % de-cell if only 1 room given
+                
+                if obj.ravenExe(2) == ':' % convert to absolute path
+                    if (strcmp(obj.modelFileList(1:2),'..')), obj.modelFileList = [ ravenBasePath obj.modelFileList(3:end) ]; end   
+                end
             end
+            
+
             
             % [PrimarySources] %
             obj.sourceNameString    = obj.rpf_ini.GetValues('PrimarySources', 'sourceNames', 'Sender');
@@ -2593,7 +2599,7 @@ classdef itaRavenProject < handle
             end
             
             % get reverberation time after sabine
-            A = roommodel.getEquivalentAbsorptionArea_eyring();
+            A = roommodel.getEquivalentAbsorptionArea_eyring(obj.pathMaterials);
         end
         
         %------------------------------------------------------------------
@@ -3300,7 +3306,7 @@ classdef itaRavenProject < handle
             end
             
             % calculate new absorption values for the variable model to match the reverberation time of the target model (default values by eyring including air abs)
-            [A, S] = roommodel.getEquivalentAbsorptionArea_eyring();
+            [A, S] = roommodel.getEquivalentAbsorptionArea_eyring(obj.pathMaterials);
             if (obj.getAirAbsorptionEnabled)
                  airAbscoeffs = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
             else
@@ -3366,6 +3372,142 @@ classdef itaRavenProject < handle
                 ax = gca; 
                 ax.XTickLabel = {32 63 125 250 500 1000 2000 4000 8000 16000}; 
                 grid on;
+
+            else
+                newReverbTime = [];
+            end
+            
+        end        
+        
+         %------------------------------------------------------------------
+        function [ newReverbTime absorp_neu_all ]= adjustAbsorptionToMatchParameter(obj, targetReverbTime, roomID, validationsimulation, materialPrefix, materialAppendix, materialIndexVector)
+            
+            if isempty(obj.modelFileList)
+                return
+            end
+            
+            % check args
+            if nargin < 3
+                roomID = 0;
+            end
+            
+            % check if simulation was already run
+            if isempty(obj.histogram)
+                if ~obj.exportHistogram
+                    obj.setExportHistogram(1);     % make sure we get a histogram
+                    obj.run();
+                    obj.setExportHistogram(0);
+                else
+                    obj.run();
+                end
+            else
+                disp('Using results from last simulation run.');
+            end
+            
+            % check back the reverberation times
+            thisReverbTime = obj.getT30(1);     % average over receivers
+            
+            % if desired, rename the materials of the model
+            if isempty(obj.model)
+                if iscell(obj.modelFileList)
+                    for iRoom = 1 : numel(obj.modelFileList)
+                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                    end
+                    roommodel = obj.model{roomID + 1};
+                else
+                    obj.model = load_ac3d(obj.modelFileList);
+                    roommodel = obj.model;
+                end
+            else
+                if iscell(obj.model)
+                    roommodel = obj.model{roomID + 1};
+                else
+                    roommodel = obj.model;
+                end
+            end
+            materialNames = roommodel.getMaterialNames(); % read materials out of the ac3d model
+            if nargin > 4
+                newMaterialNames = strcat(materialPrefix, materialNames);
+                if nargin > 5
+                    newMaterialNames = strcat(newMaterialNames, materialAppendix);
+                end
+                roommodel.setMaterialNames(newMaterialNames);
+            else
+                newMaterialNames = materialNames;
+            end
+            
+            % calculate new absorption values for the variable model to match the reverberation time of the target model (default values by eyring including air abs)
+            [A, S] = roommodel.getEquivalentAbsorptionArea_eyring(obj.pathMaterials);
+            if (obj.getAirAbsorptionEnabled)
+                 airAbscoeffs = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
+            else
+                airAbscoeffs = zeros(1,31); 
+            end
+            equivalentAirAbsorptionArea = 4* roommodel.getVolume() * airAbscoeffs;
+            
+            if numel(targetReverbTime) == 10 % go to octave resolution
+                A = A(3:3:end);   
+                equivalentAirAbsorptionArea = equivalentAirAbsorptionArea(3:3:end);
+            end
+            alphas_default = 1 - exp(((-0.163 * roommodel.getVolume() ./ targetReverbTime) - equivalentAirAbsorptionArea)/(S));
+            alphas_alt = (A+equivalentAirAbsorptionArea)/S;
+            alphas_neu = 1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:));
+                      
+            absorptionFactors = alphas_neu(:) ./ alphas_alt(:);
+            absorptionFactors(isnan(absorptionFactors)) = 1;
+            absorptionFactors(isinf(absorptionFactors)) = 999;
+            
+            % apply new absorption values
+            matProcessed={};
+            if nargin < 7
+                materialIndexVector = 1 : numel(materialNames);
+            else
+                materialIndexVector = materialIndexVector + 1; % C++ starts counting at zero, but MATLAB starts at 1
+            end
+            
+            
+            absorp_neu_all = zeros(length(alphas_neu),numel(materialIndexVector));
+            
+            for iMat = materialIndexVector
+                
+                if ~sum(strcmp(materialNames{iMat},matProcessed))
+                    matProcessed{iMat}=materialNames{iMat};
+                    [absorp, scatter] = readRavenMaterial(materialNames{iMat}, obj.pathMaterials);
+                    if isempty(absorp)
+                        absorp = alphas_default;
+                        scatter = 0.2;
+                        disp(['Material (' materialNames{iMat} ') not found. Using default absorption values by eyring.']);
+                    elseif numel(absorptionFactors) == 10
+                        absorp = absorp(3:3:end);   % go to octave resolution
+                        scatter = scatter(3:3:end);   % go to octave resolution
+                    end
+                    absorp_neu = absorp(:) .* absorptionFactors(:);
+                    absorp_neu(absorp_neu > 1) = 1;
+                    absorp_neu(absorp_neu <= 0) = 0.0001;
+                    obj.setMaterial(newMaterialNames{iMat}, absorp_neu, scatter);
+                    absorp_neu_all(:,iMat) = absorp_neu;
+                end
+            end
+            
+            if (nargin < 4) || validationsimulation
+                disp('repeat simulation for validation');
+                obj.run();
+                
+                % check back the reverberation times
+                newReverbTime = obj.getT30(1);
+                
+%                 figure;
+%                 nRT = numel(targetReverbTime);
+%                 plot(1:nRT, targetReverbTime, 1:nRT, thisReverbTime, 1:nRT, newReverbTime);
+%                 legend('Target RT', 'RT before', 'RT after');
+%                 
+%                 ylabel('T30 [s]');
+%                 xlabel('Frequency band [Hz]');
+%                 ylim([0 1.1*max(targetReverbTime)]);             
+%                 
+%                 ax = gca; 
+%                 ax.XTickLabel = {32 63 125 250 500 1000 2000 4000 8000 16000}; 
+%                 grid on;
 
             else
                 newReverbTime = [];
