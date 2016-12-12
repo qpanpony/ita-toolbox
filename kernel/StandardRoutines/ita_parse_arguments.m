@@ -300,7 +300,9 @@ while (idx <= nArguments) % go through all arguments
 end
 
 if notFoundArguments == 1
-    ita_verbose_info([thisFuncStr callFuncStr 'Some arguments could not be found in the struct. They are returned separately.'],0);
+    if nargout < 2
+        ita_verbose_info([thisFuncStr callFuncStr 'Some arguments could not be found in the struct. They are returned separately.'],0);
+    end
 end
 
 
