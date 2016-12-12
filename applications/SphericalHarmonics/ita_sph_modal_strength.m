@@ -90,7 +90,7 @@ for idxRad = 1:numel(uniqueRad)
     switch sArgs.transducer
         case {'microphone','mic'}
             if strcmp(type,'rigid') && isempty(sArgs.scatterer)
-                bn = bn*diag(4*pi./(kVec.*uniqueRad(idxRad)));
+                bn = bn.*(4*pi*(1i.^(n-1))*(1./(kVec.*uniqueRad(idxRad)).^2));
             else
                 bn = diag(4*pi*1i.^n)*bn;
             end
