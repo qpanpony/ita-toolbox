@@ -217,7 +217,7 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             if playrec('isInitialised')
                 playrec('reset');
             end
-            playrec('init', 44100, 0, 0);
+            playrec('init', this.measurementSetup.samplingRate, 0, 0);
             
             
         end
