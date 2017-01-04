@@ -13,22 +13,17 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
     %
     % *********************************************************************
     %
-    % BE AWARE: NEW MOTOR AND NEW MOTORCONTROLLER! NOT COMPATIBLE TO
-    % MOVTEC!
+    % BE AWARE: THE MOTOR CONTROL HAS BEEN SEPARATED FROM THE ORIGINAL
+    % itaEimar
     %
-    % Motor and Controller are combined!
-    % Type: Nanotec PD4-N59  18M4204 (Turntable)
-    %       Nanotec PD4-N60  18L4204 (Arm)
-    %       Nanotec PD2-O411 18L1804 (Slayer)
+    % Author:       Jan-Gerrit Richter (jri@akustik.rwth-aachen.de)
     %
-    % Author:       Benedikt Krechel - November-June 2012
+    % itaEimar:     Benedikt Krechel - November-June 2012
     %               Johannes Klein - March/April/May 2012
     %
     % Contact:      Benedikt.krechel@rwth-aachen.de
     %               Johannes.klein@rwth-aachen.de
     %
-    % Otherwise:    Pascal Dietrich!
-    %               pdi@akustik.rwth-aachen.de
     %
     % Special thanks to: Oliver Strauch for changing the e in Eimer to an a!
     %
@@ -48,12 +43,12 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
     % -  iMS.reference
     %
     % Move commands:
+    %   This lets the motor decide what part of the coordinates it is
+    %   responsible for
     % -  iMS.moveTo( itaCoordinate Object )
     %
     % Separate move commands:
-    % -  iMS.move_turntable( in degrees, counter-clockwise relative to actual position )
-    % -  iMS.move_arm( absolut degree )
-    % -  iMS.move_slayer( absolut degree )
+    % -  iMS.moveTo(MotorName, step in degrees)
     %
     % ************************************
     % STATIC MEASUREMENT:
@@ -68,15 +63,17 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
     %
     %
     % ************************************
-    % DYNAMIC MEASUREMENT:
+    % CONTINUOUS MEASUREMENT:
     %
-    % -  iMS.ContinuousMeasurement = true;
-    % -  iMS.measurementPositions = [ n times two itaCoordinate Objects,
-    %                                 first one  :   Start position
-    %                                 second one :   Speed and direction  ]
-    %
-    % -  iMS.measurementSetup = [ YOUR MEASUREMENT SETUP i.e. itaMSTF ]
-    % -  iMS.dataPath = [ PATH / FOLDER FOR RESULTS ]
+    %   This moves the arc into reference, then moves some angle against
+    %   the turn direction and sends all commands but start for the full
+    %   rotation
+    % -  iMS.prepareForContinuousMeasurement;
+    %   
+    %   Starts the previously prepared rotation and measures
+    %    iMS.runContinuousMeasurement;
+    %   
+    %   See ita_tutorial_hrtfMeasurement
     %
     % Run measurement
     % -  iMS.run
@@ -90,37 +87,20 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
     
     properties
         doSorting           =     true;   % sort the measurement coordinates for arm due to shorter measurement time 
-%         ContinuousMeasurement = 0; % moved from task-scan
     end
     % *********************************************************************
     properties (Access = protected, Hidden = true)
-%         isReferenced        =   false;      % Are all motors referenced?
-%         inuse               =   struct( ... % Which motors are in use?
-%             'turntable',    false, ...
-%             'arm',          false, ...
-%             'slayer',       false);
-%         started             =   struct( ... % Which motors are on right now?
-%             'turntable',    false, ...
-%             'arm',          false, ...
-%             'slayer',       false);
-          actual_status       =   []; % Store status - don't send the same command again!
+        actual_status       =   []; % Store status - don't send the same command again!
         old_position        =   itaCoordinates(2); % Avoid to move two times to the same position
         wait                =   true;        % Status - do we wait for motors to reach final position? -> Set by prepare-functions!
-%         sArgs_turntable     =   [];
-%         sArgs_arm           =   [];
-%         sArgs_slayer        =   [];
         
         mMotorControl = [];
     end
     % *********************************************************************
     properties(Constant, Hidden = true)
 
-%         
-        ARM_limit               =         [-90 120]; % Movement-range of Arm %jck: THIS SHOULD BE COUPLED TO THE VALUE IN prepare_move_arm
-        SLAYER_limit            =       [-91 260]; % Movement-range of Slayer
-%         % *********************************************************************
-        % *********************************************************************
     end
+    
     methods
         %% -----------------------------------------------------------------
         % Basic stuff:
@@ -162,19 +142,6 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
                     end
                 end
                 
-%                 insts               =   instrfind;         %show existing terminals using serial interface
-%                 if ~isempty(insts)
-%                     aux = strfind(insts.Name,com_port);
-%                     if numel(aux) == 1
-%                         aux = {aux};
-%                     end
-%                     for idx = 1:numel(aux)
-%                         if ~isempty(aux{idx})
-%                             delete(insts(idx));             %delete used serial ports
-%                         end
-%                     end
-%                 end
-                
             % init the motorclass object;
             this.mMotorControl = itaMotorControlNanotec;
             this.mIsInitialized = true;
@@ -189,20 +156,19 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             if ~isdir(this.finalDataPath)
                 mkdir(this.finalDataPath);
             end
-            % Set some default values:
-%             this.sArgs_turntable    =   this.sArgs_default_turntable;
-%             this.sArgs_arm          =   this.sArgs_default_arm;
-%             this.sArgs_slayer       =   this.sArgs_default_slayer;
         end
+        
+        
         %% -----------------------------------------------------------------
         % Reference stuff:
         function reference(this)
             % Move to reference position
             ita_verbose_info('Everything is moving... (TAKE CARE OF YOUR HEAD!)',0);
             this.mMotorControl.reference;
-%             this.isReferenced       =   true;
             ita_verbose_info('Reference done!',1);
         end
+        
+        
         %% -----------------------------------------------------------------
         % Move commands:
         function stop(this)
@@ -213,12 +179,6 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
         end
         
         function moveTo(this,varargin)
-            % Move turntable, arm and slayer to absolute position. Takes
-            % struct with motor name and angle in degree or
-            % itaCoordinates (first point = turntable/arm, second point* =
-            % slayer, *optional)
-            % Error checks
-            
             % Check if it is initialized:
             if ~this.isInitialized
                 ita_verbose_info('Not initialized - I will do that for you...!',0);
@@ -231,8 +191,8 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
                 ita_verbose_info('Be aware! No reference move done! Reference = Power-Up-Position!',2)
             end
             
+            % let the motor control do the move
             this.mMotorControl.moveTo(varargin{:});
-%             this.old_position = varargin;
         end
   
         function prepareContinuousMeasurement(this,varargin)

@@ -27,7 +27,6 @@ classdef itaMotorNanotec_Arm < itaMotorNanotec
             'gear_ratio',   90,        ...
             'current',      90,         ...
             'ramp_mode',    2           );
-        ARM_limit               =         [-90 120]; % Movement-range of Arm %jck: THIS SHOULD BE COUPLED TO THE VALUE IN prepare_move_arm
     end
     
     methods
@@ -39,6 +38,8 @@ classdef itaMotorNanotec_Arm < itaMotorNanotec
             
             this.motorID = 4;
             this.motorName = 'Arm';
+            
+            this.motorLimits = [-90 120];
         end
         
         function this = init(this)

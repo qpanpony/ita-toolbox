@@ -24,8 +24,7 @@ classdef itaMotorNanotec_Slayer < itaMotorNanotec
             'absolut',      true,       ...
             'gear_ratio',   200,        ...
             'current',      80,         ...
-            'ramp_mode',    2           );
-        SLAYER_limit            =       [-82 190];
+            'ramp_mode',    2           ); 
     end
     
     methods
@@ -37,6 +36,8 @@ classdef itaMotorNanotec_Slayer < itaMotorNanotec
             
             this.motorID = 5;
             this.motorName = 'Slayer';
+            
+            this.motorLimits = [-82 190];
         end
         
         function this = init(this)

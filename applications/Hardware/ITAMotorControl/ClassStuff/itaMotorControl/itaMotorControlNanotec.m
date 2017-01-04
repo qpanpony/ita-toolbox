@@ -41,12 +41,7 @@ classdef itaMotorControlNanotec < itaMotorControl
         
         function this = init(this)
             this.mSerialObj = itaSerialDeviceInterface.getInstance();
-%             this.mSerialObj.baudrate = this.baudrate;
-%             this.mSerialObj.stopbits = this.stopbits;
-%             this.mSerialObj.OutputBufferSize = this.OutputBufferSize;
-%             this.mSerialObj.comPort = this.comPort;
             
-            %TODO etc
             this.mSerialObj.portOpen = true;
             
             %load all the motors and init them to get the list of connected
@@ -143,10 +138,10 @@ classdef itaMotorControlNanotec < itaMotorControl
                    sArgs.(this.motorList{index}.getMotorName()) = nan(1);
                 end
                 
-                [sArgs notFound] = ita_parse_arguments(sArgs, varargin);
+                [sArgs, notFound] = ita_parse_arguments(sArgs, varargin);
                 % parse the notfound options for wait
 
-                controlOptions = ita_parse_arguments(controlOptions,notFound);
+                [controlOptions, notFound] = ita_parse_arguments(controlOptions,notFound);
                 
                 for index = 1:length(this.motorList)
                     motorposition = sArgs.(this.motorList{index}.getMotorName());
@@ -171,7 +166,6 @@ classdef itaMotorControlNanotec < itaMotorControl
             
             % send commands
             if ~this.send_commandlist(this.failed_command_repititions)
-%                 this.mIsInitialized             =   false;
                 error(sprintf('Motor %s is not responding!',this.motorList{index}.getMotorName));
             end
             
@@ -196,7 +190,6 @@ classdef itaMotorControlNanotec < itaMotorControl
 
             end
             this.wait4everything;
-%             this.isReferenced       =   true;
         end
         
         function prepareForContinuousMeasurement(this,varargin)
@@ -217,13 +210,16 @@ classdef itaMotorControlNanotec < itaMotorControl
             [sArgs notFound] = ita_parse_arguments(sArgs, varargin);
 
             % first, do a reference move
+            ita_verbose_info('Moving to reference',1)
             this.reference
+            ita_verbose_info('Moving to pre angle',1)
             this.moveTo(motorName,-sArgs.preAngle,'absolut',false,'speed',1)
             
             
             % now prepare the big move but don't start it
             this.moveTo(motorName,360+sArgs.preAngle+12,'speed',sArgs.speed,'absolut',false,'start',0);
             this.preparedList = motorName;
+            ita_verbose_info('Finished preparing',2)
         end
         
         function startContinuousMoveNow(this)
@@ -246,24 +242,6 @@ classdef itaMotorControlNanotec < itaMotorControl
             % Add command to commandlist
             this.commandlist{end+1}             =   string_to_send;
             success             =   1;
-%             if ~isempty(strfind(string_to_send, '='))
-%                 parametername = genvarname(regexprep(['Motor_' string_to_send(2) '_Parameter_' string_to_send(3:strfind(string_to_send, '=')-1)], ':', ''));
-%                 value = string_to_send(strfind(string_to_send, '=')+1:end-1);
-%             else
-%                 % Could not detect parametername:
-%                 this.commandlist{end+1}             =   string_to_send;
-%                 success             =   1;
-%                 return;
-%             end
-%             
-%             if isfield(this.actual_status, parametername) && (strcmpi(this.actual_status.(parametername), value))
-%                 % Parameter already set!
-%                 success = -1;
-%             else
-%                 % Need to send parameter!
-%                 this.commandlist{end+1}             =   string_to_send;
-%                 success             =   1;
-%             end
         end
         
         
@@ -509,11 +487,6 @@ classdef itaMotorControlNanotec < itaMotorControl
             % a request
             this.receivedlist   =   [];
         end
-        
-        
-
-        
-        
     end
     
 end
