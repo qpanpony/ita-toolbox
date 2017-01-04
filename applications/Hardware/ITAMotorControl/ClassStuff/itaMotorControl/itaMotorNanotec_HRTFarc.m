@@ -18,7 +18,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             'wait',         true,       ...
             'speed',        2,          ...
             'VST',          'adaptiv',  ...
-            'limit',        false,      ...
+            'limit',        true,      ...
             'continuous',   false,      ...
             'absolut',      true,      ...
             'closed_loop',  false,       ...
@@ -37,6 +37,8 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             
             this.motorID = 8;
             this.motorName = 'HRTFArc';
+            
+            this.motorLimits = [-15 375]; % the motor can do a whole rotation + ~15 deg to both sides
         end
         
         function this = init(this)
@@ -244,6 +246,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
 %                 fgetl(this.mSerialObj);
                 return
             end
+            
             if (this.sArgs_motor.limit == true)
                 % Check if the position is too far away...
                 if this.sArgs_motor.continuous == true
@@ -253,7 +256,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                 elseif this.sArgs_motor.absolut == true
                     % This case is easy because the given absolut angle
                     % shoud be between -180 and 360
-                    if (angle > 361) || (angle < -181)
+                    if (angle > this.motorLimits(2)) || (angle < this.motorLimits(1))
                         % It's not in the allowed range... :-(
                         error('Limit is on! Only positions between -180 and 360 degree are allowed!')
                     end
@@ -268,7 +271,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                     % the position angle of the turntable:
                     act_pos       =   act_pos*0.9/this.sArgs_motor.gear_ratio;
                     % Check if new position would be in the allowed range:
-                    if (act_pos+angle) > 361 || (act_pos+angle) < -181
+                    if (act_pos+angle) > this.motorLimits(2)) || (act_pos+angle) < this.motorLimits(1))
                         % No, it's not....
                         error('Limit is on! Only positions between -180 and 360 degree are allowed!')
                     end

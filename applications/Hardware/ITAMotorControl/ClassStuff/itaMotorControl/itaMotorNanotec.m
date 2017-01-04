@@ -8,10 +8,12 @@ classdef itaMotorNanotec < itaHandle
        
        mIsReferenced = false;
        mIsInit = false;
+       
+       motorLimits = [];
     end
     
     properties
-
+        
     end
     
     methods(Abstract)
