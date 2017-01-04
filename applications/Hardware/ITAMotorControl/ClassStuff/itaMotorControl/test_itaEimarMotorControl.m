@@ -235,58 +235,40 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
 %             this.old_position = varargin;
         end
   
-        % this is overloaded here to to post-processing
-%         function run(this)
-%             if this.ContinuousMeasurement
-%                 if mod(this.measurementPositions.nPoints, 2) ~= 0
-%                     ita_verbose_info(['Number of positions must be a multiple of 2 for continuous measurements [Startposition/Speedvector]!'],0);
-%                     return;
-%                 end
-%             end
-%             
-%         end
-        
-        function result = runContinuousMeasurement(this)
-            %run a single measurement, e.g. the result seems broken...
-            % MS.runMeasurement(measurementNodeNumber)
+        function prepareContinuousMeasurement(this,varargin)
+            % calculate the pre angle
+            numRepetitions = this.measurementSetup.repititions;
+            timePerRepetition = this.measurementSetup.twait*length(this.measurementSetup.outputChannels);
+            speed   =   360/(numRepetitions*timePerRepetition);
+
+            % preangletime
+            preAngleTime = 2/64*numRepetitions;
+            preAngle = preAngleTime*speed;
+
+            preAngle = min(preAngle,15);
+
+            numTotalRepetitions = numRepetitions+ceil(preAngleTime/(timePerRepetition))+4;
+            this.measurementSetup.repititions = numTotalRepetitions;
             
             %prepare motors for continuous measurement
-            this.mMotorControl.prepareForContinuousMeasurement;
+            this.mMotorControl.prepareForContinuousMeasurement('speed',speed,'preAngle',preAngle);
             
-            
-            this.measurementSetup.reset = false;
-       
-%                 % Prepare measurement move:
-%             this.prepare_move_turntable(9999, 'speed', this.measurementPositions.phi(measurementNo+1)/pi*180, 'wait', false, 'continuous', true);
-
-            % Prepare measurement... (important for MSTFinterleaved,
-            % otherwise we will waist time for generating the signal)
-            if isa(this.measurementSetup, 'itaMSTFinterleaved')
-                this.measurementSetup.final_excitation;
-                this.measurementSetup.final_compensation;
+            this.measurementSetup.excitation;
+            if playrec('isInitialised')
+                playrec('reset');
             end
-
-            % wait some time?
-            pause(this.waitBeforeMeasurement);
-
-            % Start movement (fast start) and run measurement:
+            playrec('init', 44100, 0, 0);
+            
+            
+        end
+        
+        
+        function result = runContinuousMeasurement(this)
             this.mMotorControl.setWait(false);
             this.mMotorControl.startContinuousMoveNow;
-            result = this.measurementSetup.run_raw_imc_dec;
-            this.mMotorControl.stop;
+            result = this.measurementSetup.run_raw_imc;
+            this.stop;
             this.mMotorControl.setWait(true);
-            
-            
-%             % set channelCoordinates
-%             for idx = 1:numel(result)
-%                 if ~sum(sum(isnan(result(idx).channelCoordinates.sph)))
-%                     result(idx).channelCoordinates = result(idx).channelCoordinates + repmat(this.measurementPositions.n(measurementNo), result(idx).nChannels);
-%                 else
-%                     result(idx).channelCoordinates = repmat(this.measurementPositions.n(measurementNo), result(idx).nChannels);
-%                 end
-%             end
-%             this.mLastMeasurement = measurementNo + 1;
-
         end
         
         function motorControl = getMotorControl(this)

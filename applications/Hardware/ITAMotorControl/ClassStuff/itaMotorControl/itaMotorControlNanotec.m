@@ -9,6 +9,7 @@ classdef itaMotorControlNanotec < itaMotorControl
         actual_status       =   []; % Store status - don't send the same command again!
 
         started;
+        preparedList        =   []; % continuous move. prepare first and start later
     end
     
     properties 
@@ -131,6 +132,9 @@ classdef itaMotorControlNanotec < itaMotorControl
             % if itaCoordinates are given, the position is passed to all
             % motors. they have to decide if they move
             
+            controlOptions.start = 1;
+            controlOptions.wait = 1;
+            
             this.clear_receivedlist;
             %prepare moves
             if length(varargin) ~= 1
@@ -141,7 +145,7 @@ classdef itaMotorControlNanotec < itaMotorControl
                 
                 [sArgs notFound] = ita_parse_arguments(sArgs, varargin);
                 % parse the notfound options for wait
-                controlOptions.wait = 1;
+
                 controlOptions = ita_parse_arguments(controlOptions,notFound);
                 
                 for index = 1:length(this.motorList)
@@ -155,10 +159,12 @@ classdef itaMotorControlNanotec < itaMotorControl
                 end
             end
             
-            % start moves
-            for index = 1:length(this.motorList)
-                if this.started(index)
-                    this.motorList{index}.startMoveToPosition();
+            if controlOptions.start == 1
+                % start moves
+                for index = 1:length(this.motorList)
+                    if this.started(index)
+                        this.motorList{index}.startMoveToPosition();
+                    end
                 end
             end
 
@@ -169,11 +175,12 @@ classdef itaMotorControlNanotec < itaMotorControl
                 error(sprintf('Motor %s is not responding!',this.motorList{index}.getMotorName));
             end
             
-           
-            this.wait = controlOptions.wait;
-            % wait
-            this.wait4everything
-            this.wait = 1;
+           if controlOptions.start == 1
+                this.wait = controlOptions.wait;
+                % wait
+                this.wait4everything
+                this.wait = 1;
+           end
             
         end
         
@@ -192,24 +199,37 @@ classdef itaMotorControlNanotec < itaMotorControl
 %             this.isReferenced       =   true;
         end
         
-        function prepareForContinuousMeasurement(this,speed)
-            this.reference;
-            this.moveTo('Turntable',-20);
-            
-            for index = 1:length(this.motorList)
-                if strcmp(this.motorList{index}.getMotorName(),'HRTFArc')
-                    this.started(index) = this.motorList{index}.prepareMove(370,'continuous',true,'speed',speed);
-                end
-                if strcmp(this.motorList{index}.getMotorName(),'Turntable')
-                    this.started(index) = this.motorList{index}.prepareMove(370,'continuous',true,'speed',speed);
-                end
+        function prepareForContinuousMeasurement(this,varargin)
+            % determine the motor name
+            % for now, this only works if one motor is connected (turntable
+            % or hrtfarc)
+            motorName = '';
+            if length(this.motorList) == 1
+               motorName = this.motorList{1}.getMotorName();
             end
+            if ~(strcmp(motorName,'HRTFArc') || strcmp(motorName,'Turntable'))
+               error('Only HRTFArc or Turntable supported'); 
+            end
+            
+            % get the preangle and the speed
+            sArgs.preAngle = 0;
+            sArgs.speed = 2;
+            [sArgs notFound] = ita_parse_arguments(sArgs, varargin);
+
+            % first, do a reference move
+            this.reference
+            this.moveTo(motorName,-sArgs.preAngle,'absolut',false,'speed',1)
+            
+            
+            % now prepare the big move but don't start it
+            this.moveTo(motorName,360+sArgs.preAngle+12,'speed',sArgs.speed,'absolut',false,'start',0);
+            this.preparedList = motorName;
         end
         
         function startContinuousMoveNow(this)
             % start moves
             for index = 1:length(this.motorList)
-                if this.started(index)
+                if strcmp(this.preparedList,this.motorList{index}.getMotorName())
                     this.motorList{index}.startMoveToPosition();
                 end
             end
@@ -219,8 +239,7 @@ classdef itaMotorControlNanotec < itaMotorControl
                 this.mIsInitialized             =   false;
                 error(sprintf('Motor %s is not responding!',this.motorList{index}.getMotorName));
             end
-            % wait
-            this.wait4everything        
+            this.preparedList = [];
         end
         
         function success = add_to_commandlist(this, string_to_send)
