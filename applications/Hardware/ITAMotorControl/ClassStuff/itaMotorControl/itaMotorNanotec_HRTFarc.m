@@ -107,10 +107,6 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
         
         function this = moveToReferencePosition(this)
             % Prepare reference move (turntable)
-%             if ~this.isInitialized
-%                 ita_verbose_info('Not initialized - I will do that for you...!',0);
-%                 this.initialize;
-%             end
             motorControl = this.mMotorControl;
             % Turn + some degrees in case we are already at the end of the
             % reference switch or already passed it:
@@ -208,12 +204,6 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             %   command and set by '=<value>'.
             %
             % -----------------------------------------------------------------------------------------------
-            % Init
-%             if ~this.isInitialized
-%                 ita_verbose_info('Not initialized - I will do that for you...!',0);
-%                 this.initialize
-%             end
-
             
             % -------------------------------------------------------------
             % Meaning:
@@ -271,7 +261,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                     % the position angle of the turntable:
                     act_pos       =   act_pos*0.9/this.sArgs_motor.gear_ratio;
                     % Check if new position would be in the allowed range:
-                    if (act_pos+angle) > this.motorLimits(2)) || (act_pos+angle) < this.motorLimits(1))
+                    if ((act_pos+angle) > this.motorLimits(2)) || ((act_pos+angle) < this.motorLimits(1))
                         % No, it's not....
                         error('Limit is on! Only positions between %d and %d degree are allowed!',this.motorLimits)                    
                     end
