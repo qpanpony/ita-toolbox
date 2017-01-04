@@ -246,7 +246,7 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             preAngle = preAngleTime*speed;
 
             preAngle = min(preAngle,15);
-
+            preAngle = max(preAngle,8);
             numTotalRepetitions = numRepetitions+ceil(preAngleTime/(timePerRepetition))+4;
             this.measurementSetup.repititions = numTotalRepetitions;
             
