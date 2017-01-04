@@ -258,7 +258,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                     % shoud be between -180 and 360
                     if (angle > this.motorLimits(2)) || (angle < this.motorLimits(1))
                         % It's not in the allowed range... :-(
-                        error('Limit is on! Only positions between -180 and 360 degree are allowed!')
+                        error('Limit is on! Only positions between %d and %d degree are allowed!',this.motorLimits)
                     end
                 else
                     % Limit is on and relative positioning is on... this case
@@ -273,7 +273,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                     % Check if new position would be in the allowed range:
                     if (act_pos+angle) > this.motorLimits(2)) || (act_pos+angle) < this.motorLimits(1))
                         % No, it's not....
-                        error('Limit is on! Only positions between -180 and 360 degree are allowed!')
+                        error('Limit is on! Only positions between %d and %d degree are allowed!',this.motorLimits)                    
                     end
                 end
             end
