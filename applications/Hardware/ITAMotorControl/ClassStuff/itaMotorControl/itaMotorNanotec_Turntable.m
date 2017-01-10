@@ -172,7 +172,7 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
                if this.old_position.phi ~= position.phi
 
                     angle = mod(position.phi(1)/2/pi*360+360, 720)-360;
-                    ret = this.prepare_move(angle, 'absolut', true, 'wait', true, 'speed', this.sArgs_default_motor.speed); 
+                    ret = this.prepare_move(angle, 'absolut', true, 'wait', true, 'speed', sArgs.speed); 
                     this.old_position = position;
                     started = ret;
                else
