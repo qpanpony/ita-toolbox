@@ -45,7 +45,7 @@ function [] = daffv15_write( varargin )
 %                            'DFT' => discrete Fourier spectra)
 %  datafunc     function    Data function (delivers the data for a direction)
 %  dataset      function    Dataset containing all records
-%  orient       vector-3    Orientation [yaw pitch roll] angles [°]
+%  orient       vector-3    Orientation [yaw pitch roll] angles [ï¿½]
 %  channels     int         Number of channels
 %
 %  alphares     float       Resolution of alpha-angles
@@ -385,7 +385,7 @@ else
         
         if (props.alphaspan == 360)
             % Full alpha coverage
-            % Last point of the interval (360°) coincides with the first (0°)
+            % Last point of the interval (360ï¿½) coincides with the first (0ï¿½)
             props.alphapoints = props.alphaspan / double( props.alphares );
         else
             % Partial alpha coverage
@@ -790,7 +790,7 @@ for i=1:props.dataset.numrecords
             
             % Recheck sampling rate
             if (samplerate ~= props.dataset.samplerate)
-                error('For record %d (A%0.1f°, B%0.1f°): Data function delivered different samplerate then expected', i, record.alpha, record.beta);
+                error('For record %d (A%0.1fï¿½, B%0.1fï¿½): Data function delivered different samplerate then expected', i, record.alpha, record.beta);
             end
         end
         
@@ -801,7 +801,7 @@ for i=1:props.dataset.numrecords
             
             % Recheck sampling rate
             if (isequal(freqs, props.dataset.freqs))
-                error('For record %d (A%0.1f°, B%0.1f°): Data function delivered different frequencies then expected', i, record.alpha, record.beta);
+                error('For record %d (A%0.1fï¿½, B%0.1fï¿½): Data function delivered different frequencies then expected', i, record.alpha, record.beta);
             end
         end
         
@@ -813,11 +813,11 @@ for i=1:props.dataset.numrecords
     
     % Empty data is now allowed
     if isempty(record.data)
-        error('For record %d (A%0.1f°, B%0.1f°): No data provided', i, record.alpha, record.beta);
+        error('For record %d (A%0.1fï¿½, B%0.1fï¿½): No data provided', i, record.alpha, record.beta);
     end
     
     if ~isnumeric(record.data)
-        error('For record %d (A%0.1f°, B%0.1f°): Data must be numerical', i, record.alpha, record.beta);
+        error('For record %d (A%0.1fï¿½, B%0.1fï¿½): Data must be numerical', i, record.alpha, record.beta);
     end
     
     % Implicit datatype conversion to double
@@ -830,7 +830,7 @@ for i=1:props.dataset.numrecords
     % Check metadata types
     if isfield(record, 'metadata')
         if ~isstruct(record.metadata)
-            error('For record %d (A%0.1f°, B%0.1f°): Metadata must be at least an empty structure', i, record.alpha, record.beta);
+            error('For record %d (A%0.1fï¿½, B%0.1fï¿½): Metadata must be at least an empty structure', i, record.alpha, record.beta);
         end
     end
     
@@ -841,13 +841,13 @@ for i=1:props.dataset.numrecords
     
     % Test for correct numnber of channels
     if (channels ~= props.dataset.channels)
-        error('For record (A%0.1f°, B%0.1f°): Wrong number of channels', i, record.alpha, record.beta);
+        error('For record (A%0.1fï¿½, B%0.1fï¿½): Wrong number of channels', i, record.alpha, record.beta);
     end
     
     % Elements per records
     if isfield(props, 'elementsPerRecord')
         if (numelements ~= props.elementsPerRecord)
-            error('For record (A%0.1f°, B%0.1f°): Wrong data size', i, record.alpha, record.beta);
+            error('For record (A%0.1fï¿½, B%0.1fï¿½): Wrong data size', i, record.alpha, record.beta);
         end
     else
         % The first record defines the number of elements/record
@@ -858,7 +858,7 @@ for i=1:props.dataset.numrecords
     % Test for real-valued data (IR, MS)
     if (strcmpi(props.content, 'IR') || strcmpi(props.content, 'MS'))
         if ~isreal(data)
-            error('For record (A%0.1f°, B%0.1f°): Data must be real-valued', i, record.alpha, record.beta);
+            error('For record (A%0.1fï¿½, B%0.1fï¿½): Data must be real-valued', i, record.alpha, record.beta);
         end
     end
     
@@ -867,7 +867,7 @@ for i=1:props.dataset.numrecords
     props.globalPeak = max([props.globalPeak  recordDesc{i}.peak]);
     
     if props.verbose && (recordDesc{i}.peak > 1)
-        %         fprintf('For record (A%0.1f°, B%0.1f°): Peak value %0.3f greater then 1', i, record.alpha, record.beta, recordDesc{i}.peak);
+        %         fprintf('For record (A%0.1fï¿½, B%0.1fï¿½): Peak value %0.3f greater then 1', i, record.alpha, record.beta, recordDesc{i}.peak);
         fprintf('For record %d: Peak value %0.3f greater then 1\n', i, recordDesc{i}.peak);
     end
     
@@ -970,7 +970,7 @@ for i=1:props.dataset.numrecords
             recordDesc{i}.dataOffset(c) = ftell(fid) - fblocks.dataOffset;
             
             if (props.elementsPerRecord ~= props.numfreqs)
-                error('For record (A%0.1f°, B%0.1f°): Data size does not match the number of frequencies', i, record.alpha, record.beta);
+                error('For record (A%0.1fï¿½, B%0.1fï¿½): Data size does not match the number of frequencies', i, record.alpha, record.beta);
             end
             
             % Write down the magnitudes
@@ -991,7 +991,7 @@ for i=1:props.dataset.numrecords
             recordDesc{i}.dataOffset(c) = ftell(fid) - fblocks.dataOffset;
             
             if (props.elementsPerRecord ~= props.numfreqs)
-                error('For record (A%0.1f°, B%0.1f°): Data size does not match the number of frequencies', i, record.alpha, record.beta);
+                error('For record (A%0.1fï¿½, B%0.1fï¿½): Data size does not match the number of frequencies', i, record.alpha, record.beta);
             end
             
             % Write down the magnitudes
@@ -1022,7 +1022,7 @@ for i=1:props.dataset.numrecords
             
             if (~((props.elementsPerRecord == props.dataset.transformsize) || ...
                     (props.elementsPerRecord == props.numDFTCoeffs)) )
-                error('For record (A%0.1f°, B%0.1f°): Data size does not match transform size or number of symmetric coefficients', i, record.alpha, record.beta);
+                error('For record (A%0.1fï¿½, B%0.1fï¿½): Data size does not match transform size or number of symmetric coefficients', i, record.alpha, record.beta);
             end
             
             % Write down the magnitudes
@@ -1087,7 +1087,7 @@ for i=1:props.dataset.numrecords
     
     if isfield(record, 'metadata')
         if ~isempty(fieldnames(record.metadata))
-            daff_write_metadata(fid, record.metadata);
+            daffv15_write_metadata(fid, record.metadata);
             recordDesc{i}.metadataIndex = metadataIndex;
             metadataIndex = metadataIndex + 1;
             hasMetadata = true;
@@ -1251,13 +1251,13 @@ if ~props.quiet
     fprintf('  Content type:           \t%s\n', props.contentStr);
     fprintf('  Num channels:           \t%d\n', props.dataset.channels);
     fprintf('  Num records:            \t%d\n', props.dataset.numrecords);
-    fprintf('  Alpha range:            \t[%0.1f°, %0.1f°]\n', props.dataset.alpharange(1), props.dataset.alpharange(2));
-    fprintf('  Alpha resolution:       \t%0.1f°\n', props.dataset.alphares);
+    fprintf('  Alpha range:            \t[%0.1fï¿½, %0.1fï¿½]\n', props.dataset.alpharange(1), props.dataset.alpharange(2));
+    fprintf('  Alpha resolution:       \t%0.1fï¿½\n', props.dataset.alphares);
     fprintf('  Num alpha points:       \t%d\n', props.dataset.alphapoints);
-    fprintf('  Beta range:             \t[%0.1f°, %0.1f°]\n', props.dataset.betarange(1), props.dataset.betarange(2));
-    fprintf('  Beta resolution:        \t%0.1f°\n', props.dataset.betares);
+    fprintf('  Beta range:             \t[%0.1fï¿½, %0.1fï¿½]\n', props.dataset.betarange(1), props.dataset.betarange(2));
+    fprintf('  Beta resolution:        \t%0.1fï¿½\n', props.dataset.betares);
     fprintf('  Num beta points:        \t%d\n', props.dataset.betapoints);
-    fprintf('  Orientation:            \t(Y%+0.1f°, P%+0.1f°, R%+0.1f°)\n\n', ...
+    fprintf('  Orientation:            \t(Y%+0.1fï¿½, P%+0.1fï¿½, R%+0.1fï¿½)\n\n', ...
         props.orient(1), props.orient(2), props.orient(3));
     
     if strcmpi(props.content, 'IR')
