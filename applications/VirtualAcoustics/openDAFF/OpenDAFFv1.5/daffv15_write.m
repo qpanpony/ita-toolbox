@@ -1087,7 +1087,7 @@ for i=1:props.dataset.numrecords
     
     if isfield(record, 'metadata')
         if ~isempty(fieldnames(record.metadata))
-            daff_write_metadata(fid, record.metadata);
+            daffv15_write_metadata(fid, record.metadata);
             recordDesc{i}.metadataIndex = metadataIndex;
             metadataIndex = metadataIndex + 1;
             hasMetadata = true;
