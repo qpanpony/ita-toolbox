@@ -196,13 +196,20 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
         end
   
         function prepareContinuousMeasurement(this,varargin)
+            
+            if isempty(this.measurementSetup)
+                error('Measurement Setup is unset')
+            end
+            
             % calculate the pre angle
+            % the pre angle is needed because the measurement setup will
+            % not start recording imidiately
             numRepetitions = this.measurementSetup.repititions;
             timePerRepetition = this.measurementSetup.twait*length(this.measurementSetup.outputChannels);
             speed   =   360/(numRepetitions*timePerRepetition);
 
             % preangletime
-            preAngleTime = 2/64*numRepetitions;
+            preAngleTime = 2/64*numRepetitions; % it takes 2 seconds to start recording
             preAngle = preAngleTime*speed;
 
             preAngle = min(preAngle,15);
@@ -213,7 +220,10 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             %prepare motors for continuous measurement
             this.mMotorControl.prepareForContinuousMeasurement('speed',speed,'preAngle',preAngle);
             
+            % calculate the excitation as this takes quite a long time
             this.measurementSetup.excitation;
+            
+            % pre init playrec to save the second delay
             if playrec('isInitialised')
                 playrec('reset');
             end
