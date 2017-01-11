@@ -16,7 +16,7 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
     properties(Constant, Hidden = true)
         sArgs_default_motor = struct( ...
             'wait',         true,       ...
-            'speed',        5,          ...
+            'speed',        0.5,          ...
             'VST',          'adaptiv',  ...
             'limit',        false,      ...
             'continuous',   false,      ...
@@ -107,7 +107,7 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
             motorControl = this.mMotorControl;
             % Turn + some degrees in case we are already at the end of the
             % reference switch or already passed it:
-            this.move_turntable(+10);
+            this.move_turntable(+2);
             if this.mMotorControl.send_commandlist(5)
                 ita_verbose_info('Turntable started move...',2);
             end
@@ -117,8 +117,8 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
             % Set direction:
             motorControl.add_to_commandlist(sprintf('#%dd=0\r'          , this.motorID));
             % Calculate and set lower speed:
-            stepspersecond      =   (this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
-            motorControl.add_to_commandlist(sprintf('#%du=%.2f\r'       , this.motorID, stepspersecond));
+            %stepspersecond      =   (this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
+            motorControl.add_to_commandlist(sprintf('#%du=%.2f\r'       , this.motorID, 25));
             % Calculate and set upper speed:
             stepspersecond      =   (this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
             motorControl.add_to_commandlist(sprintf('#%do=%.2f\r'       , this.motorID, stepspersecond));
@@ -394,7 +394,7 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
                 % Divide by 0.9 because each (half)-step is equal to 0.9 degree
                 % and multiply by the gear_ratio because the given angle value
                 % is for the turntable and not for the motor:
-                steps       =   (angle/0.9*this.sArgs_motor.gear_ratio);
+                steps       =   (angle/0.9*this.sArgs_motor.gear_ratio)
                 % Check if absolut or relative position mode:
                 if this.sArgs_motor.absolut == true
                     % Absolut position mode:
