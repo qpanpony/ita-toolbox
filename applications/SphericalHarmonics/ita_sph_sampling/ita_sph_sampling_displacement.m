@@ -4,15 +4,13 @@ function varargout = ita_sph_sampling_displacement(varargin)
 %  positions taken from a given sampling grid
 %  
 %   Syntax:
-%   audioObjOut = ita_sph_sampling_displacement(audioObjIn, options)
+%   samplingDisplaced = ita_sph_sampling_displacement(sampling, opts)
 %
 %   Options (default):
-%           'opt1' (defaultopt1) : description
-%           'opt2' (defaultopt1) : description
-%           'opt3' (defaultopt1) : description
+%           'relativeError' ([0.1,0.1,0.1]) : relative displacement in percent/100
 %
 %  Example:
-%   audioObjOut = ita_sph_sampling_displacement(audioObjIn)
+%   samplingDisplaced = ita_sph_sampling_displacement(sampling, [0.01,0.01,0.01])
 %
 %  See also:
 %   ita_toolbox_gui, ita_read, ita_write, ita_generate
@@ -26,7 +24,7 @@ function varargout = ita_sph_sampling_displacement(varargin)
 % </ITA-Toolbox>
 
 
-% Author: Marco Berzborn -- Email: marco.berzborn@rwth-aachen.de
+% Author: Marco Berzborn -- Email: marco.berzborn@akustik.rwth-aachen.de
 % Created:  29-Mar-2016 
 
 
