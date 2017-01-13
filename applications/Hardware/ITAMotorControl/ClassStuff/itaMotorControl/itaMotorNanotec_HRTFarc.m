@@ -253,13 +253,19 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                 else
                     % Limit is on and relative positioning is on... this case
                     % is a bit more complex!
-                    % Get position:
-                    this.mSerialObj.sendAsynch(sprintf('#%dC\r'      , this.motorID));
-                    act_pos       =   this.mSerialObj.recvAsynch();
-                    act_pos       =   str2double(act_pos(3:end));
-                    % Now multiply with 0.9 and divide by gear_ratio to get
-                    % the position angle of the turntable:
-                    act_pos       =   act_pos*0.9/this.sArgs_motor.gear_ratio;
+                    % Get position: motorposition does not work. using
+                    % saved old position instead
+                    % in the init case, old_position is not set.
+                    if isnan(this.old_position.phi_deg)
+                        this.mSerialObj.sendAsynch(sprintf('#%dI\r'      , this.motorID));
+                        act_pos       =   this.mSerialObj.recvAsynch();
+                        act_pos       =   str2double(act_pos(3:end));
+                        % Now multiply with 0.9 and divide by gear_ratio to get
+                        % the position angle of the turntable:
+                        act_pos     =   act_pos*0.9/this.sArgs_motor.gear_ratio;
+                    else
+                        act_pos       =   this.old_position.phi_deg;
+                    end
                     % Check if new position would be in the allowed range:
                     if ((act_pos+angle) > this.motorLimits(2)) || ((act_pos+angle) < this.motorLimits(1))
                         % No, it's not....
