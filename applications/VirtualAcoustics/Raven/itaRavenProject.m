@@ -303,6 +303,7 @@ classdef itaRavenProject < handle
             
             % [Global] %
             obj.projectName         = obj.rpf_ini.GetValues('Global', 'ProjectName', 'Matlab');
+            obj.projectTag          = obj.projectName;
             obj.pathResults         = obj.rpf_ini.GetValues('Global', 'ProjectPath_Output', '..\RavenOutput');
             obj.pathDirectivities   = obj.rpf_ini.GetValues('Global', 'ProjectPath_DirectivityDB', '..\RavenDatabase\DirectivityDatabase');
             obj.pathMaterials       = obj.rpf_ini.GetValues('Global', 'ProjectPath_MaterialDB', '..\RavenDatabase\MaterialDatabase');
@@ -324,6 +325,7 @@ classdef itaRavenProject < handle
             obj.logPerformance      = obj.rpf_ini.GetValues('Global', 'logPerformance', 0);
             obj.keepOutputFiles     = obj.rpf_ini.GetValues('Global', 'keepOutputFiles', 0);
             
+            
             % change relative to absolute paths
             if obj.ravenExe(2) == ':' % absolute path
                 ravenBasePath = fileparts(fileparts(obj.ravenExe)); % base path of raven
@@ -332,6 +334,8 @@ classdef itaRavenProject < handle
                 if (strcmp(obj.pathDirectivities(1:2),'..')), obj.pathDirectivities = [ ravenBasePath obj.pathDirectivities(3:end) ]; end
                 if (strcmp(obj.pathMaterials(1:2),'..')), obj.pathMaterials = [ ravenBasePath obj.pathMaterials(3:end) ]; end
                 if (strcmp(obj.fileHRTF(1:2),'..')), obj.fileHRTF = [ ravenBasePath obj.fileHRTF(3:end) ]; end               
+                
+
             end
             
             % [Rooms] %
@@ -346,6 +350,7 @@ classdef itaRavenProject < handle
                 end
             end
             
+
 
             
             % [PrimarySources] %
@@ -707,6 +712,126 @@ classdef itaRavenProject < handle
             text(spos(:,3)+0.2,spos(:,1),spos(:,2),snames)
             text(rpos(:,3)+0.2,rpos(:,1),rpos(:,2),rnames)
         end
+        
+        %------------------------------------------------------------------
+        function plotMaterialsAbsorption(obj, exportPlot)
+            
+            if nargin < 2
+               exportPlot = false; 
+            end
+            
+            freqVector = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 500 630 800 1000 1250 1600 2000 2500 3150 4000 5000 6300 8000 10000 12500 16000 20000];
+            freqLabel3rdVisual = { '', '', '31.5 Hz', '', '', '' '', '  ', '  125 Hz', ' ', ' ', ...
+                '', ' ', ' ', '  500 Hz', ' ', '  ', '', '', ' ', '   2 kHz', ...
+                ' ', '', '', '', '', '   8 kHz', '  ', '', '', '20 kHz'};
+
+            yticks = { '0.0','', '0.20','','0.40','','0.60','','0.80','','1.0'};
+
+            allMaterials = obj.getRoomMaterialNames;
+            numberMaterials = length(allMaterials);
+
+            currentMaterial = itaResult;
+            currentMaterial.freqVector = freqVector;
+            currentMaterial.freqData = [];
+
+            for iMat=1:numberMaterials
+                [absorp scatter ] = obj.getMaterial(allMaterials{iMat});
+                currentMaterial.freqData = [ currentMaterial.freqData absorp' ];
+                currentSurfaceArea = obj.getSurfaceAreaOfMaterial(allMaterials{iMat});
+                allMaterials{iMat} = strrep(allMaterials{iMat},'_',' ');
+                allMaterials{iMat} = [ allMaterials{iMat} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m² ;'];
+                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18)),'%5.2f') ' m² )'];
+            end
+
+            currentMaterial.channelNames = allMaterials;
+            currentMaterial.allowDBPlot = false;
+            currentMaterial.pf;
+            
+            % change format of plot
+            title('');
+            ylabel('Absorption coefficient');
+            xlabel('Frequency in Hz');
+            set(gca,'XLim',[63 20000]);
+            set(gca,'YLim',[0 1]);
+            leg = findobj(gcf,'Tag','legend');
+            set(leg,'Location','NorthWest');
+            set(leg,'FontSize',9);
+            
+            % remove [1] in legend entry
+            for iMat=1:numberMaterials
+                leg.String{iMat} = leg.String{iMat}(1:end-4);
+            end
+            
+
+            % export plot to raven output
+            if (exportPlot)
+              [pathstr,name,ext] = fileparts(obj.ravenProjectFile);
+              dateTimeStr = datestr(now,30);
+              dateTimeStr = strrep(dateTimeStr,'T','_');
+              fileName = [ obj.pathResults '\Absorption_' name '_' dateTimeStr '.png'];
+              saveas(gcf,fileName);
+            end
+        end
+        
+        %------------------------------------------------------------------
+        function plotMaterialsScattering(obj, exportPlot)
+                    
+            if nargin < 2
+               exportPlot = false; 
+            end
+            
+            freqVector = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 500 630 800 1000 1250 1600 2000 2500 3150 4000 5000 6300 8000 10000 12500 16000 20000];
+            freqLabel3rdVisual = { '', '', '31.5 Hz', '', '', '' '', '  ', '  125 Hz', ' ', ' ', ...
+                '', ' ', ' ', '  500 Hz', ' ', '  ', '', '', ' ', '   2 kHz', ...
+                ' ', '', '', '', '', '   8 kHz', '  ', '', '', '20 kHz'};
+
+            yticks = { '0.0','', '0.20','','0.40','','0.60','','0.80','','1.0'};
+
+            allMaterials = obj.getRoomMaterialNames;
+            numberMaterials = length(allMaterials);
+
+            currentMaterial = itaResult;
+            currentMaterial.freqVector = freqVector;
+            currentMaterial.freqData = [];
+
+            for i=1:numberMaterials
+                [absorp scatter ] = obj.getMaterial(allMaterials{i});
+                currentMaterial.freqData = [ currentMaterial.freqData scatter' ];
+                                currentSurfaceArea = obj.getSurfaceAreaOfMaterial(allMaterials{i});
+                allMaterials{i} = strrep(allMaterials{i},'_',' ');
+                allMaterials{i} = [ allMaterials{i} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m² )'];
+            end
+
+            currentMaterial.channelNames = allMaterials;
+            currentMaterial.allowDBPlot = false;
+            currentMaterial.pf;
+            
+            % change format of plot
+            title('');
+            ylabel('Scattering coefficient');
+            xlabel('Frequency in Hz');
+            set(gca,'XLim',[63 20000]);
+            set(gca,'YLim',[0 1]);
+            leg = findobj(gcf,'Tag','legend');
+            set(leg,'Location','NorthWest');
+            set(leg,'FontSize',9);
+            
+            % remove [1] in legend entry
+            for iMat=1:numberMaterials
+                leg.String{iMat} = leg.String{iMat}(1:end-4);
+            end
+
+            % export plot to raven output
+            if (exportPlot)
+              [pathstr,name,ext] = fileparts(obj.ravenProjectFile);
+              dateTimeStr = datestr(now,30);
+              dateTimeStr = strrep(dateTimeStr,'T','_');
+              fileName = [ obj.pathResults '\Scattering_' name '_' dateTimeStr '.png'];
+              saveas(gcf,fileName);
+            end
+        end
+        
+        
         
         % [Global] %
         %------------------------------------------------------------------
@@ -2652,6 +2777,31 @@ classdef itaRavenProject < handle
         function RT = getReverbTime_Eyring(obj)
             RT = obj.getReverbTime(1);
         end
+        
+        %------------------------------------------------------------------
+        function S = getSurfaceAreaOfMaterial(obj,material)
+            
+            if isempty(obj.model)
+                if iscell(obj.modelFileList)
+                    for iRoom = 1 : numel(obj.modelFileList)
+                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                    end
+                    roommodel = obj.model{roomID + 1};
+                else
+                    obj.model = load_ac3d(obj.modelFileList);
+                    roommodel = obj.model;
+                end
+            else
+                if iscell(obj.model)
+                    roommodel = obj.model{roomID + 1};
+                else
+                    roommodel = obj.model;
+                end
+            end
+            
+            S = roommodel.getSurfaceArea(material);            
+                        
+        end        
 
         %------------------------------------------------------------------
         function materialNames = getRoomMaterialNames(obj, roomID)
