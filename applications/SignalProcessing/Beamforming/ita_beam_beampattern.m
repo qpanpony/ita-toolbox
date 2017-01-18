@@ -47,7 +47,11 @@ sArgs = struct('pos1_array','itaMicArray','pos2_f','numeric','pos3_steering_th',
 %% do the calculation
 % positions of array microphones
 arrayPositions = array.cart;
-
+if isempty(array.weights) || numel(array.weights) ~= array.nPoints
+    weights = array.w;
+else
+    weights = array.weights;
+end
 % make a matrix with spherical coordinates for the unit sphere with
 % given angular resolution
 resolution = 1;
@@ -67,7 +71,7 @@ k = 2*pi*f/double(ita_constants('c'));
 v = squeeze(ita_beam_steeringVector(k,arrayPositions,scanPositions,sArgs.wavetype));
 % ... and multiply with the manifold vector for the steering
 % direction to get the beampattern
-v_steer = ita_beam_steeringVector(k,arrayPositions,steer_vec,sArgs.wavetype).';
+v_steer = weights(:).*ita_beam_steeringVector(k,arrayPositions,steer_vec,sArgs.wavetype).';
 v = v'*v_steer./sum(abs(v_steer).^2);
 
 B = reshape(v,numel(theta),numel(phi));
