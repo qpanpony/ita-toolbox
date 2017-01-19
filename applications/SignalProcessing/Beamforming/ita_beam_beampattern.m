@@ -79,7 +79,7 @@ B = B./max(abs(B(:))); % normalize to maximum
 
 if ~strcmpi(sArgs.plotPlane,'none')
     v = itaResult(v(:).'./max(abs(v(:))),f,'freq');
-    v.channelCoordinates = itaCoordinates(scanPositions.');
+    v.channelCoordinates = itaCoordinates(scanPositions);
     if (strcmpi(sArgs.plotPlane,'xyz') || strcmpi(sArgs.plotPlane,'3d'))
         switch sArgs.plotType
             case 'lin'
