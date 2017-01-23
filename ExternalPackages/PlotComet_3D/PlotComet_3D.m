@@ -66,18 +66,24 @@ blockSize = floor(1/20*length(x_data));
 tailFormat = struct('LineWidth',1,'Color','r','LineStyle','-');
 headFormat = struct('LineStyle','none','Marker','o','MarkerSize',6,...
     'Color','b');
+pointFormat = struct('LineStyle','none','Marker','o','MarkerSize',6,...
+    'Color','g');
+plotPoints = 0;
 
+returnFrames = 0;
 
+colorSwitch = 0;
+moveTail = 0;
 
 
 %parse out the inputs
 argCount = nargin - 3;
 
-for i = 1:2:argCount
+for index = 1:2:argCount
     %         caseVar = varargin{i}
-    switch varargin{i}
+    switch varargin{index}
         case 'cFigure'
-            cFigure = varargin{i+1};
+            cFigure = varargin{index+1};
             %get the original size:
             cAxes = get(cFigure,'CurrentAxes');
             xLim = get(cAxes,'XLim');
@@ -112,15 +118,27 @@ for i = 1:2:argCount
             axis([xLim, yLim, zLim]);
             
         case 'blockSize'
-            blockSize = varargin{i+1};
+            blockSize = varargin{index+1};
         case 'Frequency'
-            freq = varargin{i+1};
+            freq = varargin{index+1};
             
         case 'tailFormat'
-            tailFormat = varargin{i+1};
+            tailFormat = varargin{index+1};
             
         case 'headFormat'
-            headFormat = varargin{i+1};
+            headFormat = varargin{index+1};
+            
+        case 'plotPoints'
+            plotPoints = varargin{index+1};
+        
+        case 'returnFrames'
+            returnFrames = varargin{index+1};
+            
+        case 'colorSwitch'
+            colorSwitch = varargin{index+1};
+            
+        case 'moveTail'
+            moveTail = varargin{index+1};
     end
 end
     
@@ -152,38 +170,117 @@ pauseTime = 1./freq;
 
 n_start = 1;
 n_stop = 1;
+
+frames = [];
+deleteList = [];
 %put on the starting point
-plot3(x_data(n_start:n_stop),...
+deleteList{end+1} = plot3(x_data(n_start:n_stop),...
     y_data(n_start:n_stop),...
     z_data(n_start:n_stop),tailFormat);
-plot3(x_data(n_stop), y_data(n_stop), z_data(n_stop),headFormat);
+deleteList{end+1} = plot3(x_data(n_stop), y_data(n_stop), z_data(n_stop),headFormat);
 
+if returnFrames 
+   frames{end+1} = getframe(gcf); 
+end
+
+% prepare the colormap
+if colorSwitch
+    colormap('jet');
+    colorValues = colormap;
+    colorValues = [colorValues;[0 0 0]];
+    indexFactor = 3.882/1.335;
+else
+    indexFactor = 1;
+end
+
+
+if length(moveTail) > 1
+    tailX_data = squeeze(moveTail(:,1,:));
+    tailY_data = squeeze(moveTail(:,2,:));
+    tailZ_data = squeeze(moveTail(:,3,:));
+end
+
+n_blocks = length(x_data)/blockSize;
+i_blocks = 0;
 %playback!
-for n = 1:1:length(x_data)
+for n = 1:1:ceil(length(x_data)+length(x_data)/(n_blocks*indexFactor))
     a = tic;
-    %delete the previous plot
-    hChild = get(cAxes,'Children');
-    delete(hChild(1:2));
+
        
     
-    if n <= blockSize
-        n_start = 1;
+    if n <= blockSize*(i_blocks + 1)
+        n_start = blockSize*i_blocks + 1;
         n_stop = n;
     else
-        n_start = n_start + 1;
-        n_stop = n_stop + 1;
+        i_blocks = i_blocks + 1;
+        n_start = blockSize*i_blocks + 1;
+        n_stop = n;
+        
+        deleteList = deleteList(2:end);
+    end
+    
+    %delete the previous plot
+    for index = 1:length(deleteList)
+        delete(deleteList{index});
+    end
+    deleteList = [];
+    
+    
+    if n > length(x_data)
+%        n_start = 1;
+       n_stop = length(x_data);
     end
     
     %new plot
-    plot3(x_data(n_start:n_stop),...
+    deleteList{end+1} = plot3(x_data(n_start:n_stop),...
         y_data(n_start:n_stop),...
         z_data(n_start:n_stop),tailFormat);
-    plot3(x_data(n_stop), y_data(n_stop), z_data(n_stop),headFormat);
+    
+    
+    if plotPoints
+        for index = 1:n_stop-1
+           if colorSwitch
+               colorIndex = round((n-(index-1))*indexFactor);
+               if colorIndex >= length(colorValues)
+                   colorIndex = length(colorValues);
+               end
+               pointColor = colorValues(colorIndex,:);
+               pointFormat = struct('LineStyle','none','Marker','o','MarkerSize',6,'Color',pointColor);
+           end
+            if moveTail == 0
+                deleteList{end+1} = plot3(x_data(index), y_data(index), z_data(index),pointFormat); 
+            else
+                if colorIndex ~= length(colorValues)
+                    % point
+                    deleteList{end+1} = plot3(tailX_data(index,colorIndex), tailY_data(index,colorIndex), tailZ_data(index,colorIndex),pointFormat); 
+                end
+                % tail
+                deleteList{end+1} = plot3(tailX_data(index,1:colorIndex),...
+                tailY_data(index,1:colorIndex),...
+                tailZ_data(index,1:colorIndex),tailFormat);
+            end
+        end
+        deleteList{end+1} = plot3(x_data(n_stop), y_data(n_stop), z_data(n_stop),headFormat); 
+    else
+        deleteList{end+1} = plot3(x_data(n_stop), y_data(n_stop), z_data(n_stop),headFormat);
+    end
     drawnow;
+    
+    if returnFrames 
+        frames{end+1} = getframe(gcf); 
+    end
     
     %update playback refresh rate
     b = toc(a);
     pause(pauseTime-b);
+end
+
+if plotPoints
+    plot3(x_data(n_stop), y_data(n_stop), z_data(n_stop),pointFormat);
+    drawnow;
+    if returnFrames 
+        frames{end+1} = getframe(gcf); 
+    end
 end
 
 set(cAxes,'NextPlot',oldNextPlot);
@@ -191,4 +288,8 @@ set(cAxes,'NextPlot',oldNextPlot);
 
 if nargout == 1
     varargout{1} = cFigure;
+end
+
+if returnFrames 
+   varargout{2} = frames;
 end
