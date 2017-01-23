@@ -87,7 +87,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             % phasenstrom im stillstand
             motorControl.add_to_commandlist(sprintf('#%dr=0\r' , this.motorID));
             % fehlerkorrekturmodus
-            motorControl.add_to_commandlist(sprintf('#%dU=0\r' , this.motorID));
+            motorControl.add_to_commandlist(sprintf('#%dU=1\r' , this.motorID));
             % ausschwingzeit
             motorControl.add_to_commandlist(sprintf('#%dO=1\r' , this.motorID));
             % umkehrspiel
