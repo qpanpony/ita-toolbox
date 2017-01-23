@@ -163,7 +163,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                if sArgs.absolut == 1
                    if this.old_position.phi ~= position.phi
 
-                        angle = mod(position.phi(1)/2/pi*360+360, 720)-360;
+                        angle = mod(position.phi(1)/2/pi*360+360, 721)-360;
                         ret = this.prepare_move(angle, sArgs); 
                         this.old_position = position;
                         started = true;
@@ -257,19 +257,25 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                     % saved old position instead
                     % in the init case, old_position is not set.
                     if isnan(this.old_position.phi_deg)
-                        this.mSerialObj.sendAsynch(sprintf('#%dI\r'      , this.motorID));
+                        this.mSerialObj.sendAsynch(sprintf('#%dC\r'      , this.motorID));
                         act_pos       =   this.mSerialObj.recvAsynch();
                         act_pos       =   str2double(act_pos(3:end));
                         % Now multiply with 0.9 and divide by gear_ratio to get
                         % the position angle of the turntable:
-                        act_pos     =   act_pos*0.9/this.sArgs_motor.gear_ratio;
+                        act_pos     =   -act_pos*0.9/this.sArgs_motor.gear_ratio;
                     else
                         act_pos       =   this.old_position.phi_deg;
                     end
-                    % Check if new position would be in the allowed range:
-                    if ((act_pos+angle) > this.motorLimits(2)) || ((act_pos+angle) < this.motorLimits(1))
+                    % Check if old position would be in the allowed range:
+                    if ((act_pos) > this.motorLimits(2)) || ((act_pos) < this.motorLimits(1))
                         % No, it's not....
-                        error('Limit is on! Only positions between %d and %d degree are allowed!',this.motorLimits)                    
+                        ita_verbose_info('Warning: Could not determine a sensible position. Doing reference anyway.',0)                    
+                    else
+                        % Check if new position would be in the allowed range:
+                        if ((act_pos+angle) > this.motorLimits(2)) || ((act_pos+angle) < this.motorLimits(1))
+                            % No, it's not....
+                            error('Limit is on! Only positions between %d and %d degree are allowed!',this.motorLimits)                    
+                        end
                     end
                 end
             end

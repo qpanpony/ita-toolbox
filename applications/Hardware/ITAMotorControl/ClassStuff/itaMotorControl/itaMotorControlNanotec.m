@@ -148,7 +148,7 @@ classdef itaMotorControlNanotec < itaMotorControl
                     this.started(index) = this.motorList{index}.prepareMove(motorposition,notFound{:});
                 end
             else
-                position = varargin{1}{1}; 
+                position = varargin{1}; 
                 for index = 1:length(this.motorList)
                     this.started(index) = this.motorList{index}.prepareMove(position);
                 end
@@ -217,7 +217,7 @@ classdef itaMotorControlNanotec < itaMotorControl
             
             
             % now prepare the big move but don't start it
-            this.moveTo(motorName,360+sArgs.preAngle+12,'speed',sArgs.speed,'absolut',false,'start',0);
+            this.moveTo(motorName,360+sArgs.preAngle+15,'speed',sArgs.speed,'absolut',false,'start',0,'limit',0);
             this.preparedList = motorName;
             ita_verbose_info('Finished preparing',2)
         end
