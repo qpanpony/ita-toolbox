@@ -5,13 +5,9 @@ function [ varargout ] = comet3(this,varargin )
 % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder. 
 % </ITA-Toolbox>
 
-hFig = PlotComet_3D(this.x, this.y, this.z, varargin{:});
-xlabel('X');
-ylabel('Y');
-zlabel('Z');
-axis equal vis3d
+[hFig, frames] = PlotComet_3D(this.x, this.y, this.z, varargin{:});
 if nargout
-   varargout = {hFig};
+   varargout = {hFig,frames};
 else
     varargout = {};
 end

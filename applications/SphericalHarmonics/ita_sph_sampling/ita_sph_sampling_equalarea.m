@@ -51,7 +51,7 @@ end
 while true
     coordsCart = eq_point_set(2,sArgs.nPoints).';
     sampling = itaSamplingSph(coordsCart,'cart');
-    Y = mbe_sph_base(sampling,Nmax);
+    Y = ita_sph_base(sampling,Nmax);
     condNum = cond(Y);
     if condNum < sArgs.condSHT
         break;
