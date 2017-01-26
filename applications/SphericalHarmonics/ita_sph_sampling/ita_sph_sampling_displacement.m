@@ -1,19 +1,24 @@
 function varargout = ita_sph_sampling_displacement(varargin)
 %ITA_SPH_SAMPLING_DISPLACEMENT - displaced sampling positions
 %  This function creates a sampling grid with an additive error in the sampling
-%  positions taken from a given sampling grid
+%  positions taken from a given sampling grid. The default option for the displacement
+%  is a relative displacement in percent/100. For a absolute displacement in meters
+%  choose the option 'absolute'.
 %  
 %   Syntax:
-%   samplingDisplaced = ita_sph_sampling_displacement(sampling, opts)
+%   samplingDisplaced = ita_sph_sampling_displacement(sampling, displacement, opts)
 %
 %   Options (default):
-%           'relativeError' ([0.1,0.1,0.1]) : relative displacement in percent/100
+%			'absolute' (false)	: displacement is a absolute value
+%			'weightPoles' (true): weigting for smaller errors towards the poles
+%			'projectRad' (true)	: project displaced sampling back onto the original radius
+%
 %
 %  Example:
-%   samplingDisplaced = ita_sph_sampling_displacement(sampling, [0.01,0.01,0.01])
+%   samplingDisplaced = ita_sph_sampling_displacement(sampling, [5/10,5/10,5/10] * 1e-3, 'absolute')
 %
 %  See also:
-%   ita_toolbox_gui, ita_read, ita_write, ita_generate
+%   ita_sph_sampling, ita_sph_mimo_error_simulation
 %
 %   Reference page in Help browser 
 %        <a href="matlab:doc ita_sph_sampling_displacement">doc ita_sph_sampling_displacement</a>
@@ -27,39 +32,41 @@ function varargout = ita_sph_sampling_displacement(varargin)
 % Author: Marco Berzborn -- Email: marco.berzborn@akustik.rwth-aachen.de
 % Created:  29-Mar-2016 
 
-
-%% Initialization and Input Parsing
-
 sArgs = struct('pos1_sampling','itaCoordinates',...
-               'relativeError',[0.01 0.01 0.01]);
-[sampling, sArgs] = ita_parse_arguments(sArgs,varargin);
+               'pos2_error','double',...
+			   'absolute',false,...
+			   'weightPoles',true,...
+               'projectRad',true);
+[sampling, displacement, sArgs] = ita_parse_arguments(sArgs,varargin);
 
-if isempty(sArgs.relativeError)
-    sArgs.relativeError = zeros(1,3);
-elseif numel(sArgs.relativeError) == 1
-    sArgs.relativeError = repmat(sArgs.relativeError,1,3);
+if numel(displacement) == 1
+	displacement = repmat(displacement,1,3);
 end
 
-posError = randn(size(sampling.sph));
-posError = (bsxfun(@rdivide,posError,sqrt(sum(posError.^2,2))) .* repmat(sampling.sph(:,1),1,3)) * diag(sArgs.relativeError);
+if ~sArgs.absolute
+	posError = randn(size(sampling.sph));
+	posError = (bsxfun(@rdivide,posError,sqrt(sum(posError.^2,2))) .* repmat(sampling.sph(:,1),1,3)) * diag(displacement);
+elseif sArgs.absolute
+	posError = randn(size(sampling.sph));
+	posError = bsxfun(@rdivide,posError,sqrt(sum(posError.^2,2))) * diag(displacement);
+end
 
 posError = itaCoordinates(posError,'cart');
-posError = posError.makeSph;
-% consideration of the smaller deviations towards the poles
-% Ref: Rafaely - 2005 - Analysis and Design of Spherical Microphone Arrays
-posError.sph(:,2) = posError.sph(:,2)./sin(sampling.theta);
+if sArgs.weightPoles
+	% consideration of the smaller deviations towards the poles
+	% Ref: Rafaely - 2005 - Analysis and Design of Spherical Microphone Arrays
+	posError.sph(:,2) = posError.sph(:,2)./sin(sampling.theta);
 
-posError = posError.makeCart;
 
-% set all NaNs and Infs to zero as they are not wanted and lead to missing
-% sampling points.
-posError.cart(isnan(posError.cart)) = 0;
-posError.cart(isinf(posError.cart)) = 0;
-
+	% set all NaNs and Infs to zero as they are not wanted and lead to missing
+	% sampling points.
+	posError.cart(isnan(posError.cart)) = 0;
+	posError.cart(isinf(posError.cart)) = 0;
+end
 % new sampling coordinates with erroneous positions
 samplingError = itaCoordinates(sampling.cart + posError.cart,'cart');
 
-if sArgs.relativeError(:,1) == 0
+if sArgs.projectRad
     samplingError.sph(:,1) = sampling.sph(:,1);
 end
 
