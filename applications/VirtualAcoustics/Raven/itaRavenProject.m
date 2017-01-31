@@ -165,6 +165,7 @@ classdef itaRavenProject < handle
         simulationDone = false
         
         keepOutputFiles
+        plotModelHandle = [];
         
         % [PrimarySources] %
         sourceNameString
@@ -660,8 +661,16 @@ classdef itaRavenProject < handle
                 comp2axesMapping = [3 1 2];
             end
             if nargin < 2
-                tgtAxes = gca;
+                if (ishandle(obj.plotModelHandle))
+                    tgtAxes = obj.plotModelHandle;
+                else
+                    figure;
+                    tgtAxes = gca;
+                end
+                
             end
+            
+            obj.plotModelHandle = tgtAxes;
             
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
@@ -4544,7 +4553,7 @@ classdef itaRavenProject < handle
             
             
             hold on;
-            obj.plotModel();
+            obj.plotModel(gca);
             
             set(gca, 'CameraViewAngle', 10);
         end
@@ -4758,7 +4767,7 @@ classdef itaRavenProject < handle
                 caxis([-60 max(max(sphereEnergy))]);
                 colorbar;
                 hold on;
-                obj.plotModel();
+                obj.plotModel(gca);
                 
                 set(gca, 'CameraViewAngle', 10);
                 
