@@ -142,7 +142,7 @@ classdef itaSuper < itaMeta
                             fieldName = fieldnames(varargin{1});
                         end
                     end
-                    for ind = 1:numel(fieldName);
+                    for ind = 1:numel(fieldName)
                         try
                             this.(fieldName{ind}) = varargin{1}.(fieldName{ind});
                         catch errmsg
@@ -166,8 +166,7 @@ classdef itaSuper < itaMeta
         end
         function this = set.time(this,value)
             dimensionsValue = size(value);
-            nSamples = dimensionsValue(1);
-            this.timeData = reshape(value, nSamples, []);
+            this.timeData = reshape(value, dimensionsValue(1), []);
             this.dimensions = dimensionsValue(2:end);
         end
         function result = get.freq(this)
@@ -176,8 +175,7 @@ classdef itaSuper < itaMeta
         end
         function this = set.freq(this,value)
             dimensionsValue = size(value);
-            nBins = dimensionsValue(1);
-            this.freqData = reshape(value, nBins, []);
+            this.freqData = reshape(value, dimensionsValue(1), []);
             this.dimensions = dimensionsValue(2:end);
         end
         
@@ -467,7 +465,7 @@ classdef itaSuper < itaMeta
             else
                 this.mDataTypeEqual = false;
             end
-            if strmatch('int',value)
+            if strcmp('int',value)
                 ita_verbose_info('Sorry, but ''int'' is really dangerous for dataTypeOutput, please use double or single.',1)
             end
         end
@@ -599,7 +597,7 @@ classdef itaSuper < itaMeta
             % and select the appropriate Channel struct(s)
             %% merge channelInfo
             channelFields = this.fields;
-            channelFields = channelFields(strmatch('channel',channelFields));
+            channelFields = channelFields(strcmp('channel',channelFields));
             
             for idchfield = 1:numel(channelFields)
                 thisFieldName = channelFields{idchfield};
@@ -663,7 +661,7 @@ classdef itaSuper < itaMeta
                     
                     %% merge channelInfo
                     channelFields = this.fields;
-                    channelFields = channelFields(strmatch('channel',channelFields));
+                    channelFields = channelFields(strcmp('channel',channelFields));
                     
                     for idchfield = 1:numel(channelFields)
                         thisFieldName = channelFields{idchfield};
@@ -758,7 +756,7 @@ classdef itaSuper < itaMeta
             [sArgs] = ita_parse_arguments(struct('log_prefix',[]),varargin);
             
             %get logarithmic frequency data 20*log10(abs(Obj.freq)/referenceValue)
-            [x,  refValues, log_prefix] = itaValue.log_reference(this.channelUnits);
+            [~,  refValues, log_prefix] = itaValue.log_reference(this.channelUnits);
             if sArgs.log_prefix
                 log_prefix = sArgs.log_prefix;
             end
@@ -772,7 +770,7 @@ classdef itaSuper < itaMeta
             [sArgs] = ita_parse_arguments(struct('log_prefix',[]),varargin);
             
             %get logarithmic frequency data 20*log10(abs(Obj.freq)/referenceValue)
-            [x,  refValues, log_prefix] = itaValue.log_reference(this.channelUnits);
+            [~,  refValues, log_prefix] = itaValue.log_reference(this.channelUnits);
             if sArgs.log_prefix
                 log_prefix = sArgs.log_prefix;
             end
@@ -856,7 +854,7 @@ classdef itaSuper < itaMeta
     methods(Hidden = true)
         function res = legend(this,varargin)
             % build a cell of strings for the plot legend
-            if nargin == 1;
+            if nargin == 1
                 mode = 'log';
             else
                 mode = varargin{1};
@@ -864,7 +862,8 @@ classdef itaSuper < itaMeta
             channelNames = this.channelNames;
             channelUnits = this.channelUnits;
             channelUnits(strcmpi(channelUnits,'')) = {'1'};
-            res = {};
+            % res = {};
+			res = cell(1,this.nChannels);
             for idx = 1:this.nChannels
                 if strcmpi(mode,'nodb')
                     res{idx} = [channelNames{idx} ' [' channelUnits{idx} ']' ];
@@ -876,6 +875,7 @@ classdef itaSuper < itaMeta
             end
         end
         
+		% TODO What is this supposed to do?
         function res = log_reference(this)
             
         end
@@ -1012,6 +1012,7 @@ classdef itaSuper < itaMeta
             disp(this.LINE_END);
         end
         function displayEndOfClass(this, classname,firstStr)
+			% TODO why?
             if exist('firstStr','var')
             end
             classnameString = ['(' classname ')'];
@@ -1024,7 +1025,7 @@ classdef itaSuper < itaMeta
             if nargin == 1 % only get
                 for idx = 1:size(this,1)
                     for jdx = 1:size(this,2)
-                        for ndx = 1:this(idx,jdx).nChannels;
+                        for ndx = 1:this(idx,jdx).nChannels
                             result(idx,jdx,ndx) = itaValue(1,this(idx,jdx).channelUnits{ndx});
                         end
                     end
@@ -1032,7 +1033,7 @@ classdef itaSuper < itaMeta
             else % set values
                 for idx = 1:size(this,1)
                     for jdx = 1:size(this,2)
-                        for ndx = 1:this(idx,jdx).nChannels;
+                        for ndx = 1:this(idx,jdx).nChannels
                             this(idx,jdx,ndx).channelUnits{ndx} = value(idx,jdx);
                         end
                     end
