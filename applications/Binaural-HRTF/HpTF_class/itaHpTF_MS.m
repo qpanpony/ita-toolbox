@@ -45,10 +45,10 @@ classdef itaHpTF_MS < itaHpTF
             this.MSTF.outputChannels = [1 2];
             if nargin == 1
                 % init
-                if isa('itaHpTF',varargin)
+                if isa(varargin{1},'itaHpTF')
                     this.init = varargin;
-                elseif isa('itaMSTF',varargin) % calibration input
-                    this.MSTF = varargin;
+                elseif isa(varargin{1},'itaMSTF') % calibration input
+                    this.MSTF = varargin{1};
                 end
                 this.dimensions = 2*this.repeat;
                 this.fftDegree = this.MSTF.fftDegree;
