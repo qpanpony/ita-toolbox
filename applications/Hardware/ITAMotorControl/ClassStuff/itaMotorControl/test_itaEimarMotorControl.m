@@ -233,11 +233,12 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
         end
         
         
-        function result = runContinuousMeasurement(this)
+        function [result, result_raw] = runContinuousMeasurement(this)
             this.mMotorControl.setWait(false);
             this.mMotorControl.startContinuousMoveNow;
             pause(1);
-            result = this.measurementSetup.run_raw_imc;
+            result_raw = this.measurementSetup.run_raw_imc;
+            result = this.measurementSetup.deconvolve(result_raw);
 %             this.stop;
             this.mMotorControl.setWait(true);
         end
