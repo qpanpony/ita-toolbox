@@ -9,6 +9,6 @@ ita_raven_demo % will generate BRIR 'binaural'
 mStruct = struct;
 mStruct.listener = L;
 mStruct.source = S;
-mStruct.ch1 = binaural.ch( 1 ).timeData;
-mStruct.ch2 = binaural.ch( 2 ).timeData;
+mStruct.ch1 = double( binaural.ch( 1 ).timeData )';
+mStruct.ch2 = double( binaural.ch( 2 ).timeData )';
 mRes = va.callModule( mod_id, mStruct )
