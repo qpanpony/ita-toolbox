@@ -2,7 +2,7 @@
 % This assumes you already have set up a virtual scene without listener
 
 % Create itaVA and connect
-va = itaVA( 'localhost' );
+va = itaVA( 'localhost' )
 
 % Create a listener
 L = va.createListener( 'itaVA_Tracked_Listener' );
