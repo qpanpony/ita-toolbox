@@ -1,8 +1,10 @@
 %% itaVA simple example code for generic path renderer
-
-va = itaVA( 'localhost' )
+itaVAq
 va.reset();
-X = va.createAudiofileSignalSource( 'Audiofiles/Bauer.wav' );
+va.addSearchPath( pwd );
+
+ita_write_wav( ita_demosound, 'ita_demosound.wav', 'overwrite' );
+X = va.createAudiofileSignalSource( 'ita_demosound.wav' );
 va.setAudiofileSignalSourcePlaybackAction( X, 'play' );
 va.setAudiofileSignalSourceIsLooping( X, true );
 S = va.createSoundSource( 'itaVA_Source' );
@@ -47,12 +49,12 @@ mStruct.filepath = fullfile( pwd, 'unequal_dirac.wav' );
 mRes = va.callModule( modname, mStruct )
 
 % How to update a path sending floating point data (separate channels possible)
-b = ita_generate_impulse( 'fftDegree', 12 );
+b = ita_generate_impulse( 'fftDegree', 18 );
 mStruct = struct;
 mStruct.verbose = true; % ... remove line if verbosity not required anymore.
 mStruct.listener = L;
 mStruct.source = S;
-mStruct.ch2 = b.timeData / 4; % here, only update channel 2
+mStruct.ch2 = b.timeData / 104; % here, only update channel 2
 mRes = va.callModule( modname, mStruct ) % Currently under testing, use short IRs only
 
 va.disconnect()
