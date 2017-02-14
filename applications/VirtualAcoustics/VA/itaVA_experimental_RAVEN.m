@@ -1,4 +1,4 @@
-%% Starts and prepares VA for experimental setup and exchanges binaural filters from an itaHRTF class
+%% Starts and prepares VA for experimental setup
 itaVA_experimental_start_server
 itaVA_experimental_renderer_prepare
 
