@@ -22,7 +22,7 @@ function varargout = itaVA_setup(varargin)
 
 % Edit the above text to modify the response to help itaVA_setup
 
-% Last Modified by GUIDE v2.5 24-Oct-2016 16:33:03
+% Last Modified by GUIDE v2.5 08-Feb-2017 15:42:50
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -84,6 +84,15 @@ if ~isempty( current_va_server_dir )
             end
         end
     end
+end
+
+% NatNetML
+current_natent_dir = which( 'NatNetML.dll' );
+if ~isempty( current_natent_dir )
+    ainfo = NET.addAssembly( current_natent_dir );
+    natnetversion_raw = NatNetML.NatNetClientML( 0 ).NatNetVersion();
+    vs = sprintf( 'NatNetML (OptiTrack) %d.%d', natnetversion_raw(1), natnetversion_raw(2) );
+    set( handles.edit_natnet_version, 'String', vs )
 end
 
 uiwait( handles.figure1 );
@@ -236,14 +245,17 @@ end
 function [ found, va_component_dir ] = find_VA_Component( va_search_dir, component, recursive )
 found = false;
 va_component_dir = '';
-    
-if exist( fullfile( va_search_dir, component ), 'file' )
-    found = true;
-    va_component_dir = fullfile( va_search_dir ); % Base path is one folder up
-end
 
 if isempty( va_search_dir )
     return % something went wrong
+end
+if ~va_search_dir
+    return;
+end
+
+if exist( fullfile( va_search_dir, component ), 'file' )
+    found = true;
+    va_component_dir = fullfile( va_search_dir ); % Base path is one folder up
 end
 
 if ~found && recursive
@@ -315,6 +327,29 @@ function edit_vaserver_version_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function edit_vaserver_version_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to edit_vaserver_version (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit_natnet_version_Callback(hObject, eventdata, handles)
+% hObject    handle to edit_natnet_version (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit_natnet_version as text
+%        str2double(get(hObject,'String')) returns contents of edit_natnet_version as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit_natnet_version_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit_natnet_version (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 

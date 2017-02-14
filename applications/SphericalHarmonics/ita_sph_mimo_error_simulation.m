@@ -1,18 +1,23 @@
 function varargout = ita_sph_mimo_error_simulation(varargin)
 %ITA_SPH_MIMO_ERROR_SIMULATION - Simulate aliasing and noise errors in
 %  spherical MIMO systems.
-%  This function 
+%  This function simulates the mismatch errors from noise, sampling dispacement and aliasing 
+%  for a MIMO system comprised of a spherical loudspeaker array and a spherical microphone
+%  array.
 %
 %  Syntax:
 %   itaResult = ita_sph_mimo_error_simulation(options)
 %
 %   Options (default):
-%           'opt1' (defaultopt1) : description
-%           'opt2' (defaultopt1) : description
-%           'opt3' (defaultopt1) : description
+%           'SNR'				(60)	: SNR at each transducer
+%           'nRuns'				(5)		: calculate average of nRuns number of source-receiver orientations
+%           'dirMeasurementFile' ( [] ) : Filename for a directivity file that is to be included
+%
+%  Directivity files need to be in hdf5 format. The name of data fields need to be 'fullDirRe' and 
+%  'fullDirIm' for the real and imaginary part respectively.
 %
 %  Example:
-%   audioObjOut = ita_sph_mimo_error_simulation(audioObjIn)
+%   [individualTerms, allTerms, totalError] = ita_sph_mimo_error_simulation(sourceParams, receiverParams, opts)
 %
 %  See also:
 %   ita_toolbox_gui, ita_read, ita_write, ita_generate
@@ -26,7 +31,7 @@ function varargout = ita_sph_mimo_error_simulation(varargin)
 % </ITA-Toolbox>
 
 
-% Author: Marco Berzborn -- Email: marco.berzborn@rwth-aachen.de
+% Author: Marco Berzborn -- Email: marco.berzborn@akustik.rwth-aachen.de
 % Created:  29-Mar-2016 
 
 
@@ -36,6 +41,7 @@ sArgs = struct('pos1_source','struct',...
                'samplingRate',ita_preferences('samplingRate'),...
                'freqRange',[20 ita_preferences('samplingRate')/2],...
                'samplingDisplacement',[],...
+			   'samplingDisplacementAbsolute',false,...
                'nRuns',1,...
                'SNR',60,...
                'sma',true,...
@@ -47,6 +53,7 @@ sArgs = struct('pos1_source','struct',...
                'dirMeasurementFile',[]);
 [source,receiver,sArgs] = ita_parse_arguments(sArgs,varargin);
 
+% save all struct fields as variables for speed improvements in the parfor loop
 receiverNmax = receiver.Nmax;
 receiverSampling = receiver.sampling;
 
@@ -60,6 +67,7 @@ simSLA = sArgs.sla;
 
 SNR = sArgs.SNR;
 samplingDisplacement = sArgs.samplingDisplacement;
+displacementType = sArgs.samplingDisplacementAbsolute;
 
 ao = ita_generate_impulse('fftDegree',sArgs.fftDegree,'samplingRate',sArgs.samplingRate);
 freqVec = ao.freqVector(ao.freq2index(sArgs.freqRange(1)):ao.freq2index(sArgs.freqRange(2)));
@@ -74,7 +82,7 @@ simWNG = sArgs.simWNG;
 
 yMIMOgroundTruth = zeros(sArgs.nRuns,1,numel(kVec));
 
-
+% check if source and receiver sampling have a unique radius within a certain tolerance
 if numel(unique(sourceSampling.r)) > 1
     uniRSort = sort(unique(sourceSampling.r));
     if uniRSort(1) > uniRSort(end)*(1-2*eps) && uniRSort(end) < uniRSort(1)*(1+2*eps)
@@ -90,8 +98,10 @@ if numel(unique(receiverSampling.r)) > 1
     end
 end
 
+% include measured source directivity
 dirMeasurementFile = sArgs.dirMeasurementFile;
-%% separate error bounds
+
+% initialize constant variables
 receiverYalias = ita_sph_base(receiverSampling,receiverNmaxAlias);
 sourceYalias = ita_sph_base(sourceSampling,sourceNmaxAlias);
 sourceGalias = ita_sph_aperture_function_sla(sourceSampling,sourceNmaxAlias,sourcerMem);
@@ -100,11 +110,9 @@ sourceG = sourceGalias(:,1:(sourceNmax+1)^2);
 sourceY = sourceYalias(:,1:(sourceNmax+1)^2);
 receiverY = receiverYalias(:,1:(receiverNmax+1)^2);
 
-%% init
-% sma terms
+% declare non constant variables
 eMismatchReceiver = zeros(sArgs.nRuns,1,numel(freqVec));
 eAliasReceiver = zeros(sArgs.nRuns,1,numel(freqVec));
-% sla terms
 eMismatchSource = zeros(sArgs.nRuns,1,numel(freqVec));
 eAliasSource = zeros(sArgs.nRuns,1,numel(freqVec));
 elapsedTime = zeros(sArgs.nRuns,1);
@@ -185,6 +193,7 @@ for idxRun = 1:sArgs.nRuns
                     Msource = sourceB .* (sourceG.'.*sourceY');
                 end
             else
+				% include measured source directivity
                 dirMat = h5read(dirMeasurementFile,'/dir/fullRe',[1,1,idxFreq],[sourceSampling.nPoints,(sourceNmaxAlias+1)^2,1]) +...
                     1i* h5read(dirMeasurementFile,'/dir/fullIm',[1,1,idxFreq],[sourceSampling.nPoints,(sourceNmaxAlias+1)^2,1]);
                 Msource = dirMat(:,1:(sourceNmax+1)^2).';
@@ -235,8 +244,6 @@ for idxRun = 1:sArgs.nRuns
             end
         end
         
-        % alias error needed here since antialias bf needs them and parfor
-        % requires the variables to be initialized
         if simSMA
             if numel(unique(receiverSampling.r)) == 1
                 EreceiverAlias = receiverYalias*receiverBalias;
@@ -256,7 +263,7 @@ for idxRun = 1:sArgs.nRuns
             EsourceAlias = [];
         end
         
-        % just use random dnm for simulation
+        % use random weighting coefficients for simulation
         sourceLambda = sourceRandPattern / norm(sourceRandPattern) .* ita_sph_base(sourceLookDir,sourceNmax)' * 4*pi/(sourceNmax+1)^2;
         receiverLambda = receiverRandPattern / norm(receiverRandPattern) .* ita_sph_base(receiverLookDir,receiverNmax)' * 4*pi/(receiverNmax+1)^2;
         
@@ -264,19 +271,27 @@ for idxRun = 1:sArgs.nRuns
         if ~isempty(samplingDisplacement) && isempty(SNR)
             
             if simSMA
-                receiverSamplingErroneous = ita_sampling_displacement(receiverSampling,'relativeError',samplingDisplacement);
+                receiverSamplingErroneous = ita_sph_sampling_displacement(receiverSampling,samplingDisplacement,'absolute',displacementType);
                 receiverYmismatch = ita_sph_base(receiverSamplingErroneous,receiverNmax);
                 EreceiverMismatch = ita_sph_modal_strength(receiverSamplingErroneous,receiverNmax,kVec(idxFreq),'rigid');
-                EreceiverMismatch = EreceiverMismatch.*receiverYmismatch - Mreceiver;
+                if receiverSamplingUniqueRad
+                    EreceiverMismatch = receiverYmismatch*EreceiverMismatch - Mreceiver;
+                else
+                    EreceiverMismatch = receiverYmismatch.*EreceiverMismatch - Mreceiver;
+                end
             else
                 EreceiverMismatch = [];
             end
             if simSLA
-                sourceSamplingErroneous = ita_sampling_displacement(sourceSampling,'relativeError',samplingDisplacement);
+                sourceSamplingErroneous = ita_sph_sampling_displacement(sourceSampling,samplingDisplacement,'absolute',displacementType);
                 sourceYmismatch = ita_sph_base(sourceSamplingErroneous,sourceNmax);
                 sourceGmismatch = ita_sph_aperture_function_sla(sourceSamplingErroneous,sourceNmax,sourcerMem,'r',unique(sourceSamplingR));
                 EsourceMismatch = ita_sph_modal_strength(sourceSamplingErroneous,sourceNmax,kVec(idxFreq),'rigid','transducer','ls');
-                EsourceMismatch = (EsourceMismatch.' .* (sourceGmismatch.'.*sourceYmismatch')) - Msource;
+                if numel(unique(sourceSampling.r)) == 1
+                    EsourceMismatch = (EsourceMismatch * (sourceGmismatch.'.*sourceYmismatch')) - Msource;
+                else
+                    EsourceMismatch = (EsourceMismatch.' .* (sourceGmismatch.'.*sourceYmismatch')) - Msource;
+                end
             else
                 EsourceMismatch = [];
             end

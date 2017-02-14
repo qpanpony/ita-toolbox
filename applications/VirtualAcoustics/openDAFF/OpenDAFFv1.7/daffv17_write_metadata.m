@@ -4,7 +4,17 @@
 
 function [] = daffv17_write_metadata( fid, metadata )
 %DAFF_WRITE_METADATA Write a DAFF metadata block into DAFF binary file
-    
+
+    if ~isfield( metadata, 'name' ) || ~isfield( metadata, 'datatype' ) || ~isfield( metadata, 'value' )
+        %warning( 'Invalid metadata structure, skipping.' )
+        return
+    end
+
+    if ~( numel( metadata ) > 0 )
+        %warning( 'Empty metadata variable, skipping.' )
+        return
+    end
+
     % Number of keys
     fwrite(fid, length(metadata), 'int32');
     

@@ -45,6 +45,10 @@ daffv17_convert_from_miro( HRIR_FULL2DEG, 'HRIR_FULL2DEG_48kHz_web.v17.ir.daff',
 HRIR_FULL2DEG.resampleToFS = 44.1e3;
 daffv17_convert_from_miro( HRIR_FULL2DEG, 'HRIR_FULL2DEG_44kHz_web.v17.ir.daff', additional_metadata );
 
-% ... in frequency domain.
+% ... in complex frequency domain.
 HRIR_FULL2DEG.resampleToFS = HRIR_FULL2DEG.fs; % reset fs
-daffv17_convert_from_miro( HRIR_FULL2DEG, 'HRIR_FULL2DEG_44kHz_web.v17.dft.daff', additional_metadata, 'dft' );
+daffv17_convert_from_miro( HRIR_FULL2DEG, 'HRTF_FULL2DEG_48kHz_128taps_web.v17.dft.daff', additional_metadata, 'dft' );
+
+% ... energetic.
+daffv17_convert_from_miro( HRIR_FULL2DEG, 'HRTF_FULL2DEG_energetic_web.v17.ms.daff', additional_metadata, 'ms' );
+

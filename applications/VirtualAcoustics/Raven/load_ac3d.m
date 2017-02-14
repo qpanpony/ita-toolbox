@@ -357,6 +357,8 @@ classdef load_ac3d
             A = -S .* log(1 - A_tmp);            
         end
         
+
+        
         function [A, S] = getEquivalentAbsorptionArea(obj)
             [A, S] = obj.getEquivalentAbsorptionArea_sabine();
         end
@@ -395,6 +397,18 @@ classdef load_ac3d
             %RT = 0.163 .* obj.totalVolume ./ A;
            % RT = (2.76 / sqrt(273.15 + room_temperature)) .* (obj.totalVolume ./ A);
             RT = 0.163 .* obj.totalVolume ./ (A + 4*airAbsorption*obj.totalVolume);
+        end
+        
+        % get surface area of given material
+        function S = getSurfaceArea(obj, material)
+            
+            S = 0; %surface area (scalar)
+            for matID = 1:length(obj.bcGroups)
+                if (strfind(obj.bcGroups{matID}.name, material))
+                        S = S + obj.bcGroups{matID}.surface;                % scalar
+                end        
+                       
+            end
         end
         
         function materialNames = getMaterialNames(obj)

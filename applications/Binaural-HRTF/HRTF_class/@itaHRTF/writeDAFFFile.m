@@ -9,7 +9,7 @@ function writeDAFFFile( this, file_path, metadata_user )
 %
 % Output: none
 
-metadata = [];
+metadata = this.mMetadata;
 if nargin >= 3
     metadata = metadata_user;
 end
@@ -70,8 +70,11 @@ metadata = daffv17_add_metadata( metadata, 'Generation script', 'String', 'write
 metadata = daffv17_add_metadata( metadata, 'Generation toolkit', 'String', 'ITA-Toolkit' );
 metadata = daffv17_add_metadata( metadata, 'Generation date', 'String', date );
 metadata = daffv17_add_metadata( metadata, 'Web resource', 'String', 'http://www.ita-toolkit.org' );
-
-channels = 2; % this.nChannels < does not work?
+channels=this.nChannels/this.nDirections;
+if(channels<1)
+    warning('Number of channels per record was not detected correctly, assuming 2 channel records');
+    channels = 2;
+end
 
 % Content type switcher between time domain (ir) and frequency domain (dft)
 % (requires different data functions)

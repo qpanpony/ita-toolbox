@@ -1,17 +1,19 @@
 function varargout = ita_sph_modal_strength(varargin)
-%ITA_SPH_MODAL_STRENGTH - +++ Short Description here +++
-%  This function ++++ FILL IN INFO HERE +++
+%ITA_SPH_MODAL_STRENGTH - Calculate the modal strength function for a spherical array
+%  This function calculates the modal strength for a plane wave incident 
+%  onto a spherical microphone aray. The output is a diagonal matrix if the sampling 
+%  has a unique radius. If not, the output is a matrix with full rank. In case the wave 
+%  number k is given as a vector the output is of size N x M x nBins.
 %
 %  Syntax:
-%   audioObjOut = ita_sph_modal_strength(audioObjIn, options)
+%   B = ita_sph_modal_strength(sampling, Nmax, k, 'rigid')
 %
 %   Options (default):
-%           'opt1' (defaultopt1) : description
-%           'opt2' (defaultopt1) : description
-%           'opt3' (defaultopt1) : description
+%           'transducer' (microphone)	: microphone or loudspeaker array
+%           'hankelKind' (2)			: choose kind of Hankel function
 %
 %  Example:
-%   audioObjOut = ita_sph_modal_strength(audioObjIn)
+%   B = ita_sph_modal_strength(sampling, Nmax, k, 'rigid')
 %
 %  See also:
 %   ita_toolbox_gui, ita_read, ita_write, ita_generate
@@ -25,7 +27,7 @@ function varargout = ita_sph_modal_strength(varargin)
 % </ITA-Toolbox>
 
 
-% Author: Marco Berzborn -- Email: marco.berzborn@rwth-aachen.de
+% Author: Marco Berzborn -- Email: marco.berzborn@akustik.rwth-aachen.de
 % Created:  26-Feb-2016 
 
 %% Initialization and Input Parsing

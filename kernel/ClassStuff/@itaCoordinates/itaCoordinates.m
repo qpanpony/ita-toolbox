@@ -66,7 +66,7 @@ classdef itaCoordinates
                 elseif isstruct(varargin{1})
                     %% struct input/convert
                     fieldName = fieldnames(varargin{1});
-                    for ind = 1:numel(fieldName);
+                    for ind = 1:numel(fieldName)
                         try
                             this.(fieldName{ind}) = varargin{1}.(fieldName{ind});
                         catch errmsg
@@ -294,29 +294,29 @@ classdef itaCoordinates
                     % do nothing
                 case 'sph'
                     % sph2cart
-                    r = this.mCoord(:,1);
-                    theta = this.mCoord(:,2);
-                    phi = this.mCoord(:,3);
+                    r = this.mCoord(:,1); %#ok<PROP>
+                    theta = this.mCoord(:,2); %#ok<PROP>
+                    phi = this.mCoord(:,3); %#ok<PROP>
                     % apply builtin transformation
-                    [x,y,z] = sph2cart(phi, pi/2 - theta, r);
-                    this.mCoord = [x y z];
+                    [x,y,z] = sph2cart(phi, pi/2 - theta, r); %#ok<PROP>
+                    this.mCoord = [x y z]; %#ok<PROP>
                     this.mCoordSystem = 'cart';
                 case 'cyl'
                     % cyl2cart
-                    rho = this.mCoord(:,1);
-                    phi = this.mCoord(:,2);
-                    [x,y] = pol2cart(phi,rho);
-                    this.mCoord(:,[1 2]) = [x y];
+                    rho = this.mCoord(:,1); %#ok<PROP>
+                    phi = this.mCoord(:,2); %#ok<PROP>
+                    [x,y] = pol2cart(phi,rho); %#ok<PROP>
+                    this.mCoord(:,[1 2]) = [x y]; %#ok<PROP>
                     this.mCoordSystem = 'cart';
                 case 'pol'
-                    r = this.mCoord(:,1);
-                    alpha = this.mCoord(:,2);
-                    beta = this.mCoord(:,3);
-                    z = r.*sin(alpha).*sin(beta);
-                    rcoselev = r .* cos(beta);
-                    x = rcoselev .* sin(alpha);
-                    y = r.*cos(alpha);
-                    this.mCoord = [x y z];
+                    r = this.mCoord(:,1); %#ok<PROP>
+                    alpha = this.mCoord(:,2); %#ok<PROP>
+                    beta = this.mCoord(:,3); %#ok<PROP>
+                    z = r.*sin(alpha).*sin(beta); %#ok<PROP>
+                    rcoselev = r .* cos(beta); %#ok<PROP>
+                    x = rcoselev .* sin(alpha); %#ok<PROP>
+                    y = r.*cos(alpha); %#ok<PROP>
+                    this.mCoord = [x y z]; %#ok<PROP>
                     this.mCoordSystem = 'cart';
                     
                 otherwise
@@ -327,16 +327,16 @@ classdef itaCoordinates
             switch this.mCoordSystem
                 case 'cart'
                     % cart2sph
-                    x = this.mCoord(:,1);
-                    y = this.mCoord(:,2);
-                    z = this.mCoord(:,3);
+                    x = this.mCoord(:,1); %#ok<PROP>
+                    y = this.mCoord(:,2); %#ok<PROP>
+                    z = this.mCoord(:,3); %#ok<PROP>
                     % apply builtin transformation
-                    [phiMod, thetaMod, r] =  cart2sph(x,y,z);
+                    [phiMod, thetaMod, r] =  cart2sph(x,y,z); %#ok<PROP>
                     % phi = 0..2*pi
                     % theta = 0..pi
-                    phi = mod(phiMod, 2*pi);
-                    theta = pi/2 - thetaMod;
-                    this.mCoord = [r theta phi];
+                    phi = mod(phiMod, 2*pi); %#ok<PROP>
+                    theta = pi/2 - thetaMod; %#ok<PROP>
+                    this.mCoord = [r theta phi]; %#ok<PROP>
                     this.mCoordSystem = 'sph';
                 case 'sph'
                     % do nothing
@@ -356,16 +356,16 @@ classdef itaCoordinates
             switch this.mCoordSystem
                 case 'cart'
                     % cart2cyl
-                    x = this.mCoord(:,1);
-                    y = this.mCoord(:,2);
-                    z = this.mCoord(:,3);
+                    x = this.mCoord(:,1); %#ok<PROP>
+                    y = this.mCoord(:,2); %#ok<PROP>
+                    z = this.mCoord(:,3); %#ok<PROP>
                     
                     % apply builtin transformation
-                    [phiMod, rho] =  cart2pol(x,y);
+                    [phiMod, rho] =  cart2pol(x,y); %#ok<PROP>
                     % phi = 0..2*pi
-                    phi = mod(phiMod, 2*pi);
+                    phi = mod(phiMod, 2*pi); %#ok<PROP>
                     
-                    this.mCoord = [rho phi z];
+                    this.mCoord = [rho phi z]; %#ok<PROP>
                     this.mCoordSystem = 'cyl';
                 case 'sph'
                     % sph2cyl
@@ -409,20 +409,20 @@ classdef itaCoordinates
             switch this.mCoordSystem
                 case 'cart'
                     % cart2pol
-                    x = this.mCoord(:,1);
-                    y = this.mCoord(:,2);
-                    z = this.mCoord(:,3);
+                    x = this.mCoord(:,1); %#ok<PROP>
+                    y = this.mCoord(:,2); %#ok<PROP>
+                    z = this.mCoord(:,3); %#ok<PROP>
                     % apply builtin transformation
-                    hypotxy = hypot(x,y);
-                    r = hypot(hypotxy,z);
-                    thetaMod = acos(y./r);
-                    phiMod = atan2(z,x);
+                    hypotxy = hypot(x,y); %#ok<PROP>
+                    r = hypot(hypotxy,z); %#ok<PROP>
+                    thetaMod = acos(y./r); %#ok<PROP>
+                    phiMod = atan2(z,x); %#ok<PROP>
 
                     % phi = 0..2*pi
                     % theta = 0..pi
-                    beta = mod(phiMod, 2*pi);
-                    alpha = thetaMod;
-                    this.mCoord = [r alpha beta];
+                    beta = mod(phiMod, 2*pi); %#ok<PROP>
+                    alpha = thetaMod; %#ok<PROP>
+                    this.mCoord = [r alpha beta]; %#ok<PROP>
                     this.mCoordSystem = 'pol';
                 case 'sph'
                     % sph2pol
@@ -458,6 +458,42 @@ classdef itaCoordinates
             end
         end
         
+		% Translation in x,y,z
+		% Syntax is itaCoord = itaCoord.translate([x,y,z]) as this is not a handle class
+		function this = translate(this, txyz)
+			if strcmp(this.mCoordSystem, 'cart')
+				transCoords = (makehgtform('translate',txyz) * [this.mCoord, ones(this.nPoints,1)].').';
+			   	this.mCoord = transCoords(:,1:3);
+			else
+				this = makeCart(this);
+				this = translate(this, txyz);
+			end
+		end
+		
+		% Rotation around x,y,z-axis as defined by the Cartesian coordinate system in Matlab
+		% Syntax is itaCoord = itaCoord.rotate([x,y,z]) as this is not a handle class
+		function this = rotate(this, angles)
+			if strcmp(this.mCoordSystem, 'cart')
+				rotCoords = (makehgtform('xrotate',angles(1),'yrotate',angles(2),'zrotate',angles(3)) * [this.mCoord, ones(this.nPoints,1)].').';
+				this.mCoord = rotCoords(:,1:3);
+			else
+				this = makeCart(this);
+				this = rotate(this, angles);
+			end
+		end
+		
+		% Scaling in x,y,z
+		% Syntax is itaCoord = itaCoord.scale([x,y,z]) as this is not a handle class
+		function this = scale(this, sxyz)
+			if strcmp(this.mCoordSystem, 'cart')
+				scaleCoords = (makehgtform('scale',sxyz) * [this.mCoord, ones(this.nPoints,1)].').';
+				this.mCoord = scaleCoords(:,1:3);
+			else
+				this = makeCart(this);
+				this = scale(this, sxyz);
+			end
+
+		end
         
         function this = resize(this,n)
             if n > size(this.mCoord,1)
