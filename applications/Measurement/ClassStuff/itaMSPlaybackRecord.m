@@ -25,6 +25,8 @@ classdef itaMSPlaybackRecord < itaMSRecord
     properties(Dependent = true, Hidden = false, Transient = true, AbortSet = true, SetObservable = true) %triggers @this.init !!!
         outputChannels          % Vector specifying the output channel IDs e.g. [1 5]
         outputMeasurementChain  % itaMeasurementChain('output') defining all output measurement chain elements
+        
+        outputEqualizationFilters = []; % these filters are convolved with the excitation signal, but not the compensation
     end
     
     properties(Dependent = true, Hidden = true, Transient = true, AbortSet = true)
