@@ -1,9 +1,9 @@
+%% Execute RAVEN demo
+ita_raven_demo % will generate BRIR 'binaural'
+
 %% Starts and prepares VA for experimental setup and exchanges binaural filters from an itaHRTF class
 itaVA_experimental_start_server
 itaVA_experimental_renderer_prepare
-
-%% Execute RAVEN demo
-ita_raven_demo % will generate BRIR 'binaural'
 
 %% Exchange (variables prepared by itaVA_experimental_renderer_prepare)
 mStruct = struct;
