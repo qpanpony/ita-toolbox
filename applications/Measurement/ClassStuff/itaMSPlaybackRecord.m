@@ -15,6 +15,8 @@ classdef itaMSPlaybackRecord < itaMSRecord
         mExcitation             = [];
         mOutputChannels         = [];
         mOutputMeasurementChain = itaMeasuringStation.loadCurrentOutputMC; %itaMeasurementChain('output');
+        
+        mOutputEqualizationFilters = [];
     end
     
     properties(Dependent = true, Hidden = false, Transient = true)
@@ -448,6 +450,12 @@ classdef itaMSPlaybackRecord < itaMSRecord
         function res = get_final_excitation(this)
             % get the corrected excitation (outputamplification)
             res = this.raw_excitation * this.outputamplification_lin ;
+            
+            % if an outputequalization filter is set, convolve it with the
+            % excitation
+            if ~isempty(this.outputEqualizationFilters)
+                res = ita_convolve(res,this.outputEqualizationFilters,'cyclic',true);
+            end
         end
         
         function set.outputChannels(this,value)
@@ -502,6 +510,16 @@ classdef itaMSPlaybackRecord < itaMSRecord
         function res = get.outputMeasurementChain(this)
             res = this.mOutputMeasurementChain;
         end
+        
+        
+        function res = set.outputEqualizationFilters(this,value)
+            this.mOutputEqualizationFilters = value;
+        end
+        
+        function res = get.outputEqualizationFilters(this)
+            res = this.mOutputEqualizationFilters;
+        end
+        
         
         %% commandline
         function str = commandline(this)
