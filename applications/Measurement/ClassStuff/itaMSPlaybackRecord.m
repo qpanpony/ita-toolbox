@@ -454,7 +454,7 @@ classdef itaMSPlaybackRecord < itaMSRecord
             % if an outputequalization filter is set, convolve it with the
             % excitation
             if ~isempty(this.outputEqualizationFilters)
-                res = ita_convolve(res,this.outputEqualizationFilters,'cyclic',true);
+                res = res*this.outputEqualizationFilters;
             end
         end
         
@@ -497,6 +497,11 @@ classdef itaMSPlaybackRecord < itaMSRecord
         
         function set_outputChannels(this,value)
             this.mOutputChannels = value;
+            
+            if (this.outputEqualizationFilters.nChannels ~= 1) & (this.outputEqualizationFilters.nChannels ~= size(this.outputChannels))
+               this.outputEqualizationFilters = [];
+               ita_verbose_info('Output Equalization Filter size does not match anymore. Removing',0);
+            end
         end
         
         function res = get.outputChannels(this)
@@ -512,7 +517,20 @@ classdef itaMSPlaybackRecord < itaMSRecord
         end
         
         
-        function res = set.outputEqualizationFilters(this,value)
+        function set.outputEqualizationFilters(this,value)
+            
+            if isempty(value)
+                this.mOutputEqualizationFilters = value;
+                return
+            end
+            
+            if ~isa(value,'itaAudio')
+                error('Not an itaAudio. Doing nothing');
+            end
+            
+            if value.nChannels ~= 1 & value.nChannels ~= size(this.outputChannels)
+                error('The number of channels of the filter does not fit the number of the output channels');
+            end
             this.mOutputEqualizationFilters = value;
         end
         

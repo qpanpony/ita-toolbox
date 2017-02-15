@@ -534,7 +534,7 @@ classdef itaMSTF < itaMSPlaybackRecord
             % if an outputequalization filter is set, convolve it with the
             % excitation
             if ~isempty(this.outputEqualizationFilters)
-                res = ita_convolve(res,this.outputEqualizationFilters,'cyclic',true);
+                  res = res*this.outputEqualizationFilters;
             end
             
         end
