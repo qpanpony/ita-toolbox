@@ -15,6 +15,6 @@ myhrir.pf
 mStruct = struct;
 mStruct.listener = L;
 mStruct.source = S;
-mStruct.ch1 = myhrir.ch( 1 ).timeData;
-mStruct.ch2 = myhrir.ch( 2 ).timeData;
+mStruct.ch1 = double( myhrir.ch( 1 ).timeData )';
+mStruct.ch2 = double( myhrir.ch( 2 ).timeData )';
 mRes = va.callModule( mod_id, mStruct )

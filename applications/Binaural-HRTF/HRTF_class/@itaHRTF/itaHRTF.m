@@ -71,7 +71,7 @@ classdef  itaHRTF < itaAudio
     
     % Author: Ramona Bomhardt -- Email: rbo@akustik.rwth-aachen.de
     % Created:  10-Jul-2014
-    
+
     properties (Access = private)
         mMetadata   = [];
         mCoordSave  = [];
@@ -1482,7 +1482,5 @@ classdef  itaHRTF < itaAudio
                 result = {'channelCoordinates','domain','data'};
             end
         end
-    end
-    
-    
-    
+end
+

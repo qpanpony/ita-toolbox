@@ -47,7 +47,7 @@ classdef itaHpTF < itaAudio
             
             if nargin == 1
                 % init
-                if isa('itaHpTF',this)
+                if isa(this,'itaHpTF')
                     this.init = varargin;
                 end
             end

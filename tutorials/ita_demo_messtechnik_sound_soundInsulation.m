@@ -1,22 +1,23 @@
 %% demo: sound insulation measurement
 % Demo für die Messtechnik Vorlesung
-% mgu/jck 2014
+% mbe/jck/mgu 2017
 
 %% Init
 ccx;
 
 %% Measurement Setup for Dode sub and mid-range
-freqRange        = [50 5000];
-freqRangeSweep   = [freqRange(1) / 2 178; 178 freqRange(2) *2];
+% Script for itaMSTF with HD2 and Dode. Comments for itaMSTFbandpass.
+freqRange        = [50 10000]; % [50 5000]
+% freqRangeSweep   = [freqRange(1) / 2 178; 178 freqRange(2) *2];
 bandsPerOctave   = 3;
 averages         = 2;
 
-MS = itaMSTFbandpass;
+MS = itaMSTF; % itaMSTFbandpass
 MS.inputChannels        = 1;
-MS.outputChannels       = [1 3];
-MS.freqRange            = freqRangeSweep;
+MS.outputChannels       = 1;
+MS.freqRange            = freqRange;%freqRangeSweep;
 MS.outputamplification  = 30;
-MS.fftDegree            = 19;
+MS.fftDegree            = 20;
 MS.stopMargin           = 2.5;
 MS.latencysamples       = 8303;
 
@@ -24,17 +25,19 @@ MS.latencysamples       = 8303;
 %% Reverb
 % Source:   Receiver Room
 % Receiver: Receiver Room
-
+pause(5)
 receiverRoomRIR = MS.run;
+receiverRoomRIR = ita_time_window(receiverRoomRIR,[4 5], 'time', 'crop');
 
-ra = ita_roomacoustics(receiverRoomRIR.merge, 'freqRange',freqRange, 'bandsPerOctave', bandsPerOctave, 'T20');
+%% Compute and plot
+ra = ita_roomacoustics(receiverRoomRIR, 'freqRange', freqRange, 'bandsPerOctave', bandsPerOctave, 'T20');
 RT =  ra.T20;
 RT.plot_freq
 
 %% Receiver Room Level
 % Source:   Source Room
 % Receiver: Receiver Room
-
+pause(5)
 for idm = 1:averages
     receiverRoom(idm) = MS.run;
 end
@@ -45,7 +48,7 @@ receiverRoom.channelUnits(:)    = {'Pa'};
 %% Source Room Level
 % Source:   Source Room
 % Receiver: Source Room
-
+pause(5)
 for idm = 1:averages
     sourceRoom(idm) = MS.run; %#ok<*SAGROW>
 end
@@ -75,8 +78,8 @@ D.bar
 
 %% Ri
 % Receiver room data
-V = 65*6;   % Volume
-S = 220;    % Wall surface
+V = 154;   % Volume
+S = 194;    % Wall surface
 
 % Equivalent absorption area
 A = 0.163  * V ./ RT.freqData;
