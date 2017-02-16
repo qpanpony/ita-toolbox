@@ -598,7 +598,7 @@ classdef itaSuper < itaMeta
             % and select the appropriate Channel struct(s)
             %% merge channelInfo
             channelFields = properties(this);
-            channelFields = channelFields(strcmp('channel',channelFields));
+            channelFields = channelFields(strncmp('channel',channelFields,7));
             
             for idchfield = 1:numel(channelFields)
                 thisFieldName = channelFields{idchfield};
@@ -662,7 +662,7 @@ classdef itaSuper < itaMeta
                     
                     %% merge channelInfo
                     channelFields = properties(this);
-                    channelFields = channelFields(strcmp('channel',channelFields));
+                    channelFields = channelFields(strncmp('channel',channelFields,7));
                     
                     for idchfield = 1:numel(channelFields)
                         thisFieldName = channelFields{idchfield};
