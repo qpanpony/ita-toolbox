@@ -531,6 +531,12 @@ classdef itaMSTF < itaMSPlaybackRecord
                 res = ita_dither(res,'type',this.ditherType,'nBits',this.nBits(1),'quiet',false);
             end
             
+            % if an outputequalization filter is set, convolve it with the
+            % excitation
+            if ~isempty(this.outputEqualizationFilters)
+                  res = res*this.outputEqualizationFilters;
+            end
+            
         end
         
         function set.compensation(this,value)

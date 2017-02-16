@@ -15,6 +15,8 @@ classdef itaMSPlaybackRecord < itaMSRecord
         mExcitation             = [];
         mOutputChannels         = [];
         mOutputMeasurementChain = itaMeasuringStation.loadCurrentOutputMC; %itaMeasurementChain('output');
+        
+        mOutputEqualizationFilters = [];
     end
     
     properties(Dependent = true, Hidden = false, Transient = true)
@@ -25,6 +27,8 @@ classdef itaMSPlaybackRecord < itaMSRecord
     properties(Dependent = true, Hidden = false, Transient = true, AbortSet = true, SetObservable = true) %triggers @this.init !!!
         outputChannels          % Vector specifying the output channel IDs e.g. [1 5]
         outputMeasurementChain  % itaMeasurementChain('output') defining all output measurement chain elements
+        
+        outputEqualizationFilters = []; % these filters are convolved with the excitation signal, but not the compensation
     end
     
     properties(Dependent = true, Hidden = true, Transient = true, AbortSet = true)
@@ -446,6 +450,12 @@ classdef itaMSPlaybackRecord < itaMSRecord
         function res = get_final_excitation(this)
             % get the corrected excitation (outputamplification)
             res = this.raw_excitation * this.outputamplification_lin ;
+            
+            % if an outputequalization filter is set, convolve it with the
+            % excitation
+            if ~isempty(this.outputEqualizationFilters)
+                res = res*this.outputEqualizationFilters;
+            end
         end
         
         function set.outputChannels(this,value)
@@ -487,6 +497,11 @@ classdef itaMSPlaybackRecord < itaMSRecord
         
         function set_outputChannels(this,value)
             this.mOutputChannels = value;
+            
+            if (this.outputEqualizationFilters.nChannels ~= 1) & (this.outputEqualizationFilters.nChannels ~= size(this.outputChannels))
+               this.outputEqualizationFilters = [];
+               ita_verbose_info('Output Equalization Filter size does not match anymore. Removing',0);
+            end
         end
         
         function res = get.outputChannels(this)
@@ -500,6 +515,29 @@ classdef itaMSPlaybackRecord < itaMSRecord
         function res = get.outputMeasurementChain(this)
             res = this.mOutputMeasurementChain;
         end
+        
+        
+        function set.outputEqualizationFilters(this,value)
+            
+            if isempty(value)
+                this.mOutputEqualizationFilters = value;
+                return
+            end
+            
+            if ~isa(value,'itaAudio')
+                error('Not an itaAudio. Doing nothing');
+            end
+            
+            if value.nChannels ~= 1 & value.nChannels ~= size(this.outputChannels)
+                error('The number of channels of the filter does not fit the number of the output channels');
+            end
+            this.mOutputEqualizationFilters = value;
+        end
+        
+        function res = get.outputEqualizationFilters(this)
+            res = this.mOutputEqualizationFilters;
+        end
+        
         
         %% commandline
         function str = commandline(this)
