@@ -498,9 +498,9 @@ classdef itaMSPlaybackRecord < itaMSRecord
         function set_outputChannels(this,value)
             this.mOutputChannels = value;
             
-            if (this.outputEqualizationFilters.nChannels ~= 1) & (this.outputEqualizationFilters.nChannels ~= size(this.outputChannels))
+            if (this.outputEqualizationFilters.nChannels ~= 1)
                this.outputEqualizationFilters = [];
-               ita_verbose_info('Output Equalization Filter size does not match anymore. Removing',0);
+               ita_verbose_info('Output Equalization Filter are removed!',0);
             end
         end
         
