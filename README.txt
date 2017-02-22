@@ -1,32 +1,33 @@
-***************************************************************************************
-******                   Welcome to ITA-Toolbox for MATLAB           ******************
-***************************************************************************************
+************************************************************************
+*******                    ITA-Toolbox for MATLAB              *********
+************************************************************************
 
-Please be aware of the license agreement supplied with this Toolbox (license.txt)
-Please report serious bugs to toolbox-dev@akustik.rwth-aachen.de
+Please be aware that by using this toolbox you accept the license 
+agreement supplied in the 'license.txt' file.
+Please report bugs to toolbox-dev@akustik.rwth-aachen.de
 
-***************************************************************************************
+************************************************************************
 ** INSTALL **
-***************************************************************************************
+************************************************************************
 
-1) Open MATLAB R2010a or higher, with Signal Processing Toolbox
-2) Navigate to this ITA-Toolbox folder, where this README.txt lies in.
-3) Type <ita_toolbox_setup> in your MATLAB console
-4) Follow the instructions and have a look at the GUI and Getting Started Tutorial Script supplied
+1) Open MATLAB R2010a or higher
+2) Check if the Signal Processing and Curve Fitting Toolboxes are
+   installed (MATLAB command window: <ver>)
+3) Open the ITA-Toolbox root folder (containing this README.txt).
+4) MATLAB command window: <ita_toolbox_setup>
+5) Follow the instructions.
+6) MATLAB command window: <ita_tutorialOverview> and <ita_demoOverview>
+   for an overview of available tutorials and demos.
 
-***************************************************************************************
+************************************************************************
 ** UNINSTALL **
-***************************************************************************************
+************************************************************************
 
-To uninstall ITA-Toolbox for MATLAB:
-1) type <ita_delete_toolboxpaths> 
-   OR
-   simply type <pathtool> in your MATLAB console and delete all path entries for ITA-Toolbox and save path list.  
+1) MATLAB command window: <ita_toolbox_uninstall> 
 2) Close MATLAB.
 3) Delete your ITA-Toolbox folder
 
-***************************************************************************************
+************************************************************************
 ** Have fun! **
-***************************************************************************************
+************************************************************************
 Your ITA-Toolbox Developer Team
-Aachen, Germany, February 2013
