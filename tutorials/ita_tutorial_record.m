@@ -1,4 +1,4 @@
-% Recording with the ITA Toolbox
+%% Recording with the ITA Toolbox
 %
 % In this tutorial you will learn how to set-up a simple the ITA Toolbox
 % for a simple recording task. The first step is to create an instance
@@ -28,15 +28,15 @@ ita_preferences;
 ccx;
 
 %% Measurement Setup
-% Create instance of recording class
+% Create an instance of the recording class.
 MS = itaMSRecord;
 
 % Define recording parameters
 % In this example we'll use the input channel 1 of the selected hardware
-% device (for multiple channels please specify a vector (in example 
+% device. For multiple channels please specify a vector (see example 
 % below). In case you activated the 'Measurement Chain' in the
-% ita_preferences, you will be asked about the elements in you input and
-% output chain, once you define the input and output.
+% ita_preferences, you will be asked about the elements in you input 
+% chain, once you define the input and output.
 % The input measurement chain consists of 3 elements (sensor, preamp and
 % A/D converter). For each element you do not want to calibrate please 
 % choose 'none' from the respective drop-down menu. For elements you 

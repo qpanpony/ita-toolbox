@@ -1,5 +1,4 @@
-%% demo: sound insulation measurement
-% Demo für die Messtechnik Vorlesung
+%% Akustische Messtechnik lecture sound insulation demo
 % mbe/jck/mgu 2017
 
 %% Init

@@ -1,4 +1,4 @@
-%% Tutorial about itaCoordinates - visualize spatial audio data (Demo)
+%% Visualize spatial audio data with itaCoordinates
 %
 % <<../../pics/ita_toolbox_logo_wbg.jpg>>
 % 

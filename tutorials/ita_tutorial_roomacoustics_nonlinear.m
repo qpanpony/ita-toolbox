@@ -1,4 +1,4 @@
-%% about nonlinearities in room acoustics (DAGA2013 Paper)
+%% Nonlinearities in room acoustics
 %
 %  Exp. Sweep measurements are simulated using an emulation of the
 %  measurement chain with nonlinerities.

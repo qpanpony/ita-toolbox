@@ -1,4 +1,4 @@
-%% Tutorial Script - Analysis of room impulse responses (RIR)
+%% Analysis of room impulse responses (RIR)
 %
 % <<../../pics/ita_toolbox_logo_wbg.jpg>>
 %

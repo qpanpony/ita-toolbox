@@ -1,5 +1,6 @@
+%% Lambda Resonator Demo Function (see input arguments)
 function [ frames ] = ita_demo_lambdaResonator( varargin )
-%ita_demo_LAMBDARESONATOR - +++ Short Description here +++
+
 %  This function ++++ FILL IN INFO HERE +++
 %
 %  Syntax:

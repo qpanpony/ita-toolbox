@@ -1,4 +1,4 @@
-%% Tutorial to illustrate the effect of impulsive noise during sweep measurements 
+%% Illustration of the effect of impulsive noise during sweep measurements 
 % and a new automatic impulsive noise detection
 % technique.
 %

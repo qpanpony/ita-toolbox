@@ -1,16 +1,14 @@
-%% Treffpunkt MATLAB - ITA Toolbox
+%% Treffpunkt MATLAB - ITA Toolbox lecture demo
 %
-% <<../../pics/ita_toolbox_logo_wbg.jpg>>
 %
 % In this document we will give you a basic introduction to the ITA toolbox
 % and its application in signal processing and acoustical measurements.
 %
 % *HAVE FUN! And please report bugs* 
 %
-% _2015 - JCK, JRI, MGU, MMT, RBO
+% _2017 - JCK, JRI, MBE, RBO
 % toolbox-dev@akustik.rwth-aachen.de
 %
-% <<../../pics/toolbox_bg.png>>
 % 
  
 % <ITA-Toolbox>
@@ -354,11 +352,11 @@ h.pf
 % itaMSTF is a toolbox class designed for transfer function measurements
  
 % Select your sound card in the ita_preferences, tab 'IO Settings' as
-% 'Recording' and 'Playing Device'
+% 'Recording' and 'Playing Device'. NOT NEEDED FOR THE SIMULATION
 ita_preferences;
  
 % Generate class object
-MS = itaMSTF;
+MS = itaMSTFdummy;
  
 % Have a look at the defaults
 MS %#ok<NOPTS>
@@ -368,14 +366,42 @@ MS.inputChannels  = 1;
 MS.outputChannels = 1;
  
 % Set signal length, 2^fftDregree samples
-MS.fftDegree = 19;
+MS.fftDegree = 17;
  
+% In real measurement setup-ups be careful not do damage the speakers
+MS.outputamplification = -5;
+
 % Set output amplification in dBFS. 0 dBFS -> Digital signal amplitude of
 % 1. -20 dBFS -> digital signal amplitude of 0.1 . Have a look!
 MS.outputamplification = 0;
 MS.excitation.plot_time;
-% Set it back to -40 not to damage your speakers.
-MS.outputamplification = -40;
+
+%% Room impulse response simulation
+% In this section a simulated room impulse response (RIR) will be
+% generated basing on a noise signal.
+
+% Generate RIR
+fftDegree   = MS.fftDegree; % length of IR is 2^fftDegree samples
+fmax        = 10000; % highest eigenfreuency in Hertz
+
+% Define the room size (x,y,z)
+L           = [8 5 3]/10;
+
+% Define the source position
+r_source    = [5 3 1.2]/10; % positions
+
+% Set the reverbration time of each eigenmode
+T           = 1;
+
+% Simulate
+RIR         = ita_roomacoustics_analytic_FRF_book(itaCoordinates(L), itaCoordinates(r_source), itaCoordinates([0 0 0]),'f_max',fmax,'T',T,'fftDegree',fftDegree,'pressuremode',false);
+
+
+%% Measurement
+% Set system response
+MS.systemresponse = RIR;
+MS.nonlinearCoefficients = 1; % only linear transmission or e.g. [1 0.1 0.1] for g = 1*s^1 + 0.1*s^2 + 0.1*s^3
+MS.noiselevel            = -30;
  
 % Execute measurement
 result = MS.run;
