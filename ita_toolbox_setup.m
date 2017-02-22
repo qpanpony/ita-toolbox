@@ -107,13 +107,6 @@ end
 %% clean up old filters
 ita_delete_filter();
 
-%% show toolbox apps if possible
-if ~exist('ita_apps.m', 'file')
-    disp('no ITA-Toolbox applications found')
-else
-    ita_apps()
-end
-
 %% Then show gui
 if usejava('desktop') %Only if desktop available (non_cluster)
     %     ita_preferences();

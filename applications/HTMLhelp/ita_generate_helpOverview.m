@@ -270,55 +270,6 @@ classesHTML=[classesHTML, '<br>', sprintf('\n'), classesHTML_end];
 %write edited file
 ita_writeHTML(fullfile(htmlFolder, 'classes.html'), classesHTML);
 
-% -> edit apps.html
-[appsHTML_begin, appsHTML_end] = ita_openHTML(fullfile(templateFolder, 'template_apps.html'));
-appsHTML= appsHTML_begin;
-%%%%%%%%%%%%%%%%%%%
-appfolder = rdir([folder filesep '**' filesep 'ita_apps.m']);
-if isempty(appfolder)
-    appsHTML = [appsHTML 'sorry you do not have any application installed. Could not find "ita_apps.m"<br>' appsHTML_end];
-else
-    appfolder = appfolder(1).name;
-    temp = strfind(appfolder, filesep);
-    appfolder = appfolder(1:temp(end)-1);
-    applist = rdir([appfolder filesep '**' filesep 'AppDescription.txt']);
-    
-    
-    appsHTML = [appsHTML '<table border="2">' sprintf('\n')];
-    for idx = 1:numel(applist)
-        appDescriptionPath = applist(idx).name;
-        nameidx = strfind(appDescriptionPath,filesep);
-        appDocumentationFile = [appDescriptionPath(1:nameidx(end-2)),...
-            'HTML',...
-            filesep,...
-            'doc',...
-            filesep,...
-            appDescriptionPath(nameidx(end-3)+1:nameidx(end)),...
-            'index.html'];
-        appname = appDescriptionPath(nameidx(end-1)+1:nameidx(end)-1);
-        appDescriptionPath = strrep(appDescriptionPath, filesep, '/'); %convert ..\.. to ../.. for html
-        
-        data_ID = fopen(appDescriptionPath,'r'); %r read only
-        data = fread(data_ID, 'uint8=>char');
-        fclose(data_ID);
-        data = data(:)'; %get AppDescription.txt as string
-        desPoint = strfind(data,'Description:');
-        data = data(desPoint+12:end);
-        desPoint = strfind(data,sprintf('\n'));
-        data = data(1:desPoint);
-        % old: show complete AppDescription.txt....
-        %'<td><object data="file:///', appDescriptionPath, '" type="text/plain" width="350" height="90">', sprintf('\n'),...
-        %'Ihr Browser kann das Objekt leider nicht anzeigen!</object></td>',sprintf('\n'),..
-        appsHTML = [appsHTML,...
-            '<tr height="30">', sprintf('\n'),...
-            '<td width="100"><a href="file:///', appDocumentationFile,'">', appname, '</a></td>', sprintf('\n'),...
-            '<td>', data, sprintf('\n'),...
-            '</td>',sprintf('\n'),...
-            '</tr>', sprintf('\n')]; %#ok<AGROW>
-    end
-    appsHTML = [appsHTML '</table>' appsHTML_end];
-end
-
 %write edited file
 ita_writeHTML(fullfile(htmlFolder, 'apps.html'), appsHTML);
 
