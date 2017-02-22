@@ -1,3 +1,0 @@
-Contact:           jst@akustik.rwth-aachen.de
-Description:       VA Matlab client
-Dependencies:      no dependencies

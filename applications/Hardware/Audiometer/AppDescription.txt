@@ -1,3 +1,0 @@
-Contact:           mgu@akustik.rwth-aachen.de
-Description:       use Norsonic838, read result from Auritec-Audiometer
-Dependencies:      
