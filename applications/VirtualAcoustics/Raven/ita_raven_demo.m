@@ -7,9 +7,15 @@
 % </ITA-Toolbox>
 
 %% Projektdatei einlesen
-% load ita raven project
-rpf = itaRavenProject('..\RavenInput\Classroom\Classroom.rpf');
+% project laden
+ravenProjectPath = '..\RavenInput\Classroom\Classroom.rpf';
 
+if (~exist(ravenProjectPath,'file'))
+    [filename, pathname] = uigetfile('Classroom.rpf', 'Please select raven project file!');
+    ravenProjectPath = [pathname filename];
+    ravenBasePath = ravenProjectPath(1:end-34);
+end
+rpf = itaRavenProject(ravenProjectPath);
 %% Simulationsparameter einstellen
 % Image sources up to second order
 rpf.setISOrder_PS(2);
@@ -68,7 +74,12 @@ mono_ir.plot_time;      % plot monaural RIR in time domain
 binaural.plot_freq;     % plot binaural RIR in time domain
 
 %% Example: Include loudspeaer frequency response in RIR (for comparisons with measurements)
-ls_O100 = ita_read('..\RavenDatabase\FrequencyResponse\KH_O100_reference_holesclosed_final_at1V1m_fft14.ita');
+pathFrequencyResponse = '..\RavenDatabase\FrequencyResponse\KH_O100_reference_holesclosed_final_at1V1m_fft14.ita';
+if (~exist(pathFrequencyResponse,'file'))
+    pathFrequencyResponse = [ ravenBasePath pathFrequencyResponse(4:end) ];
+end
+
+ls_O100 = ita_read(pathFrequencyResponse);
 ir_mit_lautsprecher = ita_convolve(mono_ir, ls_O100);
 
 %% Additional features
@@ -77,3 +88,5 @@ ir_mit_lautsprecher = ita_convolve(mono_ir, ls_O100);
  
  % show absorption coefficients
  rpf.plotMaterialsAbsorption;
+ 
+ 
