@@ -9,4 +9,4 @@ Welcome to the ITA-Toolbox
 * Object-oriented programming concepts for using of well-known MATLAB commands and operators to audio data.
 * Makes it easy to do basic signal analysis and processing, record and playback audio files and much more...
 
-You can find the first instructions how to deal with the ITA-Toolbox in the [Getting Started](ITA_Toolbox_Getting_Started.pdf) file. 
+You can find the first instructions how to deal with the ITA-Toolbox in the [Getting Started](Getting_Started.txt) file.
