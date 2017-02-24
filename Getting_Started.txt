@@ -12,6 +12,8 @@ Please report bugs to toolbox-dev@akustik.rwth-aachen.de
 In the following, MATLAB commands (to be entered in the 'command window'
 will be denoted in <>. The actual command has to be entered without <>.
 
+Before you start make sure you unpacked the toolbox from the .zip file.
+
 1) Open MATLAB R2010a or higher
 2) Check for Signal Processing and Curve Fitting Toolboxes are installed
    (<ver>)
