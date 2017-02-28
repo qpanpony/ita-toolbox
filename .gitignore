@@ -14,7 +14,6 @@ Thumbs.db
 *.csv
 *.h5
 *.ita
-*.fig
 *.png
 *.jpeg
 *.sofa
