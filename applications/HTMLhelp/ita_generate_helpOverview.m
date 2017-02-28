@@ -270,8 +270,6 @@ classesHTML=[classesHTML, '<br>', sprintf('\n'), classesHTML_end];
 %write edited file
 ita_writeHTML(fullfile(htmlFolder, 'classes.html'), classesHTML);
 
-%write edited file
-ita_writeHTML(fullfile(htmlFolder, 'apps.html'), appsHTML);
 
 %% Generate Kernel Documentation
 [kernelHTML_begin, kernelHTML_end] = ita_openHTML(fullfile(templateFolder, 'template_kernel.html'));

@@ -1,5 +1,7 @@
 %% Recording with the ITA Toolbox
 %
+% <<../../pics/ita_toolbox_logo_wbg.png>>
+%
 % In this tutorial you will learn how to set-up a simple the ITA Toolbox
 % for a simple recording task. The first step is to create an instance
 % of the itaMSRecord class, the basic recording class of the ITA

@@ -1,5 +1,7 @@
 %% Nonlinearities in room acoustics
 %
+% <<../../pics/ita_toolbox_logo_wbg.png>>
+%
 %  Exp. Sweep measurements are simulated using an emulation of the
 %  measurement chain with nonlinerities.
 %
@@ -18,14 +20,14 @@
 % Please see the References for Details and plots:
 %
 % @INPROCEEDINGS{pdiNonlinearitiesDAGA2013,
-%   author = {Pascal Dietrich and Martin Guski and Michael Vorländer},
+%   author = {Pascal Dietrich and Martin Guski and Michael Vorlï¿½nder},
 %   title = {Influence of Loudspeaker Distortion on Room Acoustic Parameters},
 %   booktitle = DAGA2013,
 %   year = {2013}}
 %
 % @INPROCEEDINGS{pdiToolboxDAGA2013,
-%   author = {Pascal Dietrich and Martin Guski and Johannes Klein and Markus Müller-Trapet
-% 	and Martin Pollow and Roman Scharrer and Michael Vorländer},
+%   author = {Pascal Dietrich and Martin Guski and Johannes Klein and Markus Mï¿½ller-Trapet
+% 	and Martin Pollow and Roman Scharrer and Michael Vorlï¿½nder},
 %   title = {Measurements and Room Acoustic Analysis with the ITA-Toolbox for
 % 	MATLAB},
 %   booktitle = DAGA2013,

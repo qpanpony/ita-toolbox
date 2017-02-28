@@ -1,5 +1,7 @@
 %% Measuring a transfer function with the ITA Toolbox
 %
+% <<../../pics/ita_toolbox_logo_wbg.png>>
+%
 % In this tutorial you will learn how to measure a transfer function 
 % with the ITA Toolbox. The tutorial builds on the 'ita_tutorial_record'
 % tutorial and will only explicitly explain new settings.

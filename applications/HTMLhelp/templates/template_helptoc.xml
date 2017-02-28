@@ -14,10 +14,10 @@
 	</tocitem>
 	<tocitem target="index_guide.html" image="HelpIcon.USER_GUIDE">User's Guide
 		<tocitem target="classes.html">Classes</tocitem>
-		<tocitem target="apps.html">Applications</tocitem>
+		<!-- <tocitem target="apps.html">Applications</tocitem> -->
 		<tocitem target="kernel.html">Kernel</tocitem>
-		<tocitem target="../ITA_Toolbox_Getting_Started.pdf" image="$toolbox/matlab/icons/pdficon.gif">Getting Started with the ITA Toolbox (PDF)</tocitem>
-		<tocitem target="../ITA_Toolbox_Measurement_Tutorial.pdf" image="$toolbox/matlab/icons/pdficon.gif">Get to know how to measure with the ITA Toolbox (PDF)</tocitem>
+		<!-- <tocitem target="../ITA_Toolbox_Getting_Started.pdf" image="$toolbox/matlab/icons/pdficon.gif">Getting Started with the ITA Toolbox (PDF)</tocitem> -->
+		<!-- <tocitem target="../ITA_Toolbox_Measurement_Tutorial.pdf" image="$toolbox/matlab/icons/pdficon.gif">Get to know how to measure with the ITA Toolbox (PDF)</tocitem> -->
 		<tocitem target="doc/index.html" image="HelpIcon.RELEASE_NOTES">Function Help</tocitem>
 	</tocitem>
 	<tocitem target="index_demos.html" image="HelpIcon.EXAMPLES">Product Demos

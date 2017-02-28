@@ -1,8 +1,10 @@
 %% Tutorial to create image sources model
+% <<../../pics/ita_toolbox_logo_wbg.png>>
+%
 % author: rbo 12-2014
 
 %% Init
-file        = [ita_toolbox_path '\applications\ImageSources\box.dae'];
+file        = fullfile(ita_toolbox_path, 'applications', 'ImageSources', 'box.dae');
 receiverPos = [1 1 1.5];
 sourcePos   = [2 2 2];
 order       = 2;
