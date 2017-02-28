@@ -1,6 +1,6 @@
 %% Getting startet with the ITA-Toolbox 
 %
-% <<../pics/ita_toolbox_logo_wbg.jpg>>
+% <<../pics/ita_toolbox_logo_wbg.png>>
 %
 % In the next few lines we (the Developers of the ITA-Toolbox from the 
 % Institute of Technical Acoustics at RWTH Aachen) will try to explain 
@@ -17,7 +17,7 @@
 % _2017 - JCK
 % toolbox-dev@akustik.rwth-aachen.de
 %
-% <<../pics/ita_toolbox_logo_wbg.jpg>>
+% <<../pics/ita_toolbox_logo_wbg.png>>
 % 
 
 % <ITA-Toolbox>

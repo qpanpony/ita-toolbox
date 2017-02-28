@@ -43,8 +43,8 @@ if nargin == 0
     else %we are in an ITA-Toolbox Preferences Window (pdi)
         clf(hFigure)
     end
-    %% ITA toolbox logo
-    a_im = importdata('ita_toolbox_logo.jpg');
+    %% ITA toolbox logo with grey background
+    a_im = importdata('ita_toolbox_logo.png');
     image(a_im);axis off
     set(gca,'Units','pixel', 'Position', [20 10 350 65]*0.6);
 else %reset mode

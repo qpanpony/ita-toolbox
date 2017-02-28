@@ -1,6 +1,6 @@
 %% Analysis of room impulse responses (RIR)
 %
-% <<../../pics/ita_toolbox_logo_wbg.jpg>>
+% <<../../pics/ita_toolbox_logo_wbg.png>>
 %
 % This tutorial demonstrates how to use the RoomAcoustics application
 %
