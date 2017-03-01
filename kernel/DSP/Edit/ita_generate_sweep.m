@@ -75,11 +75,20 @@ switch lower(sArgs.mode)
         methodStr = 'linear';
     case {'exp','exponential','log','logarithmic'}
         methodStr = 'exponential';
+    case {'perfect'}
+        methodStr = 'perfect';
+        methodStrShow = 'perfect';
     otherwise
         ita_verbose_info('I do not know this type of sweep signal!',0)
         varargout{1} = [];
         varargout{2} = [];
         return;
+end
+
+if strcmp(sArgs.mode,'perfect')==1
+    sArgs.stopMargin=0;
+    f0=0;
+    f1=sArgs.samplingRate/2;
 end
 
 % include bandwidth constraints
@@ -136,7 +145,84 @@ switch methodStr
         end
         % generate the time data of the sweep signal
         audioObj.timeData = sin(2*pi*f1*L .*(exp(audioObj.timeVector/L)-1) + sArgs.phi);
-    otherwise 
+
+    case 'perfect'
+        % 'mode''perfect'': Frequency response always between 0 and fs/2'
+        n       =   sArgs.fftDegree;
+        N       =   nSamples; % oder 2^n ODER ita_nSamples(sArgs.fftDegree);
+        fs      =   sArgs.samplingRate;
+        t_gap   =   0;
+        t_start =   0;
+        df      =   fs/N;
+        nyq     =   N/2+1;
+        T       =   N/fs;
+        %calculating magnitude response...
+        MR = ones(N/2,1);
+        % calculating group delay...
+        sweep_abs = abs(MR);
+        sweep_abs = [sweep_abs; 0; flipud(sweep_abs(2:end))];
+        tg=zeros(nyq, 1);
+        
+        %groupdelay at nyquist frequency
+        tg(nyq)=T-(t_gap/1000);
+        %groupdelay at DC
+        tg(1)=0;
+        %groupdelay for first frequency bin
+        tg(2)=t_start/1000;
+        
+        % FORMULA (11, p.40 )
+        sweep_power = sum(abs(sweep_abs(3:nyq).^2));
+        C = (tg(nyq)-tg(2))/sweep_power;
+        
+        % FORMULA (10, p.40 )
+        for k=3:nyq
+            tg(k)=tg(k-1)+C*abs(sweep_abs(k))^2;
+        end
+        
+        % calculating phase from group delay
+        % calculating phase from group delay
+        sweep_ang=-cumsum(tg)*2*pi*(df);
+        
+        %wrapping phase
+        sweep_ang=wrapToPi(sweep_ang(1:nyq));
+        
+        % check if phase is zero at nyquist frequency
+        if sweep_ang(nyq)~= 0
+            fprintf('phase(nyq)=%2.2f, not ZERO, correction running... \n',sweep_ang(nyq));
+            
+            %correcting new phase
+            sweep_ang=correct_phase(sweep_ang(1:nyq),fs);
+            
+            %wrapping phase again??
+            if(max(abs(sweep_ang))>pi)
+                sweep_ang=wrap(sweep_ang);
+            end
+        end
+        
+        %mirroring phase up to fs-df
+        sweep_ang=[sweep_ang(1:nyq); flipud(-1*sweep_ang(2:nyq-1))];
+        sweep_ang(1)=pi;
+        
+        %calculate sweep in time domain
+        %calculate the complex spectrum
+        SWEEP    = sweep_abs.*exp(1i*sweep_ang);
+        SWEEP(1) = abs(SWEEP(1));
+        
+        %into time domain
+        sweep=ifft(SWEEP);
+        
+        %normalize to avoid clipping when written to wav with 16bit (worst case; LSB = 2^-15)
+        sweep = sweep' / max(abs(sweep)) * (1-2^-15);
+        
+        %zeropadding
+        sweep(end+1:N) = 0;
+        
+        sweep = sweep';
+        
+        audioObj.timeData = sweep;
+        sweeprate = 0; % jri
+%_________________________________________________________________________     
+     otherwise 
         ita_verbose_info('I do not know this type of sweep signal!',0)
         return;
 end
@@ -145,25 +231,26 @@ audioObj.channelNames{1} = sprintf('%s Sweep %1.2f to %1.2f Hz', methodStr,f1,f2
 
 %% post processing
 
-% CAREFUL smoothing in the end 
-high_fade_sample_vec = [-round(100*sArgs.samplingRate/f2 + 2), 0]+audioObj.nSamples;
-audioObj             = ita_time_window(audioObj, high_fade_sample_vec, 'samples');
-
-% extend by stopmargin
-if ~isempty(sArgs.sweeprate) || sArgs.novakround
-    extendSamples = ceil((nSamples + sArgs.stopMargin * sArgs.samplingRate)/2)*2;
-else
-    extendSamples = ita_nSamples(sArgs.fftDegree);
+if strcmp(sArgs.mode,'perfect')~=1 % no Smothing when mode: 'perfect'
+    % CAREFUL smoothing in the end
+    high_fade_sample_vec = [-round(100*sArgs.samplingRate/f2 + 2), 0]+audioObj.nSamples;
+    audioObj             = ita_time_window(audioObj, high_fade_sample_vec, 'samples');
+    
+    % extend by stopmargin
+    if ~isempty(sArgs.sweeprate) || sArgs.novakround
+        extendSamples = ceil((nSamples + sArgs.stopMargin * sArgs.samplingRate)/2)*2;
+    else
+        extendSamples = ita_nSamples(sArgs.fftDegree);
+    end
+    
+    audioObj = ita_extend_dat(audioObj,extendSamples);
+    
+    % filter to avoid sidelobes above f2
+    if f2 < sArgs.samplingRate/2
+        f2_final = max(min(f2^sArgs.bandwidth,sArgs.samplingRate/2*0.95),f2);
+        audioObj = ita_mpb_filter(audioObj,[0 f2_final],'order',14);
+    end
 end
-
-audioObj = ita_extend_dat(audioObj,extendSamples);
-
-% filter to avoid sidelobes above f2
-if f2 < sArgs.samplingRate/2
-    f2_final = max(min(f2^sArgs.bandwidth,sArgs.samplingRate/2*0.95),f2);
-    audioObj = ita_mpb_filter(audioObj,[0 f2_final],'order',14);
-end
-
 % normalize data
 audioObj = ita_normalize_dat(audioObj);
 

@@ -170,7 +170,7 @@ classdef itaMSTFinterleaved < itaMSTF
         
         %% OPTIMIZATION
         
-        function [t_wait, sweeprate] = optimize(this, varargin)
+        function [t_wait sweeprate T360] = optimize(this, varargin)
             % This function will optimize t_wait and sweeprate within a
             % given range and given nonlinearities which will lead to the
             % shortest possible measurement duration:
@@ -189,13 +189,13 @@ classdef itaMSTFinterleaved < itaMSTF
                 'L', 64,... %Number of Loudspeakers, only used in cyclic mode to ensure that only one sweep is played per loudspeaker at the same time!
                 'sweeprate_range', [5 10],... % => FFT-degree ~15-16.5
                 'freq_range', this.freqRange,...
+                'onesweepdegree',0,...  % this is the allowed rotation of the system during one sweep play. For the simulations this value was set to =<1�
+                'AzimuthRes',0,... %this is equal to the azimuth resolution and is the angle which the system rotates after all loudspeakers are excited ONCE. For the simulations this values was set to =<2�
                 'plot', false);
             
             
             %input parsing
             sArgs = ita_parse_arguments(sArgs,varargin);
-            
-            
             
             % harmonic orders
             if isempty(sArgs.harmonicDecreaseVector)
@@ -304,15 +304,102 @@ classdef itaMSTFinterleaved < itaMSTF
             % Find smallest t_wait in given sweep_rate_range
             lowidx = find(sweep_rate_values==sArgs.sweeprate_range(1));
             highidx = find(sweep_rate_values==sArgs.sweeprate_range(2));
+            t_wait_values=t_wait(result1d(lowidx:highidx));
             [t_wait, temp] = min(t_wait(result1d(lowidx:highidx)));
             sweeprate = sweep_rate_values(lowidx+temp-1);
+            
+            
+            if sArgs.onesweepdegree==0 || sArgs.AzimuthRes==0
+                T360=0;
+            else
+            %____________________________________________
+            % Edit (Alexander Fu� & Mina Fallahi,TU Berlin, audio communication group, 2013/14 ): 
+            % calculation of the optimal sweepRate, tWait and overall measurement time for a 360� turn (T360), 
+            % depending on the desired azimuth and elevation 
+            % resolution in the measurement. 
+            
+            calcData = zeros(length(sweep_rate_values), 9);  
+
+            for i = 1:length(sweep_rate_values)
+        
+        
+                tOneSweepExact = log2(this.freqRange(2)/...        % This corresponds to 1� (p.mesm.onesweepdegree�) rotation
+                this.freqRange(1)) / sweep_rate_values(i); 
+            
+                t_AllSweep = sArgs.L * t_wait_values(i);
+                teta_all = t_AllSweep*sArgs.onesweepdegree / tOneSweepExact;
+                alfa = 0.05;
+                K = sArgs.onesweepdegree;
+        
+                if teta_all > sArgs.AzimuthRes
+                       
+                    while teta_all > sArgs.AzimuthRes
+               
+                        K = K - alfa;
+                        teta_all = t_AllSweep * K / tOneSweepExact;
+
+                    end
+            
+                end
+        
+                T360 = 360 * tOneSweepExact / K;
+        
+                calcData(i,1) = sweep_rate_values(i);
+                calcData(i,2) = t_wait_values(i);
+                calcData(i,3) = T360/60;
+                calcData(i,4) = K;
+                calcData(i,5) = teta_all; 
+                calcData(i,6) = NaN;
+        
+                % ....................................................
+                % ....................................................
+        
+                teta_Onesweep = tOneSweepExact * sArgs.AzimuthRes /t_AllSweep;
+                Res = sArgs.AzimuthRes;
+        
+                if teta_Onesweep > sArgs.onesweepdegree
+            
+                    while teta_Onesweep > sArgs.onesweepdegree
+                        Res = Res - alfa;
+                        teta_Onesweep = tOneSweepExact * Res / t_AllSweep;
+                    end
+                end
+                T360 = 360 * tOneSweepExact / teta_Onesweep;
+            
+                calcData(i,7) =  T360 / 60;
+                calcData(i,8) = teta_Onesweep;
+                calcData(i,9) = Res;           
+            end
+    
+            [min1, ind1] = min(calcData(:,3));
+            [min2, ind2] = min(calcData(:,7));
+    
+            if min1 < min2
+                sweeprate = calcData(ind1,1);
+                t_wait = calcData(ind1,2);
+                T360 = calcData(ind1,3);
+                teta_Onesweep = calcData(ind1,4);
+                teta_oneTurn = calcData(ind1,5);
+            else
+                sweeprate = calcData(ind2,1);
+                t_wait = calcData(ind2,2);
+                T360 = calcData(ind2,7);
+                teta_Onesweep = calcData(ind2,8);
+                teta_oneTurn = calcData(ind2,9);
+            end
+            
+            end
+            T360=T360*60;
+            %__________________________________________
+            
+            
             % Some output:
             ita_verbose_info(['Optimized sweeprate: ' num2str(sweeprate)], 1);
             ita_verbose_info(['Optimized t_wait: ' num2str(t_wait)], 1);
             
             % sweep:
-            %             t_sweep     =   log2(20000/50)/sweeprate;
-            %             nSamples = round(t_sweep*44100/2)*2;
+            t_sweep     =   log2(this.freqRange(2)/this.freqRange(1))/sweeprate;
+            nSamples = round(t_sweep*this.samplingRate/2)*2;
             % Bugfix Aug 2013, Thanks to Alexander Fuss, Berlin
             t_sweep = log2(this.freqRange(2)/this.freqRange(1))/sweeprate;
             nSamples = round(t_sweep*this.samplingRate/2)*2;
@@ -419,7 +506,7 @@ classdef itaMSTFinterleaved < itaMSTF
             idxx_init        = (1:nSamples);
             ita_verbose_info('itaMSTFinterleaved::appending time data.',1);
             for idx = 2:this.repetitions
-                idxx            = idxx_init+nWaitSum * (idx-1);
+                idxx            = idxx_init+ Sum * (idx-1);
                 timeData(:,idxx) = timeData(:,idxx) + singleTimeData;
             end
             result.time = timeData.';
@@ -442,6 +529,67 @@ classdef itaMSTFinterleaved < itaMSTF
                   res = res*this.outputEqualizationFilters;
             end
         end
+        
+        function [repititions, tMeasure] = getRepititions(this, varargin)
+            % This funktion calculates the number of repitions needed for a
+            % certain measurement time T360 and calculates a new
+            % measurement time depending von the repetitions
+            
+            %% INITS
+            sArgs = struct('T360',10,... % Measurement Rotation time
+            'tSpace',0,...
+            'tRIR',0.03);
+            %input parsing
+            sArgs = ita_parse_arguments(sArgs,varargin);
+            
+            this.checkready; % input/output Channels set?
+            
+            % Set variables
+            excitation_raw  = this.raw_excitation;                                      % Call to itaMSTF.raw_excitation. Generates the raw specified excitation signal.
+            nSweep = length(find(excitation_raw.time ~= 0))+1; % tested only for exp sweep (f1:150Hz ; f2=22050) ; ...+1 because first value of the sweep is a zero
+            % Maybe put stuff below in get_final_excitation ??
+            % Would be better for including the outchan matrix, too.
+            % The above would then be the same as get_excitation in itaMSTF.
+            
+            nOutputChannels = length(this.outputChannels);   % Determine the number of output channels.
+            
+            nWait = this.nWait;
+            if numel(nWait) == numel(nOutputChannels)
+                nWaitSum = sum(nWait);
+            else
+                nWaitSum = sum(nWait) + nWait(end); %assume the last twait to be also good for the first excitation of the new repition
+            end
+            nSamplesStint = excitation_raw.nSamples + nWaitSum;   % Determine total number of samples for one stint through all output channels.
+            
+            % Create single stint excitation
+            excitation_raw = single(ita_extend_dat(excitation_raw, nSamplesStint));             % Extend the raw excitation to total number of stint samples.
+            for ch_idx = 1:nOutputChannels
+                nWaits = this.nWait(1:ch_idx-1);
+                excitation_interleaved_single(ch_idx) = ita_time_shift(excitation_raw, sum([0; nWaits(:)]),'samples');  %#ok<AGROW>
+            end
+            result = merge(excitation_interleaved_single);       % Merge all 'excitation_interleaves_single' itaAudio objects into one with several channels.
+            clear excitation_interleaved_single
+            
+            % END OLD
+            singleTimeData = single(result.timeData).';
+            nSamples       = result.nSamples;
+            
+            % calculate repititions  
+            repititions_count=1;
+            tMeasure=0;
+            while tMeasure<(sArgs.T360)
+            repititions_count=repititions_count+1;
+            nMeasure =  nSamples + nWaitSum * (repititions_count-1);
+            %nMeasure =  nMeasure+nRirDecay
+            tMeasure=nMeasure/this.samplingRate;
+            
+            end
+           
+            repititions=repititions_count;
+
+        end
+        
+        
         
         %% MEASURE NONLINS AND TRIR
         function nonlinearities_level = measure_nonlins(this, varargin)
@@ -521,6 +669,29 @@ classdef itaMSTFinterleaved < itaMSTF
             max_rec_lvl = 0;
         end
         
+        function [result] = run_separate_raw_dec(this)
+            % run separate - Run standard raw measurement, but each loudspeaker
+            % seperatly - NO INTERLEAVING!
+            %
+            % deconvolve to get the IR for each measurement
+
+            MS = itaMSTF(this);
+            MS.init;
+            for idx = 1:numel(this.outputChannels)
+                MS.outputChannels = this.outputChannels(idx);
+                result(idx) = MS.run_raw;
+            end
+            for idx = 1:numel(this.inputChannels)
+                temp(idx) = merge(result.ch(idx));
+            end
+            
+            temp = MS.deconvolve(temp);
+            result = merge(temp);
+        end
+        
+        
+        
+        
         function [result] = run_THDN(this, varargin)
             % Run some kind of THD+N-Measurement.
             % Measure interleaved, but turn off one loudspeaker for each measurement. Evaluate
@@ -571,7 +742,8 @@ classdef itaMSTFinterleaved < itaMSTF
             sArgs = ita_parse_arguments(sArgs, varargin);
             
             this.pre_scaling = zeros(1,numel(this.outputChannels));
-            noise = this.run;
+            noise = this.run; 
+            
             for idx = 1:numel(this.outputChannels)
                 this.pre_scaling = [zeros(1,idx-1) 1 zeros(1, numel(this.outputChannels)-idx)];
                 temp = this.run;
@@ -787,5 +959,9 @@ classdef itaMSTFinterleaved < itaMSTF
             
             this.mOutputChannels = value; 
         end
+        
+
+
+
     end
 end

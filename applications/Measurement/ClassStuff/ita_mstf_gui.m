@@ -108,7 +108,7 @@ pList{ele}.description  = 'Signal Type';
 pList{ele}.helptext     = 'Exponential/logarithmic sweeps and linear sweeps can be choosen.)';
 pList{ele}.datatype     = 'char_popup';
 pList{ele}.default      = MS.type;
-pList{ele}.list         = 'exp|lin|noise';
+pList{ele}.list         = 'exp|lin|noise|perfect';
 argList = [argList {'type'}];
 
 ele = numel(pList)+1;

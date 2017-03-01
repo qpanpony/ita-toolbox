@@ -302,6 +302,7 @@ classdef itaMSRecord < itaHandle
             
             % Write result
             result.comment = [this.comment result.comment];     % Add comment.
+            result.userData=result_tmp.userData;                  % Add userData again (because it's overwriten in the if-loop above)
             result = ita_metainfo_rm_historyline(result,'all'); % Remove all history lines.
         end
         

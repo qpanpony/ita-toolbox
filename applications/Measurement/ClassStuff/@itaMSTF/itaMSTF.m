@@ -500,6 +500,9 @@ classdef itaMSTF < itaMSPlaybackRecord
                         case{'mls'}
                             this.stopMargin = 0; % MMT: have to call before, as this triggers init
                             this.excitation = ita_generate('mls',1,sr,fft_degree);
+                         case{'perfect'}
+                             this.excitation = ita_generate_sweep('mode',this.type,'fftDegree',fft_degree,...
+                                'samplingRate',this.samplingRate,'bandwidth',0);
                         otherwise
                             error('ITA_MSTF::raw_excitation: type of signal not supported')
                     end

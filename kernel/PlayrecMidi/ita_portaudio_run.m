@@ -372,9 +372,14 @@ while timeout %normally only one time, one loop
                 %                 profile viewer
                 if ~using_more_pages
                     pageno = hPlayRec('playrec',data.timeData,out_channel_vec,sArgs.recsamples,in_channel_vec);
+                    TMeasureBegin=now;
                 else
                     % Play splitted audio:
                     for idsplit = 1:num_split_pages
+                        if idsplit == 1
+                            disp('Seriously starting the measurement now!')
+                            TMeasureBegin=now;
+                        end
                         pageno = hPlayRec('playrec',data.timeData(((idsplit-1)*sArgs.maxpagesize+1):min(idsplit*sArgs.maxpagesize, data.nSamples),:),out_channel_vec,sArgs.recsamples,in_channel_vec);                        
                         pagelist = hPlayRec('getPageList');
                         if numel(pagelist) > 0
@@ -609,6 +614,7 @@ else
     recordData.timeData = recordDatadat;
 end
 recordData.samplingRate = sArgs.samplingRate;
+recordData.userData{1} = TMeasureBegin;
 
 for idx = 1:numel(in_channel_vec)
     recordData.channelNames{idx} = ['Ch ' int2str(in_channel_vec(idx))];
