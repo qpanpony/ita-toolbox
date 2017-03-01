@@ -172,6 +172,9 @@ ita_writeHTML(fullfile(htmlFolder, 'application_demos.html'),app_demoHTML);
 % copy the info xml file as required since MATLAB R2014b
 copyfile(fullfile(templateFolder,'template_info.xml'), fullfile(htmlFolder, 'info.xml'));
 
+% copy the icons
+copyfile(fullfile(templateFolder,'images'), fullfile(htmlFolder, 'images'));
+
 %% generate Class/App Documentation in Help Browser
 % - Tumbrgel 05/2012
 %
