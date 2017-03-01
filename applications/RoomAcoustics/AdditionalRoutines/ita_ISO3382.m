@@ -21,11 +21,6 @@
 % Author: Jonathan Oberreuter -- Email: jonathan.oberreuter@akustik.rwth-aachen.de
 % Created:  06-Apr-2010 
 
-% For some more help read the 'ITA Toolbox Getting Started.pdf' 
-% delivered with the ITA-Toolbox in the documentation directory, or use the
-% wiki which provides more or less actual informations about the
-% development. (https://www.akustik.rwth-aachen.de/ITA-Toolbox/wiki)
-
 %% Equipment
 equip={'Loudspeaker ITA dodecahedron new'
     'Loudspeakers ITA dodecahedron old'

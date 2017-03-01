@@ -23,11 +23,6 @@ function varargout = ita_smooth_frequency(varargin)
 % Author: Pascal -- Email: pdi@akustik.rwth-aachen.de
 % Created:  29-Mar-2010 
 
-% For some more help read the 'ITA Toolbox Getting Started.pdf' 
-% delivered with the ITA-Toolbox in the documentation directory, or use the
-% wiki which provides more or less actual informations about the
-% development. (https://www.akustik.rwth-aachen.de/ITA-Toolbox/wiki)
-
 %% Initialization and Input Parsing
 sArgs        = struct('pos1_data','itaAudio', 'bandwidth', 1);
 [input,sArgs] = ita_parse_arguments(sArgs,varargin); 

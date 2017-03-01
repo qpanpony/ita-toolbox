@@ -24,12 +24,6 @@
             <icon>$toolbox/matlab/icons/book_mat.gif</icon>
         </listitem>
         
-        <!-- <listitem> -->
-        <!--     <label>Getting Started (PDF)</label> -->
-        <!--     <callback>open('ITA_Toolbox_Getting_Started.pdf');</callback> -->
-        <!--     <icon>$toolbox/matlab/icons/pdficon.gif</icon> -->
-        <!-- </listitem> -->
-        
         <listitem>
             <label>Web Site (ITA - RWTH Aachen)</label>
             <callback>web http://www.akustik.rwth-aachen.de -browser;</callback>

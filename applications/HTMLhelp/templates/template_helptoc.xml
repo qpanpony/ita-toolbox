@@ -4,20 +4,10 @@
 <toc version="1.0">
 
 <tocitem target="index.html">RWTH Aachen - ITA-Toolbox
-	<tocitem target="index_getstarted.html" image="HelpIcon.GETTING_STARTED">Getting Started 
-		<tocitem target="gettingstarted/introduction.html">Introduction 
-			<tocitem target="gettingstarted/prodOverview.html">Product Overview</tocitem>
-			<tocitem target="gettingstarted/sysSetup.html">Setup
-				<tocitem target="gettingstarted/hardware.html">Required Hardware</tocitem>
-			</tocitem>
-		</tocitem>
-	</tocitem>
 	<tocitem target="index_guide.html" image="HelpIcon.USER_GUIDE">User's Guide
 		<tocitem target="classes.html">Classes</tocitem>
 		<!-- <tocitem target="apps.html">Applications</tocitem> -->
 		<tocitem target="kernel.html">Kernel</tocitem>
-		<!-- <tocitem target="../ITA_Toolbox_Getting_Started.pdf" image="$toolbox/matlab/icons/pdficon.gif">Getting Started with the ITA Toolbox (PDF)</tocitem> -->
-		<!-- <tocitem target="../ITA_Toolbox_Measurement_Tutorial.pdf" image="$toolbox/matlab/icons/pdficon.gif">Get to know how to measure with the ITA Toolbox (PDF)</tocitem> -->
 		<tocitem target="doc/index.html" image="HelpIcon.RELEASE_NOTES">Function Help</tocitem>
 	</tocitem>
 	<tocitem target="index_demos.html" image="HelpIcon.EXAMPLES">Product Demos
