@@ -63,18 +63,18 @@ function varargout = PlotComet_3D(x_data, y_data, z_data, varargin)
 %initialize the inputs
 freq = 10;
 blockSize = floor(1/20*length(x_data));
-tailFormat = struct('LineWidth',1,'Color','r','LineStyle','-');
-headFormat = struct('LineStyle','none','Marker','o','MarkerSize',6,...
-    'Color','b');
-pointFormat = struct('LineStyle','none','Marker','o','MarkerSize',6,...
-    'Color','g');
+tailFormat = struct('LineWidth',2,'Color','r','LineStyle','-');
+headFormat = struct('LineStyle','none','Marker','o','MarkerSize',8,...
+    'MarkerFaceColor','b','color','b');
+pointFormat = struct('LineStyle','none','Marker','o','MarkerSize',8,...
+    'MarkerFaceColor','g','color','g');
 plotPoints = 0;
 
 returnFrames = 0;
 
 colorSwitch = 0;
 moveTail = 0;
-
+plotTurntable = 0;
 
 %parse out the inputs
 argCount = nargin - 3;
@@ -139,6 +139,9 @@ for index = 1:2:argCount
             
         case 'moveTail'
             moveTail = varargin{index+1};
+        case 'turnTable'
+            plotTurntable = 1;
+            turntableTail = varargin{index+1};
     end
 end
     
@@ -190,10 +193,15 @@ if colorSwitch
     colorValues = [colorValues;[0 0 0]];
     indexFactor = 3.882/1.335;
 else
-    indexFactor = 1;
+    indexFactor = 3.882/1.335;
 end
 
-
+    if plotTurntable
+        turntableTailX = turntableTail.x;
+        turntableTailY = turntableTail.y;
+        turntableTailZ = turntableTail.z;
+    end
+    
 if length(moveTail) > 1
     tailX_data = squeeze(moveTail(:,1,:));
     tailY_data = squeeze(moveTail(:,2,:));
@@ -238,17 +246,22 @@ for n = 1:1:ceil(length(x_data)+length(x_data)/(n_blocks*indexFactor))
     
     
     if plotPoints
+        dontPlot = 0;
         for index = 1:n_stop-1
+        dontPlot = 0;
            if colorSwitch
-               colorIndex = round((n-(index-1))*indexFactor);
+               colorIndex = round((n-(index-1))*indexFactor);       
                if colorIndex >= length(colorValues)
                    colorIndex = length(colorValues);
+                   dontPlot = 1;
                end
                pointColor = colorValues(colorIndex,:);
-               pointFormat = struct('LineStyle','none','Marker','o','MarkerSize',6,'Color',pointColor);
+               pointFormat = struct('LineStyle','none','Marker','o','MarkerSize',8,'MarkerFaceColor',pointColor,'color',pointColor);
            end
             if moveTail == 0
-                deleteList{end+1} = plot3(x_data(index), y_data(index), z_data(index),pointFormat); 
+                if ~dontPlot
+                    deleteList{end+1} = plot3(x_data(index), y_data(index), z_data(index),pointFormat); 
+                end
             else
                 if colorIndex ~= length(colorValues)
                     % point
@@ -264,6 +277,12 @@ for n = 1:1:ceil(length(x_data)+length(x_data)/(n_blocks*indexFactor))
     else
         deleteList{end+1} = plot3(x_data(n_stop), y_data(n_stop), z_data(n_stop),headFormat);
     end
+    
+    if plotTurntable
+        turntableFormat = struct('LineWidth',3,'Color','b','LineStyle','-');
+        deleteList{end+1} = plot3(turntableTailX(1:n_stop), turntableTailY(1:n_stop), turntableTailZ(1:n_stop),turntableFormat); 
+    end
+    
     drawnow;
     
     if returnFrames 
