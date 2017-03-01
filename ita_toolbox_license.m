@@ -11,13 +11,13 @@ funcTemplate = fread(fid, 'uint8=>char')';
 disp(funcTemplate(1:end-1))
 fclose(fid);
 fprintf(2,'********************************************************************************\n')
-disp(['*** This License can be found at ' ita_toolbox_path filesep 'license.txt ***' ])
+disp(['*** The license can be found at ' ita_toolbox_path filesep 'license.txt ***' ])
 fprintf(2,'********************************************************************************\n')
 
 %% ask
 if usejava('desktop') %Only if jvm available (non_cluster)
     commandwindow();
-    choice = questdlg('Do you agree to the terms of the license agreement? A text file with this License Information is located at the root of the ITA-Toolbox folder called license.txt','License Agreement - ITA-Toolbox:', ...
+    choice = questdlg('Do you agree to the terms of the license agreement? The complete licnese ("license.txt") can be found in the root directory of the ITA-Toolbox.','License Agreement - ITA-Toolbox:', ...
         'Yes','No','No');
     switch lower(choice)
         case 'yes'
@@ -30,13 +30,3 @@ end
 
 %% set accepted flag in preferences
 ita_preferences('license',true);
-
-%%
-% tmphandle = figure;
-% axis([0 180 0 150]);axis('off')
-% set(tmphandle,'Position',[100 100 1000 700 ],'NumberTitle','off','Name','ITA Toolbox License')
-% text(70,150,'ITA Toolbox   Shortcuts','FontName','Arial Black','FontSize',13)
-% % for counter = 1:numel(ShortCutList)
-% counter = 1;
-% text(3,0*counter,funcTemplate,'FontName','Courier')
-% % end
