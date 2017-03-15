@@ -760,14 +760,18 @@ classdef  itaHRTF < itaAudio
             end
             
             function surf(varargin)
-                sArgs  = struct('pos1_data','itaHRTF', 'earSide', 'L', 'freq' , 5000,'type','directivity');
+                sArgs  = struct('pos1_data','itaHRTF', 'earSide', 'L', 'freq' , 5000,'type','directivity','log',1);
                 [this,sArgs]   = ita_parse_arguments(sArgs,varargin);
                 
                 idxF = this.freq2index(sArgs.freq);
                 
                 position = get(0,'ScreenSize');
                 figure('Position',[10 50 position(3:4)*0.85]);
-                freqData_dB = this.getEar(sArgs.earSide).freqData_dB;
+                if sArgs.log 
+                    freqData_dB = this.getEar(sArgs.earSide).freqData_dB;
+                else
+                    freqData_dB = this.getEar(sArgs.earSide).freqData;
+                end
                 switch sArgs.type
                     case 'directivity'
                         surf(this.dirCoord,freqData_dB(idxF,:));
