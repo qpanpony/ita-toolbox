@@ -295,7 +295,7 @@ classdef  itaHRTF < itaAudio
                 pairs  = zeros(coord.nPoints/2,2);
                 
                 if coord.nPoints>10000 % takes a while
-                    ita_verbose_info([num2str(coord.nPoints) ' Points has to be sorted ...please wait...'], 0);
+                    ita_verbose_info([num2str(coord.nPoints) ' Points have to be sorted ...please wait...'], 0);
                 end
                 
                 
