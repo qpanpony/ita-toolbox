@@ -11,6 +11,9 @@ versionNode.appendChild...
     (docNode.createTextNode(xml.ActualVersion));
 docRootNode.appendChild(versionNode);
 
+optionsNode = getOptionsNode(docNode, bsName);
+docRootNode.appendChild(optionsNode);
+
 mainNode = docNode.createElement(xml.SaveTypeQuadripole);
 docRootNode.appendChild(mainNode);
 
@@ -26,10 +29,9 @@ xml = getXMLStrings();
 
 quadMSNode = docNode.createElement(xml.QuadripoleMeasured);
 
-optionsNode = getOptionsNode(docNode, bsName);
 [freqVecNode, transferFunctionNode, inputImpedanceNode] = lsData2DomNodes(docNode, transFunc, inputImp);
 
-quadMSNode.appendChild(optionsNode);
+
 quadMSNode.appendChild(freqVecNode);
 quadMSNode.appendChild(transferFunctionNode);
 quadMSNode.appendChild(inputImpedanceNode);
