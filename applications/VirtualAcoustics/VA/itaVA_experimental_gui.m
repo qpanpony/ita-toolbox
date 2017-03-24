@@ -55,12 +55,17 @@ function itaVA_experimental_gui_OpeningFcn(hObject, eventdata, handles, varargin
 % Choose default command line output for itaVA_experimental_gui
 handles.output = hObject;
 handles.va = itaVA;
+handles.module_id = 'PrototypeGenericPath:MyGenericRenderer';
+handles.va_source_id = 1;
+handles.va_signal_id = '';
+handles.va_listener_id = 1;
+
+refresh_workspace_vars( hObject, handles );
+refresh_sourcesignals( hObject, handles );
 
 % Update handles structure
 guidata(hObject, handles);
 
-refresh_workspace_vars( hObject, handles );
-refresh_sourcesignals( hObject, handles );
 
 
 % UIWAIT makes itaVA_experimental_gui wait for user response (see UIRESUME)
@@ -103,18 +108,22 @@ else
 end
 
 % Classic VA module call with input and output arguments
-handles.mod_id = [ gpg_renderer.class ':' gpg_renderer.id ];
+handles.module_id = [ gpg_renderer.class ':' gpg_renderer.id ];
 in_args.info = true;
-out_args = handles.va.callModule( handles.mod_id, in_args );
-disp( [ 'Your experimental renderer has ' num2str( out_args.numchannels ) ' channels and an FIR filter length of ' num2str( out_args.irfilterlengthsamples ) ' samples' ] )
+out_args = handles.va.callModule( handles.module_id, in_args );
+disp( [ 'Your experimental renderer "' handles.module_id '" has ' num2str( out_args.numchannels ) ' channels and an FIR filter length of ' num2str( out_args.irfilterlengthsamples ) ' samples' ] )
 
 handles.edit_va_channels.String = out_args.numchannels;
 handles.edit_va_fir_taps.String = out_args.irfilterlengthsamples;
 handles.edit_va_fs.String = '44.100';
 
+% example
+global ita_impulse;
+ita_impulse = ita_merge( ita_generate_impulse, ita_generate_impulse );
+
 % Very simple scene with one path
-L = handles.va.createListener( 'itaVA_ExperimentalListener' );
-S = handles.va.createSoundSource( 'itaVA_ExperimentalListener' );
+handles.va_listener_id = handles.va.createListener( 'itaVA_ExperimentalListener' );
+handles.va_source_id = handles.va.createSoundSource( 'itaVA_ExperimentalSource' );
 
 function edit_va_channels_CreateFcn(hObject, eventdata, handles)
 
@@ -128,7 +137,30 @@ function listbox_filters_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox_filters contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_filters
+index_selected = handles.listbox_filters.Value;
+filter_list = handles.listbox_filters.String;
+filter_selected = filter_list{ index_selected };
 
+
+if handles.va.isConnected
+    
+    num_channels = str2double( handles.edit_va_channels.String );
+
+    mStruct = struct;
+    mStruct.listener = handles.va_listener_id;
+    mStruct.source = handles.va_source_id;
+    mStruct.verbose = true;
+    
+    newfilter = evalin( 'base', filter_selected );
+    
+    for n=1:num_channels
+        idx_channel_name = [ 'ch' num2str( n ) ];
+        mStruct.( idx_channel_name ) = double( newfilter.ch( n ).timeData )';
+    end
+    
+    mRes = handles.va.callModule( handles.module_id, mStruct );
+    %disp( mRes )
+end
 
 % --- Executes during object creation, after setting all properties.
 function listbox_filters_CreateFcn(hObject, eventdata, handles)
@@ -151,6 +183,24 @@ function listbox_sourcesignals_Callback(hObject, eventdata, handles)
 
 % Hints: contents = cellstr(get(hObject,'String')) returns listbox_sourcesignals contents as cell array
 %        contents{get(hObject,'Value')} returns selected item from listbox_sourcesignals
+index_selected = handles.listbox_sourcesignals.Value;
+filename_list = handles.listbox_sourcesignals.String;
+filepath_list = handles.listbox_sourcesignals.UserData;
+filepath_selected = filepath_list{ index_selected };
+filename_selected = filename_list{ index_selected };
+
+if handles.va.isConnected
+    ss_infos = handles.va.getSignalSourceInfos;
+    
+    for i=1:numel( ss_infos )
+        
+    end
+    
+    handles.va_signal_id = handles.va.createAudiofileSignalSource( filepath_selected, filename_selected );
+    handles.va.setSoundSourceSignalSource( handles.va_source_id, handles.va_signal_id );
+    handles.va.setAudiofileSignalSourceIsLooping( handles.va_signal_id, true );
+    handles.va.setAudiofileSignalSourcePlaybackAction( handles.va_signal_id, 'play' );
+end
 
 
 % --- Executes during object creation, after setting all properties.
@@ -193,7 +243,7 @@ stringlist = '';
 fullfile_stringlist = '';
 for i=1:numel( filelist )
     filepath_abs = fullfile( pwd, filelist( i ).name );
-    [ ~, fbn, ft ] = fileparts(  );
+    [ ~, fbn, ft ] = fileparts( filepath_abs );
     if( strcmpi( ft, '.wav' ) )
         stringlist = [ stringlist; { fbn } ];
         fullfile_stringlist = [ fullfile_stringlist; { filepath_abs } ];
@@ -201,7 +251,7 @@ for i=1:numel( filelist )
 end
 
 handles.listbox_sourcesignals.String = stringlist;
-handles.listbox_sourcesignals.Userdata = fullfile_stringlist;
+handles.listbox_sourcesignals.UserData = fullfile_stringlist;
 
 
 % --- Executes on button press in pushbutton_refresh_workspace_vars.
