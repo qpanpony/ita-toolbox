@@ -1,6 +1,6 @@
-%% Tutorial about itaCoordinates - visualize spatial audio data (Demo)
+%% Visualize spatial audio data with itaCoordinates
 %
-% <<../../pics/ita_toolbox_logo_wbg.jpg>>
+% <<../../pics/ita_toolbox_logo_wbg.png>>
 % 
 % This tutorial demonstrates how to use the itaCoodinates class and how to
 % plot spatial/spherical audio data with the functions provided.

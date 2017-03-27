@@ -272,8 +272,8 @@ uicontrol(...
     'Callback',@UpdatePosition);
 
 
-%% ita toolbox logo
-a_im = importdata(which('ita_toolbox_logo.jpg'));
+%% ita toolbox logo with grey bg
+a_im = importdata(which('ita_toolbox_logo.png'));
 image(a_im);axis off
 set(gca,'Units','pixel', 'Position', [(width-width_button)/2 - (hor_space_s + width_button)*3.3 (height-200)/2 300 50]); %pdi new scaling
 

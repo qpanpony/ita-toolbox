@@ -672,8 +672,8 @@ classdef itaXY < itaMeasurementTasksMovtec
                 'Position',[(vs+2*vsKl+2*pbW),vs,pbW,pbH],...
                 'Callback',{@gobutton_Callback});
             
-            %% ita toolbox logo
-            a_im = importdata(which('ita_toolbox_logo.jpg'));
+            %% ita toolbox logo with grey bg
+            a_im = importdata(which('ita_toolbox_logo.png'));
             image(a_im);axis off
             set(gca,'Units','pixel', 'Position', [fW-vs-180+10 vs-10 180 35]);
             

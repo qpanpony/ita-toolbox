@@ -439,7 +439,7 @@ classdef itaMSTFinterleaved < itaMSTF
             % if an outputequalization filter is set, convolve it with the
             % excitation
             if ~isempty(this.outputEqualizationFilters)
-                  res = res*this.outputEqualizationFilters;
+                  res = ita_convolve(res,this.outputEqualizationFilters,'circular',1);
             end
         end
         

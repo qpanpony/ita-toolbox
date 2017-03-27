@@ -1,4 +1,6 @@
-% Recording with the ITA Toolbox
+%% Recording with the ITA Toolbox
+%
+% <<../../pics/ita_toolbox_logo_wbg.png>>
 %
 % In this tutorial you will learn how to set-up a simple the ITA Toolbox
 % for a simple recording task. The first step is to create an instance
@@ -28,14 +30,25 @@ ita_preferences;
 ccx;
 
 %% Measurement Setup
-% Create instance of recording class
+% Create an instance of the recording class.
 MS = itaMSRecord;
 
 % Define recording parameters
 % In this example we'll use the input channel 1 of the selected hardware
-% device. In case you activated the 'Measurement Chain' in the
-% ita_preferences, you will be asked about the elements in you input and
-% output chain, once you define the input and output.
+% device. For multiple channels please specify a vector (see example 
+% below). In case you activated the 'Measurement Chain' in the
+% ita_preferences, you will be asked about the elements in you input 
+% chain, once you define the input and output.
+% The input measurement chain consists of 3 elements (sensor, preamp and
+% A/D converter). For each element you do not want to calibrate please 
+% choose 'none' from the respective drop-down menu. For elements you 
+% want to calibrate it is recommended to choose 'unknown' (meaning that
+% you do not know the sensitivity of this element). All other options 
+% are default entries for specific pieces of equipment and can be 
+% ignored. If you do not want to calibrate each element individually,
+% just declare the 'sensor' as 'unknown' and all other elements as 
+% 'none'. This way you can calibrate the entire chain at once with a 
+% sensor calibration device (e.g. a pistonphone).
 %
 % We'll also define an FFT-degree of 19, meaning that our recording time
 % will be 2^19 Samples.
@@ -50,7 +63,7 @@ MS = itaMSRecord;
 % possible to define fixed recording times. If you need an unknown or 
 % infinite recording time, you're probably better off with normal DAWs, 
 % e.g. Reaper http://www.reaper.fm .
-MS.inputChannels = 1;
+MS.inputChannels = 1; % for multiple channels (e.g. 1, 2 & 3): [1 2 3] 
 MS.fftDegree = 19;
 MS.samplingRate = 44100;
 
@@ -118,13 +131,19 @@ result.pf
 % pistonphone) at 1000 Hz (also a property of your phone).
 
 %% Save data
-% To save your measurement data for later post processing you should use
+% To save your measurement data for later post processing you can use
 % the 'ita_write' function. It's first input argument is the itaAudio
 % object you want to save (e.g. 'result'), the second one is the 
 % filename (optionally including the full file path). Without a path
 % (as in the example below) the file will be saved in the 
-% 'current folder' in MATLAB.
+% 'current folder' in MATLAB. If you specify a '.ita' extension, the 
+% data will be saved as itaAudio. '.wav' will save the data as 
+% normalized WAV file.
 ita_write(result, 'result_file.ita');
-
-% Congrats! Now you are able to do a calibrated measurement.
-% Happy data acquisition!
+% In case you would like to save all the workspace variables (including 
+% you measurement setup ('MS') and the result ('result') you can also 
+% use the native 'save' command. In this example we'll save everything 
+% to a file called 'workspace.mat'.
+save('workspace.mat');
+% Congrats! Now you are able to do a calibrated measurement and save 
+% your results. Happy data acquisition!

@@ -1,3 +1,0 @@
-Contact:           mpo@akustik.rwth-aachen.de
-Description:       itaAudio/itaResult extentions for spatial audio data
-Dependencies:      no dependencies

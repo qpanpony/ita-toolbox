@@ -277,8 +277,8 @@ uicontrol(...
     'ForegroundColor', [0 0 .7],...
     'Callback',@MeasurementSetupButtonCallback);
 
-%% ita toolbox logo
-a_im = importdata('ita_toolbox_logo.jpg');
+%% ita toolbox logo with grey background
+a_im = importdata(which('ita_toolbox_logo.png'));
 image(a_im);axis off
 set(gca,'Units','pixel', 'Position', [0 top_margin width round(65*width/350)]);
 

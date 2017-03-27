@@ -97,11 +97,11 @@ for idx=1:nTabs
 end
 warning(xx) %write back old warning settings
 
-%% ita toolbox logo
-a_im = importdata(which('ita_toolbox_logo_lightgrey.jpg'));
+%% ita toolbox logo lightgrey bg
+a_im = importdata(which('ita_toolbox_logo_lightgrey.png'));
 ax    = axes('Parent',hFigure);
 image(a_im);axis off
-set(ax,'Units','pixel', 'Position', [50 20 300 60]*0.8); %pdi new scaling
+set(ax,'Units','pixel', 'Position', [10 20 300 60]*0.8); %pdi new scaling
 
 %% port audio and COMports
 if exist('ita_portaudio_menuStr','file')

@@ -1,3 +1,0 @@
-Contact:           mmt@akustik.rwth-aachen.de
-Description:       Classes for FEM/BEM meshes
-Dependencies:      no dependencies

@@ -712,9 +712,8 @@ classdef itaKundtTube < itaHandle
                 'horizontalAlignment','left');
             
             
-            % ITA toolbox logo
-            
-            a_im = importdata(which('ita_toolbox_logo.jpg'));
+            % ITA toolbox logo with grey background
+            a_im = importdata(which('ita_toolbox_logo.png'));
             image(a_im);axis off
             set(gca,'Units','pixel', 'Position', [10 10 210 40]);
             

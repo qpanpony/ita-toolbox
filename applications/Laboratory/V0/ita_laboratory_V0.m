@@ -1,6 +1,6 @@
 %% Measurement Tutorial
 %
-% <<../pics/ita_toolbox_logo_wbg.jpg>>
+% <<../pics/ita_toolbox_logo_wbg.png>>
 %
 % This tutorial requires understanding of ita_tutorial_measurement. 
 % Finally, we measure the ITA-V0-Box.

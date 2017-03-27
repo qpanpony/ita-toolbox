@@ -1,3 +1,0 @@
-Contact:           nsh@akustik.rwth-aachen.de
-Description:       ???
-Dependencies:      BulkyAudioData, SphericalHarmonics

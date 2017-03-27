@@ -183,8 +183,8 @@ else
 end
 figSet.hMainFigure = hMainFigure;
 
-%% ITA toolbox logo
-a_im = importdata('ita_toolbox_logo.jpg');
+%% ITA toolbox logo with grey background
+a_im = importdata('ita_toolbox_logo.png');
 image(a_im);axis off
 set(gca,'Units','pixel', 'Position', [10 10 350 65]*0.6); %TODO: later set correctly the position
 

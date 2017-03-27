@@ -1,3 +1,0 @@
-Contact:           pdi@akustik.rwth-aachen.de
-Description:        Pole Zero Modelling / Fitting
-Dependencies:      no dependencies

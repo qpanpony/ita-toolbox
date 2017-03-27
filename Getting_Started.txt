@@ -1,0 +1,41 @@
+************************************************************************
+*******                    ITA-Toolbox for MATLAB              *********
+************************************************************************
+
+Please be aware that by using this toolbox you accept the license 
+agreement supplied in the 'license.txt' file.
+Please report bugs to toolbox-dev@akustik.rwth-aachen.de
+
+************************************************************************
+** INSTALL **
+************************************************************************
+In the following, MATLAB commands (to be entered in the 'command window'
+will be denoted in <>. The actual command has to be entered without <>.
+
+Before you start make sure you unpacked the toolbox from the .zip file.
+
+1) Open MATLAB R2014b or higher
+2) Check for Signal Processing and Curve Fitting Toolboxes are installed
+   (<ver>)
+3) Open the ITA-Toolbox root folder (containing the current file).
+4) Execute <ita_toolbox_setup>
+5) Follow the instructions.
+6) For an overview of available tutorials and demos:
+   <ita_tutorialOverview> and <ita_demoOverview>
+7) To generate the documentation execute the function
+   <ita_generate_documentation> followed by <doc> to open it.
+   It might be necessary to restart MATLAB for the ITA-Toolbox 
+   documentation to appear in the MATLAB help browser.
+
+************************************************************************
+** UNINSTALL **
+************************************************************************
+
+1) <ita_toolbox_uninstall> 
+2) Close MATLAB.
+3) Delete your ITA-Toolbox folder
+
+************************************************************************
+** Have fun! **
+************************************************************************
+Your ITA-Toolbox Developer Team

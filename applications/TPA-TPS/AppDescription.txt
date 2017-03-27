@@ -1,3 +1,0 @@
-Contact:           pdi@akustik.rwth-aachen.de
-Description:       Transfer Path Analysis and Synthesis
-Dependencies:      Measurement

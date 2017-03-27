@@ -208,10 +208,10 @@ uicontrol(...
     'BackgroundColor', [0.8 0.8 0.8],...
     'Callback',@PreferencesButtonCallback);
 
-%% ita toolbox logo
-a_im = importdata('ita_toolbox_logo.jpg');
+%% ita toolbox logo with grey backgroud
+a_im = importdata(which('ita_toolbox_logo.png'));
 image(a_im);axis off
-set(gca,'Units','pixel', 'Position', [130 height-195 350 65]);
+set(gca,'Units','pixel', 'Position', [275 height-195 350 65]);
 
 %% Callback functions
     function RefreshButtonCallback(hObject,eventdata)

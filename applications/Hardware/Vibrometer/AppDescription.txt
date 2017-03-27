@@ -1,3 +1,0 @@
-Contact:           mmt@akustik.rwth-aachen.de
-Description:       Control Polytec Laser Vibrometer
-Dependencies:      
