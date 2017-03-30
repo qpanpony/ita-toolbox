@@ -1,8 +1,8 @@
 %% Show the license and its location;
 
 % <ITA-Toolbox>
-% This file is part of the ITA-Toolbox. Some rights reserved. 
-% You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder. 
+% This file is part of the ITA-Toolbox. Some rights reserved.
+% You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
 % </ITA-Toolbox>
 
 
@@ -21,9 +21,9 @@ if usejava('desktop') %Only if jvm available (non_cluster)
         'Yes','No','No');
     switch lower(choice)
         case 'yes'
-            fprintf(2,'You have agreed to the license agreement of ITA-Toolbox for MATLAB\n');
+            fprintf(2,'You accepted the ITA-Toolbox license agreement\n');
         case 'no'
-            fprintf(2,'You have NOT agreed to the license agreement of ITA-Toolbox for MATLAB\n');
+            fprintf(2,'You did NOT accept to the ITA-Toolbox license agreement\n');
             error('License Agreement not accepted.')
     end
 end
