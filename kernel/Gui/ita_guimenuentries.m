@@ -375,11 +375,6 @@ if isempty(itamenu_cache)
     
     idx = idx+1;
     itamenu{idx}.type = 'function';
-    itamenu{idx}.text = 'Open Getting Started PDF';
-    itamenu{idx}.parent = 'Help';
-    
-    idx = idx+1;
-    itamenu{idx}.type = 'function';
     itamenu{idx}.text = 'Open ITA-Toolbox Website';
     itamenu{idx}.parent = 'Help';
     

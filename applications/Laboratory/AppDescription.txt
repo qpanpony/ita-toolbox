@@ -1,3 +1,0 @@
-Contact:           pdi@akustik.rwth-aachen.de
-Description:        ITA Acoustic Laboratory Course
-Dependencies:      Measurement, RoomAcoustics, SpatialAudio, SphericalHarmonics

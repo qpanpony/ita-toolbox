@@ -110,7 +110,12 @@ input.data = interpData;
 
 % some postprocessing to cancel out effects of extrapolation
 if isTime(input)
-    input = ita_time_window(input,[1.1*processingLimits(1) 0.95*processingLimits(1) 0.8*processingLimits(2) 0.95*processingLimits(2)],'time');
+    if processingLimits(1) == 0
+        %only use fadeOut part of timeWindow
+        input = ita_time_window(input,[0.8*processingLimits(2) 0.95*processingLimits(2)],'time');
+    else
+        input = ita_time_window(input,[1.1*processingLimits(1) 0.95*processingLimits(1) 0.8*processingLimits(2) 0.95*processingLimits(2)],'time');
+    end
 elseif ~sArgs.no_filter
     input = ita_filter_bandpass(input,'lower',processingLimits(1),'upper',processingLimits(2),'order',20,'zerophase');
 end

@@ -33,11 +33,6 @@ function varargout = ita_plot_2D(varargin)
 % Author: MMT -- Email: mmt@akustik.rwth-aachen.de
 % Created:  09-Jan-2010 
 
-% For some more help read the 'ITA Toolbox Getting Started.pdf' 
-% delivered with the ITA-Toolbox in the documentation directory, or use the
-% wiki which provides more or less actual informations about the
-% development. (https://www.akustik.rwth-aachen.de/ITA-Toolbox/wiki)
-
 %% Get Function String
 thisFuncStr  = [upper(mfilename) ':'];     %Use to show warnings or infos in this functions
 

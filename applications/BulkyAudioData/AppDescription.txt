@@ -1,3 +1,0 @@
-Contact:           mpo@akustik.rwth-aachen.de
-Description:       experimental classes for bulky audio data
-Dependencies:      no dependencies

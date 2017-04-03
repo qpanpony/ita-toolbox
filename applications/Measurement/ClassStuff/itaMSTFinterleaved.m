@@ -435,6 +435,12 @@ classdef itaMSTFinterleaved < itaMSTF
             end
             
             res = this.mFinalExcitation .*  this.pre_scaling .* this.outputamplification_lin;
+            
+            % if an outputequalization filter is set, convolve it with the
+            % excitation
+            if ~isempty(this.outputEqualizationFilters)
+                  res = ita_convolve(res,this.outputEqualizationFilters,'circular',1);
+            end
         end
         
         %% MEASURE NONLINS AND TRIR

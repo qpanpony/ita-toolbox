@@ -1,3 +1,0 @@
-Contact:           mmt@akustik.rwth-aachen.de
-Description:       represent complex sources by distributed monopoles
-Dependencies:      SphericalHarmonics

@@ -295,7 +295,7 @@ classdef  itaHRTF < itaAudio
                 pairs  = zeros(coord.nPoints/2,2);
                 
                 if coord.nPoints>10000 % takes a while
-                    ita_verbose_info([num2str(coord.nPoints) ' Points has to be sorted ...please wait...'], 0);
+                    ita_verbose_info([num2str(coord.nPoints) ' Points have to be sorted ...please wait...'], 0);
                 end
                 
                 
@@ -760,14 +760,18 @@ classdef  itaHRTF < itaAudio
             end
             
             function surf(varargin)
-                sArgs  = struct('pos1_data','itaHRTF', 'earSide', 'L', 'freq' , 5000,'type','directivity');
+                sArgs  = struct('pos1_data','itaHRTF', 'earSide', 'L', 'freq' , 5000,'type','directivity','log',1);
                 [this,sArgs]   = ita_parse_arguments(sArgs,varargin);
                 
                 idxF = this.freq2index(sArgs.freq);
                 
                 position = get(0,'ScreenSize');
                 figure('Position',[10 50 position(3:4)*0.85]);
-                freqData_dB = this.getEar(sArgs.earSide).freqData_dB;
+                if sArgs.log 
+                    freqData_dB = this.getEar(sArgs.earSide).freqData_dB;
+                else
+                    freqData_dB = this.getEar(sArgs.earSide).freqData;
+                end
                 switch sArgs.type
                     case 'directivity'
                         surf(this.dirCoord,freqData_dB(idxF,:));
@@ -784,15 +788,22 @@ classdef  itaHRTF < itaAudio
             end
             
             function display(this)
-                this.displayLineStart
-                this.disp
+                if numel(this) == 0
+                    disp('****** nothing to do, empty object ******')
+                elseif numel(this) > 1
+                    disp(['size(' inputname(1) ') = [' num2str(size(this))  ']; (for full display, pick a single instance)']);
+                else
+                    this.displayLineStart
+                    this.disp
+                    
+                    dir = num2str(this.nDirections,5);
+                    stringD = [dir ' Directions (Type = ' this.mTF_type ')'];
+                    
+                    middleLine = this.LINE_MIDDLE;
+                    middleLine(3:(2+length(stringD))) = stringD;
+                    fprintf([middleLine '\n']);
+                end
                 
-                dir = num2str(this.nDirections,5);
-                stringD = [dir ' Directions (Type = ' this.mTF_type ')'];
-                
-                middleLine = this.LINE_MIDDLE;
-                middleLine(3:(2+length(stringD))) = stringD;
-                fprintf([middleLine '\n']);
             end
             
             function disp(this)

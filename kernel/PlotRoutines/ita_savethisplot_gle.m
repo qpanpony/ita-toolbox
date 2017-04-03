@@ -794,7 +794,7 @@ if ita_preferences('toolboxlogo')
     logo_position = [0 0];
     fprintf(fid,'amove %d %d\n',logo_position(1),logo_position(2));
     fprintf(fid,'begin name toolbox_logo\n');
-    fprintf(fid,'\tbitmap "%s" %d %d\n',which('ita_toolbox_logo_wbg.jpg'),logo_size,0.21*3/4*logo_size);
+    fprintf(fid,'\tbitmap "%s" %d %d\n',which('ita_toolbox_logo_wbg.png'),logo_size,0.21*3/4*logo_size);
     fprintf(fid,'end name\n');
 end
 

@@ -1,3 +1,0 @@
-Contact:           fwe@akustik.rwth-aachen.de
-Description:       OpenDAFF project including Matlab writer scripts and DAFFMex reader interface from C++ library
-Dependencies:      

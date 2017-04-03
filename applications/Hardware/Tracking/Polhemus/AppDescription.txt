@@ -1,3 +1,0 @@
-Contact:           fwe@akustik.rwth-aachen.de
-Description:       Polhemus Tracker Software
-Dependencies:      no dependencies
