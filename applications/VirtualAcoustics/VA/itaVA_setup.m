@@ -66,8 +66,12 @@ if ~isempty( current_va_mex_dir )
     set( handles.va_search_dir, 'String', fullfile( va_path ) );
     
     set( handles.edit_vamatlab_full_path, 'String', current_va_mex_dir )
-    v = VAMatlab( 'getVersion' );
-    set( handles.edit_vamatlab_version, 'String', v )
+    try
+        v = VAMatlab( 'getVersion' );
+        set( handles.edit_vamatlab_version, 'String', v )
+    catch
+        set( handles.edit_vamatlab_version, 'String', 'Failed to execute VAMatlab, probably a depending library is missing.' )
+    end
 end
 
 % VAServer
