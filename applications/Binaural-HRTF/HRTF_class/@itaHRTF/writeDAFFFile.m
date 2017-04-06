@@ -44,11 +44,11 @@ end
 
 theta_start_deg = rad2deg( min( this.channelCoordinates.theta ) );
 theta_end_deg = rad2deg( max( this.channelCoordinates.theta ) );
-theta_num_elements = size( unique( this.channelCoordinates.theta ), 1 );
+theta_num_elements = size( uniquetol( this.channelCoordinates.theta ), 1 );
 
 phi_start_deg = rad2deg( min( mod( this.channelCoordinates.phi, 2*pi ) ) );
 phi_end_deg = rad2deg( max( mod( this.channelCoordinates.phi, 2*pi ) ) );
-phi_num_elements = size( unique( this.channelCoordinates.phi ), 1 );
+phi_num_elements = size( uniquetol( this.channelCoordinates.phi ), 1 );
 
 assert( phi_num_elements ~= 0 );
 alphares = ( phi_end_deg - phi_start_deg ) / phi_num_elements; % phi end does not cover entire circle in this case
