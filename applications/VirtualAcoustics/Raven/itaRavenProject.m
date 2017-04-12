@@ -456,7 +456,7 @@ classdef itaRavenProject < handle
                 %                 system([obj.ravenExe ' "' obj.ravenProjectFile '" >> ' obj.ravenLogFile]);
                 prevPath = pwd;
                 cd(fileparts(obj.ravenExe));
-                dos([obj.ravenExe ' "' obj.ravenProjectFile '"'], '-echo');
+                dos(['"' obj.ravenExe '"' ' "' obj.ravenProjectFile '"'],'-echo');
                 disp('Done.');
                 cd(prevPath);
                 
