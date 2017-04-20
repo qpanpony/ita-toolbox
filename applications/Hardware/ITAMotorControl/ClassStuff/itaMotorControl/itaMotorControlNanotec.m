@@ -235,6 +235,7 @@ classdef itaMotorControlNanotec < itaMotorControl
                 this.mIsInitialized             =   false;
                 error(sprintf('Motor %s is not responding!',this.motorList{index}.getMotorName));
             end
+            this.wait4everything
             this.preparedList = [];
         end
         
@@ -447,7 +448,7 @@ classdef itaMotorControlNanotec < itaMotorControl
                 else
                     ita_verbose_info('Position NOT reached! - Check for errors!', 0);
                     this.send_commandlist(this.failed_command_repititions); % mpo: bugfix: send_commandlist needs argument
-                    this.isReferenced = false;
+%                     this.isReferenced = false;
                 end
                 this.clear_receivedlist;
                 this.started(1:length(this.motorIDList)) = false;
