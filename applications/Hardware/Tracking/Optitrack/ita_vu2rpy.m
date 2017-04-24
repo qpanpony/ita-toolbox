@@ -63,8 +63,15 @@ if abs(dot(v,u,2)) > 1e-5
 end
 
 % normalize view/up vectors
-v(~isnan(v(:,1)),:) = normr(v(~isnan(v(:,1)),:));
-u(~isnan(u(:,1)),:) = normr(u(~isnan(u(:,1)),:));
+[~,colv]=size(v);
+[~,colu]=size(u);
+if (colv == 1)
+    v(~isnan(v(:,1)),:) = v(~isnan(v(:,1)),:) ./ abs(v(~isnan(v(:,1)),:));
+    u(~isnan(u(:,1)),:) = u(~isnan(u(:,1)),:) ./ abs(u(~isnan(u(:,1)),:));
+else
+    v = sqrt( ones ./ (sum((v(~isnan(v(:,1)),:).*v(~isnan(v(:,1)),:))')) )' * ones(1,colv).*v(~isnan(v(:,1)),:);
+    u = sqrt( ones ./ (sum((u(~isnan(u(:,1)),:).*u(~isnan(u(:,1)),:))')) )' * ones(1,colu).*u(~isnan(u(:,1)),:);
+end
 
 % init.
 y = NaN(size(v,1),1);
