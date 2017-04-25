@@ -72,7 +72,7 @@ qx = qw;
 qy = qw;
 qz = qw;
 
-for idx = 1:vec_ent;
+for idx = 1:vec_ent
     
     % build rotation matrix
     R = [s(idx,:); u(idx,:); -v(idx,:)];
