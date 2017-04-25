@@ -235,48 +235,40 @@ classdef itaVA < handle
             connected = VAMatlab( 'IsTrackerConnected', this.handle );
         end
         
+        function disconnectTracker( this )
+            % Disconnects from the NatNet tracking server
+            VAMatlab( 'DisconnectTracker', this.handle )
+        end
+        
+		% -- Tracked listener -- %
+		
         function setTrackedListener( this, listener_id )
-            % Connects a VA listener with the tracked rigid body
+            % Connects a VA listener with the tracked listener rigid body
             %
             % Parameters:
             %
             % 	listener_id  [integer-1x1]   VA listener id
             %
             VAMatlab( 'SetTrackedListener', this.handle, listener_id );
+        end		
+        
+        function setTrackedListenerRigidBodyIndex( this, index )
+            % Sets the index of the rigid body to be tracked for listener (default is 1)
+            VAMatlab( 'SetTrackedListenerRigidBodyIndex', this.handle, index )
         end
         
-        function setTrackedSource( this, source_id )
-            % Connects a VA source with the tracked rigid body
-            %
-            % Parameters:
-            %
-            % 	source_id  [integer-1x1]   VA listener id
-            %
-            VAMatlab( 'SetTrackedSource', this.handle, source_id );
-        end
-        
-        function disconnectTracker( this )
-            % Disconnects from the NatNet tracking server
-            VAMatlab( 'DisconnectTracker', this.handle )
-        end
-        
-        function setRigidBodyIndex( this, index )
-            % Sets the index of the rigid body to be tracked (default is 1)
-            VAMatlab( 'SetRigidBodyIndex', this.handle, index )
-        end
-        
-        function setRigidBodyTranslation( this, translation )
-            % Sets the pivot point translation for the tracked rigid body
+        function setTrackedListenerRigidBodyTranslation( this, translation )
+            % Sets the pivot point translation for the tracked listener rigid body
 			%
 			% Parameters:
 			%
 			%	translation [double-3x1]	Translation in local coordinate system of rigid body [m]
 			%
-            VAMatlab( 'SetRigidBodyTranslation', this.handle, translation )
+            VAMatlab( 'SetTrackedListenerRigidBodyTranslation', this.handle, translation )
         end
         
-        function setRigidBodyRotation( this, rotation )
-            % Sets the rotation of orientation for the tracked rigid body
+        function setTrackedListenerRigidBodyRotation( this, rotation )
+            % Sets the rotation of orientation for the tracked listener rigid body
 			%
 			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
 			%
@@ -284,8 +276,35 @@ classdef itaVA < handle
 			%
 			%	rotation [quaternion]	Rotation of rigid body
 			%
-            VAMatlab( 'SetRigidBodyRotation', this.handle, rotation )
+            VAMatlab( 'SetTrackedListenerRigidBodyRotation', this.handle, rotation )
         end
+		
+		% -- Tracked real-world listener -- %
+		
+        function setTrackedRealWorldListener( this, listener_id )
+            % Connects a VA real-world listener with the tracked real-world rigid body
+            %
+            % Parameters:
+            %
+            % 	listener_id  [integer-1x1]   VA listener id
+            %
+            VAMatlab( 'SetTrackedRealWorldListener', this.handle, listener_id );
+        end
+		
+		@todo
+        
+		% -- Tracked source -- %
+		
+        function setTrackedSource( this, source_id )
+            % Connects a VA source with the tracked source rigid body
+            %
+            % Parameters:
+            %
+            % 	source_id  [integer-1x1]   VA listener id
+            %
+            VAMatlab( 'SetTrackedSource', this.handle, source_id );
+        end
+		
         
         %% --= Functions =--
         
