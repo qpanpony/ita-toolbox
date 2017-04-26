@@ -35,6 +35,15 @@ function varargout = ita_speech_transmission_index(varargin)
 sArgs        = struct('pos1_ir','itaAudio', 'levels', [], 'SNR', [],'plot',false,'analytic', false, 'gender', 'male');
 [ir,sArgs] = ita_parse_arguments(sArgs,varargin); 
 
+if ~strcmpi(ir.signalType,'energy')
+    ita_verbose_info('Your IR does not have the correct signalType, I will fix this, but be careful!',0);
+    ir.signalType = 'energy';
+end
+
+if ir.trackLength < 1.6
+    ita_verbose_info('IR is shorter than ISO 60268-16 recommends, I hope you know what you are doing!',0);
+end
+
 if strcmpi(sArgs.gender,'male')
     genderIndex = 1;
 elseif strcmpi(sArgs.gender,'female')
@@ -144,7 +153,7 @@ varargout(1) = {STI};
 if nargout > 1
     varargout(2) = {MTI};
     if nargout > 2 && sArgs.analytic
-        varargout(3) = STI_analytic;
+        varargout(3) = {STI_analytic};
     end
 end
 
