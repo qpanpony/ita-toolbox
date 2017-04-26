@@ -250,7 +250,7 @@ classdef itaVA < handle
             % 	listener_id  [integer-1x1]   VA listener id
             %
             VAMatlab( 'SetTrackedListener', this.handle, listener_id );
-        end		
+        end
         
         function setTrackedListenerRigidBodyIndex( this, index )
             % Sets the index of the rigid body to be tracked for listener (default is 1)
@@ -286,13 +286,38 @@ classdef itaVA < handle
             %
             % Parameters:
             %
-            % 	listener_id  [integer-1x1]   VA listener id
+            % 	listener_id  [integer-1x1]   VA real-world listener id
             %
             VAMatlab( 'SetTrackedRealWorldListener', this.handle, listener_id );
         end
 		
-		@todo
+        function setTrackedRealWorldListenerRigidBodyIndex( this, index )
+            % Sets the index of the rigid body to be tracked for real-world listener (default is 1)
+            VAMatlab( 'SetTrackedRealWorldListenerRigidBodyIndex', this.handle, index )
+        end
         
+        function setTrackedRealWorldListenerRigidBodyTranslation( this, translation )
+            % Sets the pivot point translation for the tracked real-world listener rigid body
+			%
+			% Parameters:
+			%
+			%	translation [double-3x1]	Translation in local coordinate system of rigid body [m]
+			%
+            VAMatlab( 'SetTrackedRealWorldListenerRigidBodyTranslation', this.handle, translation )
+        end
+        
+        function setTrackedRealWorldListenerRigidBodyRotation( this, rotation )
+            % Sets the rotation of orientation for the tracked real-world listener rigid body
+			%
+			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
+			%
+			% Parameters:
+			%
+			%	rotation [quaternion]	Rotation of rigid body
+			%
+            VAMatlab( 'SetTrackedRealWorldListenerRigidBodyRotation', this.handle, rotation )
+        end
+		        
 		% -- Tracked source -- %
 		
         function setTrackedSource( this, source_id )
@@ -300,9 +325,36 @@ classdef itaVA < handle
             %
             % Parameters:
             %
-            % 	source_id  [integer-1x1]   VA listener id
+            % 	source_id  [integer-1x1]   VA source id
             %
             VAMatlab( 'SetTrackedSource', this.handle, source_id );
+        end
+		
+        function setTrackedSourceRigidBodyIndex( this, index )
+            % Sets the index of the rigid body to be tracked for source (default is 1)
+            VAMatlab( 'SetTrackedSourceRigidBodyIndex', this.handle, index )
+        end
+        
+        function setTrackedSourceRigidBodyTranslation( this, translation )
+            % Sets the pivot point translation for the tracked source rigid body
+			%
+			% Parameters:
+			%
+			%	translation [double-3x1]	Translation in local coordinate system of rigid body [m]
+			%
+            VAMatlab( 'SetTrackedSourceRigidBodyTranslation', this.handle, translation )
+        end
+        
+        function setTrackedSourceRigidBodyRotation( this, rotation )
+            % Sets the rotation of orientation for the tracked source rigid body
+			%
+			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
+			%
+			% Parameters:
+			%
+			%	rotation [quaternion]	Rotation of rigid body
+			%
+            VAMatlab( 'SetTrackedSourceRigidBodyRotation', this.handle, rotation )
         end
 		
         
