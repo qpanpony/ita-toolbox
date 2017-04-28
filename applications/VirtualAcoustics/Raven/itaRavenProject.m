@@ -749,7 +749,7 @@ classdef itaRavenProject < handle
                 currentSurfaceArea = obj.getSurfaceAreaOfMaterial(allMaterials{iMat});
                 allMaterials{iMat} = strrep(allMaterials{iMat},'_',' ');
                 allMaterials{iMat} = [ allMaterials{iMat} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m² ;'];
-                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18)),'%5.2f') ' m² )'];
+                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18,iMat)),'%5.2f') ' m² )'];
             end
 
             currentMaterial.channelNames = allMaterials;
