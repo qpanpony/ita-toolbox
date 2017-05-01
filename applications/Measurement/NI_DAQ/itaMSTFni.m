@@ -131,7 +131,7 @@ classdef itaMSTFni < itaMSTF
             [result, max_rec_lvl] = run_latency@itaMSTF(this);
         end
         
-        function calibrate_input(this,elementIds)
+        function this = calibrate_input(this,elementIds)
             % have to do this here because of different run function
             % do only specific elements (e.g. only AD)
             if ~exist('elementIds','var')
@@ -443,6 +443,7 @@ sInit.length = pList{3}*sInit.samplingRate;
 %% Measurement
 % record data
 signalRecord = ita_NI_daq_run(sInit.length,niSession,'inputchannels',sInit.Channel,'samplingRate',sInit.samplingRate);
+signalRecord = ita_filter_bandpass(signalRecord,'lower',20,'zerophase',false);
 signalRecord = signalRecord / MC(1).sensitivity(MCE.type); % compensation of rest
 
 %% Evaluate
