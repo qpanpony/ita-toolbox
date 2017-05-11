@@ -93,6 +93,14 @@ classdef itaMSTFni < itaMSTF
             addlistener(this,'outputChannels','PostSet',@this.init);
         end
         
+        function this = edit(this)
+            % edit - Start GUI.
+            %
+            % This function calls the itaMSTFni GUI.
+            
+            this = ita_mstfni_gui(this);
+        end
+        
         function init(this,varargin)
             % init - Initialize the itaMSTFni class object.
             % call the parent init function first
@@ -100,6 +108,18 @@ classdef itaMSTFni < itaMSTF
             
             % then run the NI card initialization
             this.niSession = init_NI_card(this);
+        end
+        
+        function checkready(this)
+            %check if the instance is ready for measurement run and ask for
+            %missing entries
+            if isempty(this.inputChannels) || isempty(this.outputChannels)
+                this.edit;
+            end
+            % has the NI session been initialized
+            if isempty(this.niSession.Channels)
+                this.init;
+            end
         end
         
         function MS = calibrationMS(this)
