@@ -232,65 +232,69 @@ classdef itaMSTFni < itaMSTF
             MS.niSession.release;
         end
         
-        function [niSession,Channels] = init_NI_card(this,sens)
+        function [niSession,inputChannels,outputChannels] = init_NI_card(this,sens)
             % uses Christoph Hoellers's (hoellerc@nrc.ca) code for initilaization of NI session
             % for now only as simple DAC, so only Voltage type
             if nargin < 2
                 sens = 0.01;
             end
             
-            % create channel data from MS
-            Channels = struct();
-            Channels.name = {'IN1','IN2','IN3','IN4'};
-            Channels.type = {'Voltage','Voltage','Voltage','Voltage'};
-            Channels.sensitivity = sens.*ones(1,4);
-            Channels.isActive = ismember(1:4,this.inputChannels);
-            
             % Initialization
-            niDevices	= daq.getDevices();	% returns an object with all the NI cards
-            niSession	= daq.createSession('ni');
-            nDevice		= length(niDevices);
-            nChannels   = 4 ; %NI cDAQ-9178 and NI USB-4431 has 4 input channels per module/system
+            [inputChannels,outputChannels,niDevices,rateLimits] = ita_get_ni_deviceinfo(sens);
+            % create session (will be stored)
+            niSession = daq.createSession('ni');
+            % turn off useless warning
+            warning('off','daq:Session:clockedOnlyChannelsAdded')
             
-            % If everything else fails, use these default settings
-            if (~exist('Channels','var')) || ~(nDevice == size(Channels.isActive,1))
-                for iDevice = 1:nDevice
-                    for iChannel = 1:nChannels
-                        Channels.isActive(iDevice,iChannel)	= 0;
-                        Channels.name{iDevice,iChannel} = niDevices(iDevice).Subsystems(1).ChannelNames{iChannel,1};
-                        Channels.type{iDevice,iChannel}			= 'Voltage';
-                        Channels.sensitivity(iDevice,iChannel)	= sens;
-                    end
-                end
+            if this.samplingRate < rateLimits(1)
+                warning(['Device does not support a sampling rate of ' num2str(this.samplingRate) ', changing to lower limit of ' num2str(rateLimits(1))]);
+                this.samplingRate = rateLimits(1);
+            elseif this.samplingRate > rateLimits(2)
+                warning(['Device does not support a sampling rate of ' num2str(this.samplingRate) ', changing to upper limit of ' num2str(rateLimits(2))]);
+                this.samplingRate = rateLimits(2);
             end
+            niSession.Rate = this.samplingRate;
             
-            warning('off','daq:Session:clockedOnlyChannelsAdded') % turn off useless warning
+            % INPUT
+            % set channel data from MS
+            if any(this.inputChannels > numel(inputChannels.name))
+                error(['Your device does not have ' num2str(max(this.inputChannels)) ' input channels!']);
+            else
+                inputChannels.isActive = ismember(1:numel(inputChannels.name),this.inputChannels);
+            end
             
             % Add analog input channels
-            for iDevice = 1:nDevice
-                for iChannel = 1:nChannels
-                    if Channels.isActive(iDevice,iChannel)
-                        niSession.addAnalogInputChannel(get(niDevices(iDevice),'ID'),iChannel-1,Channels.type{iDevice,iChannel});
-                        niSession.Channels(end).Name = Channels.name{iDevice,iChannel};
-                        % set to AC coupling to get rid of large DC offset
-                        niSession.Channels(end).Coupling = 'AC';
-                        %                         if any(strcmpi(Channels.type{iDevice,iChannel},{'Accelerometer' 'Microphone'}))
-                        %                             niSession.Channels(end).Sensitivity = Channels.sensitivity(iDevice,iChannel);
-                        %                         end
-                    end
+            for iChannel = 1:numel(inputChannels.name)
+                if inputChannels.isActive(iChannel)
+                    iDevice = inputChannels.mapping{iChannel}(1);
+                    iDeviceChannel = inputChannels.mapping{iChannel}(2);
+                    niSession.addAnalogInputChannel(get(niDevices(iDevice),'ID'),iDeviceChannel-1,inputChannels.type{iChannel});
+                    niSession.Channels(end).Name = inputChannels.name{iChannel};
+                    % set to AC coupling to get rid of large DC offset
+                    niSession.Channels(end).Coupling = 'AC';
+                    % if any(strcmpi(Channels.type{iDevice,iChannel},{'Accelerometer' 'Microphone'}))
+                    %    niSession.Channels(end).Sensitivity = Channels.sensitivity(iDevice,iChannel);
+                    % end
                 end
             end
             
-            % Add analog output channel (for now, only one)
-            if ~isempty(this.outputChannels)
-                niSession.addAnalogOutputChannel(get(niDevices(1),'ID'),0,'Voltage');
-                if numel(this.outputChannels) > 1 || any(this.outputChannels > 1)
-                    warning('Currently only one output channel supported');
-                end
+            % OUTPUT
+            % set channel data from MS
+            if any(this.outputChannels > numel(outputChannels.name))
+                error(['Your device does not have ' num2str(max(this.outputChannels)) ' output channels!']);
+            else
+                outputChannels.isActive = ismember(1:numel(outputChannels.name),this.outputChannels);
             end
             
-            % set sampling rate
-            niSession.Rate = this.samplingRate;
+            % Add analog output channels
+            for iChannel = 1:numel(outputChannels.name)
+                if outputChannels.isActive(iChannel)
+                    iDevice = outputChannels.mapping{iChannel}(1);
+                    iDeviceChannel = inputChannels.mapping{iChannel}(2);
+                    niSession.addAnalogOutputChannel(get(niDevices(iDevice),'ID'),iDeviceChannel-1,outputChannels.type{iChannel});
+                    niSession.Channels(end).Name = inputChannels.name{iChannel};
+                end
+            end
             
         end % function
         
