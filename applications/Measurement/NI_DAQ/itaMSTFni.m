@@ -88,7 +88,6 @@ classdef itaMSTFni < itaMSTF
             % Define listeners to automatically call the init function of
             % this class in case of a change in the below specified
             % properties.
-            addlistener(this,'samplingRate','PostSet',@this.init);
             addlistener(this,'inputChannels','PostSet',@this.init);
             addlistener(this,'outputChannels','PostSet',@this.init);
         end
@@ -101,13 +100,14 @@ classdef itaMSTFni < itaMSTF
             this = ita_mstfni_gui(this);
         end
         
-        function init(this,varargin)
+        function this = init(this,varargin)
             % init - Initialize the itaMSTFni class object.
-            % call the parent init function first
             init@itaMSTF(this);
-            
-            % then run the NI card initialization
-            this.niSession = init_NI_card(this);
+            % if this is an object loaded from disk (niSession is empty),
+            % we do not need to initialize the card
+            if ~isempty(this.niSession)
+                this.niSession = init_NI_card(this);
+            end
         end
         
         function checkready(this)
@@ -117,8 +117,12 @@ classdef itaMSTFni < itaMSTF
                 this.edit;
             end
             % has the NI session been initialized
-            if isempty(this.niSession.Channels)
-                this.init;
+            if isempty(this.niSession) || isempty(this.niSession.Channels)
+                this.niSession = init_NI_card(this);
+            end
+            % has the samplingRate been changed (NI rate is no exact)
+            if abs(this.niSession.Rate - this.samplingRate) > 1
+                this.niSession = init_NI_card(this);
             end
         end
         
@@ -232,15 +236,15 @@ classdef itaMSTFni < itaMSTF
             MS.niSession.release;
         end
         
-        function [niSession,inputChannels,outputChannels] = init_NI_card(this,sens)
+        function [niSession,inputChannels,outputChannels] = init_NI_card(this)
             % uses Christoph Hoellers's (hoellerc@nrc.ca) code for initilaization of NI session
             % for now only as simple DAC, so only Voltage type
-            if nargin < 2
-                sens = 0.01;
-            end
             
             % Initialization
-            [inputChannels,outputChannels,niDevices,rateLimits] = ita_get_ni_deviceinfo(sens);
+            [inputChannels,outputChannels,niDevices,rateLimits] = ita_get_ni_deviceinfo();
+            if isempty(niDevices) % no card attached
+                error('Cannot initialize NI card, maybe not connected?')
+            end
             % create session (will be stored)
             niSession = daq.createSession('ni');
             % turn off useless warning
