@@ -13,8 +13,9 @@ ravenProjectPath = '..\RavenInput\Classroom\Classroom.rpf';
 if (~exist(ravenProjectPath,'file'))
     [filename, pathname] = uigetfile('Classroom.rpf', 'Please select raven project file!');
     ravenProjectPath = [pathname filename];
-    ravenBasePath = ravenProjectPath(1:end-34);
 end
+ravenBasePath = ravenProjectPath(1:end-34);
+
 rpf = itaRavenProject(ravenProjectPath);
 %% Simulationsparameter einstellen
 % Image sources up to second order
