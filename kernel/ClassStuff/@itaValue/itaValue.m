@@ -39,8 +39,8 @@ classdef itaValue
                     elseif ischar(varargin{1})
                         token = varargin{1}(:).';
                         
-                        if ~isempty(str2num(token)) %pre check if only a value inside, pdi
-                            A.value = str2num(token);
+                        if ~isnan(str2double(token)) %pre check if only a value inside, pdi
+                            A.value = str2double(token);
                         else
                             %token_new = token; token_new(token_new == '.') = ' ';
                             unit_start = find(isstrprop(token,'alpha'));
@@ -59,10 +59,12 @@ classdef itaValue
                                 else
                                     unit_start = unit_start(1);
                                 end
+							catch
+								% do nothing
                             end
                             value_token = token(1:unit_start-1);
                             value_token = value_token(value_token ~= ' ');
-                            A.value = str2num(value_token); %#ok<ST2NM>
+                            A.value = sscanf(value_token,'%f');
                             if isempty(A.value)
                                 A.value = 1;
                             end
@@ -95,7 +97,7 @@ classdef itaValue
             if length(a) > 1
                 res = [];
                 for idx = 1:length(a)
-                    res = [res ' '  num2str(a(idx),varargin{:})];
+                    res = [res ' '  num2str(a(idx),varargin{:})]; %#ok<AGROW>
                 end
             else
                 res = num2str(a.value(:),varargin{:});
@@ -145,7 +147,7 @@ classdef itaValue
             % invert a matrix
             res    = ita_unit_inv(a);
             values = inv(double(a));
-            for idx = 1:size(a,1);
+            for idx = 1:size(a,1)
                 for jdx = 1:size(a,2)
                     res(idx,jdx).value = values(idx,jdx);
                 end
@@ -189,23 +191,13 @@ classdef itaValue
         
         %% disp
         function disp(a)
-            % show the variable value and string
-            %             spacing = 10;
-            %             for idx = 1:size(a,1)
-            %                 aux = '';
-            %                 for jdx = 1:size(a,2)
-            %                     newString = num2str(a(idx,jdx));
-            %                     aux = [newString repmat('',1,spacing - length(newString))];
-            %                 end
-            %                 disp(aux)
-            %             end
             disp(num2str(a))
         end
         
-        function display(a)
+        function display(a) %#ok<DISPLAY>
             % show the variable value and string
             x = ver('matlab');
-            if isempty(javachk('desktop')) && str2num(x.Version) < 7.13    % check if we are in desktop mode
+            if isempty(javachk('desktop')) && sscanf(x.Version,'%f') < 7.13    % check if we are in desktop mode
                 spacing = 15;
                 if size(a,1) == 1 && size(a,2) == 1 %normal 1D disp
                     
@@ -286,10 +278,10 @@ classdef itaValue
             end
             
             varargout{1} = res; %return string for e.g. legend
-            if nargout >= 2;
+            if nargout >= 2
                 varargout{2} = val; %return double for division
             end
-            if nargout >= 3;
+            if nargout >= 3
                 varargout{3} = log_prefix; %scaling factor for log10
             end
         end

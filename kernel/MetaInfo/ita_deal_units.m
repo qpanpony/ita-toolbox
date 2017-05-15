@@ -158,8 +158,8 @@ end
             end
         end
         
-        [num1 den1] = unitstr2nums(numToken);
-        [den2 num2] = unitstr2nums(denToken);
+        [num1, den1] = unitstr2nums(numToken);
+        [den2, num2] = unitstr2nums(denToken);
         num         = num1 * num2;
         den         = den1 * den2;
         
@@ -169,7 +169,7 @@ end
                 return;
             end
             unitStr(unitStr == '*') = ' ';
-            tokenPos = findstr(unitStr,' ');
+            tokenPos = strfind(unitStr,' ');
             tokenPos = [1 tokenPos length(unitStr)];
             num = 1; den = 1; %init
             
@@ -192,7 +192,7 @@ end
                     end
                     exponent = 1;
                     if any(isstrprop(token,'digit'))
-                        exponent = str2num(token(isstrprop(token,'digit')));
+                        exponent = sscanf(token(isstrprop(token,'digit')),'%f');
                         token = token(~isstrprop(token,'digit'));
                     end
                                         
@@ -253,7 +253,6 @@ end
                             den = den * cc.tesla(2).^exponent;
                         case 'rad'
                             num = num * cc.rad.^exponent;
-                            den = den;
                         otherwise
                             if ~isempty(token)
                                 ita_verbose_info(['Oh Lord. I do not know this unit: ' token '! Ignoring this...'])
@@ -355,10 +354,10 @@ end
         end
         
         %% more than one element?
-        if ~isempty( findstr(numStr,' ') ) %#ok<*REMFF1> %more than one token
+        if ~isempty(strfind(numStr,' ')) %#ok<*REMFF1> %more than one token
             numStr = ['(' numStr ')'];
         end
-        if ~isempty( findstr(denStr,' ') ) %more than one token
+        if ~isempty(strfind(denStr,' ')) %more than one token
             denStr = ['(' denStr ')'];
         end
         if isempty(numStr) && isempty(denStr)
@@ -694,7 +693,7 @@ end
                 for i = maxExponent:-1:1
                     if isfactor(numFactor.^i,iNum) && isfactor(denFactor.^i,iDen)
                         if i ~= 1
-                            newString = [newString '^' num2str(i)]; %#ok<AGROW>
+                            newString = [newString '^' num2str(i)];
                         end
                         iNum = iNum/numFactor.^i;
                         iDen = iDen/denFactor.^i;
@@ -831,7 +830,7 @@ end
         
         function [iNum, iDen, numString] = check4hertz(iNum,iDen,numString)
             numFactor = 1; denFactor = cc.second; newString = 'Hz'; %hertz
-            if iDen == denFactor && iNum == numFactor;
+            if iDen == denFactor && iNum == numFactor
                 iNum = iNum/numFactor;
                 iDen = iDen/denFactor;
                 numString = appendString(numString,newString);

@@ -64,8 +64,8 @@ else
 end
 
 
-refLeftChan0c  = ita_minimumphase(ita_time_window(refLeftChan0,[t1 t2],'time','crop'));
-refRightChan0c = ita_minimumphase(ita_time_window(refRightChan0 ,[t1 t2],'time','crop'));
+refLeftChan0c  = ita_time_window(refLeftChan0,[t1 t2],'time','crop');
+refRightChan0c = ita_time_window(refRightChan0 ,[t1 t2],'time','crop');
     
 %.........................................................................
 % Smooting
@@ -73,7 +73,7 @@ refRightChan0c = ita_minimumphase(ita_time_window(refRightChan0 ,[t1 t2],'time',
 refLeftChan0c = ita_smooth_notches(refLeftChan0c,'bandwidth',1/2,...
     'threshold', 3);
 
-refRightChan0c = ita_smooth_notches(refLeftChan0c,'bandwidth',1/2,...
+refRightChan0c = ita_smooth_notches(refRightChan0c,'bandwidth',1/2,...
     'threshold', 3);
     
 for iAz = 1:numAzAngle

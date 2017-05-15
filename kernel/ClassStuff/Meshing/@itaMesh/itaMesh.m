@@ -311,11 +311,11 @@ classdef itaMesh
         end
         
         %% plot
-        function h = plot(this,additionalArgs)
+        function h = plot(this,varargin)
             if nargin < 2
                 h = ita_plot_mesh(this);
             else
-                h = ita_plot_mesh(this,additionalArgs);
+                h = ita_plot_mesh(this,varargin{:});
             end
         end
         

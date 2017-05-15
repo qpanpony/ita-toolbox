@@ -902,7 +902,8 @@ for i=1:props.dataset.numrecords
             
             % Back to Matlab indices (+1)
             i1 = recordDesc{i}.effOffset(c) + 1;
-            i2 = i1 + recordDesc{i}.effLength(c) - 1;
+%             i2 = i1 + recordDesc{i}.effLength(c) - 1;
+            i2 = recordDesc{i}.effLength(c) - 1;
             
             % Write down the filter coefficients
             switch props.quantization
@@ -1087,7 +1088,7 @@ for i=1:props.dataset.numrecords
     
     if isfield(record, 'metadata')
         if ~isempty(fieldnames(record.metadata))
-            daff_write_metadata(fid, record.metadata);
+            daffv15_write_metadata(fid, record.metadata);
             recordDesc{i}.metadataIndex = metadataIndex;
             metadataIndex = metadataIndex + 1;
             hasMetadata = true;

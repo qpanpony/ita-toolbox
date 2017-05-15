@@ -41,13 +41,16 @@ if nargin
     handleMode = false;
     if ischar(varargin{1})
         sArgs        = struct('pos1_unvFilename','string','plotObject',itaSuper(),'plotInstant',[],'plotDomain','freq','plotType','mag','plotRange',[],'hold','off');
+        sArgs.reduce = 0;
         [unvFilename,sArgs] = ita_parse_arguments(sArgs,varargin);
         Mesh = itaMesh(unvFilename);
     elseif isa(varargin{1},'itaMesh')
         sArgs        = struct('pos1_Mesh','itaMesh','plotObject',itaSuper(),'plotInstant',[],'plotDomain','freq','plotType','mag','plotRange',[],'hold','off');
+        sArgs.reduce = 0;
         [Mesh,sArgs] = ita_parse_arguments(sArgs,varargin);
     elseif all(ishandle(varargin{1}))
         sArgs        = struct('pos1_h','anything','plotObject',itaSuper(),'plotInstant',[],'plotDomain','freq','plotType','mag','plotRange',[],'hold','off');
+        sArgs.reduce = 0;
         [h,sArgs] = ita_parse_arguments(sArgs,varargin);
         handleMode = true;
     else
@@ -152,6 +155,9 @@ else
     else
 %         figure('units','normalized','outerposition',[1 0 1 1]);
         figure;
+    end
+    if sArgs.reduce ~= 0
+        [faces_matrix, vertices_matrix] = reducepatch(faces_matrix,vertices_matrix,sArgs.reduce,'fast');
     end
     h = patch('Vertices',vertices_matrix,'Faces',faces_matrix,'FaceVertexCData',plotData,'FaceColor','interp','EdgeColor','k');
     hold off;
