@@ -127,6 +127,7 @@ classdef itaMSTFni < itaMSTF
         end
         
         function MS = calibrationMS(this)
+            this.checkready;
             % call the parent function
             MS = calibrationMS@itaMSTF(this);
             % convert to instance of this class
