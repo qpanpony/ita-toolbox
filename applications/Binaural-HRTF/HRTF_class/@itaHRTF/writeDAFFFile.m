@@ -9,7 +9,7 @@ function writeDAFFFile( this, file_path, metadata_user )
 %
 % Output: none
 
-metadata = [];
+metadata = this.mMetadata;
 if nargin >= 3
     metadata = metadata_user;
 end
@@ -44,25 +44,32 @@ end
 
 theta_start_deg = rad2deg( min( this.channelCoordinates.theta ) );
 theta_end_deg = rad2deg( max( this.channelCoordinates.theta ) );
-theta_num_elements = size( unique( this.channelCoordinates.theta ), 1 );
+theta_num_elements = size( uniquetol( this.channelCoordinates.theta ), 1 );
 
-phi_start_deg = rad2deg( min( mod( this.channelCoordinates.phi, 2*pi ) ) );
-phi_end_deg = rad2deg( max( mod( this.channelCoordinates.phi, 2*pi ) ) );
-phi_num_elements = size( unique( this.channelCoordinates.phi ), 1 );
+phi_start_deg = rad2deg( min( mod( this.channelCoordinates.phi, 2 * pi ) ) );
+phi_end_deg = rad2deg( max( mod( this.channelCoordinates.phi, 2 * pi ) ) );
+phi_num_elements = size( uniquetol( this.channelCoordinates.phi ), 1 );
 
 assert( phi_num_elements ~= 0 );
 alphares = ( phi_end_deg - phi_start_deg ) / phi_num_elements; % phi end does not cover entire circle in this case
 alphares_full_circle = ( phi_end_deg - phi_start_deg ) / ( phi_num_elements - 1 ); % phi end does not cover entire circle in this case
 if phi_end_deg + alphares_full_circle >= 360.0
-    alpharange = [ phi_start_deg ( phi_end_deg + alphares_full_circle ) ]; % Account for full circle
+    alpharange = [ phi_start_deg 360 ]; % Account for full circle and force end of range to 360 deg
     alphares = alphares_full_circle;
 else
     alpharange = [ phi_start_deg phi_end_deg ];
 end
 
+assert( alpharange( 1 ) >= 0.0 )
+assert( alpharange( 2 ) <= 360.0 )
+
 assert( theta_num_elements ~= 0 );
 betares = ( theta_end_deg - theta_start_deg ) / ( theta_num_elements - 1 ); % phi end does not cover entire circle
 betarange = 180 - [ theta_start_deg theta_end_deg ]; % Flip poles (DAFF starts at south pole)
+
+assert( betarange( 2 ) >= 0.0 )
+assert( betarange( 1 ) <= 180.0 )
+
 
 %% Assemble metadata
 
@@ -70,8 +77,11 @@ metadata = daffv17_add_metadata( metadata, 'Generation script', 'String', 'write
 metadata = daffv17_add_metadata( metadata, 'Generation toolkit', 'String', 'ITA-Toolkit' );
 metadata = daffv17_add_metadata( metadata, 'Generation date', 'String', date );
 metadata = daffv17_add_metadata( metadata, 'Web resource', 'String', 'http://www.ita-toolkit.org' );
-
-channels = 2; % this.nChannels < does not work?
+channels=this.nChannels/this.nDirections;
+if(channels<1)
+    warning('Number of channels per record was not detected correctly, assuming 2 channel records');
+    channels = 2;
+end
 
 % Content type switcher between time domain (ir) and frequency domain (dft)
 % (requires different data functions)

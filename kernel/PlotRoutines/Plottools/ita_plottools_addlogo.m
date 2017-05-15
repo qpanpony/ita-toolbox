@@ -57,7 +57,7 @@ ha2 = axes('Position',logo_pos);
 %% load logo and plot
 persistent a_im;
 if isempty(a_im)
-    a_im = importdata(which('ita_toolbox_logo_wbg.jpg'));
+    a_im = importdata(which('ita_toolbox_logo_wbg.png'));
 end
 h_i = image(a_im,'alphaData',sArgs.logoalpha);
 set(h_i,'UserData','ITA-Toolbox-Logo'); % Write something to UserData so we can identify it

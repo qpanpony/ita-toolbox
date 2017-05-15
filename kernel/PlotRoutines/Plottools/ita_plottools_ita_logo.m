@@ -11,8 +11,8 @@ mode = 'normal';
 if nargin == 1
     mode = varargin{1};
 end
-
-a_im = importdata(which('ita_toolbox_logo_lightgrey.jpg'));
+% with lightgrey bg
+a_im = importdata(which('ita_toolbox_logo_lightgrey.png'));
 graph_size = size(a_im);
 graph_size = [graph_size(1) graph_size(2)];
 axes();

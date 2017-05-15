@@ -41,6 +41,7 @@ sArgs = struct('pos1_source','struct',...
                'samplingRate',ita_preferences('samplingRate'),...
                'freqRange',[20 ita_preferences('samplingRate')/2],...
                'samplingDisplacement',[],...
+			   'samplingDisplacementAbsolute',false,...
                'nRuns',1,...
                'SNR',60,...
                'sma',true,...
@@ -66,6 +67,7 @@ simSLA = sArgs.sla;
 
 SNR = sArgs.SNR;
 samplingDisplacement = sArgs.samplingDisplacement;
+displacementType = sArgs.samplingDisplacementAbsolute;
 
 ao = ita_generate_impulse('fftDegree',sArgs.fftDegree,'samplingRate',sArgs.samplingRate);
 freqVec = ao.freqVector(ao.freq2index(sArgs.freqRange(1)):ao.freq2index(sArgs.freqRange(2)));
@@ -269,19 +271,27 @@ for idxRun = 1:sArgs.nRuns
         if ~isempty(samplingDisplacement) && isempty(SNR)
             
             if simSMA
-                receiverSamplingErroneous = ita_sampling_displacement(receiverSampling,'relativeError',samplingDisplacement);
+                receiverSamplingErroneous = ita_sph_sampling_displacement(receiverSampling,samplingDisplacement,'absolute',displacementType);
                 receiverYmismatch = ita_sph_base(receiverSamplingErroneous,receiverNmax);
                 EreceiverMismatch = ita_sph_modal_strength(receiverSamplingErroneous,receiverNmax,kVec(idxFreq),'rigid');
-                EreceiverMismatch = EreceiverMismatch.*receiverYmismatch - Mreceiver;
+                if receiverSamplingUniqueRad
+                    EreceiverMismatch = receiverYmismatch*EreceiverMismatch - Mreceiver;
+                else
+                    EreceiverMismatch = receiverYmismatch.*EreceiverMismatch - Mreceiver;
+                end
             else
                 EreceiverMismatch = [];
             end
             if simSLA
-                sourceSamplingErroneous = ita_sampling_displacement(sourceSampling,'relativeError',samplingDisplacement);
+                sourceSamplingErroneous = ita_sph_sampling_displacement(sourceSampling,samplingDisplacement,'absolute',displacementType);
                 sourceYmismatch = ita_sph_base(sourceSamplingErroneous,sourceNmax);
                 sourceGmismatch = ita_sph_aperture_function_sla(sourceSamplingErroneous,sourceNmax,sourcerMem,'r',unique(sourceSamplingR));
                 EsourceMismatch = ita_sph_modal_strength(sourceSamplingErroneous,sourceNmax,kVec(idxFreq),'rigid','transducer','ls');
-                EsourceMismatch = (EsourceMismatch.' .* (sourceGmismatch.'.*sourceYmismatch')) - Msource;
+                if numel(unique(sourceSampling.r)) == 1
+                    EsourceMismatch = (EsourceMismatch * (sourceGmismatch.'.*sourceYmismatch')) - Msource;
+                else
+                    EsourceMismatch = (EsourceMismatch.' .* (sourceGmismatch.'.*sourceYmismatch')) - Msource;
+                end
             else
                 EsourceMismatch = [];
             end

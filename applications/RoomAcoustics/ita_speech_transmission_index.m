@@ -35,6 +35,15 @@ function varargout = ita_speech_transmission_index(varargin)
 sArgs        = struct('pos1_ir','itaAudio', 'levels', [], 'SNR', [],'plot',false,'analytic', false, 'gender', 'male');
 [ir,sArgs] = ita_parse_arguments(sArgs,varargin); 
 
+if ~strcmpi(ir.signalType,'energy')
+    ita_verbose_info('Your IR does not have the correct signalType, I will fix this, but be careful!',0);
+    ir.signalType = 'energy';
+end
+
+if ir.trackLength < 1.6
+    ita_verbose_info('IR is shorter than ISO 60268-16 recommends, I hope you know what you are doing!',0);
+end
+
 if strcmpi(sArgs.gender,'male')
     genderIndex = 1;
 elseif strcmpi(sArgs.gender,'female')
@@ -120,7 +129,7 @@ if sArgs.analytic
     % RT for analytic result
     RT      = ita_roomacoustics(ir,'T30','freqRange',[125 8000],'bandsperoctave',1);
     RT      = RT.T30.freq;
-    m_analytic = 1./sqrt(1 + (2*pi.*bsxfun(@times,fm,RT)./13.8).^2);
+    m_analytic = 1./(bsxfun(@times,sqrt(1 + (2*pi.*bsxfun(@times,fm,RT)./13.8).^2),(1+10.^(-SNR.'./10))));
     m_analytic = min(bsxfun(@times,m_analytic,correctionTerm),1);
     SNR_eff_analytic = min(max(real(10.*log10(m_analytic./(1-m_analytic))),-15),15);
     TI_analytic = (SNR_eff_analytic + 15)./30;
@@ -144,7 +153,7 @@ varargout(1) = {STI};
 if nargout > 1
     varargout(2) = {MTI};
     if nargout > 2 && sArgs.analytic
-        varargout(3) = STI_analytic;
+        varargout(3) = {STI_analytic};
     end
 end
 

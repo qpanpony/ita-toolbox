@@ -553,7 +553,7 @@ classdef itaOptitrack < handle
                 if Optitrack_obj.singleShot
                    Optitrack_obj.timerData = timer('TimerFcn',{@Optitrack_obj.TimerCallback},'ExecutionMode','singleShot'); % execute timer callback once
                 else
-                   Optitrack_obj.timerData = timer('TimerFcn',{@Optitrack_obj.TimerCallback},'Period',round(1/16/Optitrack_obj.frameRate*1000)/1000,'ExecutionMode','fixedRate','BusyMode','drop');
+                   Optitrack_obj.timerData = timer('TimerFcn',{@Optitrack_obj.TimerCallback},'Period',round(1/16/Optitrack_obj.frameRate*1000)/1000,'ExecutionMode','fixedSpacing','BusyMode','drop');
                 end
             else
                 Optitrack_obj.correctRowIdx = 1; % reset row counter
@@ -561,7 +561,7 @@ classdef itaOptitrack < handle
                    Optitrack_obj.timerData = timer('TimerFcn',{@Optitrack_obj.TimerCallback},'ExecutionMode','singleShot'); % execute timer callback once
                 else
                    Optitrack_obj.timerData = timer('TimerFcn',{@Optitrack_obj.TimerCallback},'Period',round(1/16/Optitrack_obj.frameRate*1000)/1000,...
-                        'ExecutionMode','fixedRate','BusyMode','drop','TasksToExecute',32*Optitrack_obj.numFrames); % execute timer 16*Optitrack_obj.numFrames times but abort as soon as Optitrack_obj.rigidBodyLogData.data is filled
+                        'ExecutionMode','fixedSpacing','BusyMode','drop','TasksToExecute',32*Optitrack_obj.numFrames); % execute timer 16*Optitrack_obj.numFrames times but abort as soon as Optitrack_obj.rigidBodyLogData.data is filled
                 end
             end
             

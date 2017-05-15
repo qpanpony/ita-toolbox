@@ -42,7 +42,7 @@ set(gcf,'Name','Hörversuch')
 set(gcf,'NumberTitle','off')
 
 
-a_im = importdata(which('ita_toolbox_logo_wbg.jpg'));
+a_im = importdata(which('ita_toolbox_logo_wbg.png'));
 image(a_im);
 axis off;
 set(gca,'Units','pixel', 'Position', [50 20 300 60]*2); %pdi new scaling

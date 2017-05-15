@@ -61,9 +61,9 @@ hMainFigure = figure( ...       % the main GUI figure
 figSet.hMainFigure = hMainFigure;
 
 %% ITA toolbox logo
-a_im = importdata(which('ita_toolbox_logo.jpg'));
+a_im = importdata(which('ita_toolbox_logo.png'));
 image(a_im);axis off
-set(gca,'Units','pixel', 'Position', [10 10 350 65]*0.6); %TODO: later set correctly the position
+set(gca,'Units','pixel', 'Position', [10 10 350 65]*0.6);
 
 %% pushbuttons - ui control elements
 for iButton = 1:nButtons

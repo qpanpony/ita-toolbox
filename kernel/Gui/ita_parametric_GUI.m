@@ -70,7 +70,7 @@ end
 %name  = varargin{2}; %name of window
 
 sArgs = struct('pos1_pList','cell','pos2_name','char','wait','on','ita_menu','off',...
-    'ita_menu_disable',cell(1),'logo','ita_toolbox_logo.jpg','backgroundlogo','','logo2','','return_handles',false,'fgh',[],'position',[]);
+    'ita_menu_disable',cell(1),'logo','ita_toolbox_logo.png','backgroundlogo','','logo2','','return_handles',false,'fgh',[],'position',[]);
 sArgs.buttonnames = {'Cancel','Okay'};
 narginchk(2,2*numel(fields(sArgs)));
 [pList, name, sArgs] = ita_parse_arguments(sArgs,varargin);

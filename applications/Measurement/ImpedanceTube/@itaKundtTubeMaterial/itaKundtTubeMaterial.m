@@ -452,9 +452,9 @@ classdef itaKundtTubeMaterial < itaKundtTube
                     'Callback',{@newSampOrRepCallback, this},...
                     'TooltipString',toolTipStr,...
                     'Enable','off');
-                % ITA toolbox logo
+                % ITA toolbox logo with grey background
                 ax(1) = subplot(100,100,1);
-                a_im = importdata(which('ita_toolbox_logo.jpg'));
+                a_im = importdata(which('ita_toolbox_logo.png'));
                 image(a_im);axis off
                 set(gca,'Units','pixel', 'Position', [10 10 210 40]);
                 %gui anzeigen

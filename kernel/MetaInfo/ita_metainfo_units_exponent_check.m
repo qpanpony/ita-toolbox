@@ -20,11 +20,6 @@ function str = ita_metainfo_units_exponent_check(str)
 % Author: Pascal Dietrich -- Email: pdi@akustik.rwth-aachen.de
 % Created:  07-Dec-2009 
 
-% For some more help read the 'ITA Toolbox Getting Started.pdf' 
-% delivered with the ITA-Toolbox in the documentation directory, or use the
-% wiki which provides more or less actual informations about the
-% development. (https://www.akustik.rwth-aachen.de/ITA-Toolbox/wiki)
-
 % ********************* NEVER CHANGE THIS FILE ****************************
 
 % this should work for pc, mac and linux. Never change this file

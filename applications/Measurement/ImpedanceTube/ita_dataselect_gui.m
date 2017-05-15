@@ -42,8 +42,8 @@ hFig = figure('Name','Select Probes from your Current Directory to plot',...
     'NumberTitle','off', ...
     'Color', [0.8 0.8 0.8]);
 
-%ITA toolbox logo
-a_im = importdata(which('ita_toolbox_logo.jpg'));
+%ITA toolbox logo with grey background
+a_im = importdata(which('ita_toolbox_logo.png'));
 image(a_im);axis off
 set(gca,'Units','pixel', 'Position', [20 20 200 35]); %TODO: later set correctly the position
 

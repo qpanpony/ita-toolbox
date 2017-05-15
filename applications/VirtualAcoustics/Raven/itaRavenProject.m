@@ -165,6 +165,7 @@ classdef itaRavenProject < handle
         simulationDone = false
         
         keepOutputFiles
+        plotModelHandle = [];
         
         % [PrimarySources] %
         sourceNameString
@@ -455,7 +456,7 @@ classdef itaRavenProject < handle
                 %                 system([obj.ravenExe ' "' obj.ravenProjectFile '" >> ' obj.ravenLogFile]);
                 prevPath = pwd;
                 cd(fileparts(obj.ravenExe));
-                dos([obj.ravenExe ' "' obj.ravenProjectFile '"'], '-echo');
+                dos(['"' obj.ravenExe '"' ' "' obj.ravenProjectFile '"'],'-echo');
                 disp('Done.');
                 cd(prevPath);
                 
@@ -660,8 +661,16 @@ classdef itaRavenProject < handle
                 comp2axesMapping = [3 1 2];
             end
             if nargin < 2
-                tgtAxes = gca;
+                if (ishandle(obj.plotModelHandle))
+                    tgtAxes = obj.plotModelHandle;
+                else
+                    figure;
+                    tgtAxes = gca;
+                end
+                
             end
+            
+            obj.plotModelHandle = tgtAxes;
             
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
@@ -740,7 +749,7 @@ classdef itaRavenProject < handle
                 currentSurfaceArea = obj.getSurfaceAreaOfMaterial(allMaterials{iMat});
                 allMaterials{iMat} = strrep(allMaterials{iMat},'_',' ');
                 allMaterials{iMat} = [ allMaterials{iMat} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m² ;'];
-                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18)),'%5.2f') ' m² )'];
+                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18,iMat)),'%5.2f') ' m² )'];
             end
 
             currentMaterial.channelNames = allMaterials;
@@ -4544,7 +4553,7 @@ classdef itaRavenProject < handle
             
             
             hold on;
-            obj.plotModel();
+            obj.plotModel(gca);
             
             set(gca, 'CameraViewAngle', 10);
         end
@@ -4758,7 +4767,7 @@ classdef itaRavenProject < handle
                 caxis([-60 max(max(sphereEnergy))]);
                 colorbar;
                 hold on;
-                obj.plotModel();
+                obj.plotModel(gca);
                 
                 set(gca, 'CameraViewAngle', 10);
                 

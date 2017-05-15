@@ -420,6 +420,7 @@ while timeout %normally only one time, one loop
                 waitFor = sArgs.recsamples ./ sArgs.samplingRate;
             elseif playback
                 ita_verbose_info('start playback',1)
+                sArgs.block = true;
                 pageno = hPlayRec('play',single(data.timeData),out_channel_vec);
                 waitFor = data.nSamples ./ data.samplingRate;
             else
@@ -429,7 +430,7 @@ while timeout %normally only one time, one loop
             hPlayRec('reset');
             ita_verbose_info('TIMEOUT, I will try a reset and redo',0)
             ita_verbose_info(errmsg.message,0);
-            timeout = true;
+            timeout = true;            
             break
         end
         
@@ -450,7 +451,7 @@ while timeout %normally only one time, one loop
         
         pause(0.01) % pdi changed: was 0.1 before
         lastSample = 1;
-        if sArgs.block && ~timeout && ~using_more_pages
+        if sArgs.block && ~timeout %&& ~using_more_pages
             %if verboseMode || max_buffer_reached, disp('ITA_PORTAUDIO:
             %waiting for results'), end;%pdi:please be quiter
             isfinished = hPlayRec('isFinished',pageno);

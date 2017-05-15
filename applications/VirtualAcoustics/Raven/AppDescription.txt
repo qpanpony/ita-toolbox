@@ -1,3 +1,0 @@
-Contact:           spe@akustik.rwth-aachen.de
-Description:       Raven Room Acoustics Simulation
-Dependencies:      RoomAcoustics, SphericalHarmonics

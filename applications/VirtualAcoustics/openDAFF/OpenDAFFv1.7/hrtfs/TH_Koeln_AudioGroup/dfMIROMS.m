@@ -1,8 +1,5 @@
 function [ freqs, mags, metadata ] = dfMIROMS( alpha, beta, miro_obj )
     
-    if ~isempty( miro_obj.resampleToFS )
-        sampleRate = miro_obj.resampleToFS;
-    end
     if strcmp( miro_obj.angles, 'DEG' )
         [ irID, azimuth, elevation ] = closestIr( miro_obj, alpha, beta );
     else

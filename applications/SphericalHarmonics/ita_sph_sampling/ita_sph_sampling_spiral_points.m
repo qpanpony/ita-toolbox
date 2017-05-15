@@ -52,7 +52,7 @@ end
 while true
     coordsCart = calculate_spiral_points(sArgs.nPoints);
     sampling = itaSamplingSph(coordsCart,'sph');
-    Y = mbe_sph_base(sampling,Nmax);
+    Y = ita_sph_base(sampling,Nmax);
     condNum = cond(Y);
     if condNum < sArgs.condSHT
         break;

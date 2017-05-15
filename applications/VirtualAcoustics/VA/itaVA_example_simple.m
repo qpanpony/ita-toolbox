@@ -22,7 +22,7 @@ va.setAudiofileSignalSourcePlaybackAction( X, 'play' )
 va.setAudiofileSignalSourceIsLooping( X, true );
 
 % Create a virtual sound source and set a position
-S = va.createSoundSource( 'itaVA_Source', 'all' );
+S = va.createSoundSource( 'itaVA_Source' );
 va.setSoundSourcePosition( S, [0 1.7 -2] )
 
 % Connect the signal source to the virtual sound source
@@ -30,7 +30,7 @@ va.setSoundSourceSignalSource( S, X )
 
 % Create a listener with a HRTF and position him
 H = va.loadHRIRDataset( '$(DefaultHRIR)' );
-L = va.createListener( 'itaVA_Listener', 'all', H );
+L = va.createListener( 'itaVA_Listener', 'default', H );
 va.setListenerPosition( L, [0 1.7 0] )
 va.setListenerOrientationYPR( L, [0 0 0] ) % Default view is to -Z (OpenGL)
 

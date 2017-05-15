@@ -1,3 +1,0 @@
-Contact:           pdi@akustik.rwth-aachen.de
-Description:      Nonlinear System Models
-Dependencies:      Measurement

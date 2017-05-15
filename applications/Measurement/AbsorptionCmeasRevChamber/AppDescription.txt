@@ -1,3 +1,0 @@
-Contact:           mgu@akustik.rwth-aachen.de
-Description:       Protocols for Reveration Chamber Measurements
-Dependencies:      RoomAcoustics

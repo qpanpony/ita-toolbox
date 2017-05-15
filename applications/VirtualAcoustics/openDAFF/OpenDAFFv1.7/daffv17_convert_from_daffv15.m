@@ -23,7 +23,7 @@ function [] = daffv17_convert_from_daffv15( daffv15_input_file_path, daffv17_out
    
     metadata_field_names = fieldnames( metadata_v15 );
     if size( metadata_field_names, 1 )
-       for i = size( metadata_field_names, 1 )
+       for i = 1:size( metadata_field_names, 1 )
            key = metadata_field_names{i};
            val = metadata_v15.( key );
            if isnumeric( val )

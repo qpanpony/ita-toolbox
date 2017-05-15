@@ -18,7 +18,7 @@ function varargout = ita_toolbox_setup(varargin)
 % </ITA-Toolbox>
 
 
-warning off %#ok<WNOFF>
+warning off
 close all
 clc
 
@@ -79,7 +79,7 @@ ita_preferences(prefs);    % Set all prefs, non-existing ones will be ignored
 %% WIN64 and no ASIO sound cards
 if strcmpi(mexext,'mexw64')
     % check for sound card list
-    [devStrIn, devIDsIn, devStrOut, devIDsOut] = ita_portaudio_menuStr();
+    [~, devIDsIn, ~, devIDsOut] = ita_portaudio_menuStr();
     if numel(devIDsIn) == 1 && numel(devIDsOut) == 1 && ita_preferences('playrec') > 0
         ita_preferences('playrec',mod(ita_preferences('playrec'),2)+1);
         ccx
@@ -87,7 +87,7 @@ if strcmpi(mexext,'mexw64')
         disp('Trying different playrec MEX-file to find sound cards...')
         pause(0.5)
         % search with alternative playrec mex-file
-        [devStrIn, devIDsIn, devStrOut, devIDsOut] = ita_portaudio_menuStr();
+        [~, devIDsIn, ~, devIDsOut] = ita_portaudio_menuStr();
         if numel(devIDsIn) == 1 && numel(devIDsOut) == 1 && ita_preferences('playrec') > 0
             ita_preferences('playrec',mod(ita_preferences('playrec'),2)+1);
             ccx
@@ -107,13 +107,6 @@ end
 %% clean up old filters
 ita_delete_filter();
 
-%% show toolbox apps if possible
-if ~exist('ita_apps.m', 'file')
-    disp('no ITA-Toolbox applications found')
-else
-    ita_apps()
-end
-
 %% Then show gui
 if usejava('desktop') %Only if desktop available (non_cluster)
     %     ita_preferences();
@@ -130,8 +123,9 @@ else
     ita_disp()
     disp('<a href="matlab:ita_toolbox_gui"> Click here to start with a GUI ''ita_toolbox_gui()'' to start working...</a>')
     ita_disp()
-    disp('<a href="matlab:edit ita_tutorial"> Click here to start with a Tutorial script''ita_tutorial()''</a>')
+    disp('<a href="matlab:edit ita_tutorial"> Click here to start with a Tutorial script ''ita_tutorial()''</a>')
     ita_disp()
+    disp('<a href="matlab:ita_generate_documentation"> Click here to build the HTML documentation ''ita_generate_documentation()''</a>')
 end
 ita_disp()
 

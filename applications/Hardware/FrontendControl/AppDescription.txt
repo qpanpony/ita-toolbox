@@ -1,3 +1,0 @@
-Contact:           pdi@akustik.rwth-aachen.de
-Description:       Control Measurement Frontends via Midi
-Dependencies:      Measurement

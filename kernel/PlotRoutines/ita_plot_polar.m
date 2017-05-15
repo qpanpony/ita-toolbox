@@ -175,8 +175,8 @@ if ~all(isreal(plotData))
 end
 
 %% plot it
-if sArgs.newFigure && ~ishold
-   % figure('Name','Polar plot'); #jtu remove?
+if sArgs.newFigure
+   figure('Name','Polar plot');
 end
 % Determine Plot Range
 if isempty(sArgs.plotRange)
