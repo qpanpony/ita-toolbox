@@ -505,8 +505,12 @@ classdef itaRavenProject < handle
                     delete(obj.ravenLogFile);
                 end
                 %                 system([obj.ravenExe ' "' obj.ravenProjectFile '" >> ' obj.ravenLogFile]);
-                dos([obj.ravenExe ' "' obj.ravenProjectFile '"'], '-echo');
+                prevPath = pwd;
+                cd(fileparts(obj.ravenExe));
+                dos(['"' obj.ravenExe '"' ' "' obj.ravenProjectFile '"'],'-echo');
                 disp('Done.');
+                cd(prevPath);
+                
                 
                 % restore the initial project name
                 obj.setProjectName(savedProjectName);
