@@ -14,6 +14,7 @@ classdef itaHpTF_Audio < itaHpTF
     %                                             Audio Engineering Society Convention 130, May 2011)
     %         normalized        (Normalization of HpTF)
     %         smoothing         (Smoothing bandwidth has to be defined in fractions of octaves, see also ita_smooth)
+    %         mic               (measured microphone transfer funcions - not inverted: length does not matter; will be adapted)
     %
     % itaHpTF_Audio Methods (private):
     %         HP_equalization   If this.mic is not set, it will be unused 
@@ -30,7 +31,9 @@ classdef itaHpTF_Audio < itaHpTF
         m_fUpper     = 18000;
         mMethod      = 'mSTD';
         mNormalized  = true;
+        mGainComp    = true;
         mSmoothing   = 1/6;
+        mSelectMeas    = 1:8; % select the channels which should be used for the HpTF
     end
     
     properties(Dependent = true, Hidden = false)
@@ -38,8 +41,10 @@ classdef itaHpTF_Audio < itaHpTF
         fLower      = 100;
         fUpper      = 18000;
         method      = 'mSTD';
-        normalized  = true;
+        normalized  = true; % normalization of the signal
+        gainComp    = true; % microphone compensation
         smoothing   = 1/6;
+        selectMeas   = 1:8; % select specific measurements
     end
     
     properties (Dependent = true, SetAccess = private)
@@ -122,6 +127,13 @@ classdef itaHpTF_Audio < itaHpTF
         function normalized = get.normalized(this)
             normalized = this.mNormalized; end
         
+        function comp = get.gainComp(this)
+            comp = this.mGainComp; end
+        
+        function sel = get.selectMeas(this)
+            sel = this.mSelectMeas; end
+        
+        
         function smoothing = get.smoothing(this)
             smoothing = this.mSmoothing; end
         %% ................................................................
@@ -151,6 +163,16 @@ classdef itaHpTF_Audio < itaHpTF
             this = HP_equalization(this);
         end
         
+        function this = set.selectMeas(this,ch)
+            this.mSelectMeas = ch;
+            this = HP_equalization(this);
+        end
+        
+        function this = set.gainComp(this,comp)
+            this.mGainComp = comp;
+            this = HP_equalization(this);
+        end
+        
         function this = set.smoothing(this,smoothing)
             this.mSmoothing = smoothing;
             this = HP_equalization(this);
@@ -162,11 +184,12 @@ classdef itaHpTF_Audio < itaHpTF
         % SET PRIVATE
         %..................................................................
         function this = set.init(this,var)
-            this.nameHP      = var.nameHP;
+             this.nameHP      = var.nameHP;
             this.nameMic     = var.nameMic;
             this.nameSubj    = var.nameSubj;
             this.repeat      = var.repeat;
             this.mTF.time    = var.time;
+            this.selectMeas  = 1:var.repeat;
             this = HP_equalization(this);
         end
         
@@ -175,11 +198,8 @@ classdef itaHpTF_Audio < itaHpTF
             %     Audio Engineering Society Convention 130, May 2011
             
             tWin    = this.TF.trackLength; % crop HPTF
-            if this.mic.dimensions == 2 % mic min phase + extension
-                minMic = ita_minimumphase(this.mic);
-                [mic, TF] = ita_extend_dat(minMic,this.TF);
-            else TF = this.TF;
-            end
+            measSel = sort([2*this.selectMeas-1 2*this.selectMeas]);
+            TF = this.TF.ch(measSel);
             
             %init
             thisEQ  = this;
@@ -200,14 +220,19 @@ classdef itaHpTF_Audio < itaHpTF
                     otherwise
                         error('Unknown type');
                 end
-                if this.mic.dimensions == 2
-                    Rec = ita_multiply_spk(Rec,mic);
+                
+                if this.mic.dimensions == 2 % Compensation of mic
+                    minMic  = ita_minimumphase(this.mic);
+                    RecM    = ita_convolve(Rec,minMic.ch(cdx));
+                    RecM.fftDegree = TF.fftDegree;
+                else
+                    RecM = Rec;
                 end
-                %% Short Filter with no correction for low freqs and minimun phase
-                aux = max(abs(Rec.freqData),[],2);
+                %% Short Filter with no correction for low freqs and minimum phase
+                aux = max(abs(RecM.freqData),[],2);
                 
                 % find first maximum and truncate low freq correction at this point
-                idxDF   = Rec.freq2index([this.fLower  this.fLower*1.5 ]);
+                idxDF   = RecM.freq2index([this.fLower  this.fLower*1.5 ]);
                 d_aux   = diff(aux(idxDF(1):idxDF(2)));
                 idx     = find(diff(sign(d_aux)) ~= 0,1,'first'); % Bruno style...
                 aux(1:idxDF(1)+idx+1) = aux(idxDF(1)+idx+2);
@@ -227,10 +252,18 @@ classdef itaHpTF_Audio < itaHpTF
             this_min   = ita_minimumphase(ita_time_shift(HpTF,tWin/2));
             this_win   = ita_time_window(this_min,[tWin*0.99,tWin],'time','crop');
            
-            if this.normalized,                    
-                this_norm = ita_normalize_dat(this_win);
+            if this.gainComp % compensate gains from mics (equalize)
+                idxDF   = this_win.freq2index(this.fLower);
+                chGain  = 20*log10(abs(this_win.freqData(idxDF,:)));
+                this_comp = this_win;
+                this_comp.freqData = bsxfun(@times,this_win.freqData,10.^(-chGain/20));
+            else, this_comp = this_win;
+            end
+            
+            if this.normalized
+                this_norm = ita_normalize_dat(this_comp);
                 thisEQ.timeData = this_norm.timeData;
-            else thisEQ.timeData = this_win.timeData;
+            else, thisEQ.timeData = this_comp.timeData;
             end
             
             if ~isempty(this.savePath)
