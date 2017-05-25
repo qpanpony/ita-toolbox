@@ -23,7 +23,7 @@ for iDevice = 1:nDevices
         tmpLimit = round(niDevices(iDevice).Subsystems(iSub).RateLimit);
         rateLimits(1) = max(rateLimits(1),min(tmpLimit));
         rateLimits(2) = min(rateLimits(2),max(tmpLimit));
-        if contains(lower(niDevices(iDevice).Subsystems(iSub).SubsystemType),'input')
+        if ~isempty(strfind(lower(niDevices(iDevice).Subsystems(iSub).SubsystemType),'input'))
             for iChannel = 1:niDevices(iDevice).Subsystems(iSub).NumberOfChannelsAvailable
                 inputChannelIdx = inputChannelIdx + 1;
                 inputChannels.mapping(inputChannelIdx) = {[iDevice,iChannel]};
@@ -41,7 +41,7 @@ inputChannels.isActive = zeros(inputChannelIdx,1);
 outputChannelIdx = 0;
 for iDevice = 1:nDevices
     for iSub = 1:numel(niDevices(iDevice).Subsystems)
-        if contains(lower(niDevices(iDevice).Subsystems(iSub).SubsystemType),'output')
+        if ~isempty(strfind(lower(niDevices(iDevice).Subsystems(iSub).SubsystemType),'output'))
             for iChannel = 1:niDevices(iDevice).Subsystems(iSub).NumberOfChannelsAvailable
                 outputChannelIdx = outputChannelIdx + 1;
                 outputChannels.mapping(outputChannelIdx) = {[iDevice,iChannel]};
