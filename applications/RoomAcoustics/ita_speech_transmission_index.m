@@ -41,7 +41,8 @@ if ~strcmpi(ir.signalType,'energy')
 end
 
 if ir.trackLength < 1.6
-    ita_verbose_info('IR is shorter than ISO 60268-16 recommends, I hope you know what you are doing!',0);
+    ita_verbose_info('IR is shorter than ISO 60268-16 recommends, I hope you know what you are doing! I will extend the data',0);
+    ir = ita_extend_dat(ir,1.6);
 end
 
 if strcmpi(sArgs.gender,'male')
@@ -54,7 +55,7 @@ end
 
 %% constants
 fk      = ita_ANSI_center_frequencies([125 8000],1);
-fm      = ita_ANSI_center_frequencies([62 1250],3)./100;
+fm      = [0.63 0.8 1 1.25 1.6 2 2.5 3.15 4 5 6.3 8 10 12.5];
 fm(5)   = 1.6; % rounding errors
 I_k_rt  = 10.^([46 27 12 6.5 7.5 8 12].'./10);
 
@@ -86,7 +87,15 @@ I_k     = 10.^(L(:)./10) + 10.^((L(:)-SNR(:))./10);
 h_k     = ita_filter_fractional_octavebands(ir,'bandsperoctave',1,'freqRange',[125 8000]);
 h_k_sq  = h_k.^2;
 % modulation transfer function values
-m_k_fm  = bsxfun(@rdivide,abs(h_k_sq.freq2value(fm)),abs(h_k_sq.freq2value(0)).*(1+10.^(-SNR./10))).';
+m_k_fm = zeros(numel(fk),numel(fm));
+for iM = 1:numel(fm)
+    % to get an FFT bin exactly at fm
+    newLength = floor(h_k.trackLength*fm(iM))/fm(iM);
+    h_k_sq_tmp = ita_time_crop(h_k_sq,[0 newLength],'time');
+    m_k_fm(:,iM) = (abs(h_k_sq_tmp.freq2value(fm(iM)))./(abs(h_k_sq_tmp.freq2value(0)).*(1+10.^(-SNR./10)))).';
+end
+% old version:
+% m_k_fm  = bsxfun(@rdivide,abs(h_k_sq.freq2value(fm)),abs(h_k_sq.freq2value(0)).*(1+10.^(-SNR./10))).';
 
 % correction terms for masking and reception threshold
 I_k_am = zeros(numel(fk),1);
