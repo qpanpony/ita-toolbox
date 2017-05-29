@@ -159,6 +159,7 @@ classdef itaMSTFni < itaMSTF
         function this = calibrate_input(this,elementIds)
             % have to do this here because of different run function
             % do only specific elements (e.g. only AD)
+            this.checkready
             if ~exist('elementIds','var')
                 elementIds = 1:3;
             else
@@ -196,6 +197,7 @@ classdef itaMSTFni < itaMSTF
             % have to do this here because of different run function
             % Calibrates all output chains, using only the first
             % (hopefully calibrated) input chain. Input chain calibration
+            this.checkready
             if ~exist('input_chain_number','var')
                 input_chain_number = find(this.inputMeasurementChain.hw_ch == this.inputChannels(1));
             end
