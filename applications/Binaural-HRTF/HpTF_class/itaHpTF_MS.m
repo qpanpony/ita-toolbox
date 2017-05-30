@@ -88,6 +88,7 @@ classdef itaHpTF_MS < itaHpTF
                 % Measure Right side
                 MS.inputChannels = chIn(2);
                 MS.outputChannels = chOut(2);
+                commandwindow
                 resultR = MS.run;
                 resultR.channelNames{1} = strR;
                 
@@ -108,7 +109,7 @@ classdef itaHpTF_MS < itaHpTF
                     disp(['Measurement ',num2str(idxM),'/',num2str(this.repeat),' finished.'])
                     disp('Put headphones off and on again. Press any key to continue.')
                     pause
-                    pause(2)
+                    pause(1)
                 else
                     commandwindow
                     fprintf('\nMEASUREMENT DONE!\n')
@@ -118,6 +119,7 @@ classdef itaHpTF_MS < itaHpTF
             MS.inputChannels = chIn;
             
             HpTF = itaHpTF_Audio(this);
+            HpTF.selectMeas = 1:this.repeat;
             assignin('base', ['HpTF_' this.nameSubj], HpTF)
         end
         

@@ -114,7 +114,7 @@ classdef itaMSTF < itaMSPlaybackRecord
                     fieldName = fieldnames(rmfield(this.saveobj,'dateSaved'));
                 end
                 
-                for ind = 1:numel(fieldName);
+                for ind = 1:numel(fieldName)
                     try
                         this.(fieldName{ind}) = varargin{1}.(fieldName{ind});
                     catch errmsg
@@ -371,11 +371,10 @@ classdef itaMSTF < itaMSPlaybackRecord
             
             %% sweep rate from analytic calculation, only using sweep parameters / PDI
             nSamples                = ita_nSamples( this.fftDegree );
-            finalFreqRange          = this.finalFreqRange;
             % MMT: use nSamples-1 here to be conform with sweep calculation
             % based on timeVector and chirp function
             finalExcitationLength   = (nSamples-1)/this.samplingRate - this.stopMargin;
-            sweepRate(1)            = log2(finalFreqRange(2)/finalFreqRange(1))/finalExcitationLength;
+            sweepRate(1)            = log2(this.finalFreqRange(2)/this.finalFreqRange(1))/finalExcitationLength;
             
             %% sweep rate of analysis of excitation signal
             sweepRate(2)    = ita_sweep_rate(this.raw_excitation,[2000 this.samplingRate/3]);
@@ -563,7 +562,7 @@ classdef itaMSTF < itaMSPlaybackRecord
                 if this.minimumphasedeconvolution
                     % get minimumphase part of deconvolution, neglect
                     % all-pass component
-                    [this.mCompensation, allpass_component] = ita_invert_spk_regularization(ita_extend_dat(this.raw_excitation,this.final_excitation.nSamples*factor),[min(this.freqRange(:)) max(this.freqRange(:))],'filter',this.filter);
+                    [this.mCompensation, allpass_component] = ita_invert_spk_regularization(ita_extend_dat(this.raw_excitation,this.final_excitation.nSamples*factor),[min(this.freqRange(:)) max(this.freqRange(:))],'filter',this.filter); %#ok<ASGLU>
                 else
                     this.mCompensation = ita_invert_spk_regularization(ita_extend_dat(this.raw_excitation,this.final_excitation.nSamples*factor),[min(this.freqRange(:)) max(this.freqRange(:))],'filter',this.filter);
                 end
@@ -619,7 +618,7 @@ classdef itaMSTF < itaMSPlaybackRecord
                 token = this.(list{idx});
                 if isempty(token) || isa(token,'itaSuper')
                     continue;
-                end;
+                end
                 
                 if ischar(token)
                     token = ['''' token ''''];
@@ -630,7 +629,7 @@ classdef itaMSTF < itaMSPlaybackRecord
                     end
                 else
                     error([upper(mfilename) '.commandline: What kind of field value is this?']);
-                end;
+                end
                 str = [str '''' list{idx} '''' ',' token ];
                 
                 if idx < numel(list)
@@ -643,7 +642,7 @@ classdef itaMSTF < itaMSPlaybackRecord
     
     %% Hidden methods
     methods(Hidden = true)
-        function display(this)
+        function display(this) %#ok<DISPLAY>
             this.excitation; %pre-init
             
             % Begin Display Start Line

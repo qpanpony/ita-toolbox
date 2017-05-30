@@ -118,8 +118,8 @@ setappdata(fgh,'AxisHandles',[axh1 axh2]);
 setappdata(fgh,'ActiveAxis',axh1);
 setappdata(fgh,'ita_domain', 'frequency and phase');
 %% Make first axis current
-axes(axh1);
-
+%axes(axh1); hbr - produce error on 2016b
+set(fgh,'CurrentAxes',axh1)
 %% Return the figure handle
 if nargout
     varargout{1} = fgh;

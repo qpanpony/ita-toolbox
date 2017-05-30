@@ -1,6 +1,6 @@
 % Prepare an experimental renderer using PrototypeGEnericPath
 itaVAq
-va.addSearchPath( pwd ); 
+va.addSearchPath( pwd );
 va.reset();
 
 % Find first PGP renderer

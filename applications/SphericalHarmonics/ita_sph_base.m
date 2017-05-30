@@ -1,14 +1,17 @@
 function Y = ita_sph_base(s, nmax, type, complex)
 %ITA_SPH_BASE - creates spherical harmonics (SH) base functions
 % function Y = ita_sph_base(s, nmax, type)
-%
+% Y is a matrix with dimensions [nr_points x nr_coefs]
 % calculates matrix with spherical harmonic base functions
 % for the grid given in theta and phi
 % give type of normalization
 %
+%
 % the definition was taken from:
 % E. G. Williams, "Fourier Acoustics",
-% Academic Press, San Diego, 1999. p.???
+% Academic Press, San Diego, 1999. p. 190
+%
+% This definition includes the Condon-Shotley phase term (-1)^m
 %
 % Martin Pollow (mpo@akustik.rwth-aachen.de)
 % Institute of Technical Acoustics, RWTH Aachen, Germany
@@ -54,15 +57,7 @@ end
 nr_coefs = (nmax+1)^2;
 nm = 1:nr_coefs;
 
-% avoid "~" for backward compatibility
-% [~,m] = ita_sph_linear2degreeorder(nm);
-[n,m] = ita_sph_linear2degreeorder(nm); %#ok<ASGLU>
-
-
-%% Check if either real or complex bases wanted
-
-%% Complex SH base
-% [nr_points nr_coefs]
+[~,m] = ita_sph_linear2degreeorder(nm);
 exp_term = exp(1i*phi*m);
 
 % calculate a matrix containing the associated legendre functions
@@ -89,13 +84,17 @@ for ind = 0:nmax
                 bsxfun(@times,(-1).^(0:ind)*sqrt(2),legendre(ind,cos(theta.'),'norm').');
             
         case {'schmidt','sch','semi-normalized'}
-            Pnm(:,index_m_pos0) = legendre(ind,cos(theta.'),'sch').';
+            Pnm(:,index_m_pos0) = ...
+                bsxfun(@times,(-1).^(0:ind)*sqrt(2),legendre(ind,cos(theta.'),'sch').');
             
         otherwise
             error('Wow! I do not know this normalization!')
     end
     
     % copy the Pnm data to the left side of the Toblerone spectrum
+    % the phase term over theta is not included up to this point and Pnm is
+    % already normalized. We do not need to use the complex conjugate of
+    % Pnm or renormalize.
     if ind > 0
         Pnm(:,index_m_neg) = bsxfun(@times,(-1).^(1:ind),Pnm(:,index_m_pos));
     end

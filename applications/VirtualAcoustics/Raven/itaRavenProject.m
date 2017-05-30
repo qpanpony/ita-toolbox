@@ -456,7 +456,7 @@ classdef itaRavenProject < handle
                 %                 system([obj.ravenExe ' "' obj.ravenProjectFile '" >> ' obj.ravenLogFile]);
                 prevPath = pwd;
                 cd(fileparts(obj.ravenExe));
-                dos([obj.ravenExe ' "' obj.ravenProjectFile '"'], '-echo');
+                dos(['"' obj.ravenExe '"' ' "' obj.ravenProjectFile '"'],'-echo');
                 disp('Done.');
                 cd(prevPath);
                 
@@ -505,8 +505,12 @@ classdef itaRavenProject < handle
                     delete(obj.ravenLogFile);
                 end
                 %                 system([obj.ravenExe ' "' obj.ravenProjectFile '" >> ' obj.ravenLogFile]);
-                dos([obj.ravenExe ' "' obj.ravenProjectFile '"'], '-echo');
+                prevPath = pwd;
+                cd(fileparts(obj.ravenExe));
+                dos(['"' obj.ravenExe '"' ' "' obj.ravenProjectFile '"'],'-echo');
                 disp('Done.');
+                cd(prevPath);
+                
                 
                 % restore the initial project name
                 obj.setProjectName(savedProjectName);
@@ -749,12 +753,12 @@ classdef itaRavenProject < handle
                 currentSurfaceArea = obj.getSurfaceAreaOfMaterial(allMaterials{iMat});
                 allMaterials{iMat} = strrep(allMaterials{iMat},'_',' ');
                 allMaterials{iMat} = [ allMaterials{iMat} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m² ;'];
-                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18)),'%5.2f') ' m² )'];
+                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18,iMat)),'%5.2f') ' m² )'];
             end
 
             currentMaterial.channelNames = allMaterials;
             currentMaterial.allowDBPlot = false;
-            currentMaterial.pf;
+            ita_plot_freq(currentMaterial,'LineWidth',2);
             
             % change format of plot
             title('');
@@ -764,7 +768,7 @@ classdef itaRavenProject < handle
             set(gca,'YLim',[0 1]);
             leg = findobj(gcf,'Tag','legend');
             set(leg,'Location','NorthWest');
-            set(leg,'FontSize',9);
+            set(leg,'FontSize',12);
             
             % remove [1] in legend entry
             for iMat=1:numberMaterials

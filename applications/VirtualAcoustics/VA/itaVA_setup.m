@@ -66,8 +66,12 @@ if ~isempty( current_va_mex_dir )
     set( handles.va_search_dir, 'String', fullfile( va_path ) );
     
     set( handles.edit_vamatlab_full_path, 'String', current_va_mex_dir )
-    v = VAMatlab( 'getVersion' );
-    set( handles.edit_vamatlab_version, 'String', v )
+    try
+        v = VAMatlab( 'getVersion' );
+        set( handles.edit_vamatlab_version, 'String', v )
+    catch
+        set( handles.edit_vamatlab_version, 'String', 'Failed to execute VAMatlab, probably a depending library is missing.' )
+    end
 end
 
 % VAServer
@@ -87,9 +91,9 @@ if ~isempty( current_va_server_dir )
 end
 
 % NatNetML
-current_natent_dir = which( 'NatNetML.dll' );
-if ~isempty( current_natent_dir )
-    ainfo = NET.addAssembly( current_natent_dir );
+current_natnet_dir = which( 'NatNetML.dll' );
+if ~isempty( current_natnet_dir )
+    ainfo = NET.addAssembly( current_natnet_dir );
     natnetversion_raw = NatNetML.NatNetClientML( 0 ).NatNetVersion();
     vs = sprintf( 'NatNetML (OptiTrack) %d.%d', natnetversion_raw(1), natnetversion_raw(2) );
     set( handles.edit_natnet_version, 'String', vs )

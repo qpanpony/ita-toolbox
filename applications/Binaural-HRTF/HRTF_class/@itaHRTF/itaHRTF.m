@@ -788,15 +788,22 @@ classdef  itaHRTF < itaAudio
             end
             
             function display(this)
-                this.displayLineStart
-                this.disp
+                if numel(this) == 0
+                    disp('****** nothing to do, empty object ******')
+                elseif numel(this) > 1
+                    disp(['size(' inputname(1) ') = [' num2str(size(this))  ']; (for full display, pick a single instance)']);
+                else
+                    this.displayLineStart
+                    this.disp
+                    
+                    dir = num2str(this.nDirections,5);
+                    stringD = [dir ' Directions (Type = ' this.mTF_type ')'];
+                    
+                    middleLine = this.LINE_MIDDLE;
+                    middleLine(3:(2+length(stringD))) = stringD;
+                    fprintf([middleLine '\n']);
+                end
                 
-                dir = num2str(this.nDirections,5);
-                stringD = [dir ' Directions (Type = ' this.mTF_type ')'];
-                
-                middleLine = this.LINE_MIDDLE;
-                middleLine(3:(2+length(stringD))) = stringD;
-                fprintf([middleLine '\n']);
             end
             
             function disp(this)

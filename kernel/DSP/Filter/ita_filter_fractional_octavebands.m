@@ -41,6 +41,8 @@ input = sArgs.data;
 
 %% Call mpb filter
 input = ita_mpb_filter(input,'oct',sArgs.bandsperoctave,'octavefreqrange',sArgs.freqRange,'zerophase',sArgs.zerophase,'order',sArgs.order);
+% units are not copied in mpf_filter routine, do it here (?)
+input.channelUnits(:) = input.channelUnits(1);
 
 if nargin == 0
    % setin base

@@ -125,6 +125,7 @@ else
     ita_disp()
     disp('<a href="matlab:edit ita_tutorial"> Click here to start with a Tutorial script ''ita_tutorial()''</a>')
     ita_disp()
+    disp('<a href="matlab:ita_generate_documentation"> Click here to build the HTML documentation ''ita_generate_documentation()''</a>')
 end
 ita_disp()
 
