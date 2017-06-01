@@ -274,17 +274,26 @@ classdef itaRavenProject < handle
         
         %------------------------------------------------------------------
         function setRavenExe(obj, newRavenExe)
-            obj.ravenExe = newRavenExe;
-
-            if (exist(obj.ravenIniFile,'file'))
-                obj.raven_ini.SetValues('Global', {'PathRavenExe'}, {obj.ravenExe});
-                obj.raven_ini.WriteFile(obj.ravenIniFile);
+            
+            
+            if (exist(newRavenExe,'file'))
+                
+                obj.ravenExe = newRavenExe;
+                
+                if (exist(obj.ravenIniFile,'file'))
+                    obj.raven_ini.SetValues('Global', {'PathRavenExe'}, {obj.ravenExe});
+                    obj.raven_ini.WriteFile(obj.ravenIniFile);
+                else
+                    obj.raven_ini = IniConfig();
+                    obj.raven_ini.AddSections({'Global'});
+                    obj.raven_ini.AddKeys('Global', {'PathRavenExe'}, {obj.ravenExe});
+                end
+                
             else
-                obj.raven_ini = IniConfig();
-                obj.raven_ini.AddSections({'Global'});
-                obj.raven_ini.AddKeys('Global', {'PathRavenExe'}, {obj.ravenExe});
+                error('[itaRaven]: Error: Path to new Raven binary not found!');
+                
             end
-                                            
+            
         end
         
         %------------------------------------------------------------------
@@ -444,29 +453,30 @@ classdef itaRavenProject < handle
                 
                 % give the project name a date and time string to help to identify the results
                 obj.setProjectName(obj.projectTag);
-                
-                % set filter length to the length of the reverberation
-                %                 obj.setFilterLengthToReverbTime();
-                
+                               
                 % run the simulation
                 disp(['Running simulation... (' obj.ravenExe ')']);
                 if exist(obj.ravenLogFile, 'file')
                     delete(obj.ravenLogFile);
                 end
                 %                 system([obj.ravenExe ' "' obj.ravenProjectFile '" >> ' obj.ravenLogFile]);
+                
+                if (~exist(obj.ravenExe,'file'))
+                    error('[itaRaven]: Error: Cannot find Raven binary file!');
+                end
+                
                 prevPath = pwd;
                 cd(fileparts(obj.ravenExe));
                 dos(['"' obj.ravenExe '"' ' "' obj.ravenProjectFile '"'],'-echo');
-                disp('Done.');
                 cd(prevPath);
                 
                 % restore the initial project name
                 obj.setProjectName(savedProjectName);
                 
                 % gather results
-                disp('Getting results...');
+                disp('[R] Simulation seems to be finished. Getting results...');
                 obj.gatherResults();
-                disp('Done.');
+                disp('[R] Done.');
                 
                 obj.simulationDone = true;
                 
@@ -5422,7 +5432,7 @@ classdef itaRavenProject < handle
                 windowEnd = round(timestep + currentWindowLength/2);
                 windowLength = windowEnd - windowBegin + 1;
                 histo(timestep, :) = sum(histo(windowBegin:windowEnd, :), 1) / windowLength;
-                
+                 
                 currentWindowLength = currentWindowLength * stepFactor;
             end
             for timestep = endTimeStep : numTimeSteps
