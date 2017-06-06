@@ -52,8 +52,12 @@ while true
     coordsCart = eq_point_set(2,sArgs.nPoints).';
     sampling = itaSamplingSph(coordsCart,'cart');
     Y = ita_sph_base(sampling,Nmax);
-    condNum = cond(Y);
-    if condNum < sArgs.condSHT
+    if sArgs.condSHT ~= inf
+        condNum = cond(Y);
+        if condNum < sArgs.condSHT
+            break;
+        end
+    else
         break;
     end
     sArgs.nPoints = sArgs.nPoints+1;
