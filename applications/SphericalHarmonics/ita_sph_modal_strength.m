@@ -98,7 +98,7 @@ for idxRad = 1:numel(uniqueRad)
             end
         case {'loudspeaker','ls'}
             if strcmp(type,'rigid') && isempty(sArgs.scatterer)
-                bn = diag(-1i.^n*Z_air)*bn.*ita_sph_besselh(n,sArgs.hankelKind,sArgs.dist*kVec);
+                bn = diag((-1i) * (-1)^sArgs.hankelKind * Z_air)*bn.*ita_sph_besselh(n,sArgs.hankelKind,sArgs.dist*kVec);
             else
                 ita_verbose_info('This design type makes no sense for a loudspeaker array.',0);
                 varargout{1} = [];
