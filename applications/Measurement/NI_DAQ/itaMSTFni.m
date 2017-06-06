@@ -236,7 +236,9 @@ classdef itaMSTFni < itaMSTF
             end
             this.outputMeasurementChain = mco;          % Copy over the list of all calibrated output measurement chains into the real Measurement Setup.
             % release hardware for the standard object
-            MS.niSession.release;
+            if ~isempty(MS.niSession) % only if something was measured
+                MS.niSession.release;
+            end
         end
         
         function [niSession,inputChannels,outputChannels] = init_NI_card(this)
