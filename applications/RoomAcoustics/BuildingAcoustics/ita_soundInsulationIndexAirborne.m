@@ -65,19 +65,13 @@ delta = max(0,refCurve + soundInsulationIndex - soundInsulation);
 counter = 0; % stopping criterion
 % shift reference curve until limits are reached
 
-while sum(delta) < refSurf && counter < 1e3
-    if max(delta) >= deficiencyLimit
-        break;
-    elseif sum(delta) < refSurf-1
-        soundInsulationIndex = soundInsulationIndex + dbStep;
-    else
-        soundInsulationIndex = soundInsulationIndex - dbStep;
-    end
-    
+while sum(delta) < refSurf && all(delta) < deficiencyLimit && counter < 1e3
+    soundInsulationIndex = soundInsulationIndex + dbStep;
     delta = max(0,refCurve + soundInsulationIndex - soundInsulation);
     counter = counter+1;
 end
-
+soundInsulationIndex = soundInsulationIndex - dbStep;
+delta = max(0,refCurve + soundInsulationIndex - soundInsulation);
 deficiencies = itaResult(delta,freq,'freq')*itaValue(1,'dB');
 deficiencies.allowDBPlot = false;
 
