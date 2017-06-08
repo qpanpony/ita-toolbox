@@ -65,7 +65,7 @@ delta = max(0,refCurve + soundInsulationIndex - soundInsulation);
 counter = 0; % stopping criterion
 % shift reference curve until limits are reached
 
-while sum(delta) < refSurf && all(delta) < deficiencyLimit && counter < 1e3
+while sum(delta) < refSurf && all(delta <= deficiencyLimit) && counter < 1e3
     soundInsulationIndex = soundInsulationIndex + dbStep;
     delta = max(0,refCurve + soundInsulationIndex - soundInsulation);
     counter = counter+1;
@@ -81,7 +81,8 @@ if sArgs.createPlot
     plotResult = itaResult([10.^((refCurve+soundInsulationIndex)./20), [ones(sum(freq<=500),1)*10.^(soundInsulationIndex./20); nan(sum(freq>500),1)]],freq,'freq');
     ita_plot_freq(plotResult,'figure_handle',fgh,'axes_handle',gca,'hold');
     bar(gca,deficiencies.freqVector,deficiencies.freq,'hist');
-    legend({'Sound transmission loss','Shifted reference curve',[outputStr ' = ' num2str(soundInsulationIndex) 'dB'],'Deficiencies'});
+    [maxDef,maxIdx] = max(deficiencies.freq);
+    legend({'Sound transmission loss','Shifted reference curve',[outputStr ' = ' num2str(soundInsulationIndex) 'dB'],['Deficiencies (sum: ' num2str(sum(deficiencies.freq)) 'dB, max: ' num2str(maxDef) 'dB at ' num2str(deficiencies.freqVector(maxIdx)) 'Hz)']});
     ylim([0 max(max(soundInsulation),max(refCurve)+soundInsulationIndex)+15]);
 end
 
