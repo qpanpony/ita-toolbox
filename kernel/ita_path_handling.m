@@ -18,7 +18,7 @@ function varargout = ita_path_handling(varargin)
 if nargin > 0
     error('There should not be any input arguments to ita_path_handling');
 end
-ignoreList  = {'.git','.svn','private','tmp','prop-base','props','text-base','template','doc'};
+ignoreList  = {'.git','.svn','private','tmp','prop-base','props','text-base','template','doc','helpers'};
 
 %% toolbox prefix string
 fullpath = ita_toolbox_path();
