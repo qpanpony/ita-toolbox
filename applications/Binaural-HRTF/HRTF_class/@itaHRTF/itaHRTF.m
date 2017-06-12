@@ -1110,7 +1110,7 @@ classdef  itaHRTF < itaAudio
                 W               = diag(vWeights);                                      % diagonal matrix containing weights
                 D               = diag(regweights_rep);                                % decomposition order-dependent Tikhonov regularization
                 
-                Y               = ita_sph_base(this.dirCoord,Nmeas,'orthonormal',false);   % calculate real-valued SHs using the measurement grid (high SH-order)
+                Y               = ita_sph_base(this.dirCoord,Nmeas,'real');   % calculate real-valued SHs using the measurement grid (high SH-order)
                 
                 %% Calculate spatially smoothed HRTF data set
                 hrtf_smoo_wo_ITD = zeros(this.nBins,2*this.dirCoord.nPoints); % init.: columns: LRLRLR...
@@ -1302,11 +1302,11 @@ classdef  itaHRTF < itaAudio
                 earSidePlot = sArgs.earSide;
                 if numel(phiC_deg)>1,
                     xData = phiC_deg;
-                    strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) '°'];
+                    strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) 'ï¿½'];
                     strXlabel = '\phi in Degree';
                 else
                     xData = thetaC_deg;
-                    strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) '°'];
+                    strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) 'ï¿½'];
                     strXlabel = '\theta in Degree';
                 end
                 
@@ -1394,11 +1394,11 @@ classdef  itaHRTF < itaAudio
                 earSidePlot = sArgs.earSide;
                 if numel(phiC_deg)>1,
                     xData = phiC_deg;
-                    strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) '°'];
+                    strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) 'ï¿½'];
                     strXlabel = '\phi in Degree';
                 else
                     xData = thetaC_deg;
-                    strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) '°'];
+                    strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) 'ï¿½'];
                     strXlabel = '\theta in Degree';
                 end
                 

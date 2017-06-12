@@ -57,7 +57,7 @@ for k=1:numel(weights)
         Bformat(:,k)=weights(k).*Bformat(:,k); %Apply weighting factors
 end
 % SH and inversion
-Y = ita_sph_base(LS,TheOrder,'williams',false); % generate basefunctions
+Y = ita_sph_base(LS, TheOrder, 'real'); % generate basefunctions
 Yinv=pinv(Y); % calculate Pseudoinverse
 
 

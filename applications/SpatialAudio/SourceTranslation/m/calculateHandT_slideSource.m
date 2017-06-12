@@ -47,7 +47,7 @@ coordinate.cart = loc;
 grid = params.display.grid + coordinate;
 
 % Spherical Harmonics: num_angels x (Nc+1)^2.
-Ynm = ita_sph_base(grid, N, 'Williams', true);
+Ynm = ita_sph_base(grid, N);
 
 % prepare hankel functions for translated source
 for k_ind = 1 : K
