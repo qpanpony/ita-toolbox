@@ -552,6 +552,24 @@ classdef itaVA < handle
 		[id] = VAMatlab('createSoundSourceExplicitRenderer', this.handle, name,renderer);
 	end
 
+	function [signalSourceID] = createTextToSpeechSignalSource(this, name)
+		% Creates a text to speech signal
+		%
+		% Parameters:
+		%
+		% 	name [string] Displayed name (optional, default: '')
+		%
+		% Return values:
+		%
+		% 	signalSourceID [string] Signal source ID
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		if ~exist('name','var'), name = ''; end
+		[signalSourceID] = VAMatlab('createTextToSpeechSignalSource', this.handle, name);
+	end
+
 	function [] = deleteListener(this, listenerID)
 		% Deletes a listener from the scene
 		%
@@ -1278,6 +1296,24 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		[info] = VAMatlab('getSignalSourceInfos', this.handle);
+	end
+
+	function [params] = getSignalSourceParameters(this, ID,args)
+		% Returns the current signal source parameters
+		%
+		% Parameters:
+		%
+		% 	ID [string] Signal source identifier
+		% 	args [mstruct] Requested parameters
+		%
+		% Return values:
+		%
+		% 	params [mstruct] Parameters
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[params] = VAMatlab('getSignalSourceParameters', this.handle, ID,args);
 	end
 
 	function [info] = getSoundInfo(this, soundID)
@@ -2348,6 +2384,24 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		VAMatlab('setReproductionModuleMuted', this.handle, sModuleID,bMuted);
+	end
+
+	function [] = setSignalSourceParameters(this, ID,params)
+		% Sets signal source parameters
+		%
+		% Parameters:
+		%
+		% 	ID [string] Signal source identifier
+		% 	params [mstruct] Parameters
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('setSignalSourceParameters', this.handle, ID,params);
 	end
 
 	function [] = setSoundSourceAuralizationMode(this, soundSourceID,auralizationMode)
