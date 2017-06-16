@@ -66,9 +66,10 @@ end
 
 %% Normalize
 if sArgs.allchannels
+    gainApplied = nan(1, result.nChannels);
     for ch_idx = 1:result.nChannels
-        gainApplied = max(abs(result.freqData(:,ch_idx)));
-        result.freqData(:,ch_idx) = result.freqData(:,ch_idx) ./ gainApplied;
+        gainApplied(1, ch_idx) = max(abs(result.freqData(:,ch_idx)));
+        result.freqData(:,ch_idx) = result.freqData(:,ch_idx) ./ gainApplied(1, ch_idx);
     end
 else
     gainApplied = max(max(abs(result.freqData)));
