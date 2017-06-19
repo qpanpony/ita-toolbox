@@ -128,11 +128,11 @@ surf(coord, data);
 % chosen.
 
 unitSphere = ones(coord.nPoints,1);
-surf(coord, unitSphere, data);
+surf(coord, data,'radius',unitSphere);
 % note that now the color resembles the magnitude of the data
 
 % by the way, the short form does the same:
-surf(coord, 1, data)
+surf(coord, data,'radius',1)
 
 
 %% Plotting phase details of the directivity
@@ -141,7 +141,7 @@ surf(coord, 1, data)
 % convert the matlab angle (-pi..pi) to positive phase (0..2pi)
 phase = angle(data) + pi;
 % phase on unit sphere
-surf(coord, 1, phase);
+surf(coord, phase,'radius',1);
 caxis([0 2*pi]);
 colormap hsv
 % here you have to adjust the color axis manually, as the surf plot
@@ -160,7 +160,7 @@ surf(coord_half, data_half)
 % plop factor gives the relative size of the triangles that we destroy
 % together with the larger ones.
 
-surf(coord_half,  1, data_half, 'plop', 4)
+surf(coord_half,  data_half, 'radius',1,'plop', 4)
 % The higher the plop factor, the more patches are preserved.
 
 %% Sample plot with lightning and additional parameters
@@ -178,7 +178,7 @@ camlight
 % For better quality, the absolute maximum should be determined and the
 % same axes length be chosen.
 
-return; %this is only for the publish() function
+% return; %this is only for the publish() function
 % take a lower spatial resolution of 22.5°/22.5° (theta/phi)
 coordSmall = ita_generateSampling_equiangular(22.5,22.5);
 % create an audio object
@@ -191,6 +191,6 @@ ao.freq = bsxfun(@times, 1e4./ao.freqVector, cardioid.');
 ao.freq = ao.freq + rand(size(ao.freq));
 % and plot the directivities of this audio object for some frequencies
 for freqs = 1000:1000:16000
-    surf(coordSmall, ao, freqs)
+    surf(coordSmall, ao.freq2value(freqs))
     pause(0.3);
 end
