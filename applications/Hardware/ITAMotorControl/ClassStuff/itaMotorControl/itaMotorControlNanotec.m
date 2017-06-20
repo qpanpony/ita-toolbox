@@ -142,7 +142,7 @@ classdef itaMotorControlNanotec < itaMotorControl
                 % parse the notfound options for wait
 
                 [controlOptions, notFound] = ita_parse_arguments(controlOptions,notFound);
-                
+                this.wait = controlOptions.wait;
                 for index = 1:length(this.motorList)
                     motorposition = sArgs.(this.motorList{index}.getMotorName());
                     this.started(index) = this.motorList{index}.prepareMove(motorposition,notFound{:});
@@ -220,6 +220,15 @@ classdef itaMotorControlNanotec < itaMotorControl
             this.moveTo(motorName,360+sArgs.preAngle+15,'speed',sArgs.speed,'absolut',false,'start',0,'limit',0);
             this.preparedList = motorName;
             ita_verbose_info('Finished preparing',2)
+        end
+        
+        function startMove(this)
+            for index = 1:length(this.motorList)
+                if this.started(index)
+                    this.motorList{index}.startMoveToPosition();
+                end
+            end
+            this.wait4everything;
         end
         
         function startContinuousMoveNow(this)

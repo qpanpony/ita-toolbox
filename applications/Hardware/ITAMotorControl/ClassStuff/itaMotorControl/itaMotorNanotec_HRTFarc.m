@@ -14,18 +14,25 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
     end
     
     properties(Constant, Hidden = true)
+        
         sArgs_default_motor = struct( ...
-            'wait',         true,       ...
-            'speed',        2,          ...
-            'VST',          'adaptiv',  ...
-            'limit',        true,      ...
-            'continuous',   false,      ...
-            'absolut',      true,      ...
-            'closed_loop',  false,       ...
-            'acceleration_ramp', 1,  ...
-            'gear_ratio',   5,        ...
-            'current',      100,        ...
-            'ramp_mode',    2           );    
+            'wait',             true,       ...
+            'speed',            2,          ...
+            'VST',              'adaptiv',  ...
+            'limit',            true,      ...
+            'continuous',       false,      ...
+            'absolut',          true,      ...
+            'closed_loop',      false,       ...
+            'acceleration_ramp',1,  ...
+            'gear_ratio',       5,        ...
+            'current',          100,        ...
+            'ramp_mode',        2,           ...
+            'P',                400, ...
+            'I',                2.0, ...
+            'D',                700, ...
+            'P_nenner',         3, ...
+            'I_nenner',         5,...
+            'D_nenner',         3);    
     end
     
     methods
@@ -91,7 +98,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             % ausschwingzeit
             motorControl.add_to_commandlist(sprintf('#%dO=1\r' , this.motorID));
             % umkehrspiel
-            motorControl.add_to_commandlist(sprintf('#%dz=0\r'          , this.motorID));
+            motorControl.add_to_commandlist(sprintf('#%dz=5\r'          , this.motorID));
             
             % automatisches senden des status deaktivieren
             motorControl.add_to_commandlist(sprintf('#%dJ=0\r'          , this.motorID));
@@ -125,7 +132,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             motorControl.add_to_commandlist(sprintf('#%dd=1\r'          , this.motorID));
             % Calculate and set lower speed:
 %             stepspersecond      =   round(this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
-            motorControl.add_to_commandlist(sprintf('#%du=%d\r'       , this.motorID, 3));
+            motorControl.add_to_commandlist(sprintf('#%du=%d\r'       , this.motorID, 1));
             % Calculate and set upper speed:
             stepspersecond      =   round(this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
             motorControl.add_to_commandlist(sprintf('#%do=%d\r'       , this.motorID, stepspersecond));
@@ -149,7 +156,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                sArgs = ita_parse_arguments(sArgs,varargin);
            end
            if sArgs.continuous
-                ret = this.prepare_move(position, 'speed', sArgs.speed,'continuous', true); 
+                ret = this.prepare_move(position, sArgs); 
                 started = true;
            else
                    % if only the phi angle is given
@@ -300,19 +307,25 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                 % Activate CL during movement:
                 motorControl.add_to_commandlist(sprintf('#%d:CL_enable=2\r' , this.motorID));
                 % Nice values for the speed closed loop control:
-                pos     =   [0.5 1 2 3 4 8 12 16 25 32 40 50];
-                vecP    =   [0.5 1.5 2.5 3.5 4.5 4.5 5.5 2.5 2.0 1.3 1.3 1.3];
-                vecI    =   [0.05 0.1 0.2 0.3 0.4 0.8 1.2 1.6 2.0 2.5 2.5 2.5];
-                vecD    =   [9 6 4 3 2 1 1 3 6 10 10 10];
-                pP      =   polyfit(pos,vecP,5);
-                pI      =   polyfit(pos,vecI,5);
-                pD      =   polyfit(pos,vecD,5);
-                P       =   polyval(pP,this.sArgs_motor.speed);
-                I       =   polyval(pI,this.sArgs_motor.speed);
-                D       =   polyval(pD,this.sArgs_motor.speed);
-                P_nenner    =   5;
-                I_nenner    =   5;
-                D_nenner    =   5;
+%                 pos     =   [0.5 1 2 3 4 8 12 16 25 32 40 50];
+%                 vecP    =   [0.5 1.5 2.5 3.5 4.5 4.5 5.5 2.5 2.0 1.3 1.3 1.3];
+%                 vecI    =   [0.05 0.1 0.2 0.3 0.4 0.8 1.2 1.6 2.0 2.5 2.5 2.5];
+%                 vecD    =   [9 6 4 3 2 1 1 3 6 10 10 10];
+%                 pP      =   polyfit(pos,vecP,5);
+%                 pI      =   polyfit(pos,vecI,5);
+%                 pD      =   polyfit(pos,vecD,5);
+%                 P       =   polyval(pP,this.sArgs_motor.speed);
+%                 I       =   polyval(pI,this.sArgs_motor.speed);
+%                 D       =   polyval(pD,this.sArgs_motor.speed);
+%                 P_nenner    =   5;
+%                 I_nenner    =   5;
+%                 D_nenner    =   5;
+                P           =   this.sArgs_motor.P;% (400 = default)
+                I           =   this.sArgs_motor.I;% (2 = default)
+                D           =   this.sArgs_motor.D;% (700 = default)
+                P_nenner    =   this.sArgs_motor.P_nenner;
+                I_nenner    =   this.sArgs_motor.I_nenner;
+                D_nenner    =   this.sArgs_motor.D_nenner;
                 P_zaehler   =   round(P*2^P_nenner);
                 I_zaehler   =   round(I*2^I_nenner);
                 D_zaehler   =   round(D*2^D_nenner);
@@ -322,13 +335,14 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                 motorControl.add_to_commandlist(sprintf('#%d:CL_KI_v_N=%d\r'    , this.motorID, I_nenner));
                 motorControl.add_to_commandlist(sprintf('#%d:CL_KD_v_Z=%d\r'    , this.motorID, D_zaehler));
                 motorControl.add_to_commandlist(sprintf('#%d:CL_KD_v_N=%d\r'    , this.motorID, D_nenner));
-                % Nice values for the positioning closed loop control:
-                P       =   200;% (400 = default)
-                I       =   1.0;% (2 = default)
-                D       =   300;% (700 = default)
-                P_nenner    =   3;
-                I_nenner    =   5;
-                D_nenner    =   3;
+%                 % Nice values for the positioning closed loop control:
+
+                P           =   this.sArgs_motor.P;% (400 = default)
+                I           =   this.sArgs_motor.I;% (2 = default)
+                D           =   this.sArgs_motor.D;% (700 = default)
+                P_nenner    =   this.sArgs_motor.P_nenner;
+                I_nenner    =   this.sArgs_motor.I_nenner;
+                D_nenner    =   this.sArgs_motor.D_nenner;
                 P_zaehler   =   round(P*2^P_nenner);
                 I_zaehler   =   round(I*2^I_nenner);
                 D_zaehler   =   round(D*2^D_nenner);
@@ -338,6 +352,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                 motorControl.add_to_commandlist(sprintf('#%d:CL_KI_s_N=%d\r'    , this.motorID, I_nenner));
                 motorControl.add_to_commandlist(sprintf('#%d:CL_KD_s_Z=%d\r'    , this.motorID, D_zaehler));
                 motorControl.add_to_commandlist(sprintf('#%d:CL_KD_s_N=%d\r'    , this.motorID, D_nenner));
+
                 % Kask V-Regler: P = 1.2, I = 0.85, D = 0.7
                 % Kask- P-Regler: P = 400 (default), I = 2 (default), D = 700 (default)
                 % TODO: Send values to the motor... or we just skip the
