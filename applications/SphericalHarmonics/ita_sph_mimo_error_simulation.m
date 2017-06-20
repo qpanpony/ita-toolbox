@@ -426,13 +426,12 @@ sArgs = struct('pos1_receiverCoords','itaCoordinates',...
                'pos5_k','double',...
                'r',[],...
                'r_eq',1,...
-               'norm',false,...
-               'shType','complex');
+               'norm',false);
 [receiverCoords,receiverNmax,sourceCoords,sourceNmax,k,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 [receiverLookDirection, sourceLookDirection,r] = array_orientation(receiverCoords,sourceCoords);
-yReceiver = ita_sph_base(receiverLookDirection,receiverNmax,'Williams',strcmp(sArgs.shType,'complex'))';
-ySource = ita_sph_base(sourceLookDirection,sourceNmax,'Williams',strcmp(sArgs.shType,'complex'))';
+yReceiver = ita_sph_base(receiverLookDirection,receiverNmax)';
+ySource = ita_sph_base(sourceLookDirection,sourceNmax)';
 
 % avoid sArgs in parfor since it is a broadcast variable
 if ~isempty(sArgs.r)

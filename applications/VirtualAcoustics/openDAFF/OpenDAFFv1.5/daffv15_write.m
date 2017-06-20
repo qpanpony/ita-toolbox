@@ -902,7 +902,8 @@ for i=1:props.dataset.numrecords
             
             % Back to Matlab indices (+1)
             i1 = recordDesc{i}.effOffset(c) + 1;
-            i2 = i1 + recordDesc{i}.effLength(c) - 1;
+%             i2 = i1 + recordDesc{i}.effLength(c) - 1;
+            i2 = recordDesc{i}.effLength(c) - 1;
             
             % Write down the filter coefficients
             switch props.quantization

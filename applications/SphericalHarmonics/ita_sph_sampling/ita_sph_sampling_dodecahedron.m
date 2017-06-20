@@ -44,6 +44,9 @@ phi3 = 4*pi/3;
 
 theta = [repmat(theta1,3,1); repmat(theta2,3,1); repmat(theta3,3,1); repmat(theta4,3,1)].';
 phi = repmat([[phi1; phi2; phi3]; pi/3+[phi1; phi2; phi3]],2,1).';
-r = 0.15 .* ones(size(theta));
+r = ones(size(theta));
 
 s = itaSamplingSph([r(:) theta(:) phi(:)],'sph');
+s.nmax = floor(sqrt(s.nPoints)-1);
+
+end

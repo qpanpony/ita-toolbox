@@ -17,7 +17,7 @@ fprintf(2,'*********************************************************************
 %% ask
 if usejava('desktop') %Only if jvm available (non_cluster)
     commandwindow();
-    choice = questdlg('Do you agree to the terms of the license agreement? The complete licnese ("license.txt") can be found in the root directory of the ITA-Toolbox.','License Agreement - ITA-Toolbox:', ...
+    choice = questdlg('Do you agree to the terms of the license agreement? The complete license ("license.txt") can be found in the root directory of the ITA-Toolbox.','License Agreement - ITA-Toolbox:', ...
         'Yes','No','No');
     switch lower(choice)
         case 'yes'

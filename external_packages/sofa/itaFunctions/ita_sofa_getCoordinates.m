@@ -50,7 +50,7 @@ switch dataType
     case 'spherical'
 %         if strcmpi(dataUnit,'degree')
             coordinates.phi_deg = data(:,1);
-            coordinates.elevation = data(:,2);
+            coordinates.theta_deg = data(:,2)+90;
             coordinates.r = data(:,3);
 %         else
 %             warning('ITA_READ_SOFA: unit is not checked in spherical type'); 

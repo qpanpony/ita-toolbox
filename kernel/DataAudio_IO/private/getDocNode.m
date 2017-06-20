@@ -3,13 +3,20 @@ function docNode = getDocNode(transFunc, inputImp, bsName)
 xml = getXMLStrings();
 
 docNode = com.mathworks.xml.XMLUtils.createDocument(xml.DocType);
+domImpl = docNode.getImplementation();
+doctype = domImpl.createDocumentType(xml.DocType, [], '');
+docNode.appendChild(doctype);
 docRootNode = docNode.getDocumentElement;
+
 % docRootNode.setAttribute('attr_name','attr_value');
 
 versionNode = docNode.createElement(xml.Version);
 versionNode.appendChild...
     (docNode.createTextNode(xml.ActualVersion));
 docRootNode.appendChild(versionNode);
+
+optionsNode = getOptionsNode(docNode, bsName);
+docRootNode.appendChild(optionsNode);
 
 mainNode = docNode.createElement(xml.SaveTypeQuadripole);
 docRootNode.appendChild(mainNode);
@@ -26,10 +33,9 @@ xml = getXMLStrings();
 
 quadMSNode = docNode.createElement(xml.QuadripoleMeasured);
 
-optionsNode = getOptionsNode(docNode, bsName);
 [freqVecNode, transferFunctionNode, inputImpedanceNode] = lsData2DomNodes(docNode, transFunc, inputImp);
 
-quadMSNode.appendChild(optionsNode);
+
 quadMSNode.appendChild(freqVecNode);
 quadMSNode.appendChild(transferFunctionNode);
 quadMSNode.appendChild(inputImpedanceNode);
