@@ -19,7 +19,7 @@ function varargout = itaVA_NCTC_gui(varargin)
 %       can ignore them. It is a hint that the rendering processor produces
 %       zeros, which is normal if your initial FIR filter is empty. This is
 %       the default behaviour.
-%
+
 % Edit the above text to modify the response to help itaVA_NCTC_gui
 
 % Last Modified by GUIDE v2.5 16-Jun-2017 09:53:13
