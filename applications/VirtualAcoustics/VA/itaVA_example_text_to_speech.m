@@ -63,3 +63,17 @@ tts_in.id = 'id_excidea';
 tts_in.prepare_text = 'That is an excellent idea!';
 tts_in.direct_playback = true;
 va.setSignalSourceParameters( X, tts_in )
+
+while( true )
+    txt = inputdlg;
+    if isempty( txt )
+        break;
+    end
+    tts_in = struct();
+    tts_in.direct_playback = true;
+    tts_in.prepare_text = txt{1};
+    if isempty( tts_in.prepare_text )
+        break;
+    end
+    va.setSignalSourceParameters( X, tts_in )
+end
