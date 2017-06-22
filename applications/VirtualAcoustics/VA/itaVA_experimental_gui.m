@@ -59,6 +59,9 @@ handles.module_id = 'PrototypeGenericPath:MyGenericRenderer';
 handles.va_source_id = -1;
 handles.va_signal_id = '';
 handles.va_listener_id = -1;
+handles.module_channels = -1;
+handles.module_filter_length_samples = -1;
+handles.listbox_sourcesignals_last_index = -1;
 
 refresh_workspace_vars( hObject, handles );
 refresh_sourcesignals( hObject, handles );
@@ -116,10 +119,12 @@ disp( [ 'Using channel prototype generic path renderer with identifier: ' gpg_re
 handles.module_id = [ gpg_renderer.class ':' gpg_renderer.id ];
 in_args.info = true;
 out_args = handles.va.callModule( handles.module_id, in_args );
-disp( [ 'Your experimental renderer "' handles.module_id '" has ' num2str( out_args.numchannels ) ' channels and an FIR filter length of ' num2str( out_args.irfilterlengthsamples ) ' samples' ] )
+handles.module_channels = out_args.numchannels;
+handles.module_filter_length_samples = out_args.irfilterlengthsamples;
+disp( [ 'Your experimental renderer "' handles.module_id '" has ' num2str( handles.module_channels ) ' channels and an FIR filter length of ' num2str( out_args.irfilterlengthsamples ) ' samples' ] )
 
-handles.edit_va_channels.String = out_args.numchannels;
-handles.edit_va_fir_taps.String = out_args.irfilterlengthsamples;
+handles.edit_va_channels.String = handles.module_channels;
+handles.edit_va_fir_taps.String = handles.module_filter_length_samples;
 handles.edit_va_fs.String = '44.100'; % @todo get from VA audio streaming settings
 
 % Useful FIRs
@@ -141,6 +146,8 @@ handles.va_signal_id = '';
 handles.va.setOutputMuted( handles.checkbox_global_muted.Value );
 handles.va.setOutputGain( handles.slider_volume.Value );
 
+refresh_sourcesignals( hObject, handles );
+refresh_workspace_vars( hObject, handles );
 
 % Update handles (store values)
 guidata( hObject, handles );
@@ -219,31 +226,35 @@ filename_selected = filename_list{ index_selected };
 
 if handles.va.isConnected
     
-    va_signal_id_old = handles.va_signal_id;
+    last_index = handles.listbox_sourcesignals_last_index;
     
-    if ~isempty( va_signal_id_old ) && strcmp( handles.va.getSoundSourceSignalSource( handles.va_source_id ), va_signal_id_old )
-        playstate = handles.va.getAudiofileSignalSourcePlaybackState( va_signal_id_old );
+    if last_index == index_selected
+        % play/pause current
+        va_signal_id = handles.va.getSoundSourceSignalSource( handles.va_source_id );
+        assert( ~isempty( va_signal_id ) )
+        playstate = handles.va.getAudiofileSignalSourcePlaybackState( va_signal_id );
         if strcmpi( playstate, 'playing' )
-            handles.va.setAudiofileSignalSourcePlaybackAction( handles.va_signal_id, 'pause' );
+            handles.va.setAudiofileSignalSourcePlaybackAction( va_signal_id, 'pause' );
         else
-            handles.va.setAudiofileSignalSourcePlaybackAction( handles.va_signal_id, 'play' );
+            handles.va.setAudiofileSignalSourcePlaybackAction( va_signal_id, 'play' );
         end
     else
-        if ~isempty( va_signal_id_old )
+        % new selected, remove old?
+        if last_index ~= -1
+            va_signal_id = handles.va.getSoundSourceSignalSource( handles.va_source_id );
             handles.va.setSoundSourceSignalSource( handles.va_source_id, '' );
-            handles.va.deleteSignalSource( va_signal_id_old );
+            handles.va.deleteSignalSource( va_signal_id );
         end
         
+        % create new
         handles.va_signal_id = handles.va.createAudiofileSignalSource( filepath_selected, filename_selected );
         handles.va.setSoundSourceSignalSource( handles.va_source_id, handles.va_signal_id );
         handles.va.setAudiofileSignalSourcePlaybackAction( handles.va_signal_id, 'play' );
         is_looping = handles.checkbox_loop.Value;
         handles.va.setAudiofileSignalSourceIsLooping( handles.va_signal_id, is_looping );
         
+        handles.listbox_sourcesignals_last_index = index_selected;
 
-        if ~isempty( va_signal_id_old )
-            handles.va.deleteSignalSource( va_signal_id_old );
-        end
     end
 end
 
@@ -271,21 +282,35 @@ function pushbutton_start_va_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 itaVA_experimental_start_server
 
+
 function refresh_workspace_vars( hObject, handles )
+% Updates workspace variables in listbox
 base_ws_vars = evalin( 'base', 'whos' ); 
 
 stringlist = '';
 for i=1:numel( base_ws_vars )
     if( strcmp( base_ws_vars( i ).class, 'itaAudio' ) )
-        stringlist = [ stringlist; { base_ws_vars( i ).name } ];
+        audio_var = evalin( 'base', base_ws_vars( i ).name );
+        if handles.module_channels == audio_var.nChannels
+            stringlist = [ stringlist; { base_ws_vars( i ).name } ];
+        end
     end
 end
 
-handles.listbox_filters.String = stringlist;
+if ~isempty( stringlist )
+    handles.listbox_filters.String = stringlist;
+else
+    if handles.va.isConnected
+        warning( [ 'No itaAudio objects with matching ' handles.module_channels ' channels found in current workspace' ] )
+    else
+        %warning( [ 'No itaAudio objects found in current workspace' ] )
+    end
+end
 
 
 function refresh_sourcesignals( hObject, handles )
 filelist = dir( pwd );
+handles.listbox_sourcesignals_last_index = -1;
 
 stringlist = '';
 fullfile_stringlist = '';
@@ -298,8 +323,18 @@ for i=1:numel( filelist )
     end
 end
 
-handles.listbox_sourcesignals.String = stringlist;
-handles.listbox_sourcesignals.UserData = fullfile_stringlist;
+if ~isempty( stringlist )
+    handles.listbox_sourcesignals.String = stringlist;
+else
+    %warning( [ 'No WAV files found in current workfolder (' pwd ')' ] )
+end
+if ~isempty( fullfile_stringlist )
+    handles.listbox_sourcesignals.UserData = fullfile_stringlist;
+end
+
+% Update handles structure
+guidata( hObject, handles );
+
 
 
 % --- Executes on button press in pushbutton_refresh_workspace_vars.

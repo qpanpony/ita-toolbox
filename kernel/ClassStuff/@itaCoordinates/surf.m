@@ -38,16 +38,19 @@ function varargout = surf(this, varargin)
 % Author:
 %   Martin Pollow, mpo@akustik.rwth-aachen.de, 4.1.2010
 
-narginchk(1,inf);
 
-defaultProperties = {'EdgeAlpha',0, 'FaceColor', 'interp'};
-sArgs        = struct('pos1_data','double', 'radius', [],'magnitude',0,defaultProperties{:},'parent',[]);
-if ~isempty(varargin)
-    [data,sArgs] = ita_parse_arguments(sArgs,varargin); 
-end
+defaultProperties = {'EdgeAlpha', 0, ...
+                     'FaceColor', 'interp'};
 
-numArgIn = nargin;
+sArgs             = struct('pos1_data','double', ...
+                           'radius', [], ...
+                           'magnitude', 0, ...
+                           'parent', [], ...
+                           'complex', false, ...
+                           'colorbar', true, ...
+                           defaultProperties{:});
 
+[data,sArgs] = ita_parse_arguments(sArgs,varargin); 
 
 if sArgs.magnitude
    data = abs(data); 
@@ -64,7 +67,7 @@ end
 %     parent = varargin{2};
 %     varargin = varargin(3:end);
 % end
-if (numArgIn == 1)
+if (nargin == 1)
     % only coordinates given
     r = this.r;
     color = zeros(size(r));
@@ -76,7 +79,7 @@ else
     else
         r = data.'; 
     end
-    isComplex = ~all(isreal(r));% & min(r(:)) < 0;
+    isComplex = ~all(isreal(r)) || sArgs.complex; 
     if isComplex
         % if the radius is complex, set the color
         color = mod(angle(r),2*pi);
@@ -193,15 +196,19 @@ switch colorbar_settings
     case 'geometry'
         % do nothing
     case 'complex'
-        colormap hsv
-        colorbar;
+        colormap(hsv)
+        if sArgs.colorbar
+            colorbar;
+        end
         caxis([0 2*pi]);
     case 'magnitude'
         colormap jet
 %         caxis([0 max(color)]);
         if min(color) < max(color)
             caxis([min(color) max(color)]);
-            colorbar;
+            if sArgs.colorbar
+                colorbar;
+            end
         elseif all(isfinite(color))
             caxis([0 max(color)]);
         else

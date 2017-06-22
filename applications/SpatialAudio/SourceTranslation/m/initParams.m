@@ -168,8 +168,7 @@ params.display.grid.r = params.array.r;
 
 % Spherical Harmonics: num_angels x (Nc+1)^2.
 params.display.Ynm = ita_sph_base(params.display.grid,...
-                                  params.source.N,...
-                                  'Williams', true);
+                                  params.source.N);
 
 % Build up a reverse grid.
 th = params.display.grid.theta;
@@ -207,8 +206,7 @@ params.array.mics = params.array.grid.nPoints;  % Number of microphones
 
 % Spherical Harmonics: num_angels x (Narray+1)^2.
 params.array.Ynm = ita_sph_base(params.array.grid,...
-                                params.array.N,...
-                                'Williams', true);
+                                params.array.N);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Parameters that are relative to the center 

@@ -17,7 +17,7 @@ opts.audioSource='';    %Signal of the source (itaAudio or filename)
 opts = ita_parse_arguments(opts, varargin);
 
 % Encode Source
-Bformat = ita_sph_base(sourcePos, opts.order, 'Williams', false);
+Bformat = ita_sph_base(sourcePos, opts.order, 'real');
 
 if ~isempty(opts.audioSource)
     if isa(opts.audioSource,'char')

@@ -14,7 +14,7 @@ classdef itaSamplingSphReal < itaSamplingSph
     end
     methods(Access = protected)
         function this = set_base(this, nmax)
-                this.Y = ita_sph_base(this,nmax,'Williams',false);
+                this.Y = ita_sph_base(this, nmax, 'real');
                 ita_verbose_info(['Real valued spherical harmonics up to order ' num2str(nmax) ' calculated.']);
         end
     end

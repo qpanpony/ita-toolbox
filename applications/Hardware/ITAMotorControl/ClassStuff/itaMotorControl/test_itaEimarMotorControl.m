@@ -204,7 +204,7 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             % calculate the pre angle
             % the pre angle is needed because the measurement setup will
             % not start recording imidiately
-            numRepetitions = this.measurementSetup.repititions;
+            numRepetitions = this.measurementSetup.repetitions;
             timePerRepetition = this.measurementSetup.twait*length(this.measurementSetup.outputChannels);
             speed   =   360/(numRepetitions*timePerRepetition);
 
@@ -215,7 +215,7 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             preAngle = min(preAngle,15);
             preAngle = max(preAngle,8);
             numTotalRepetitions = numRepetitions+ceil(preAngleTime/(timePerRepetition))+9;
-            this.measurementSetup.repititions = numTotalRepetitions;
+            this.measurementSetup.repetitions = numTotalRepetitions;
             
             %prepare motors for continuous measurement
             this.mMotorControl.prepareForContinuousMeasurement('speed',speed,'preAngle',preAngle);

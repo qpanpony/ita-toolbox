@@ -106,7 +106,7 @@ ear_d       =   [-0.07 0.07];
 
 W = sparse(diag(w));                                      % diagonal matrix containing weights
 D = sparse(diag(dweights_rep));                                  % decomposition order-dependent Tikhonov regularization
-Y = ita_sph_base(this.dirCoord,Nmax,'orthonormal',false);   % calculate real-valued SHs using the measurement grid
+Y = ita_sph_base(this.dirCoord,Nmax,'real');   % calculate real-valued SHs using the measurement grid
 
 %% Calculate HRTF data for field points
 if Nmax > 25
@@ -131,7 +131,7 @@ for ear=1:2
 %     % calculate weighted SH coefficients using a decomposition order-dependent Tikhonov regularization
 %     
 %     freqData_temp = data.freqData;
-%     Y = ita_sph_base(data.channelCoordinates,Nmax,'orthonormal',false);
+%     Y = ita_sph_base(data.channelCoordinates,Nmax,'real');
     
     a0              = (Y.'*W*Y + epsilon*D) \ Y.'*W * freqData_temp.';
     %a0 = (Y.'*W*Y + epsilon*D) \ Y.' *
@@ -142,10 +142,10 @@ for ear=1:2
         % calculate range-extrapolated HRTFs
         a1 = a0 .* hankel_rep.';
         
-        Yest = ita_sph_base(field,N,'orthonormal',false);  % use real-valued SH's
+        Yest = ita_sph_base(field,N,'real');  % use real-valued SH's
         hrtf_arbi(:,ear:2:end) = (Yest*a1).';           % interpolated + range-extrapolated HRTFs
     else
-        Yest = ita_sph_base(field,Nmax,'orthonormal',false);  % use real-valued SH's
+        Yest = ita_sph_base(field,Nmax,'real');  % use real-valued SH's
         hrtf_arbi(:,ear:2:end) = (Yest*a0).';           % interpolated HRTFs
     end
 end

@@ -74,7 +74,7 @@ if sArgs.allchannels
     gainApplied = nan(1, result.nChannels);
     for ch_idx = 1:result.nChannels
         gainApplied(1, ch_idx) = max(abs(result.dat(ch_idx,:)));
-        result.dat(ch_idx,:)   = result.dat(ch_idx,:) ./ gainApplied;
+        result.dat(ch_idx,:)   = result.dat(ch_idx,:) ./ gainApplied(1, ch_idx);
     end
 else
     gainApplied     = max(max(abs(result.timeData)));

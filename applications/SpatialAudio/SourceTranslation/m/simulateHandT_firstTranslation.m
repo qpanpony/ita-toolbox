@@ -53,7 +53,7 @@ for k_ind = 1 : K
     grid = params.display.grid - coordinate;
 
     % Spherical Harmonics: num_angels x (Nc+1)^2.
-    Ynm = ita_sph_base(grid, N, 'Williams', true);
+    Ynm = ita_sph_base(grid, N);
 
     hn_disPoints_x_N = ita_sph_besselh([0:N], 1,...
                         kr_disPoints_x_freqs(:,k_ind));

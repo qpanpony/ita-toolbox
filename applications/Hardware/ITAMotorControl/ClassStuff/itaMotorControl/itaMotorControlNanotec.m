@@ -142,7 +142,7 @@ classdef itaMotorControlNanotec < itaMotorControl
                 % parse the notfound options for wait
 
                 [controlOptions, notFound] = ita_parse_arguments(controlOptions,notFound);
-                
+                this.wait = controlOptions.wait;
                 for index = 1:length(this.motorList)
                     motorposition = sArgs.(this.motorList{index}.getMotorName());
                     this.started(index) = this.motorList{index}.prepareMove(motorposition,notFound{:});
@@ -222,6 +222,15 @@ classdef itaMotorControlNanotec < itaMotorControl
             ita_verbose_info('Finished preparing',2)
         end
         
+        function startMove(this)
+            for index = 1:length(this.motorList)
+                if this.started(index)
+                    this.motorList{index}.startMoveToPosition();
+                end
+            end
+            this.wait4everything;
+        end
+        
         function startContinuousMoveNow(this)
             % start moves
             for index = 1:length(this.motorList)
@@ -235,6 +244,7 @@ classdef itaMotorControlNanotec < itaMotorControl
                 this.mIsInitialized             =   false;
                 error(sprintf('Motor %s is not responding!',this.motorList{index}.getMotorName));
             end
+            this.wait4everything
             this.preparedList = [];
         end
         
@@ -447,7 +457,7 @@ classdef itaMotorControlNanotec < itaMotorControl
                 else
                     ita_verbose_info('Position NOT reached! - Check for errors!', 0);
                     this.send_commandlist(this.failed_command_repititions); % mpo: bugfix: send_commandlist needs argument
-                    this.isReferenced = false;
+%                     this.isReferenced = false;
                 end
                 this.clear_receivedlist;
                 this.started(1:length(this.motorIDList)) = false;
