@@ -2,7 +2,7 @@ function [ loudspeakerSignals ] = ita_decodeAmbisonics( Bformat, LoudspeakerPos,
 %ITA_DECODEAMBISONICS Summary of this function goes here
 %   Detailed explanation goes here
 
-opts.decoding='remax' % Decoding strategy (remax,inphase,plane)
+opts.decoding='remax'; % Decoding strategy (remax,inphase,plane)
 
 opts = ita_parse_arguments(opts,varargin);
 
