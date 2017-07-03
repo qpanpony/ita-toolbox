@@ -135,7 +135,10 @@ classdef itaAudio < itaSuper
         end
         
         function this = set.fftDegree(this, value)
-            nSamples    = ita_nSamples(value);
+            if value>31
+                warning('FFT degree higher than 31 are not converted in to number of Samples anymore in itaAudio.setfftDegree! If you did not expect this message, please report to the toolbox support team.');
+            end
+            nSamples    = ita_nSamples(value, 'fftDegree');
             this        = set_nSamples(this, nSamples);
         end
         
@@ -148,8 +151,11 @@ classdef itaAudio < itaSuper
         
         function this = set.trackLength(this, value)
             nSamples = this.samplingRate * double(value);
+            if nSamples<32
+                warning('Warning! Samples numbers smaller than 32 are not converted to FFT degree anymore in itaAudio.nSamples! If you did not expect this message, please report to the toolbox support team.');
+            end
             if isfinite(nSamples)
-                this = set_nSamples(this, nSamples);
+                this = set_nSamples(this, nSamples, 'samples');
             else
                 disp('Cannot set trackLength, nSamples are not finite. Check the samplingRate.');
             end
@@ -273,8 +279,11 @@ classdef itaAudio < itaSuper
         end
         
         function this = set_nSamples(this, nSamples)
+            if nSamples<32
+                warning('Warning! Samples numbers smaller than 32 are not converted to FFT degree anymore in itaAudio.nSamples! If you did not expect this message, please report to the toolbox support team.');
+            end
             % set nSamples and trim audio time data accordingly
-            nSamples = ita_nSamples(nSamples);
+            nSamples = ita_nSamples(nSamples,'samples');
             if nSamples == this.nSamples
                 return; % nothing to do, length is OK
             elseif nSamples > this.nSamples

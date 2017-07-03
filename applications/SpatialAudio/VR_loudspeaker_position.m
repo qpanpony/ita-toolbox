@@ -9,7 +9,7 @@ function pos = VR_loudspeaker_position(varargin)
 % Options
 opts.virtualSpeaker     = false;            % true      || Indicates whether to add virtual speaker achieve a more regular distribution (stabilizes the pseudoinverse in Ambisonics Decoding)
 opts.coordSystem        = 'itaCoordinates'; % 'openGL'  || indicates in which coordinate system the output is
-opts.isItaCoordinates   = false;            % true      || indicates whether the output is a itaCoordinate or not (warning: if combined with coordSystem='opneGL', the angles for azimuth and elevation are not correct
+opts.isItaCoordinates   = true;            % true      || indicates whether the output is a itaCoordinate or not (warning: if combined with coordSystem='opneGL', the angles for azimuth and elevation are not correct
 opts.heightCorrection   = 0.0597;          % in meter  || ensures that the loudspeakers are around the point (0 0 0), standard value is height of the bigger loudspeaker in the horizontal plane
 
 opts=ita_parse_arguments(opts, varargin);
