@@ -414,7 +414,7 @@ classdef itaMSTFinterleaved < itaMSTF
             nSamples       = result.nSamples;
             
             % extend result
-            result.fftDegree = nSamples + nWaitSum * (this.repetitions - 1);
+            result.nSamples = nSamples + nWaitSum * (this.repetitions - 1);
             timeData         = single(result.time).';
             idxx_init        = (1:nSamples);
             ita_verbose_info('itaMSTFinterleaved::appending time data.',1);

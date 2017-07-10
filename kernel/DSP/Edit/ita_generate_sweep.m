@@ -112,7 +112,7 @@ end
 %% generate sweep and settings for itaAudio
 audioObj = itaAudio;
 audioObj.samplingRate = sArgs.samplingRate;
-audioObj.fftDegree    = nSamples;
+audioObj.nSamples    = nSamples;
 
 % decide between linear and exponential sweep
 switch methodStr
