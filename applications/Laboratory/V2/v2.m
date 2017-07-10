@@ -14,7 +14,7 @@ classdef v2
     % v2gui.
     %
     % v1.0, 7.10.2014
-    % Florian Thevißen, Florian.Thevissen@rwth-aachen.de
+    % Florian Theviï¿½en, Florian.Thevissen@rwth-aachen.de
     % Institute of Technical Acoustics (ITA), RWTH Aachen University
     
     properties (Access=public)
@@ -113,7 +113,7 @@ classdef v2
             obj.MS.outputamplification = 22;
             obj.MS.fftDegree = 16; %init.
             obj.MS.averages = 1;
-            obj.MS.fftDegree = obj.measurementProperties.samples;
+            obj.MS.nSamples = obj.measurementProperties.samples;
         end
         
         % measure SNR and Signals in both sending and receiving room

@@ -318,7 +318,7 @@ classdef itaMSTFinterleaved < itaMSTF
             nSamples = round(t_sweep*this.samplingRate/2)*2;
             
             this.twait     = t_wait;
-            this.fftDegree = nSamples;
+            this.nSamples = nSamples;
             
             this.type = ita_generate_sweep('freqRange',this.freqRange,'bandwidth',this.bandwidth,'sweeprate',sweeprate, 'stopMargin', this.stopMargin);
         end
