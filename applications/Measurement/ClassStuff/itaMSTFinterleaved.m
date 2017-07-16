@@ -641,7 +641,10 @@ classdef itaMSTFinterleaved < itaMSTF
                    resultsMI = itaAudio(1,nOutputChannels);
                    for index = 1:nOutputChannels
                       resultsMI(index) = result;
-                      resultsMI(index).timeData = timeData(:,index:nOutputChannels:end); 
+                      resultsMI(index).timeData = timeData(:,index:nOutputChannels:end);
+                      repmatFactor = resultsMI(index).nChannels/result.nChannels;
+                      resultsMI(index).channelNames = repmat(result.channelNames,repmatFactor,1);
+                      resultsMI(index).channelUnits = repmat(result.channelUnits,repmatFactor,1);
                    end
                    result = resultsMI;
                 else
