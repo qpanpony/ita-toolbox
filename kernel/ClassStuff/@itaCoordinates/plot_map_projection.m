@@ -1,14 +1,16 @@
 function varargout = plot_map_projection(this, varargin)
 %PLOT_MAP_PROJECTION - Plot a map projection of data on a sphere
 %  This function plots a map projection for a dataset on a full or 
-%  partial spherical surface
+%  partial spherical surface. The x-axis is at latitude = 0 and 
+%  longitude = 0 and points into the map. The longitude angle is defined as
+%  counter clockwise. The y-axis is defined as latitude = 0 and 
+%  longitude = pi/2. The positive z-axis is defined as latitude = pi.
 %
 %  Syntax:
 %   plot_map_projection(this, data, options)
 %
 %   Options (default):
 %           'proj' ('wagner4')   : Specifies the projection type (See mapping toolbox documentation for supported projections)
-%           'phi0' (0)           : Longitute angle phi0 = 0 -> x-axis at origin of the map
 %           'shading' ('interp') : Specifies the shading algorithm
 %           'db' (false)         : db plot
 %           'limits' ([])        : Colorbar limits
@@ -32,7 +34,6 @@ function varargout = plot_map_projection(this, varargin)
 % Created:  06-Jun-2017 
 
 sArgs = struct('pos1_data','double',...
-               'phi0',0,...
                'proj','wagner4',...
                'db',false,...
                'shading','interp',...
@@ -44,8 +45,9 @@ sArgs = struct('pos1_data','double',...
 % convert to longitude, latitude coordinates required by the mapping toolbox
 [azi,ele,~] = cart2sph(this.x,this.y,this.z);
 lat = ele*180/pi;
-% if phi0 = 0, x = 1 is the origin of the map at lat = 0, lon = 0
-lon = (azi-sArgs.phi0)*180/pi;
+% x = 1 is the origin of the map at lat = 0, lon = 0
+% flip sign of the azimuth to define the x-axis as pointing into the map
+lon = -(azi)*180/pi;
 % longitude, latitude limits for the plot
 latLim = [min(lat),max(lat)];
 lonLim = [min(lon),max(lon)];
@@ -118,7 +120,8 @@ axh.XLim = lonLim * pi/180;
 axh.YTick = YTicks;
 axh.YTickLabels = LatTicks;
 axh.XTick = XTicks;
-axh.XTickLabels = LonTicks;
+% flip sign again, since x-axis points into the map
+axh.XTickLabels = -LonTicks;
 
 axh.YTickLabel = strcat(axh.YTickLabel, '^\circ');
 axh.XTickLabel = strcat(axh.XTickLabel, '^\circ');
