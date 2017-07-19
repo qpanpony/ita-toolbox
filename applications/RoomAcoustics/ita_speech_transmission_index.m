@@ -90,8 +90,8 @@ h_k_sq  = h_k.^2;
 m_k_fm = zeros(numel(fk),numel(fm));
 for iM = 1:numel(fm)
     % to get an FFT bin exactly at fm
-    newLength = floor(h_k.trackLength*fm(iM))/fm(iM);
-    h_k_sq_tmp = ita_time_crop(h_k_sq,[0 newLength],'time');
+    newLength = floor(floor(h_k.trackLength*fm(iM))/fm(iM)*h_k.samplingRate/2)*2;
+    h_k_sq_tmp = ita_time_crop(h_k_sq,[1 newLength],'samples');
     m_k_fm(:,iM) = (abs(h_k_sq_tmp.freq2value(fm(iM)))./(abs(h_k_sq_tmp.freq2value(0)).*(1+10.^(-SNR./10)))).';
 end
 % old version:
