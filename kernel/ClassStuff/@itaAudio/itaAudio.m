@@ -155,7 +155,7 @@ classdef itaAudio < itaSuper
                 warning('Warning! Samples numbers smaller than 32 are not converted to FFT degree anymore in itaAudio.nSamples! If you did not expect this message, please report to the toolbox support team.');
             end
             if isfinite(nSamples)
-                this = set_nSamples(this, nSamples, 'samples');
+                this = set_nSamples(this, nSamples);
             else
                 disp('Cannot set trackLength, nSamples are not finite. Check the samplingRate.');
             end
