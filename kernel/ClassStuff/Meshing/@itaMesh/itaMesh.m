@@ -11,7 +11,7 @@ classdef itaMesh
     properties(Access = protected)
         mNodes = itaMeshNodes;
         mShellElements = itaMeshElements(0,'shell','tetra','linear');
-        mVolumeElements = itaMeshElements(0,'volume','tetra','linear');;
+        mVolumeElements = itaMeshElements(0,'volume','tetra','linear');
         mGroups = {};
     end
     
@@ -74,7 +74,7 @@ classdef itaMesh
                     end
                 elseif isstruct(varargin{1}) % Struct input/convert
                     fieldName = fieldnames(varargin{1});
-                    for ind = 1:numel(fieldName);
+                    for ind = 1:numel(fieldName)
                         try
                             this.(fieldName{ind}) = varargin{1}.(fieldName{ind});
                         catch errmsg
@@ -111,7 +111,7 @@ classdef itaMesh
             end
         end
         
-        function display(this)
+        function display(this) %#ok<DISPLAY>
             disp('==|itaMesh|============================================================');
             if this.nNodes > 0
                 disp('   Nodes');
