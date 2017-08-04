@@ -174,10 +174,10 @@ if meshOnly
     set(h,'EdgeAlpha',edgeAlpha,'EdgeColor',edgeColor,'FaceColor',faceColor);
 else
     set(h,'UserData',nodeIDs);
-    if strcmpi(sArgs.plotType,'lin')
+    if ismember(sArgs.plotType,{'lin','real','imag'})
         title(['Magnitude (linear, ' sArgs.plotObject.channelUnits{1} ') at ' sArgs.plotDomain ': ' abscissaStr]);
         if isempty(sArgs.plotRange) || numel(sArgs.plotRange) < 2
-            sArgs.plotRange = [1.2*min(plotData(:)) 1.2*max(plotData(:))];
+            sArgs.plotRange = [-1.2 1.2].*max(abs(plotData(:)));
         end
         set(gca,'CLim',sort(sArgs.plotRange));
     elseif strcmpi(sArgs.plotType,'phase')
