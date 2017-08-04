@@ -31,7 +31,7 @@ end
 
 %% Init Settings
 sArgs.normalizeinput    = false;
-sArgs.normalizeoutput    = false;
+sArgs.normalizeoutput   = false;
 
 sArgs.inputchannels     = [];
 sArgs.outputchannels    = [];
@@ -49,16 +49,16 @@ if ~playback && sArgs.recsamples == -1
     sArgs.recsamples = data;
 end
 
+if ~playback && ~record
+    error('ITA_NI_DAQ_RUN:What do you want? Play or Record, or both? You need to specify an input and/or an output!')
+end
+
 sArgs.samplingRate = round(niSession.Rate); % NI rate is not exact
 
 in_channel_vec   = sArgs.inputchannels;
 out_channel_vec  = sArgs.outputchannels;
 normalize_input  = sArgs.normalizeinput;
 normalize_output = sArgs.normalizeoutput;
-
-if ~playback && ~record
-    error('ITA_NI_DAQ_RUN:What do you want? Play or Record, or both? You need to specify an input and/or an output!')
-end
 
 if playback
     % Extract channels to play
@@ -81,8 +81,16 @@ if playback
     end
     
     % Check levels - Normalizing
+    % determine clipping limit from NI session information
+    outputClipping = 1; % standard
+    for iChannel = numel(niSession.Channels)
+        isOutput = ~isempty(strfind(niSession.Channels(iChannel).ID,'ao'));
+        if isOutput
+            outputClipping = max(outputClipping,max(abs(double(niSession.Channels(iChannel).Range))));
+        end
+    end    
     peak_value = max(max(abs(data.timeData)));
-    if (peak_value > 1) || (normalize_output)
+    if (peak_value > outputClipping) || (normalize_output)
         ita_verbose_info('Oh Lord! Levels too high for playback. Normalizing...',0)
         data = ita_normalize_dat(data);
     end
@@ -99,10 +107,13 @@ if playback
     sArgs.recsamples = data.nSamples;
 end
 
-% Full (double) precision
-recordDatadat = zeros(sArgs.recsamples,numel(in_channel_vec),sArgs.repeats);
-if sArgs.singleprecision % only single precision
-    recordDatadat = single(recordDatadat);
+if record
+    % Full (double) precision
+    recordDatadat = zeros(sArgs.recsamples,numel(in_channel_vec),sArgs.repeats);
+    if sArgs.singleprecision
+        % only single precision
+        recordDatadat = single(recordDatadat);
+    end
 end
 
 % run measurement, possibly repeated
@@ -121,30 +132,36 @@ for idrep = 1:sArgs.repeats
     end
     pause(0.01)
     % do the measurement
-    if ~sArgs.singleprecision % Full (double) precision
-        recordDatadat(:,:,idrep) = niSession.startForeground();
+    if record
+        if ~sArgs.singleprecision % Full (double) precision
+            recordDatadat(:,:,idrep) = niSession.startForeground();
+        else
+            recordDatadat(:,:,idrep) = single(niSession.startForeground());
+        end
     else
-        recordDatadat(:,:,idrep) = single(niSession.startForeground());
+        niSession.startForeground();
     end
 end % loop for repeats
 
 ita_verbose_info('playback/record finished ',1);
 
-recordData = itaAudio();
-recordData.dataType = class(recordDatadat);
-recordData.dataTypeOutput = class(recordDatadat);
-% Check if we need to average multiple measurements:
-if size(recordDatadat,3) > 1
-    % average:
-    recordData.timeData = mean(recordDatadat,3);
-else
-    % no average: (This saves memory!)
-    recordData.timeData = recordDatadat;
-end
-recordData.samplingRate = sArgs.samplingRate;
-
-for idx = 1:numel(in_channel_vec)
-    recordData.channelNames{idx} = ['Ch ' int2str(in_channel_vec(idx))];
+if record
+    recordData = itaAudio();
+    recordData.dataType = class(recordDatadat);
+    recordData.dataTypeOutput = class(recordDatadat);
+    % Check if we need to average multiple measurements:
+    if size(recordDatadat,3) > 1
+        % average:
+        recordData.timeData = mean(recordDatadat,3);
+    else
+        % no average: (This saves memory!)
+        recordData.timeData = recordDatadat;
+    end
+    recordData.samplingRate = sArgs.samplingRate;
+    
+    for idx = 1:numel(in_channel_vec)
+        recordData.channelNames{idx} = ['Ch ' int2str(in_channel_vec(idx))];
+    end
 end
 
 %% Remove Latency
@@ -155,7 +172,16 @@ end
 %% Check for clipping and other errors
 clipping = false;
 if record
-    if any(any(abs(recordData.timeData)>=10)) % Check for clipping (NI card actually handles up to 10Vpk)
+    % determine clipping limit from NI session information
+    clippingLimit = Inf;
+    for iChannel = numel(niSession.Channels)
+        isInput = ~isempty(strfind(niSession.Channels(iChannel).ID,'ai'));
+        if isInput
+            clippingLimit = min(clippingLimit,max(abs(double(niSession.Channels(iChannel).Range))));
+        end
+    end    
+    
+    if any(any(abs(recordData.timeData)>=clippingLimit)) % Check for clipping (NI card actually handles up to 10Vpk)
         ita_verbose_info('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',0);
         ita_verbose_info('!ITA_NI_DAQ_RUN:Careful, Clipping!',0);
         ita_verbose_info('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!',0);
@@ -181,21 +207,21 @@ if record
         ita_verbose_info(['Minimum digital level: ' int2str(20*log10(channelMin)) ' dBFS on channel: ' int2str(in_channel_vec(indexMin))],0);
     end
     ita_verbose_info(['Maximum digital level: ' int2str(20*log10(channelMax)) ' dBFS on channel: ' int2str(in_channel_vec(indexMax))],0);
-end
-
-%% Add history line
-infosforhistory = struct('PlayDevice','NI','Play_Channels',out_channel_vec,'RecDevice','NI','Rec_Channels',in_channel_vec,'Sampling_Rate',niSession.Rate,'Normalize_Input',normalize_input,'Normalize_Output',0,'Rec_Samples',sArgs.recsamples,'Block',1,'Repeats',sArgs.repeats);
-recordData = ita_metainfo_add_historyline(recordData,'ita_NI_daq_run',[{data}; ita_struct2arguments(infosforhistory)],'withsubs');
-
-if clipping
-    recordData = ita_metainfo_add_historyline(recordData,'!!!ITA_NI_DAQ_RUN:Careful, clipping or something else went wrong!!!');
-    recordData = ita_errorlog_add(recordData,'!!!ITA_NI_DAQ_RUN:Careful, clipping or something else went wrong!!!');
+    
+    % Add history line
+    infosforhistory = struct('PlayDevice','NI','Play_Channels',out_channel_vec,'RecDevice','NI','Rec_Channels',in_channel_vec,'Sampling_Rate',niSession.Rate,'Normalize_Input',normalize_input,'Normalize_Output',0,'Rec_Samples',sArgs.recsamples,'Block',1,'Repeats',sArgs.repeats);
+    recordData = ita_metainfo_add_historyline(recordData,'ita_NI_daq_run',[{data}; ita_struct2arguments(infosforhistory)],'withsubs');
+    
+    if clipping
+        recordData = ita_metainfo_add_historyline(recordData,'!!!ITA_NI_DAQ_RUN:Careful, clipping or something else went wrong!!!');
+        recordData = ita_errorlog_add(recordData,'!!!ITA_NI_DAQ_RUN:Careful, clipping or something else went wrong!!!');
+    end
 end
 
 %% Find output parameters
-if nargout ~= 0
+if nargout ~= 0 && record
     if normalize_input
-        ita_normalize_dat(recordData)
+        recordData = ita_normalize_dat(recordData);
     end
     varargout{1} = recordData;
 end
