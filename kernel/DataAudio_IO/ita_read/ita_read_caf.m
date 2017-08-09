@@ -1,5 +1,5 @@
 function result = ita_read_caf(filename,varargin)
-%ITA_READ_FLAC - Read Free Lossless Audio Codec Files
+%ITA_READ_FLAC - Read Core Audio Format Files
 %   This function is completely based on the MATLAB audioread.
 %
 %   It returns a itaAudio object containing the files data and metadata.
