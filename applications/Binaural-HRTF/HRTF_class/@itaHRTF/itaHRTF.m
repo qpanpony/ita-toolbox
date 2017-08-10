@@ -117,10 +117,15 @@ classdef  itaHRTF < itaAudio
     methods % Special functions that implement operations that are usually performed only on instances of the class
         %% Input
         function this = itaHRTF(varargin)
-            
-            this = this@itaAudio();
-            
+            % initialize itaHRTF with itaAudio properties (only for nargin == 1)
+            if nargin > 1, iniAudio = [];
+            else, iniAudio = varargin{:};
+            end
+                            
+            this = this@itaAudio(iniAudio);
+
             if nargin >1
+
                 % itaAudio input
                 TF_types = this.propertiesTF_type;
                 for iTF = 1:numel(TF_types)
@@ -148,6 +153,7 @@ classdef  itaHRTF < itaAudio
                 end
                 
             elseif nargin == 1
+
                 if isa(varargin{1},'itaHRTF')
                     this = varargin{1};
                     
