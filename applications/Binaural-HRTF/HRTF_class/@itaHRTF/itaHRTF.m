@@ -118,7 +118,8 @@ classdef  itaHRTF < itaAudio
         %% Input
         function this = itaHRTF(varargin)
             % initialize itaHRTF with itaAudio properties (only for nargin == 1)
-            if nargin > 1 || (nargin == 1 && ischar(varargin{1})), iniAudio = [];
+            if nargin > 1 || (nargin == 1 && (ischar(varargin{1}) || isa(varargin{1},'itaAudio')))
+                iniAudio = [];
             elseif nargin == 1 && isstruct(varargin{1})
                 fNames = {'domain','data','signalType','samplingRate'};
                 for idxFN = 1:numel(fNames)
