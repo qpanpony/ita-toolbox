@@ -118,8 +118,12 @@ classdef  itaHRTF < itaAudio
         %% Input
         function this = itaHRTF(varargin)
             % initialize itaHRTF with itaAudio properties (only for nargin == 1)
-            if nargin > 1, iniAudio = [];
-            else, iniAudio = varargin{:};
+            if nargin > 1 || (nargin == 1 && ischar(varargin{1})), iniAudio = [];
+            elseif nargin == 1 && isstruct(varargin{1})
+                fNames = {'domain','data','signalType','samplingRate'};
+                for idxFN = 1:numel(fNames)
+                    iniAudio.(fNames{idxFN}) = varargin{1}.(fNames{idxFN});
+                end
             end
                             
             this = this@itaAudio(iniAudio);
@@ -182,7 +186,13 @@ classdef  itaHRTF < itaAudio
                     
                 elseif isa(varargin{1},'itaAudio')
                     this.itaAudio2itaHRTF = varargin{1};
-                end
+                    
+                elseif ischar(varargin{1}) % openDaff/ sofa/ hdf5 input
+                    if strfind(lower(varargin{1}),'.daff'), this.openDAFF2itaHRTF = varargin{1};
+                    elseif strfind(lower(varargin{1}),'.hdf5'), this.hdf2itaHRTF = varargin{1};
+                    elseif strfind(lower(varargin{1}),'.sofa'), this.sofa2itaHRTF = varargin{1};
+                    end
+                 end
             end
         end
         
@@ -1496,11 +1506,8 @@ classdef  itaHRTF < itaAudio
             
             function result = propertiesSphereType
                 result = {'cap', 'ring','full','undefined'};
-            end
+            end         
             
-            function result = propertiesInit
-                result = {'channelCoordinates','domain','data'};
-            end
         end
 end
 
