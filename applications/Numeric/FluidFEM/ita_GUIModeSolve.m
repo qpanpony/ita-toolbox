@@ -65,13 +65,13 @@ if nargin ==4
     % gets a struct from ModeSolve for the visualisation of pressure
     handles.output = hObject;
     guidata(hObject, handles);
-    set(handles.Status,'String','Calculation is finised!');
-    typeString={'Admittance Y','Impedanz Z','Reflection R', 'Absorption alpha',...
+    set(handles.Status,'String','Calculation is finished!');
+    typeString={'Admittance Y','Impedance Z','Reflection R', 'Absorption alpha',...
         'Displacement u','Velocity v','Acceleration a','Pressure p','Point Source Q'};
     set(handles.type,'String',typeString)
-    solveModeString = {'particular solution','modal analysis komplex','modal analysis real','eigenmodes real','eigenmodes komplex'};
+    solveModeString = {'particular solution','modal analysis complex','modal analysis real','eigenmodes real','eigenmodes complex'};
     set(handles.solveMode,'String', solveModeString);
-
+    
     UD = get(handles.freqSlide,'UserData');
     ModeSolveData = varargin{1};
     UD.p = ModeSolveData.p;
@@ -80,7 +80,7 @@ if nargin ==4
     set(handles.freqSlide,'Value',real(UD.gui.Freq(1))/real(UD.gui.Freq(end)));
     set(handles.currentFreq,'String',num2str(round(real(UD.gui.Freq(1))*10)/10,4));
     set(handles.freqSlide,'UserData',UD);
-
+    
     lFreq = length(UD.gui.Freq);
     set(handles.freqSlide,'SliderStep',[1/(lFreq),0.1]);
     if sum(sum(real(UD.p))) == 0 && sum(sum(imag(UD.p)))== 0
@@ -96,15 +96,15 @@ if nargin ==4
     set(handles.SliderStart,'String',num2str(round(real(UD.gui.Freq(1))*10)/10,4));
     set(handles.SliderStop,'String',num2str(round(real(UD.gui.Freq(end))*10)/10,4));
     set(handles.lbAddedPS,'String','No added point sources');
-
+    
 else
     % initialization of gui
     handles.output = hObject;
     guidata(hObject, handles);
-    typeString={'Admittance Y','Impedanz Z','Reflection R', 'Absorption alpha',...
+    typeString={'Admittance Y','Impedance Z','Reflection R', 'Absorption alpha',...
         'Displacement u','Velocity v','Acceleration a','Pressure p','Point Source Q'};
     set(handles.type,'String',typeString);
-    solveModeString = {'particular solution','modal analysis komplex','modal analysis real','eigenmodes real','eigenmodes komplex'};
+    solveModeString = {'particular solution','modal analysis complex','modal analysis real','eigenmodes real','eigenmodes complex'};
     set(handles.solveMode,'String', solveModeString);
 end
 
@@ -151,14 +151,14 @@ end
 % sets solver modulo
 switch solveMode
     case 1, ModeSolveData.solveMode ='particular';
-    case 2, ModeSolveData.solveMode ='komplex';
+    case 2, ModeSolveData.solveMode ='complex';
     case 3, ModeSolveData.solveMode ='real';
     case 4
         ModeSolveData.solveMode ='eigs real';
         ModeSolveData.Thresh = [];
         ModeSolveData.NumInt = [];
     case 5 % frequency dependend boundary conditions need further informations
-        ModeSolveData.solveMode ='eigs komplex';
+        ModeSolveData.solveMode ='eigs complex';
         ModeSolveData.Thresh = [];
         ModeSolveData.NumInt = [];
         for i1 = 1:length(ModeSolveData.groupMaterial)
@@ -200,7 +200,7 @@ if ~isnan(value) && imag(value)==0 && value >= 0
 else
     handles.startFreq = 20; %default
     set(hObject,'String','20');
-    set(handles.Status,'String','Start frequency must be a real positiv number!');
+    set(handles.Status,'String','Start frequency must be a real positive number!');
 end
 
 set(handles.singleFreqButton,'Value',0);
@@ -214,7 +214,7 @@ if ~isnan(value) && imag(value)==0 && value >= 0
 else
     handles.stepFreq = 1; %default
     set(hObject,'String','1');
-    set(handles.Status,'String','Step frequency must be a real positiv number!');
+    set(handles.Status,'String','Step frequency must be a real positive number!');
 end
 set(handles.singleFreqButton,'Value',0);
 set(handles.multipleFreqButton,'Value',1);
@@ -234,7 +234,7 @@ if ~isnan(value) && imag(value)==0 && value >= 0
 else
     handles.stopFreq = 1; %default
     set(hObject,'String','1');
-    set(handles.Status,'String','Stop frequency must be a real positiv number!');
+    set(handles.Status,'String','Stop frequency must be a real positive number!');
 end
 set(handles.singleFreqButton,'Value',0);
 set(handles.multipleFreqButton,'Value',1);
@@ -249,7 +249,7 @@ if ~isnan(value) && imag(value)==0 && value >= 0
 else
     handles.startFreq = 20; %default
     set(hObject,'String','20');
-    set(handles.Status,'String','Start frequency must be a real positiv number!');
+    set(handles.Status,'String','Start frequency must be a real positive number!');
 end
 set(handles.singleFreqButton,'Value',1);
 set(handles.multipleFreqButton,'Value',0);
@@ -267,7 +267,7 @@ findMat = strfind(meshFilename, '.mat');
 
 if  isempty(findUnv) && isempty(findDae) && isempty(findMat)
     meshFilename=[];
-    set(handles.Status,'String','The mesh file must be an *.unv file!');
+    set(handles.Status,'String','The mesh file must be a *.unv file!');
 end
 set(handles.meshFilename,'String',meshFilename);
 
@@ -278,7 +278,7 @@ if ~isempty(meshFilename)
     if ~isempty(findUnv)
         classes =ita_read_unv(meshFilename);
         generateGroups = 1;
-
+        
         if isa(classes,'itaMesh')
             coord = classes.nodes;
             if length(classes)<3 % keine surf, keine gruppen
@@ -311,7 +311,7 @@ if ~isempty(meshFilename)
                 end
             end
         end
-
+        
     elseif ~isempty(findDae)
         str = 'Please insert the max. length of each element.';
         wL = inputdlg(str,'Length of elements...');
@@ -351,23 +351,23 @@ if ~isempty(meshFilename)
         plotElem = plotElem(:,edit);
     elseif length(volElem.nodes(1,:)) == 4
         edit = [1:3, 1,2,4, 2,3,4];
-        plotElem = plotElem(:,edit); 
+        plotElem = plotElem(:,edit);
     elseif length(volElem.nodes(1,:)) == 8
         edit = [1:4, 1,2,5,6, 2,3,6,7, 3,4,7,8, 1,4,5,8];
         plotElem = plotElem(:,edit);
     end
-
+    
     hold on;
     p = patch('Faces',plotElem,'Vertices',coord.cart,'FaceVertexCData',[0 0 0],'FaceColor','none');
     set(p,'EdgeColor',[0.75 0.75 1]);
     hold on;
     p1 =patch('Faces',surfElem.nodes,'Vertices',coord.cart,'FaceVertexCData',[0 0 0],'FaceColor',[0.9 0.9 0.9]) ;
     set(p1,'FaceAlpha',0.5); set(p1,'EdgeColor',[0 0 1]); hold off;
-
-    set(handles.Status,'String','Your Mesh is on the left side! Now you can select frequency and boundary conditions');
+    
+    set(handles.Status,'String','Your Mesh is on the right side! Now you can select frequency and boundary conditions');
     set(handles.mesh,'UserData',1);
     
-    % Activate nodes for cursor 
+    % Activate nodes for cursor
     dcm_obj = datacursormode;
     set(dcm_obj,'UpdateFcn',@updateCursor);
     datacursormode off;
@@ -375,8 +375,8 @@ if ~isempty(meshFilename)
     % sets maximal frequency
     [~, fMean] = preprocessingMode(coord, volElem);
     set(handles.singleFreq,'String',num2str(ceil(fMean)));
-
-
+    
+    
     if generateGroups==1
         groups = ita_createSurfGroups(coord,surfElem,6);
     end
@@ -397,7 +397,7 @@ if ~isempty(meshFilename)
     
     set(handles.groupName,'String',groupName);
     set(handles.infoBC,'String',groupInfo);
-
+    
     % data
     ModeSolveData.coord=coord;
     ModeSolveData.volElem = volElem;
@@ -457,9 +457,9 @@ set(handles.freqSlide,'UserData',UD);
 function FilenameBC_Callback(hObject, eventdata, handles)
 % gets filename of boundary coundition file
 [FilenameBC,FilepathBC] = uigetfile({'*.txt;*.ita;','BC files - Amittance (*.txt,*.ita)';
-   '*.txt',  'Text files - Admittance (*.txt)'; ...
-   '*.ita', 'ita files - Admittance (*.ita)';
-   '*.*',  'All Files (*.*)'},'Select frequency dependent File');
+    '*.txt',  'Text files - Admittance (*.txt)'; ...
+    '*.ita', 'ita files - Admittance (*.ita)';
+    '*.*',  'All Files (*.*)'},'Select frequency dependent File');
 FilenameBC=[FilepathBC FilenameBC];
 if isempty(strfind(FilenameBC,'.ita')) && isempty(strfind(FilenameBC,'.txt')) ...
         && isempty(strfind(FilenameBC,'.ITA')) && isempty(strfind(FilenameBC,'.TXT'))
@@ -531,18 +531,18 @@ if ~isempty(surfElem)
     hold on;cla;
     p1 =patch('Faces',surfElem.nodes,'Vertices',coord.cart,'FaceVertexCData',[0 0 0],'FaceColor',[0.9 0.9 0.9]) ;
     set(p1,'FaceAlpha',0.5); set(p1,'EdgeColor',[0 0 1]); hold off;hold on;
-
+    
     num = groupMaterial{selected}{1}.ID;
     if strcmp(groupMaterial{selected}{1}.type,'nodes')
         groupCoord = coord.cart(num,:);
-
+        
         p3 = plot3(groupCoord(:,1),groupCoord(:,2),groupCoord(:,3));
         set(p3,'LineStyle','none');set(p3,'Marker','o');
         set(p3,'MarkerFaceColor','g');set(p3,'MarkerEdgeColor','k');
     else
         groupElem = surfElem.nodes(num,:);
         groupCoord = coord.cart(groupElem,:);
-
+        
         p3 = plot3(groupCoord(:,1),groupCoord(:,2),groupCoord(:,3));
         set(p3,'LineStyle','none');set(p3,'Marker','o');
         set(p3,'MarkerFaceColor','g');set(p3,'MarkerEdgeColor','k');
@@ -556,10 +556,10 @@ function solveMode_Callback(hObject, eventdata, handles)
 typeSM = get(hObject,'Value');
 switch typeSM
     case 1; typeName = 'particular solution';
-    case 2; typeName = 'modal analysis (komplex)';
+    case 2; typeName = 'modal analysis (complex)';
     case 3; typeName = 'modal analysis (real)';
     case 4; typeName = 'eigenmodes real';
-    case 5; typeName = 'eigenmodes komplex';
+    case 5; typeName = 'eigenmodes complex';
 end
 
 function freqSlide_Callback(hObject, eventdata, handles)
@@ -577,7 +577,7 @@ if ~isempty(UD)
     set(handles.playFreqPB,'Value', ~stat);
     set(handles.currentFreq,'String',num2str(round(real(UD.gui.Freq(posFreq)*10))/10,4));
     set(handles.freqSlide,'SliderStep',[1/(lFreq),0.1]);
-
+    
     if sum(sum(real(UD.p))) == 0 && sum(sum(imag(UD.p)))== 0, press = zeros(length(UD.p),lFreq);
         set(handles.axes4,'Clim',[-1 1]);colorbar;
     else
@@ -595,7 +595,7 @@ if ~isempty(UD)
     else
         set(handles.farField,'String','');
     end
-
+    
 end
 
 function playFreqPB_Callback(hObject, eventdata, handles)
@@ -604,7 +604,7 @@ buttonPos = get(handles.playFreqPB,'Position');
 UD =  get(handles.freqSlide,'UserData');
 if ~isempty(UD)
     lFreq = length(UD.gui.Freq);
-
+    
     set(handles.freqSlide,'SliderStep',[1/(lFreq),0.1]);
     if sum(sum(real(UD.p))) == 0 && sum(sum(imag(UD.p)))== 0, press = zeros(length(UD.p),lFreq);
         set(handles.axes4,'Clim',[-1 1]);colorbar;
@@ -615,21 +615,21 @@ if ~isempty(UD)
             colorbar;
         end
     end
-
+    
     slidePos = get(handles.freqSlide,'Value');
     if slidePos ==0, i1 = 1;
     elseif slidePos == 1, i1 =1;
     else i1 = ceil(slidePos*lFreq);
     end
-
+    
     % unnecessary picture
     [dataPic, map]=imread('pig.gif','gif','frame','all');
     lPic = size(dataPic,4);i2 = 1;
-
+    
     set(handles.playFreqPB,'String','');
-
+    
     set(handles.playFreqPB,'Position',[buttonPos(1) buttonPos(2)+buttonPos(4)/2-0.327 buttonPos(3) 0.654]);
-
+    
     while i1<=lFreq  && get(handles.playFreqPB,'Value')
         cla;
         set(handles.currentFreq,'String',num2str(round(real(UD.gui.Freq(i1))*10)/10,4));
@@ -641,7 +641,7 @@ if ~isempty(UD)
             set(handles.farField,'String','');
         end
         i1 = i1+1;
-
+        
         % unnecessary picture
         if i2 > lPic, i2 = 1;end
         pic=ind2rgb(dataPic(:,:,1,i2),map);
@@ -656,7 +656,7 @@ if ~isempty(UD)
     end
     set(handles.playFreqPB,'String','Play');
     set(hObject,'CData',[]);
-
+    
 end
 set(handles.playFreqPB,'Position',buttonPos);
 
@@ -704,7 +704,7 @@ UD =  get(handles.freqSlide,'UserData');
 if ~isempty(UD)
     lFreq = length(UD.gui.Freq);
     set(handles.currentFreq,'String',num2str(round(real(UD.gui.Freq(1))*10)/10,4));
-
+    
     if sum(sum(real(UD.p))) == 0 && sum(sum(imag(UD.p)))== 0, press = zeros(length(UD.p),lFreq);
         set(handles.axes4,'Clim',[-1 1]);colorbar;
     else
@@ -712,13 +712,13 @@ if ~isempty(UD)
         cMin = min(min(press));cMax = max(max(press));
         if ~isinf(cMin) && ~isinf(cMax),set(handles.axes4,'Clim',[ cMin cMax]);colorbar;end
     end
-
+    
     slidePos = get(handles.freqSlide,'Value');
     if slidePos ==0, i1 = 1;
     elseif slidePos == 1, i1 =1;
     else i1 = round(slidePos*lFreq);
     end
-
+    
     while i1>0  && get(handles.rwPB,'Value')
         cla;
         set(handles.currentFreq,'String',num2str(round(real(UD.gui.Freq(i1)*10)/10),4));
@@ -747,7 +747,7 @@ UD =  get(handles.freqSlide,'UserData');
 if ~isempty(UD)
     lFreq = length(UD.gui.Freq);
     set(handles.currentFreq,'String',num2str(round(real(UD.gui.Freq(1))*10)/10,4));
-
+    
     if sum(sum(real(UD.p))) == 0 && sum(sum(imag(UD.p)))== 0, press = zeros(length(UD.p),lFreq);
         set(handles.axes4,'Clim',[-1 1]); colorbar;
     else
@@ -755,13 +755,13 @@ if ~isempty(UD)
         cMin = min(min(press));cMax = max(max(press));
         if ~isinf(cMin) && ~isinf(cMax),set(handles.axes4,'Clim',[ cMin cMax]); colorbar;end
     end
-
+    
     slidePos = get(handles.freqSlide,'Value');
     if slidePos ==0, i1 = 1;
     elseif slidePos == 1, i1 =1;
     else i1 = round(slidePos*lFreq);
     end
-
+    
     while i1<=lFreq  && get(handles.ffPB,'Value')
         cla;
         set(handles.currentFreq,'String',num2str(round(real(UD.gui.Freq(i1))*10)/10,4));
@@ -791,7 +791,7 @@ end
 if ~isempty(UD)
     [diff, posFreq] =  min(abs(UD.gui.Freq-plotFreq));
     lFreq = length(UD.gui.Freq);
-
+    
     set(handles.freqSlide,'SliderStep',[1/lFreq,0.1]);
     if sum(sum(real(UD.p))) == 0 && sum(sum(imag(UD.p)))== 0, press = zeros(length(UD.p),1);
         set(handles.axes4,'Clim',[-1 1]);colorbar;
@@ -800,7 +800,7 @@ if ~isempty(UD)
         cMin = min(min(press));cMax = max(max(press));
         if ~isinf(cMin) && ~isinf(cMax),set(handles.axes4,'Clim',[ cMin cMax]);colorbar; end
     end
-
+    
     cla;
     set(handles.currentFreq,'String',num2str(round(real(UD.gui.Freq(posFreq))*10)/10,4));
     set(handles.freqSlide,'Value',posFreq/lFreq);
@@ -815,7 +815,7 @@ if ~isempty(UD)
     ita_GUIModeSolveSpk(UD);
 else
     set(handles.Status,'String','No calculations are done, so you have to chose a mesh and later result data from unv files!');
-
+    
     % set meshfilename
     mesh_Callback(hObject, eventdata, handles)
     meshFilename = get(handles.meshFilename,'String');
@@ -824,12 +824,12 @@ else
     resultFilename=[resultFilepath resultFilename];
     findUnv = findstr(resultFilename,'.unv');
     findIta = findstr(resultFilename,'.ita');
-
+    
     if isempty(findUnv) && isempty(findIta)
         resultFilename=[];
         set(handles.Status,'String','The result file must be an *.unv or *ita file!');
     end
-
+    
     if ~isempty(meshFilename) && ~isempty(resultFilename)
         try
             if strcmp(resultFilename(end-3:end),'.unv')
@@ -854,7 +854,7 @@ else
             else
                 set(handles.Status,'String','Your mesh does not belong to your results!');
             end
-
+            
         catch
             set(handles.Status,'String','This is no unv file 2414!');
         end
@@ -876,7 +876,7 @@ switch button
         itaSaveTmp.freqData = results.p.';
         itaSaveTmp.resultType = 'simulation';
         groupPropTmp=['meshFilename' get(handles.meshFilename,'String') '|'];
-
+        
         for i1 = 1:length(results.groupMaterial)
             if ~isempty(results.groupMaterial{i1}{2})
                 if length(results.groupMaterial{i1}{2}.Value)>1
@@ -888,26 +888,26 @@ switch button
                     ' ' stringBC ' ' results.groupMaterial{i1}{2}.Unit];
             end
         end
-
+        
         itaSaveTmp.comment =groupPropTmp;
         itaSaveTmp.channelUnits(1:length(results.coord.ID)) ={'pa'};
         for i1 =1:length(results.coord.ID)
             itaSaveTmp.channelNames(i1) = {num2str(results.coord.ID(i1))};
         end
         itaSaveTmp.channelCoordinates = results.coord;
-            
+        
         % get result filename
         [resultItaFilename,resultItaFilepath] = uiputfile('*.ita','Save result as *.ita');
         resultItaFilename=[resultItaFilepath resultItaFilename];
-
+        
         % save data
         findIta = findstr(resultItaFilename,'.ita');
-
+        
         if isempty(findIta)
             resultItaFilename=[];
-            set(handles.Status,'String','The ita file must be an *.ita file!');
+            set(handles.Status,'String','The ita file must be a *.ita file!');
         end
-
+        
         if ~isempty(resultItaFilename)
             ita_write(itaSaveTmp,resultItaFilename);
             set(handles.Status,'String',['Your result is written in file' resultItaFilename '!']);
@@ -919,7 +919,7 @@ switch button
         itaSaveTmp.freqData = results.p.';
         itaSaveTmp.resultType = 'simulation';
         groupPropTmp=['meshFilename' get(handles.meshFilename,'String') '|'];
-
+        
         for i1 = 1:length(results.groupMaterial)
             if ~isempty(results.groupMaterial{i1}{2})
                 if length(results.groupMaterial{i1}{2}.Value)>1
@@ -931,18 +931,18 @@ switch button
                     ' ' stringBC ' ' results.groupMaterial{i1}{2}.Unit];
             end
         end
-
+        
         itaSaveTmp.comment =groupPropTmp;
         itaSaveTmp.channelUnits(1:length(results.coord.ID)) ={'pa'};
         for i1 =1:length(results.coord.ID)
             itaSaveTmp.channelNames(i1) = {num2str(results.coord.ID(i1))};
         end
         itaSaveTmp.channelCoordinates = results.coord;
-
+        
         % get result filename
         ita_setinbase('simuRes',itaSaveTmp);
     case 'log-File'
-
+        
         % sets name and dir of logfile
         [logFilename,logFilepath] = uiputfile('*.txt','Save logfile as');
         logFilename=[logFilepath logFilename];
@@ -951,28 +951,28 @@ switch button
             logFilename=[];
             set(handles.Status,'String','The logfile must be a *.txt file!');
         end
-
+        
         UD =  get(handles.freqSlide,'UserData');
         if ~isempty(UD) && ~isempty(logFilename)
             meshFilename = get(handles.meshFilename,'String');
             writeLogFile(logFilename,meshFilename,UD.gui,UD.coord,{UD.volElem, UD.surfElem },UD.groupMaterial);
             set(handles.Status,'String',['Logfile is saved in ' logFilename '!']);
         end
-
+        
     case 'unv-File'
         % sets name and dir of resultfile
         UD =  get(handles.freqSlide,'UserData');
-
+        
         [resultFilename,resultFilepath] = uiputfile('*.unv','Save resultfile as');
         resultFilename=[resultFilepath resultFilename];
-
+        
         findUnv = findstr(resultFilename,'.unv');
-
+        
         if isempty(findUnv)
             resultFilename=[];
-            set(handles.Status,'String','The result file must be an *.unv file!');
+            set(handles.Status,'String','The result file must be a *.unv file!');
         end
-
+        
         if ~isempty(UD) && ~isempty(resultFilename)
             for i1=1:length(UD.gui.Freq)
                 Data.p_real = real(UD.p(:,i1));
@@ -1004,7 +1004,7 @@ findIta = strfind(resultFilename,'.ita');
 
 if (isempty(findUnv)&&isempty(findIta))
     resultFilename=[];
-    set(handles.Status,'String','The result file must be an *.unv file!');
+    set(handles.Status,'String','The result file must be a *.unv file!');
 end
 
 %import data in gui
@@ -1018,7 +1018,7 @@ if ~isempty(meshFilename) && ~isempty(resultFilename)
         else
             set(handles.Status,'String','Your results has to be a *.ita or *.unv file!');
         end
-           
+        
         % summary of data
         UD = get(handles.freqSlide,'UserData');
         if length(UD.coord.ID)==size(results.freqData,2)
@@ -1028,7 +1028,7 @@ if ~isempty(meshFilename) && ~isempty(resultFilename)
             set(handles.freqSlide,'Value',real(results.freqVector(1))/real(results.freqVector(end)));
             set(handles.currentFreq,'String',num2str(round(real(results.freqVector(1))*10)/10,4));
             set(handles.freqSlide,'UserData',UD);
-
+            
             % plot first frequency
             lFreq = length(UD.gui.Freq);
             set(handles.freqSlide,'SliderStep',[1/(lFreq),0.1]);
@@ -1045,13 +1045,13 @@ if ~isempty(meshFilename) && ~isempty(resultFilename)
             set(handles.freqSlide,'Value',1/(lFreq));
             set(handles.SliderStart,'String',num2str(round(real(UD.gui.Freq(1))*10)/10,4));
             set(handles.SliderStop,'String',num2str(round(real(UD.gui.Freq(end))*10)/10,4));
-
+            
             % set filenames
             set(handles.meshFilename,'String',meshFilename);
         else
             set(handles.Status,'String','Your mesh does not belong to your results!');
         end
-
+        
     catch
         set(handles.Status,'String','This is no unv file 2414 or valid *.ita file!');
     end
@@ -1071,9 +1071,9 @@ if ~ischar(currentPS2) && length(currentPS2)>1
     PSNameTmp = currentPS2{pos};
     currentPS = {currentPS{1:pos-1}; currentPS{pos+1:end}};
     currentPS2 = {currentPS2{1:pos-1}; currentPS2{pos+1:end}};
-
+    
     l_infoBC = length(infoBC);
-
+    
     for i1=1:5:l_infoBC
         if strcmp(infoBC{i1} ,PSNameTmp)~=0
             infoBC = {infoBC{1:i1-1,1} infoBC{i1+5:end,1}}';
@@ -1111,7 +1111,7 @@ function lbAddedPS_Callback(hObject, eventdata, handles)
 
 function PointSourceName_Callback(hObject, eventdata, handles)
 lbPS = get(handles.lbAddedPS,'UserData');
-namePS = get(hObject,'String'); 
+namePS = get(hObject,'String');
 UD = get(handles.freqSlide,'UserData');
 if isempty(namePS)
     set(hObject,'String','Name of point source');
@@ -1139,7 +1139,7 @@ else
             set(handles.PointSourceName,'String','Name of point source');
             set(handles.txtCursorID,'String','');
             set(handles.PointSourceID,'String','ID edit');
-
+            
             % neu
             groupInfo = get(handles.infoBC,'String');
             groupName = get(handles.groupName,'String');
@@ -1150,20 +1150,20 @@ else
             else
                 groupTmp.ID = str2double(get(handles.PointSourceCursorID,'String'));
             end
-
+            
             prop.ID = lGroup+1; prop.name =namePS; prop.type = 'Point Source';
             prop.Value =1; prop.zFreqA = []; prop.zFreqBName = 'none';
             groupMaterialTmp = itaMeshBoundaryC(prop);
             groupMaterialTmp.groupID = lGroup+1;
             UD.groupMaterial{end+1} = {groupTmp, groupMaterialTmp};
-
+            
             groupInfo{(lGroup+1)*5-4} = namePS;  % name
             groupName{lGroup+1} = namePS;
             groupInfo{(lGroup+1)*5-3} = 'Point Source';% type
             groupInfo{(lGroup+1)*5-2} = '1';% value
             groupInfo{(lGroup+1)*5-1} = 'none'; % File
             groupInfo{(lGroup+1)*5} = []; % space
-
+            
             set(handles.groupName,'String',groupName);
             set(handles.infoBC,'String',groupInfo);
             set(handles.freqSlide,'UserData',UD);
@@ -1206,10 +1206,10 @@ end
 % %         if strcmp(groupInfo,'Select mesh')
 % %             lGroup = 0;
 % %         end
-% 
+%
 %         groupTmp = itaMeshGroup(1,namePS ,1,'nodes');
 %         groupTmp.ID = id;
-% 
+%
 %         prop.ID = lGroup+1; prop.name =namePS; prop.type = 'Point Source';
 %         prop.Value =1; prop.zFreqA = []; prop.zFreqBName = 'none';
 %         groupMaterialTmp = itaMeshBoundaryC(prop);
@@ -1219,14 +1219,14 @@ end
 %         else
 %             UD.groupMaterial{end+1} = {groupTmp, groupMaterialTmp};
 %         end
-% 
+%
 %         groupInfo{(lGroup+1)*5-4} = namePS;  % name
 %         groupName{lGroup+1} = namePS;
 %         groupInfo{(lGroup+1)*5-3} = 'Point Source';% type
 %         groupInfo{(lGroup+1)*5-2} = '1';% value
 %         groupInfo{(lGroup+1)*5-1} = 'none'; % File
 %         groupInfo{(lGroup+1)*5} = []; % space
-% 
+%
 %         set(handles.groupName,'String',groupName);
 %         set(handles.infoBC,'String',groupInfo);
 %         set(handles.freqSlide,'UserData',UD);
@@ -1265,10 +1265,10 @@ else
         groupInfo = get(handles.infoBC,'String');
         groupName = get(handles.groupName,'String');
         lGroup = length(groupInfo)/5;
-
+        
         groupTmp = itaMeshGroup(1,namePS ,1,'nodes');
         groupTmp.ID = sourceID;
-
+        
         prop.ID = lGroup+1; prop.name =namePS; prop.type = 'Point Source';
         prop.Value =1; prop.zFreqA = []; prop.zFreqBName = 'none';
         groupMaterialTmp = itaMeshBoundaryC(prop);
@@ -1284,7 +1284,7 @@ else
         groupInfo{(lGroup+1)*5-2} = '1';% value
         groupInfo{(lGroup+1)*5-1} = 'none'; % File
         groupInfo{(lGroup+1)*5} = []; % space
-
+        
         set(handles.groupName,'String',groupName);
         set(handles.infoBC,'String',groupInfo);
         set(handles.freqSlide,'UserData',UD);
@@ -1420,7 +1420,7 @@ elseif length(volElem.nodes(1,:)) == 10
     plotElem = plotElem(:,edit);
 elseif length(volElem.nodes(1,:)) == 4
     edit = [1:3, 1,2,4, 2,3,4];
-    plotElem = plotElem(:,edit); 
+    plotElem = plotElem(:,edit);
 elseif length(volElem.nodes(1,:)) == 8
     edit = [1:4, 1,2,5,6, 2,3,6,7, 3,4,7,8, 1,4,5,8];
     plotElem = plotElem(:,edit);
@@ -1433,24 +1433,24 @@ hold on;
 p1 =patch('Faces',surfElem.nodes,'Vertices',coord.cart,'FaceVertexCData',[0 0 0],'FaceColor',[0.9 0.9 0.9]) ;
 set(p1,'FaceAlpha',0.5); set(p1,'EdgeColor',[0 0 1]); hold off;
 
-set(handles.Status,'String','Your Mesh is on the left side! Now you can select frequency and boundary conditions');
+set(handles.Status,'String','Your Mesh is on the right side! Now you can select frequency and boundary conditions');
 set(handles.mesh,'UserData',1);
-    
-% Activate nodes for cursor 
+
+% Activate nodes for cursor
 dcm_obj = datacursormode;
 set(dcm_obj,'UpdateFcn',@updateCursor);
 datacursormode off;
-    
+
 % sets maximal frequency
 [~, fMean] = preprocessingMode(coord, volElem);
 set(handles.singleFreq,'String',num2str(ceil(fMean)));
 
 groups = ita_createSurfGroups(coord,surfElem,6);
-    
+
 % elemente, gruppen... bearbeiten
 groupName = cell(length(groups),1);
 groupInfo = cell(5*length(groups),1);
-    
+
 for i1=1:length(groups)
     groupMaterial{i1}= ita_niceGroupMaterial(coord, volElem, surfElem, groups{i1},i1); %#ok<*AGROW>
     groupName{i1} =  groups{i1}.groupName;
@@ -1460,7 +1460,7 @@ for i1=1:length(groups)
     groupInfo{i1*5-1} = 'none'; % File
     groupInfo{i1*5} = []; % space
 end
-    
+
 set(handles.groupName,'String',groupName);
 set(handles.infoBC,'String',groupInfo);
 
@@ -1534,17 +1534,17 @@ set(handles.rbEditID,'Value',0);
 set(handles.rbCursorID,'Value',1);
 
 if sum(isstrprop(get(handles.xPos,'string'),'xdigit'))>= 1 &&...
-     sum(isstrprop(get(handles.yPos,'string'),'xdigit'))>= 1 &&...
-     sum(isstrprop(get(handles.zPos,'string'),'xdigit'))>= 1
-pos = zeros(1,3);
-pos(1) = str2double(get(handles.xPos,'string'));
-pos(2) = str2double(get(handles.yPos,'string'));
-pos(3) = str2double(get(handles.zPos,'string'));
-
-posC = itaCoordinates;
-posC.cart = pos;
-
-
+        sum(isstrprop(get(handles.yPos,'string'),'xdigit'))>= 1 &&...
+        sum(isstrprop(get(handles.zPos,'string'),'xdigit'))>= 1
+    pos = zeros(1,3);
+    pos(1) = str2double(get(handles.xPos,'string'));
+    pos(2) = str2double(get(handles.yPos,'string'));
+    pos(3) = str2double(get(handles.zPos,'string'));
+    
+    posC = itaCoordinates;
+    posC.cart = pos;
+    
+    
     pos2 = UD.coord.findnearest(posC);
     %pos2 = find( (UD.coord.cart(:,1)==pos(1)) & (UD.coord.cart(:,2)==pos(2)) & (UD.coord.cart(:,3)==pos(3)), 1);
     %id = UD.coord.ID(pos2);
@@ -1568,13 +1568,13 @@ posC.cart = pos;
         groupInfo = get(handles.infoBC,'String');
         groupName = get(handles.groupName,'String');
         lGroup = length(groupInfo)/5;
-%         if strcmp(groupInfo,'Select mesh')
-%             lGroup = 0;
-%         end
-
+        %         if strcmp(groupInfo,'Select mesh')
+        %             lGroup = 0;
+        %         end
+        
         groupTmp = itaMeshGroup(1,namePS ,1,'nodes');
         groupTmp.ID = id;
-
+        
         prop.ID = lGroup+1; prop.name =namePS; prop.type = 'Point Source';
         prop.Value =1; prop.zFreqA = []; prop.zFreqBName = 'none';
         groupMaterialTmp = itaMeshBoundaryC(prop);
@@ -1584,14 +1584,14 @@ posC.cart = pos;
         else
             UD.groupMaterial{end+1} = {groupTmp, groupMaterialTmp};
         end
-
+        
         groupInfo{(lGroup+1)*5-4} = namePS;  % name
         groupName{lGroup+1} = namePS;
         groupInfo{(lGroup+1)*5-3} = 'Point Source';% type
         groupInfo{(lGroup+1)*5-2} = '1';% value
         groupInfo{(lGroup+1)*5-1} = 'none'; % File
         groupInfo{(lGroup+1)*5} = []; % space
-
+        
         set(handles.groupName,'String',groupName);
         set(handles.infoBC,'String',groupInfo);
         set(handles.freqSlide,'UserData',UD);
@@ -1599,9 +1599,9 @@ posC.cart = pos;
     else
         set(handles.Status,'String','Please select a name for your point source!');
     end
- set(handles.xPos,'string','x')
- set(handles.yPos,'string','y')
- set(handles.zPos,'string','z')
+    set(handles.xPos,'string','x')
+    set(handles.yPos,'string','y')
+    set(handles.zPos,'string','z')
 end
 
 function zPos_Callback(hObject, eventdata, handles)
@@ -1654,7 +1654,7 @@ function listbox8_Callback(hObject, eventdata, handles)
 % % hObject    handle to lbAddedPS (see GCBO)
 % % eventdata  reserved - to be defined in a future version of MATLAB
 % % handles    empty - handles not created until after all CreateFcns called
-% 
+%
 % % Hint: listbox controls usually have a white background on Windows.
 % %       See ISPC and COMPUTER.
 % if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
