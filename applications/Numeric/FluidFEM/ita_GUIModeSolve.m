@@ -319,11 +319,17 @@ if ~isempty(meshFilename)
         surfElem = makeShellElements(volElem);
         generateGroups = 1;
         
-    else %.mat-file        
+    else %.mat-file
         classes = load(meshFilename);
         fnames = fieldnames(classes);
         %supported file?
-        if length(fnames) == 2 && isa(classes.(fnames{1}),...
+        if isa(classes.(fnames{1}),'itaMesh')
+            mesh = classes.(fnames{1});
+            coord = mesh.nodes;
+            volElem = mesh.volumeElements;
+            surfElem = mesh.shellElements;
+            generateGroups = 1;
+        elseif length(fnames) == 2 && isa(classes.(fnames{1}),...
                 'itaMeshNodes') && isa(classes.(fnames{2}), 'itaMeshElements')
             coord = classes.coord;
             volElem = classes.elem;
