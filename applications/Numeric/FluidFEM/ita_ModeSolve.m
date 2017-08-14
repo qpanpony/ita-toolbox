@@ -2,7 +2,7 @@ function varargout = ita_ModeSolve(varargin)
 % This function is the main function from the fe solver.
 % It can be used from gui or by manual data (see function manualInput).
 % When this function is used by gui no data is given back and when it is
-% used by manual data input a struct with the calculated pressure 
+% used by manual data input a struct with the calculated pressure
 % (ModeSolveOut.p) and solver data (ModeSolveOut.data) is given back
 
 % <ITA-Toolbox>
@@ -14,17 +14,22 @@ function varargout = ita_ModeSolve(varargin)
 %% object of coordinates, elements, groups, group porperties and fluid
 sArgs  = struct('pos1_data',[], 'display', 1, 'SystemMatrix',[]);
 [GUI,sArgs]   = ita_parse_arguments(sArgs,varargin);
-            
+
 if ~isstruct(GUI)
     error('Wrong input parameter!')
 end
-structField = fieldnames(GUI);  
+structField = fieldnames(GUI);
 if isempty(strfind(structField{1},'coord')) % old or manual version
     ita_ModeSolveManualInput(GUI);
     [coord, elements, groupMaterial] = niceObject(GUI.meshFilename, GUI.propertyFilename); % generate coordinate, element and group material objects
-    if size(elements{2}.nodes,2)<10, elements = {elements{1} elements{2}};
-    else elements = {elements{2} elements{1}}; end
-    if nargout ~= 1, error('Wrong number of outputs'); end
+    if size(elements{2}.nodes,2)<10
+        elements = {elements{1} elements{2}};
+    else
+        elements = {elements{2} elements{1}};
+    end
+    if nargout ~= 1
+        error('Wrong number of outputs');
+    end
 else % GUI version: This version uses renumberated groups and elements
     coord = GUI.coord;
     elements ={GUI.volElem, GUI.surfElem};
@@ -37,12 +42,13 @@ fluid = itaMeshFluid(1,'ModeSolve',343.7,1.2);
 %% System matrices
 if isempty(sArgs.SystemMatrix)
     SysMat = sys_mat(coord, elements, groupMaterial);
-else SysMat = sArgs.SystemMatrix;
+else
+    SysMat = sArgs.SystemMatrix;
 end
 %% Pressure calculation
 if strcmp(GUI.solveMode,'particular') % particular solution of fe- helmholtzequation
     [p] = particularS(GUI,SysMat, coord, elements, groupMaterial, fluid);
-elseif strcmp(GUI.solveMode,'komplex') || strcmp(GUI.solveMode,'real')  % pressure calculation with modalanalysis
+elseif strcmp(GUI.solveMode,'complex') || strcmp(GUI.solveMode,'real')  % pressure calculation with modalanalysis
     dMax = sqrt((max(coord.x)-min(coord.x))^2+(max(coord.y)-min(coord.y))^2+(max(coord.z)-min(coord.z))^2);
     [p, GUI] = ModalAnalysis(SysMat, GUI, dMax, groupMaterial, fluid);
 else  % eigenvalue and frequency calculation
@@ -53,7 +59,6 @@ end
 
 %% Output
 if isempty(strfind(structField{1},'coord')) || sArgs.display == 0 % old or manual version
-    
     pRes = itaResult;
     pRes.freqVector = GUI.Freq';
     pRes.freqData   = p.';

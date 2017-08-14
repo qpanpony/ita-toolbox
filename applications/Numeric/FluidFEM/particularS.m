@@ -55,7 +55,8 @@ for i1 = 1:length(GUI.Freq) % loop over all frequencies
             p_knownElem = unique(elements{2}(groupMaterial{dirichlet(i4,1)}.ID,:));
             p_unknownElem(p_knownElem) = [];
 
-            K_temp =K; l_knownElem = length(p_knownElem);
+            K_temp = K;
+            l_knownElem = length(p_knownElem);
             K_temp(p_knownElem,p_knownElem) = eye(l_knownElem,l_knownElem);
             K_temp(p_knownElem,p_unknownElem) = zeros(length(p_knownElem),length(p_unknownElem));
             K_temp(p_unknownElem,p_knownElem) = zeros(length(p_unknownElem),length(p_knownElem));
@@ -78,6 +79,6 @@ end
 t3 = toc;
 disp('Time particular');
 disp('-------------------------------------------------------------------');
-disp(['Gesamt   : ' num2str(t3)]);
+disp(['Total   : ' num2str(t3)]);
 disp(' ');
 close(h);
