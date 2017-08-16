@@ -80,21 +80,14 @@ surfElements =[];
 volumeNodes = volumeElements.nodes;
 for i1=1:volumeElements.nElements
     nodes_temp = volumeNodes(i1,:);
-    for i2=1:n_surf
-        list((i1-1)*n_surf+i2,:) = nodes_temp(Surf(i2,:));
-    end
+    list((i1-1)*n_surf+(1:n_surf),:) = nodes_temp(Surf);
 end
 
 list_sort = sort(list,2);
 % sort out elements
 while ~isempty(list)
-    pos=[];
     elem_temp =list_sort(1,:);
-    for i2=1:size(list_sort,1)
-        if length(find(elem_temp==list_sort(i2,:)))==n_nodes;
-            pos =[pos,i2]; %#ok<AGROW>
-        end
-    end
+    pos = find(sum(abs(elem_temp-list_sort),2)==0);
     if length(pos)==1
         surfElements = [surfElements;list(1,:)]; %#ok<AGROW>
         list_sort(1,:)=[];
