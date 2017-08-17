@@ -17,13 +17,13 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
         
         sArgs_default_motor = struct( ...
             'wait',             true,       ...
-            'speed',            2,          ...
+            'speed',            3,          ...
             'VST',              'adaptiv',  ...
             'limit',            true,      ...
             'continuous',       false,      ...
             'absolut',          true,      ...
             'closed_loop',      false,       ...
-            'acceleration_ramp',1,  ...
+            'acceleration_ramp',10,  ...
             'gear_ratio',       5,        ...
             'current',          100,        ...
             'ramp_mode',        2,           ...
@@ -45,7 +45,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             this.motorID = 8;
             this.motorName = 'HRTFArc';
             
-            this.motorLimits = [-15 375]; % the motor can do a whole rotation + ~15 deg to both sides
+            this.motorLimits = [-20 380]; % the motor can do a whole rotation + ~15 deg to both sides
         end
         
         function this = init(this)
@@ -108,7 +108,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
 %             motorControl.add_to_commandlist(sprintf('#%dl%d\r'         , this.motorID, 5154));
 
             % set lower speed to 1 Hz/sec (lowest value)
-            motorControl.add_to_commandlist(sprintf('#%du1\r'          , this.motorID));
+            motorControl.add_to_commandlist(sprintf('#%du3\r'          , this.motorID));
             
         end
         
@@ -297,9 +297,9 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             % Choose ramp mode: (0=trapez, 1=sinus-ramp, 2=jerkfree-ramp):
             motorControl.add_to_commandlist(sprintf('#%d:ramp_mode=%d\r', this.motorID, this.sArgs_motor.ramp_mode));
 %             % Set maximum acceleration jerk:
-             motorControl.add_to_commandlist(sprintf('#%d:b=1\r'       , this.motorID));
+             motorControl.add_to_commandlist(sprintf('#%d:b=20\r'       , this.motorID));
 %             % Use acceleration jerk as braking jerk:
-            motorControl.add_to_commandlist(sprintf('#%d:B=0\r'         , this.motorID));
+            motorControl.add_to_commandlist(sprintf('#%d:B=20\r'         , this.motorID));
             % Closed_loop?
             %this.sArgs_motor.closed_loop = true; % DEBUG!
             if this.sArgs_motor.closed_loop == true
@@ -414,7 +414,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             % Set acceleration ramp directly
              motorControl.add_to_commandlist(sprintf('#%d:accel%.0f\r'           , this.motorID, this.sArgs_motor.acceleration_ramp));
             % Brake ramp:
-            motorControl.add_to_commandlist(sprintf('#%dB0\r'              , this.motorID));
+            motorControl.add_to_commandlist(sprintf('#%d:decel10\r'              , this.motorID));
             % Zero menas equal to acceleration ramp!
             
             ret = true;
