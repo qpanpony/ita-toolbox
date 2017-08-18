@@ -54,7 +54,7 @@ classdef itaMeshGroup < itaMeta
                     this.mID = 1:varargin{1};
                 elseif isstruct(varargin{1}) % Struct input/convert
                     fieldName = fieldnames(varargin{1});
-                    for ind = 1:numel(fieldName);
+                    for ind = 1:numel(fieldName)
                         try
                             this.(fieldName{ind}) = varargin{1}.(fieldName{ind});
                         catch errmsg

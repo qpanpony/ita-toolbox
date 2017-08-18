@@ -128,8 +128,8 @@ classdef  itaMeshBoundaryC < itaMeshProperties
                 case 'Absorption', value ='';
                 case 'Displacement', value ='m';
                 case 'Velocity', value ='m/s';
-                case 'Acceleration', value ='m/s²';
-                case 'Point Source', value ='m³/s';
+                case 'Acceleration', value ='m/s^2';
+                case 'Point Source', value ='m^3/s';
                 case 'Pressure', value ='Pa';
             end
             
