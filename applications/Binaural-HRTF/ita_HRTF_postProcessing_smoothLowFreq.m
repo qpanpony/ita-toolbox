@@ -10,7 +10,7 @@ function varargout = ita_HRTF_postProcessing_smoothLowFreq(varargin)
 %   Options (default):
 %           'cutOffFrequency' (100) : The lowest point of measured data
 %           'upperFrequency' (300)  : Frequency information up to this frequency is used during interpolation but not changed
-%           'opt3' (defaultopt1) : description
+%           'timeShift' (1)         : description
 %
 %  Example:
 %   audioObjOut = ita_HRTF_postProcessing_smoothLowFreq(audioObjIn,'cutOffFrequency',100)
@@ -33,7 +33,7 @@ function varargout = ita_HRTF_postProcessing_smoothLowFreq(varargin)
 % all fixed inputs get fieldnames with posX_* and dataTyp
 % optonal inputs get a default value ('comment','test', 'opt1', true)
 % please see the documentation for more details
-sArgs        = struct('pos1_data','itaAudio', 'cutOffFrequency', 100,'upperFrequency',300);
+sArgs        = struct('pos1_data','itaAudio', 'cutOffFrequency', 100,'upperFrequency',300,'timeShift',1);
 [input,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 %% body
@@ -41,8 +41,13 @@ sArgs        = struct('pos1_data','itaAudio', 'cutOffFrequency', 100,'upperFrequ
 % for multi instances, do a for loop
 for instIndex = 1:length(input)
   % first, shift the HRTF to 0. This will allow better phase interpolation
-  shiftSamples = ita_start_IR(input(instIndex));
-  [tmp] = ita_time_shift(input(instIndex),-shiftSamples,'samples');
+
+  if sArgs.timeShift
+    shiftSamples = ita_start_IR(input(instIndex));
+    [tmp] = ita_time_shift(input(instIndex),-shiftSamples,'samples');
+  else
+      tmp = input(instIndex);
+  end
 
   
   % interpolate to 0
@@ -56,10 +61,13 @@ for instIndex = 1:length(input)
   tmp.freqData(1:binIdxAtUpper,:) = interpValues1.*exp(1i.*interpPhase);
 
   %% Add history line
-  input = ita_metainfo_add_historyline(input,mfilename,varargin);
-
-  % shift the audio back to its original position
-  data_full(instIndex) = ita_time_shift(tmp,shiftSamples);
+  tmp = ita_metainfo_add_historyline(input,mfilename,varargin);
+  if sArgs.timeShift
+      % shift the audio back to its original position
+      data_full(instIndex) = ita_time_shift(tmp,shiftSamples);
+  else
+     data_full(instIndex) = tmp; 
+  end
 
 end
 
