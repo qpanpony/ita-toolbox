@@ -63,7 +63,7 @@ if isempty(strfind(structField{1},'coord')) || sArgs.display == 0 % old or manua
     pRes.freqVector = GUI.Freq';
     pRes.freqData   = p.';
     pRes.resultType = 'simulation';
-    pRes.channelUnits(1:coord.nPoints) ={'pa'};
+    pRes.channelUnits(1:coord.nPoints) ={'Pa'};
     
     for i1 =1:coord.nPoints
         pRes.channelNames(i1) = {num2str(coord.ID(i1))};
