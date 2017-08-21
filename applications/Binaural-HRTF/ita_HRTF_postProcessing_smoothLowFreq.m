@@ -10,7 +10,8 @@ function varargout = ita_HRTF_postProcessing_smoothLowFreq(varargin)
 %   Options (default):
 %           'cutOffFrequency' (100) : The lowest point of measured data
 %           'upperFrequency' (300)  : Frequency information up to this frequency is used during interpolation but not changed
-%           'timeShift' (1)         : description
+%           'timeShift' (0)         : Time shift the data to zero to help
+%                                       with unwrap phase
 %
 %  Example:
 %   audioObjOut = ita_HRTF_postProcessing_smoothLowFreq(audioObjIn,'cutOffFrequency',100)
@@ -33,7 +34,7 @@ function varargout = ita_HRTF_postProcessing_smoothLowFreq(varargin)
 % all fixed inputs get fieldnames with posX_* and dataTyp
 % optonal inputs get a default value ('comment','test', 'opt1', true)
 % please see the documentation for more details
-sArgs        = struct('pos1_data','itaAudio', 'cutOffFrequency', 100,'upperFrequency',300,'timeShift',1);
+sArgs        = struct('pos1_data','itaAudio', 'cutOffFrequency', 100,'upperFrequency',300,'timeShift',0);
 [input,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 %% body
@@ -54,17 +55,17 @@ for instIndex = 1:length(input)
   binIdxAtLower    = tmp.freq2index(sArgs.cutOffFrequency);
   binIdxAtUpper    = tmp.freq2index(sArgs.upperFrequency);
   dataFromLowerToUpper = tmp.freqData(binIdxAtLower:binIdxAtUpper,:);
-  interpValues1 = interp1([0 tmp.freqVector(binIdxAtLower:binIdxAtUpper)], [repmat(1,1,tmp.nChannels); abs(dataFromLowerToUpper)], tmp.freqVector(1:binIdxAtUpper));
+  interpValues1 = interp1([0 tmp.freqVector(binIdxAtLower:binIdxAtUpper)], [ones(1,tmp.nChannels); abs(dataFromLowerToUpper)], tmp.freqVector(1:binIdxAtUpper));
   interpPhase = interp1(tmp.freqVector(binIdxAtLower:binIdxAtUpper),unwrap(angle(dataFromLowerToUpper)),tmp.freqVector(1:binIdxAtUpper),'linear','extrap');
 
   % set the interpolated values into the shifted audio
   tmp.freqData(1:binIdxAtUpper,:) = interpValues1.*exp(1i.*interpPhase);
 
   %% Add history line
-  tmp = ita_metainfo_add_historyline(input,mfilename,varargin);
+  tmp = ita_metainfo_add_historyline(tmp,mfilename,varargin);
   if sArgs.timeShift
       % shift the audio back to its original position
-      data_full(instIndex) = ita_time_shift(tmp,shiftSamples);
+      data_full(instIndex) = ita_time_shift(tmp,shiftSamples,'samples');
   else
      data_full(instIndex) = tmp; 
   end
