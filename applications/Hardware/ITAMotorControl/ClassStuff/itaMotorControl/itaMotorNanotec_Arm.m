@@ -81,6 +81,10 @@ classdef itaMotorNanotec_Arm < itaMotorNanotec
            name = this.motorName; 
         end
         
+        function disableReference(this,value)
+
+        end
+        
         function sendConfiguration(this)
             motorControl = this.mMotorControl;
             motorControl.add_to_commandlist(sprintf('#%d:port_in_a7\r'  , this.motorID));

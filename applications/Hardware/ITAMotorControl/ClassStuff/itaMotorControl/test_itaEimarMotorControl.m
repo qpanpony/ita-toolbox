@@ -209,12 +209,14 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             speed   =   360/(numRepetitions*timePerRepetition);
 
             % preangletime
-            preAngleTime = 2/64*numRepetitions; % it takes 2 seconds to start recording
-            preAngle = preAngleTime*speed;
+            preAngle = 45;
+            preAngleTime = preAngle/speed; % it takes 2 seconds to start recording
 
-            preAngle = min(preAngle,20);
-            preAngle = max(preAngle,20);
-            numTotalRepetitions = numRepetitions+ceil(preAngleTime/(timePerRepetition))+9;
+            postAngle = 10;
+            postAngleTime = postAngle/speed;
+            
+            additionalReps = ceil((postAngleTime+preAngleTime + 1)/timePerRepetition);
+            numTotalRepetitions = numRepetitions+additionalReps;
             this.measurementSetup.repetitions = numTotalRepetitions;
             
             %prepare motors for continuous measurement
@@ -236,7 +238,7 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
         function [result, result_raw] = runContinuousMeasurement(this)
             this.mMotorControl.setWait(false);
             this.mMotorControl.startContinuousMoveNow;
-            pause(1);
+            pause(0.1);
             result_raw = this.measurementSetup.run_raw_imc;
             result = this.measurementSetup.deconvolve(result_raw);
 %             this.stop;
