@@ -13,8 +13,8 @@ l_N  = length(coord.ID);  % number of nodes
 dirichlet = zeros(length(groupMaterial),2); % checks if a pressure boundary condition exists
 omega = 2*pi*GUI.Freq;
 
-h = waitbar(0,'Particular: Pressure calculation is running...');
-     tic
+h = itaWaitbar(length(GUI.Freq),'Pressure calculation ...','Particular Solution');
+tic
 %% Main
 for i1 = 1:length(GUI.Freq) % loop over all frequencies
     % init admittancematrix and weightvector
@@ -43,7 +43,7 @@ for i1 = 1:length(GUI.Freq) % loop over all frequencies
     
     if nnz(dirichlet) == 0 && nnz(f)==0 % neumann boundary condition
         warning('ModeSolve:: No excitation'); %#ok<*WNTAG>
-        p=zeros(length(f),i1);      
+        p=zeros(length(f),i1);
     elseif nnz(dirichlet(:,1)) ~= 0 % dirichlet boundary condition
         for i4 =1:nnz(dirichlet(:,1))
             if i4>1
@@ -51,16 +51,16 @@ for i1 = 1:length(GUI.Freq) % loop over all frequencies
             end
             K = (SysMat.S-(omega(i1)./fluid.c)^2.*SysMat.M+1j*omega(i1)*fluid.rho.*A);
             p_unknownElem = zeros(length(coord.x),1);
-
+            
             p_knownElem = unique(elements{2}(groupMaterial{dirichlet(i4,1)}.ID,:));
             p_unknownElem(p_knownElem) = [];
-
+            
             K_temp = K;
             l_knownElem = length(p_knownElem);
             K_temp(p_knownElem,p_knownElem) = eye(l_knownElem,l_knownElem);
             K_temp(p_knownElem,p_unknownElem) = zeros(length(p_knownElem),length(p_unknownElem));
             K_temp(p_unknownElem,p_knownElem) = zeros(length(p_unknownElem),length(p_knownElem));
-
+            
             p_const = sparse(1,length(coord.x));
             p_const(p_knownElem) = dirichlet(i4,2);
             p_const(p_unknownElem) = f(p_unknownElem)-K(p_unknownElem,p_knownElem)*p_const(p_knownElem).';
@@ -68,17 +68,15 @@ for i1 = 1:length(GUI.Freq) % loop over all frequencies
             p = K_temp\p_const.';
         end
     else % neumann boundary condition
-        
         p(:,i1) = (SysMat.S-(omega(i1)./fluid.c)^2.*SysMat.M+1j.*omega(i1).*fluid.rho*A)\(omega(i1)^2.*fluid.rho.*f);
-
     end
     
-    waitbar(i1/length(GUI.Freq));
+    h.inc();
 end
+close(h);
 
-t3 = toc;
+t = toc;
 disp('Time particular');
 disp('-------------------------------------------------------------------');
-disp(['Total   : ' num2str(t3)]);
+disp(['Total   : ' num2str(t)]);
 disp(' ');
-close(h);
