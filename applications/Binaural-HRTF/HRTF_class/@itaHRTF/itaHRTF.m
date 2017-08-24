@@ -532,6 +532,7 @@ classdef  itaHRTF < itaAudio
                 
                 % data
                 % the data is saved as positions x channel x filterdata
+                this.samplingRate = handleSofa.Data.SamplingRate;
                 
                 data = zeros(size(handleSofa.Data.IR,3),numPositions*2);
                 data(:,1:2:numPositions*2) = squeeze(handleSofa.Data.IR(:,1,:)).';
