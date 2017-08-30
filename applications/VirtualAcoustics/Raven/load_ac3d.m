@@ -289,7 +289,27 @@ classdef load_ac3d
         function S = getSurface(obj)
             S = obj.totalSurface;
         end
-       
+        
+        function SMat = getMaterialSurface(obj,materialName)
+            
+             % sometimes multiple materials with the same name are defined. in this case, sum up all of them
+            matchingMatIDs = [];   
+            SMat = 0;
+            for matID = 1:length(obj.bcGroups)
+                if (strcmp(obj.bcGroups{matID}.name, materialName))
+                    matchingMatIDs = [matchingMatIDs matID];
+                    SMat = SMat + obj.bcGroups{matID}.surface;     
+                end
+            end
+            
+            if isempty(matchingMatIDs)
+                error(['Material "' materialName '" is not part of the model. Please check materialname and or your *.ac file']);
+            end
+            
+           
+        end
+        
+        
         function [A, S] = getEquivalentAbsorptionArea_sabine(obj, material_path, portal_surface_materials)
             if nargin < 2
                 material_path = '..\RavenDatabase\MaterialDatabase';
