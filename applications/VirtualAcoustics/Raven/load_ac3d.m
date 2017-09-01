@@ -38,6 +38,7 @@ classdef load_ac3d
             % (works also with Matlab 2016 and newer)
             
             if exist(fullFilename, 'file')
+                obj.modelFilename = fullFilename;
                 fileID = fopen(fullFilename);
                 allRows = textscan(fileID, '%s','Delimiter', '\n');
                 
