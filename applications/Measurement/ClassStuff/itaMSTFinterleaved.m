@@ -455,7 +455,7 @@ classdef itaMSTFinterleaved < itaMSTF
             inputvec = this.inputChannels;
             % Use first inputchannel!
             this.inputChannels = inputvec(1);
-            % Measure nonlins f�r alle LS einzeln:
+            % Measure nonlins f???r alle LS einzeln:
             for idx = 1:numel(outputvec)
                 this.outputChannels = outputvec(idx);
                 nonlinearities = this.run_HD(varargin{:});
@@ -643,8 +643,8 @@ classdef itaMSTFinterleaved < itaMSTF
                       resultsMI(index) = result;
                       resultsMI(index).timeData = timeData(:,index:nOutputChannels:end);
                       repmatFactor = resultsMI(index).nChannels/result.nChannels;
-                      resultsMI(index).channelNames = repmat(result.channelNames,repmatFactor,1);
-                      resultsMI(index).channelUnits = repmat(result.channelUnits,repmatFactor,1);
+                      resultsMI(index).channelNames = repelem(result.channelNames,repmatFactor,1);
+                      resultsMI(index).channelUnits = repelem(result.channelUnits,repmatFactor,1);
                    end
                    result = resultsMI;
                 else

@@ -29,7 +29,8 @@ classdef itaMotorNanotec < itaHandle
         % basic moves: requires execution to halt while something is moving
         this = moveToReferencePosition(this);
         this = startMoveToPosition(this);
-        
+        disableReference(this,value);
+%         this = freeFromStopButton(this);
         ret = prepareMove(this,position,varargin);
     end    
 end

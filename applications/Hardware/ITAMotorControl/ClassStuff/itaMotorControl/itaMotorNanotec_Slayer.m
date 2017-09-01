@@ -99,6 +99,10 @@ classdef itaMotorNanotec_Slayer < itaMotorNanotec
 
         end
         
+        function disableReference(this,value)
+
+        end
+        
         function this = moveToReferencePosition(this)
             
             % Prepare reference move (arm)

@@ -136,6 +136,9 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
              this.mMotorControl.add_to_commandlist(sprintf('#%dA\r'        , this.motorID));
         end
         
+        function disableReference(this,value)
+
+        end
         
         function started = prepareMove(this,position,varargin)
            

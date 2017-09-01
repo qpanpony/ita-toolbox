@@ -23,8 +23,9 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             'continuous',       false,      ...
             'absolut',          true,      ...
             'closed_loop',      false,       ...
-            'acceleration_ramp',1,  ...
-            'gear_ratio',       5,        ...
+            'acceleration_ramp',20,  ...
+            'decceleration_ramp',20, ...
+            'gear_ratio',       80,        ...
             'current',          100,        ...
             'ramp_mode',        2,           ...
             'P',                400, ...
@@ -44,14 +45,21 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             
             this.motorID = 8;
             this.motorName = 'HRTFArc';
-            
-            this.motorLimits = [-15 375]; % the motor can do a whole rotation + ~15 deg to both sides
+            this.motorLimits = [-45 330]; % the motor can do a whole rotation + ~15 deg to both sides
         end
         
         function this = init(this)
             
         end
         
+        
+        function disableReference(this,value)
+            if value
+                this.mMotorControl.sendControlSequenceAndPrintResults(':port_in_a=0');
+            else
+                this.mMotorControl.sendControlSequenceAndPrintResults(':port_in_a=7'); 
+            end
+        end
         function stop(this)
             % DO NOT ASK - JUST STOP ALL MOTORS!
             for i = 1:5 % repeat several times to ensure that every motor stops!
@@ -62,6 +70,22 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                 ret = this.mSerialObj.recvAsynch;
             end    
         end
+        
+%         function freeFromStopButton(this)
+%            res = motorControl.sendControlSequenceAndPrintResults('Zd');
+%            resp = res{end};
+%            direction = str2double(resp(end));
+%            
+%            if direction == 0
+%               direction = -1;
+%            else
+%                direction = 1;
+%            end
+%            this.allowMoveOverRefButton(1);
+%            this.prepareMove(direction*20,'absolut',false,'speed',10);
+%            this.startMoveToPosition();
+%            this.allowMoveOverRefButton(0);
+%         end
         
         
         function getStatus(this)
@@ -88,6 +112,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
         function sendConfiguration(this)
             % Set Input 1 as external Referenceswitch
             motorControl = this.mMotorControl;
+            motorControl.add_to_commandlist(sprintf('#%d:port_in_a=7\r'  , this.motorID));
             motorControl.add_to_commandlist(sprintf('#%d:port_in_b=7\r'  , this.motorID));
             motorControl.add_to_commandlist(sprintf('#%d:port_out_a=1\r' , this.motorID));
             motorControl.add_to_commandlist(sprintf('#%d:port_out_a=2\r' , this.motorID));
@@ -105,10 +130,10 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             % endschalterverhalten: the ref manual is not very clear. bit 0
             % is the most important bit. all not listed bits are 0 
             % defValue bin2dec('0100010000100010') = 17442
-%             motorControl.add_to_commandlist(sprintf('#%dl%d\r'         , this.motorID, 5154));
-
+            this.allowMoveOverRefButton(0);
+            
             % set lower speed to 1 Hz/sec (lowest value)
-            motorControl.add_to_commandlist(sprintf('#%du1\r'          , this.motorID));
+            motorControl.add_to_commandlist(sprintf('#%du3\r'          , this.motorID));
             
         end
         
@@ -117,25 +142,29 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             motorControl = this.mMotorControl;
             % Turn + some degrees in case we are already at the end of the
             % reference switch or already passed it:
-            this.prepareMove(10,'absolut',false,'speed',1);
-            this.startMoveToPosition();
-            if this.mMotorControl.send_commandlist(5);
-                ita_verbose_info('HRTFarc started move...',2);
-            end
-            tmpWait = motorControl.wait;
-            motorControl.wait = true;
-            motorControl.wait4everything;
-            motorControl.wait = tmpWait;
+%             this.prepareMove(20,'absolut',false,'speed',10);
+%             this.startMoveToPosition();
+%             if this.mMotorControl.send_commandlist(5);
+%                 ita_verbose_info('HRTFarc started move...',2);
+%             end
+%             tmpWait = motorControl.wait;
+%             motorControl.wait = true;
+%             motorControl.wait4everything;
+%             motorControl.wait = tmpWait;
+            this.disableReference(0);
             % Call Reference-Mode:
             motorControl.add_to_commandlist(sprintf('#%dp=4\r'          , this.motorID));
             % Set direction:
             motorControl.add_to_commandlist(sprintf('#%dd=1\r'          , this.motorID));
             % Calculate and set lower speed:
-%             stepspersecond      =   round(this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
-            motorControl.add_to_commandlist(sprintf('#%du=%d\r'       , this.motorID, 1));
+            stepspersecond      =   round(this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
+            motorControl.add_to_commandlist(sprintf('#%du=%d\r'       , this.motorID, stepspersecond));
             % Calculate and set upper speed:
             stepspersecond      =   round(this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
             motorControl.add_to_commandlist(sprintf('#%do=%d\r'       , this.motorID, stepspersecond));
+            % set decel to a high value so the switch is not overrun
+            motorControl.add_to_commandlist(sprintf('#%d:decel1%.0f\r'              , this.motorID,100));
+ 
             % Start reference move:
             motorControl.add_to_commandlist(sprintf('#%dA\r'            , this.motorID));
 
@@ -192,6 +221,21 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
     
     methods(Hidden = true)
        
+        function this = allowMoveOverRefButton(this,value)
+           motorControl = this.mMotorControl;
+           if value
+              motorControl.sendControlSequenceAndPrintResults('l17442'); 
+           else
+              motorControl.sendControlSequenceAndPrintResults('l5154'); 
+           end
+%            Frei rückwärts
+%            5154
+%            Stop
+%            9250
+        end
+        
+        
+        
         function ret = prepare_move(this, angle, varargin)
             %   This function prepares the moves of the turntable, counterclockwise for a negative
             %   angle and clockwise for a positive angle.
@@ -297,7 +341,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             % Choose ramp mode: (0=trapez, 1=sinus-ramp, 2=jerkfree-ramp):
             motorControl.add_to_commandlist(sprintf('#%d:ramp_mode=%d\r', this.motorID, this.sArgs_motor.ramp_mode));
 %             % Set maximum acceleration jerk:
-             motorControl.add_to_commandlist(sprintf('#%d:b=1\r'       , this.motorID));
+             motorControl.add_to_commandlist(sprintf('#%d:b=4\r'       , this.motorID));
 %             % Use acceleration jerk as braking jerk:
             motorControl.add_to_commandlist(sprintf('#%d:B=0\r'         , this.motorID));
             % Closed_loop?
@@ -414,7 +458,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             % Set acceleration ramp directly
              motorControl.add_to_commandlist(sprintf('#%d:accel%.0f\r'           , this.motorID, this.sArgs_motor.acceleration_ramp));
             % Brake ramp:
-            motorControl.add_to_commandlist(sprintf('#%dB0\r'              , this.motorID));
+            motorControl.add_to_commandlist(sprintf('#%d:decel1%.0f\r'              , this.motorID,this.sArgs_motor.decceleration_ramp));
             % Zero menas equal to acceleration ramp!
             
             ret = true;

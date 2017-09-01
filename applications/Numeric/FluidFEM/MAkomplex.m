@@ -42,7 +42,7 @@ omegaO = 2*pi*(fGr+deltaFreqMax);
 if fdependent == 0  % no frequency dependent boundary conditions
     % eigenvalues / eigenvectors
     [eVector, eValue] = polyeig(SysMat.S,1i*aYn,-SysMat.M/fluid.c^2);
-    h = waitbar(0,'Komplex Modulation: Pressure calculation is running...');
+    h = waitbar(0,'Complex Modulation: Pressure calculation is running...');
     tic
     % sort eigenvectors
     [~, pos2] = sort(real(eValue));
@@ -103,11 +103,11 @@ if fdependent == 0  % no frequency dependent boundary conditions
     end
     t2 = toc;
     disp(' ');
-    disp('Time komplex');
+    disp('Time complex');
     disp('-------------------------------------------------------------------');
-    disp(['Sortieren: ' num2str(t1)]);
-    disp(['Schleife : ' num2str(t2)]);
-    disp(['Gesamt   : ' num2str(t1+t2)]);
+    disp(['Sorting: ' num2str(t1)]);
+    disp(['Loop   : ' num2str(t2)]);
+    disp(['Total  : ' num2str(t1+t2)]);
     disp(' ');
     close(h)
 else % frequency dependent boundary conditions
