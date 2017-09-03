@@ -198,6 +198,10 @@ classdef itaMotorControlNanotec < itaMotorControl
 
             end
             this.wait4everything;
+            
+            for index = 1:length(this.motorList)
+               this.motorList{index}.setReferenced(true); 
+            end
         end
         
         function prepareForContinuousMeasurement(this,varargin)

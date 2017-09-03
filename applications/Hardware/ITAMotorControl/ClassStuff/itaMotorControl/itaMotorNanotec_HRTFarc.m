@@ -1,20 +1,20 @@
 classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
     %ITAMOTORCONTROL Summary of this class goes here
     %   Detailed explanation goes here
-    
+
     properties(Access = protected, Hidden = true)
         mSerialObj; % the serial connection
-        
+
         mMotorControl; % parent controlling this class
         sArgs_motor;
     end
-    
-    properties 
+
+    properties
 
     end
-    
+
     properties(Constant, Hidden = true)
-        
+
         sArgs_default_motor = struct( ...
             'wait',             true,       ...
             'speed',            2,          ...
@@ -33,31 +33,32 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             'D',                700, ...
             'P_nenner',         3, ...
             'I_nenner',         5,...
-            'D_nenner',         3);    
+            'D_nenner',         3);
     end
-    
+
     methods
         function this = itaMotorNanotec_HRTFarc(varargin)
             options =   struct('motorControl', []);
             options    =   ita_parse_arguments(options, varargin);
             this.mMotorControl = options.motorControl;
             this.mSerialObj = itaSerialDeviceInterface.getInstance();
-            
+            this.mIsReferenced = 0;
+
             this.motorID = 8;
             this.motorName = 'HRTFArc';
             this.motorLimits = [-45 330]; % the motor can do a whole rotation + ~15 deg to both sides
         end
-        
+
         function this = init(this)
-            
+            this.setReferenced(false);
         end
-        
-        
+
+
         function disableReference(this,value)
             if value
                 this.mMotorControl.sendControlSequenceAndPrintResults(':port_in_a=0');
             else
-                this.mMotorControl.sendControlSequenceAndPrintResults(':port_in_a=7'); 
+                this.mMotorControl.sendControlSequenceAndPrintResults(':port_in_a=7');
             end
         end
         function stop(this)
@@ -68,14 +69,14 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             end
             while this.mSerialObj.BytesAvailable
                 ret = this.mSerialObj.recvAsynch;
-            end    
+            end
         end
-        
+
 %         function freeFromStopButton(this)
 %            res = motorControl.sendControlSequenceAndPrintResults('Zd');
 %            resp = res{end};
 %            direction = str2double(resp(end));
-%            
+%
 %            if direction == 0
 %               direction = -1;
 %            else
@@ -86,28 +87,28 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
 %            this.startMoveToPosition();
 %            this.allowMoveOverRefButton(0);
 %         end
-        
-        
+
+
         function getStatus(this)
             motorControl.add_to_commandlist(sprintf('#%d$\r'    , this.motorID));
         end
-        
+
         function status = isActive(this)
             if this.mIsInit == false
                 this.mSerialObj.sendAsynch(sprintf('#%d$\r'    , this.motorID));
             end
             status = this.mIsInit;
         end
-        
+
         function setActive(this,value)
            this.mIsInit = value;
         end
-        
+
         function id = getMotorID(this)
             id = this.motorID;
         end
         function name = getMotorName(this)
-           name = this.motorName; 
+           name = this.motorName;
         end
         function sendConfiguration(this)
             % Set Input 1 as external Referenceswitch
@@ -124,19 +125,19 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             motorControl.add_to_commandlist(sprintf('#%dO=1\r' , this.motorID));
             % umkehrspiel
             motorControl.add_to_commandlist(sprintf('#%dz=5\r'          , this.motorID));
-            
+
             % automatisches senden des status deaktivieren
             motorControl.add_to_commandlist(sprintf('#%dJ=0\r'          , this.motorID));
             % endschalterverhalten: the ref manual is not very clear. bit 0
-            % is the most important bit. all not listed bits are 0 
+            % is the most important bit. all not listed bits are 0
             % defValue bin2dec('0100010000100010') = 17442
             this.allowMoveOverRefButton(0);
-            
+
             % set lower speed to 1 Hz/sec (lowest value)
             motorControl.add_to_commandlist(sprintf('#%du3\r'          , this.motorID));
-            
+
         end
-        
+
         function this = moveToReferencePosition(this)
             % Prepare reference move (turntable)
             motorControl = this.mMotorControl;
@@ -164,20 +165,20 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             motorControl.add_to_commandlist(sprintf('#%do=%d\r'       , this.motorID, stepspersecond));
             % set decel to a high value so the switch is not overrun
             motorControl.add_to_commandlist(sprintf('#%d:decel1%.0f\r'              , this.motorID,100));
- 
+
             % Start reference move:
             motorControl.add_to_commandlist(sprintf('#%dA\r'            , this.motorID));
 
 
             this.old_position = itaCoordinates(1);
-            
+
         end
-        
+
         function this = startMoveToPosition(this)
              this.mMotorControl.add_to_commandlist(sprintf('#%dA\r'        , this.motorID));
         end
-        
-        
+
+
         function started = prepareMove(this,position,varargin)
            sArgs = this.sArgs_default_motor;
            sArgs.continuous = false;
@@ -185,7 +186,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                sArgs = ita_parse_arguments(sArgs,varargin);
            end
            if sArgs.continuous
-                ret = this.prepare_move(position, sArgs); 
+                ret = this.prepare_move(position, sArgs);
                 started = true;
            else
                    % if only the phi angle is given
@@ -200,7 +201,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                    if this.old_position.phi ~= position.phi
 
                         angle = mod(position.phi(1)/2/pi*360+360, 721)-360;
-                        ret = this.prepare_move(angle, sArgs); 
+                        ret = this.prepare_move(angle, sArgs);
                         this.old_position = position;
                         started = true;
                    else
@@ -210,7 +211,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                     % in relative positioning mode, the angle is calculated
                     % and added to the old position
                     angle = position.phi_deg(1);
-                    ret = this.prepare_move(angle, sArgs); 
+                    ret = this.prepare_move(angle, sArgs);
                     this.old_position = this.old_position + position;
                     started = true;
                end
@@ -218,24 +219,24 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
         end
 
     end
-    
+
     methods(Hidden = true)
-       
+
         function this = allowMoveOverRefButton(this,value)
            motorControl = this.mMotorControl;
            if value
-              motorControl.sendControlSequenceAndPrintResults('l17442'); 
+              motorControl.sendControlSequenceAndPrintResults('l17442');
            else
-              motorControl.sendControlSequenceAndPrintResults('l5154'); 
+              motorControl.sendControlSequenceAndPrintResults('l5154');
            end
-%            Frei rückwärts
+%            Frei rï¿½ckwï¿½rts
 %            5154
 %            Stop
 %            9250
         end
-        
-        
-        
+
+
+
         function ret = prepare_move(this, angle, varargin)
             %   This function prepares the moves of the turntable, counterclockwise for a negative
             %   angle and clockwise for a positive angle.
@@ -255,7 +256,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             %   command and set by '=<value>'.
             %
             % -----------------------------------------------------------------------------------------------
-            
+
             % -------------------------------------------------------------
             % Meaning:
             %
@@ -272,13 +273,13 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             % Current           =   Maximum current in percent
             % Ramp_mode         =   0=trapez, 1=sinus-ramp, 2=jerkfree-ramp
             % -------------------------------------------------------------
-            
+
             motorControl = this.mMotorControl;
-            
+
             this.sArgs_motor = ita_parse_arguments(varargin{:});
             % Assign wait to global wait:
 %
-            
+
             if (this.sArgs_motor.speed == 0) && ((angle == 0) && (~this.sArgs_motor.continuous) && (~this.sArgs_motor.absolut))
                 % This means: STOP!
                 motorControl.add_to_commandlist(sprintf('#%dS\r'        , this.motorID));
@@ -287,7 +288,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
 %                 fgetl(this.mSerialObj);
                 return
             end
-            
+
             if (this.sArgs_motor.limit == true)
                 % Check if the position is too far away...
                 if this.sArgs_motor.continuous == true
@@ -320,12 +321,12 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                     % Check if old position would be in the allowed range:
                     if ((act_pos) > this.motorLimits(2)) || ((act_pos) < this.motorLimits(1))
                         % No, it's not....
-                        ita_verbose_info('Warning: Could not determine a sensible position. Doing reference anyway.',0)                    
+                        ita_verbose_info('Warning: Could not determine a sensible position. Doing reference anyway.',0)
                     else
                         % Check if new position would be in the allowed range:
                         if ((act_pos+angle) > this.motorLimits(2)) || ((act_pos+angle) < this.motorLimits(1))
                             % No, it's not....
-                            error('Limit is on! Only positions between %d and %d degree are allowed!',this.motorLimits)                    
+                            error('Limit is on! Only positions between %d and %d degree are allowed!',this.motorLimits)
                         end
                     end
                 end
@@ -405,11 +406,11 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                 % Use motor as classic step motor without closed loop:
                 motorControl.add_to_commandlist(sprintf('#%d:CL_enable=0\r'     , this.motorID));
             end
-            
+
             % JRI: unknown command?
             % Correction of the sinus-commutierung: (Should be on!)
             % motorControl.add_to_commandlist(sprintf('#%d:cal_elangle_enable=1\r', this.motorID));
-            
+
             % Set the speed:
             % Divide by 0.9 because each (half)-step is equal to 0.9 degree
             % and multiply by the gear_ratio because the given speed value
@@ -425,9 +426,9 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
                 else
                     % Turn left: (positive)
                     motorControl.add_to_commandlist(sprintf('#%dd=1\r'          , this.motorID));
-                end 
+                end
                 steps       =   (angle/0.9*this.sArgs_motor.gear_ratio);
-                motorControl.add_to_commandlist(sprintf('#%ds=%d\r'       , this.motorID, round(abs(steps))));               
+                motorControl.add_to_commandlist(sprintf('#%ds=%d\r'       , this.motorID, round(abs(steps))));
             else
                 % Calculate the number of steps:
                 % Divide by 0.9 because each (half)-step is equal to 0.9 degree
@@ -460,12 +461,11 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
             % Brake ramp:
             motorControl.add_to_commandlist(sprintf('#%d:decel1%.0f\r'              , this.motorID,this.sArgs_motor.decceleration_ramp));
             % Zero menas equal to acceleration ramp!
-            
+
             ret = true;
         end
- 
-        
-    end
-    
-end
 
+
+    end
+
+end
