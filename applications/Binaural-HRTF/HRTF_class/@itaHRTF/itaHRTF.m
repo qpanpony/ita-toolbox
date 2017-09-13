@@ -698,12 +698,37 @@ classdef  itaHRTF < itaAudio
                 phiUni = rad2deg(phi_Unique(this,varargin));
             end
             
-            function slice = sphericalSlice(this,dirID,dir_deg)
+            function slice = sphericalSlice(this,dirID,dir_deg,exactSearch)
                 % dir in degree
                 % dirID [phi, theta]
+                if ~exist('exactSearch','var')
+                    exactSearch = 0;
+                end
                 
-                phiU = rad2deg(this.phi_Unique);
-                thetaU = rad2deg(this.theta_Unique);
+                if ~exactSearch
+                    phiU = rad2deg(this.phi_Unique);
+                    thetaU = rad2deg(this.theta_Unique);
+                else
+                    earCoords = this.getEar('L').channelCoordinates;
+                    switch dirID
+                        case {'phi_deg', 'p'}
+                            phiValues = unique(earCoords.phi_deg);
+                            [~,index] = min(abs(phiValues - dir_deg));
+                            exactPhiValue = phiValues(index);
+                            tmp = earCoords.n(earCoords.phi_deg == exactPhiValue);
+                            thetaU = tmp.theta_deg;
+                            
+                            slice = this.findnearestHRTF(thetaU,dir_deg);
+                        case {'theta_deg', 't'}
+                            thetaValues = unique(earCoords.theta_deg);
+                            [~,index] = min(abs(thetaValues - dir_deg));
+                            exactThetaValue = thetaValues(index);
+                            tmp = earCoords.n(earCoords.theta_deg == exactThetaValue);
+                            phiU = tmp.phi_deg;
+                            
+                            slice = this.findnearestHRTF(dir_deg,phiU);
+                    end
+                end
                 switch dirID
                     case {'phi_deg', 'p'}
                         slice = this.findnearestHRTF(thetaU,dir_deg);
