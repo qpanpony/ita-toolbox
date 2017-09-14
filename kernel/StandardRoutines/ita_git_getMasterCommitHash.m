@@ -3,13 +3,14 @@ function commitID = ita_git_getMasterCommitHash
 %  This function reads the git config and returns the hash of the last
 %  commit in the master branch
 %  The function is used in the to record the toolbox commit
-%  which was used to create the ita file
+%  which was used to create (or load) the ita file (called from itaSuper
+%  constructor)
 %
 %  Syntax:
 %   commitID = ita_git_getMasterCommitHash()
 %
 %  See also:
-%
+%       itaSuper.init
 %
 %   Reference page in Help browser
 %        <a href="matlab:doc ita_git_read_config">doc ita_git_read_config</a>
