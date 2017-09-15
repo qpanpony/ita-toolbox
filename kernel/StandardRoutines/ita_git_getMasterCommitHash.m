@@ -1,4 +1,4 @@
-function commitID = ita_git_getMasterCommitHash
+function commitID = ita_git_getMasterCommitHash(varargin)
 %ITA_GIT_GETMASTERCOMMITHASH - Get hash of last used master commit
 %  This function reads the git config and returns the hash of the last
 %  commit in the master branch
@@ -8,6 +8,12 @@ function commitID = ita_git_getMasterCommitHash
 %
 %  Syntax:
 %   commitID = ita_git_getMasterCommitHash()
+%   commitID = ita_git_getMasterCommitHash('path','.','branch','test')
+%
+%   Options (default):
+%           'branch' (master)  : the branch of the returned commit id
+%           'path' (ita_toolbox_path)      : the path of the repository
+%
 %
 %  See also:
 %       itaSuper.init
@@ -25,12 +31,28 @@ function commitID = ita_git_getMasterCommitHash
 % Created:  13-Sep-2017
 
 
+sArgs.branch = 'master';
+sArgs.path = '';
+
+sArgs = ita_parse_arguments(sArgs,varargin);
+
+if isempty(sArgs.path)
+    repPath = ita_toolbox_path;
+else
+   repPath = sArgs.path; 
+end
+
 commitID = '';
 try
     workingDir = pwd;
-    cd(ita_toolbox_path)
-    [~,commitID] = system('git merge-base master HEAD');
-    commitID = strrep(commitID,sprintf('\n'),'');
+    cd(repPath)
+    [status,commitID] = system(sprintf('git merge-base %s HEAD',sArgs.branch));
+    if status == 0
+        commitID = strrep(commitID,newline,'');
+    else
+        ita_verbose_info(sprintf('Git Hash Failed: %s',commitID), 1);
+        commitID = '';
+    end
     cd(workingDir);
 catch e
     
