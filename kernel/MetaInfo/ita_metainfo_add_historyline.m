@@ -97,7 +97,17 @@ if nargin >= 3 % the function had some input arguments
     elseif isa(arguments,'itaSuper')
         argumentStr = '(audioObj)';
     end
-    historyline = [historyline argumentStr];
+    
+    dateLine = '';
+    
+    try 
+       dateLine = date; 
+       dateLine  = [dateLine ' - '];
+    catch e
+        
+    end
+    
+    historyline = [dateLine historyline argumentStr];
 end
 
 %% Add the history line ?�pdi:faster
