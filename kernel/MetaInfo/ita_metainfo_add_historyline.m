@@ -101,7 +101,7 @@ if nargin >= 3 % the function had some input arguments
     dateLine = '';
     
     try 
-       dateLine = date; 
+       dateLine = datestr(now); 
        dateLine  = [dateLine ' - '];
     catch e
         
