@@ -253,6 +253,13 @@ classdef itaMSRecord < itaHandle
             result = ita_portaudio(this.nSamples,'InputChannels',this.inputChannels, ...
                 'repeats',1,'singleprecision',singleprecision,'reset', this.reset);
             max_rec_lvl = max(abs(result.timeData),[],1);
+            
+            % add history line
+            commitID = ita_git_getMasterCommitHash;
+            if ~isempty(commitID)
+                result = ita_metainfo_add_historyline(result,'Measurement',commitID);
+            end
+            
         end
         
         function [result, max_rec_lvl] = run_raw_imc(this)
