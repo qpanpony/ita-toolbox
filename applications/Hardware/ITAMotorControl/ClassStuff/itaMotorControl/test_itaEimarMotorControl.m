@@ -262,7 +262,9 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             % add history line
             commitID = ita_git_getMasterCommitHash;
             if ~isempty(commitID)
-               ita_metainfo_add_historyline(result_raw,'Continuous Measurement',commitID); 
+               result_raw = ita_metainfo_add_historyline(result_raw,'Continuous Measurement',commitID); 
+               result = ita_metainfo_add_historyline(result,'Continuous Measurement',commitID); 
+
             end
         end
         
