@@ -16,7 +16,7 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
     properties(Constant, Hidden = true)
         sArgs_default_motor = struct( ...
             'wait',         true,       ...
-            'speed',        0.5,          ...
+            'speed',        2,          ...
             'VST',          'adaptiv',  ...
             'limit',        false,      ...
             'continuous',   false,      ...
@@ -117,8 +117,8 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
             % Set direction:
             motorControl.add_to_commandlist(sprintf('#%dd=0\r'          , this.motorID));
             % Calculate and set lower speed:
-            %stepspersecond      =   (this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
-            motorControl.add_to_commandlist(sprintf('#%du=%.2f\r'       , this.motorID, 25));
+            stepspersecond      =   (this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
+            motorControl.add_to_commandlist(sprintf('#%du=%.2f\r'       , this.motorID, stepspersecond));
             % Calculate and set upper speed:
             stepspersecond      =   (this.sArgs_default_motor.speed/0.9*this.sArgs_default_motor.gear_ratio);
             motorControl.add_to_commandlist(sprintf('#%do=%.2f\r'       , this.motorID, stepspersecond));
@@ -155,6 +155,7 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
            end
             
            sArgs.continuous = false;
+           sArgs.direct = true;
            sArgs.speed = this.sArgs_default_motor.speed;
            if ~isempty(varargin)
                sArgs = ita_parse_arguments(sArgs,varargin);
@@ -173,8 +174,11 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
                end
 
                if this.old_position.phi ~= position.phi
-
-                    angle = mod(position.phi(1)/2/pi*360+360, 720)-360;
+                    if ~sArgs.direct
+                        angle = mod(position.phi(1)/2/pi*360+360, 720)-360;
+                    else
+                       angle = position.phi_deg(1); 
+                    end
                     ret = this.prepare_move(angle, 'absolut', true, 'wait', true, 'speed', sArgs.speed); 
                     this.old_position = position;
                     started = ret;
@@ -397,7 +401,7 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
                 % Divide by 0.9 because each (half)-step is equal to 0.9 degree
                 % and multiply by the gear_ratio because the given angle value
                 % is for the turntable and not for the motor:
-                steps       =   (angle/0.9*this.sArgs_motor.gear_ratio)
+                steps       =   (angle/0.9*this.sArgs_motor.gear_ratio);
                 % Check if absolut or relative position mode:
                 if this.sArgs_motor.absolut == true
                     % Absolut position mode:

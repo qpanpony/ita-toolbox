@@ -101,7 +101,7 @@ classdef itaEimar < itaMeasurementTasksScan
     %
     %   someAdditionalStuff = 4;
     %   function1 = @(varargin)someFunction(varargin,someAdditionalStuff);
-    %   functionHandles = {function1,@someOtherFunction}
+    %   functionHandles = {function0,@someOtherFunction}
     %
     % *********************************************************************
     %
@@ -924,7 +924,7 @@ classdef itaEimar < itaMeasurementTasksScan
                 return;
             end
             
-            angle = angle - 120.41; % Larger substractive value: Higher position. Checkt at 90°.
+            angle = angle - 119.01; % Larger substractive value: Higher position. Checkt at 90°.
             
             
             

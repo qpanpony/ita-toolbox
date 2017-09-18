@@ -207,20 +207,35 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             numRepetitions = this.measurementSetup.repetitions;
             timePerRepetition = this.measurementSetup.twait*length(this.measurementSetup.outputChannels);
             speed   =   360/(numRepetitions*timePerRepetition);
-
-            % preangletime
-            preAngle = 45;
-            preAngleTime = preAngle/speed; % it takes 2 seconds to start recording
-
-            postAngle = 10;
-            postAngleTime = postAngle/speed;
+            motorControl = this.getMotorControl;
+            motorName = motorControl.motorList{1}.getMotorName;
             
-            additionalReps = ceil((postAngleTime+preAngleTime + 1)/timePerRepetition);
-            numTotalRepetitions = numRepetitions+additionalReps;
-            this.measurementSetup.repetitions = numTotalRepetitions;
-            
+            if strcmp(motorName,'HRTFArc')
+                % preangletime
+                preAngle = 45;
+                preAngleTime = preAngle/speed; % it takes 2 seconds to start recording
+
+                postAngle = -35;
+                postAngleTime = postAngle/speed;
+
+                additionalReps = ceil((postAngleTime+preAngleTime + 1)/timePerRepetition);
+                numTotalRepetitions = numRepetitions+additionalReps;
+                this.measurementSetup.repetitions = numTotalRepetitions;
+            else
+                % preangletime
+                preAngle = 15;
+                preAngleTime = preAngle/speed; % it takes 2 seconds to start recording
+
+                postAngle = 5;
+                postAngleTime = postAngle/speed;
+
+                additionalReps = ceil((postAngleTime+preAngleTime + 1)/timePerRepetition);
+                numTotalRepetitions = numRepetitions+additionalReps;
+                this.measurementSetup.repetitions = numTotalRepetitions;    
+                
+            end
             %prepare motors for continuous measurement
-            this.mMotorControl.prepareForContinuousMeasurement('speed',speed,'preAngle',preAngle);
+            this.mMotorControl.prepareForContinuousMeasurement('speed',speed,'preAngle',preAngle,'postAngle',postAngle);
             
             % calculate the excitation as this takes quite a long time
             this.measurementSetup.excitation;
@@ -243,6 +258,12 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             result = this.measurementSetup.deconvolve(result_raw);
 %             this.stop;
             this.mMotorControl.setWait(true);
+            
+            % add history line
+            commitID = ita_git_getMasterCommitHash;
+            if ~isempty(commitID)
+               ita_metainfo_add_historyline(result_raw,'Continuous Measurement',commitID); 
+            end
         end
         
         function motorControl = getMotorControl(this)

@@ -219,6 +219,7 @@ classdef itaMotorControlNanotec < itaMotorControl
             % get the preangle and the speed
             sArgs.preAngle = 0;
             sArgs.speed = 2;
+            sArgs.postAngle = 10;
             [sArgs notFound] = ita_parse_arguments(sArgs, varargin);
 
             % first, do a reference move
@@ -231,7 +232,8 @@ classdef itaMotorControlNanotec < itaMotorControl
             
             
             % now prepare the big move but don't start it
-            this.moveTo(motorName,360-35,'speed',sArgs.speed,'absolut',true,'start',0,'limit',0);
+            moveAngle = 360 + sArgs.preAngle + sArgs.postAngle;
+            this.moveTo(motorName,moveAngle,'speed',sArgs.speed,'absolut',false,'start',0,'limit',0,'direct',1);
             this.preparedList = motorName;
             ita_verbose_info('Finished preparing',2)
         end
