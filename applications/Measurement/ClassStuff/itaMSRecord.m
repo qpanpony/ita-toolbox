@@ -310,6 +310,12 @@ classdef itaMSRecord < itaHandle
             % Write result
             result.comment = [this.comment result.comment];     % Add comment.
             result = ita_metainfo_rm_historyline(result,'all'); % Remove all history lines.
+            
+            % add history line
+            commitID = ita_git_getMasterCommitHash;
+            if ~isempty(commitID)
+                result = ita_metainfo_add_historyline(result,'Measurement',commitID);
+            end
         end
         
         function [result, max_rec_lvl] = run(this)

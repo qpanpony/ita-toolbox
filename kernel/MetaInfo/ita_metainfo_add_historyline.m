@@ -96,6 +96,10 @@ if nargin >= 3 % the function had some input arguments
         end
     elseif isa(arguments,'itaSuper')
         argumentStr = '(audioObj)';
+       
+        if withSubs
+            sub_historylines{length(sub_historylines)+1} = arguments.history; %#ok<AGROW>
+        end
     end
     
     dateLine = '';
