@@ -13,6 +13,7 @@ function commitID = ita_git_getMasterCommitHash(varargin)
 %   Options (default):
 %           'branch' (master)  : the branch of the returned commit id
 %           'path' (ita_toolbox_path)      : the path of the repository
+%           'force' (false)     : force a new update on the commit id
 %
 %
 %  See also:
@@ -30,11 +31,24 @@ function commitID = ita_git_getMasterCommitHash(varargin)
 % Author: Jan-Gerrit Richter -- Email: jri@akustik.rwth-aachen.de
 % Created:  13-Sep-2017
 
+persistent oldArgs;
+persistent oldID;
 
 sArgs.branch = 'master';
 sArgs.path = '';
+sArgs.force = 0;
 
 sArgs = ita_parse_arguments(sArgs,varargin);
+
+
+if ~isempty(oldID)
+    if isequaln(oldArgs,sArgs)
+        if ~sArgs.force
+            commitID = oldID;
+            return;
+        end
+    end
+end
 
 if isempty(sArgs.path)
     repPath = ita_toolbox_path;
@@ -54,6 +68,9 @@ try
         commitID = '';
     end
     cd(workingDir);
+    
+    oldID = commitID;
+    oldArgs = sArgs;
 catch e
     
 end
