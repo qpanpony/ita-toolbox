@@ -180,6 +180,7 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
         
         function moveTo(this,varargin)
             % Check if it is initialized:
+%             varargin{1}.phi_deg
             if ~this.isInitialized
                 ita_verbose_info('Not initialized - I will do that for you...!',0);
                 this.initialize
@@ -304,7 +305,10 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             if this.doSorting
                 this.sort_measurement_positions();
             end
+            motorList = this.mMotorControl.motorList;
+            motorList{1}.disableReference(1);
             run@itaMeasurementTasksScan(this);
+            motorList{1}.disableReference(0);
         end
         
     end
