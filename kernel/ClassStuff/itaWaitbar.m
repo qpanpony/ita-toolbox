@@ -64,6 +64,7 @@ classdef  itaWaitbar < itaHandle
         loopNameCell            = 0;
         
         loopFactor = 1 % jri: if the loop does not take very long, only update every loopFactor
+        useJava = 1; % if java is not loaded, don't show the figure but display remaining time
     end
     
     properties(Dependent = true, Hidden = false)
@@ -92,6 +93,11 @@ classdef  itaWaitbar < itaHandle
                 end
             end
             
+            if usejava('jvm')
+                this.useJava = 1;
+            else
+                this.useJava = 0;
+            end
             
             this.nNestings = numel(nLoopCount);
             
@@ -110,24 +116,29 @@ classdef  itaWaitbar < itaHandle
             screenSize = get(0, 'screensize');
             
             figPosition = [(screenSize(1,3:4)-figSize)/2 figSize];
-            this.figHandle = figure('position', figPosition, 'name', 'itaWaitbar', 'toolbar', 'none', 'menubar', 'none',  'numberTitle', 'off', 'tag', 'itaWaitbar', 'nextPlot', 'new');
             
-            if ~isempty(openWaitbars) % if other waitbar is open => put new below old
-                posOfLastWB = get(openWaitbars(1), 'outerposition');
-                figPosition = get(this.figHandle, 'outerposition');
-                figPosition(1) = posOfLastWB(1);
-                figPosition(2) = posOfLastWB(2) - figPosition(4);
-                set(this.figHandle, 'outerposition', figPosition)
-            end
             
-            for iNesting = 1:this.nNestings
-                this.axHandle(this.nNestings-iNesting+1)     = axes('parent', this.figHandle,'units', 'pixels', 'position', [0.1*figSize(1) iNesting*2*axSize(2)  axSize ], 'XTick',[], 'YTick', [], 'xlim', [0 max(nLoopCount(this.nNestings-iNesting+1),1)], 'box', 'on');
-                this.patchHandle(this.nNestings-iNesting+1)  = patch([0 0 0 0], [0 0 1 1], [1 .3 .3], 'parent', this.axHandle(this.nNestings-iNesting+1));
-                this.txtHandle(this.nNestings-iNesting+1)    = text(nLoopCount(this.nNestings-iNesting+1)/2,0.5, 'asdd', 'parent', this.axHandle(this.nNestings-iNesting+1), 'HorizontalAlignment', 'center', 'fontsize', 11) ;
+            if this.useJava == 1
+                this.figHandle = figure('position', figPosition, 'name', 'itaWaitbar', 'toolbar', 'none', 'menubar', 'none',  'numberTitle', 'off', 'tag', 'itaWaitbar', 'nextPlot', 'new');
+            
+            
+                if ~isempty(openWaitbars) % if other waitbar is open => put new below old
+                    posOfLastWB = get(openWaitbars(1), 'outerposition');
+                    figPosition = get(this.figHandle, 'outerposition');
+                    figPosition(1) = posOfLastWB(1);
+                    figPosition(2) = posOfLastWB(2) - figPosition(4);
+                    set(this.figHandle, 'outerposition', figPosition)
+                end
+
+                for iNesting = 1:this.nNestings
+                    this.axHandle(this.nNestings-iNesting+1)     = axes('parent', this.figHandle,'units', 'pixels', 'position', [0.1*figSize(1) iNesting*2*axSize(2)  axSize ], 'XTick',[], 'YTick', [], 'xlim', [0 max(nLoopCount(this.nNestings-iNesting+1),1)], 'box', 'on');
+                    this.patchHandle(this.nNestings-iNesting+1)  = patch([0 0 0 0], [0 0 1 1], [1 .3 .3], 'parent', this.axHandle(this.nNestings-iNesting+1));
+                    this.txtHandle(this.nNestings-iNesting+1)    = text(nLoopCount(this.nNestings-iNesting+1)/2,0.5, 'asdd', 'parent', this.axHandle(this.nNestings-iNesting+1), 'HorizontalAlignment', 'center', 'fontsize', 11) ;
+                end
+                this.txtTimeLeft    = uicontrol('style', 'text','units', 'pixels',  'position', [0.1*figSize(1) axSize(2)/2  axSize ], 'string', '', 'parent', this.figHandle, 'HorizontalAlignment', 'center', 'fontsize', 9, 'backgroundcolor', get(this.figHandle, 'color')) ;
+                this.txtMessage     = uicontrol('style', 'text','units', 'pixels',  'position', [0.1*figSize(1) figSize(2)-axSize(2)*1.5  axSize ], 'string', messageStr, 'parent', this.figHandle, 'HorizontalAlignment', 'center', 'fontsize', 11, 'backgroundcolor', get(this.figHandle, 'color')) ;
+                this.pauseToggle    = uicontrol('style', 'toggleButton','units', 'pixels',  'position', [3 3  50 22 ], 'string', 'pause' , 'parent', this.figHandle, 'HorizontalAlignment', 'center', 'fontsize', 11, 'backgroundcolor', [1 1 1] * 0.9, 'callback', {@this.pauseCalculation}) ;
             end
-            this.txtTimeLeft    = uicontrol('style', 'text','units', 'pixels',  'position', [0.1*figSize(1) axSize(2)/2  axSize ], 'string', '', 'parent', this.figHandle, 'HorizontalAlignment', 'center', 'fontsize', 9, 'backgroundcolor', get(this.figHandle, 'color')) ;
-            this.txtMessage     = uicontrol('style', 'text','units', 'pixels',  'position', [0.1*figSize(1) figSize(2)-axSize(2)*1.5  axSize ], 'string', messageStr, 'parent', this.figHandle, 'HorizontalAlignment', 'center', 'fontsize', 11, 'backgroundcolor', get(this.figHandle, 'color')) ;
-            this.pauseToggle    = uicontrol('style', 'toggleButton','units', 'pixels',  'position', [3 3  50 22 ], 'string', 'pause' , 'parent', this.figHandle, 'HorizontalAlignment', 'center', 'fontsize', 11, 'backgroundcolor', [1 1 1] * 0.9, 'callback', {@this.pauseCalculation}) ;
             this.nLoopsIntern = nLoopCount;
             
             this.updateBar
@@ -152,29 +163,31 @@ classdef  itaWaitbar < itaHandle
             end
             set(this.txtTimeLeft, 'string', timeStr)
             set(this.patchHandle, 'facecolor', [1 .8 .8])
-             drawnow()
+	    drawnow()
         end
         
         function updateBar(this, updateMessage)
-            % update the bar in the figure
-            if nargin > 1
-                set(this.txtMessage, 'string', updateMessage);
-            end
-            
-            % global loop index iLoop => nested loop indices
-            if this.iLoop
-                [this.iLoopForEveryNesting{end:-1:1}] = ind2sub(this.nLoops(end:-1:1), this.iLoop); 
-            else % iLoop == 0 => all nested loops == 0
-                [this.iLoopForEveryNesting{:}] = deal(0);
-            end
-            
-            yValues = [0 0 1 1];
-            for iNesting = 1:this.nNestings
-                xValues = [0 this.iLoopForEveryNesting{iNesting} * [1 1] 0];
-                
-                set(this.patchHandle(iNesting), 'vertices', [xValues(:), yValues(:)]);
+            if this.useJava
+                % update the bar in the figure
+                if nargin > 1
+                    set(this.txtMessage, 'string', updateMessage);
+                end
 
-                set(this.txtHandle(iNesting), 'string', sprintf('%s  %i of %2.0f ', this.loopNameCell{iNesting}, this.iLoopForEveryNesting{iNesting}, this.nLoops(iNesting)));
+                % global loop index iLoop => nested loop indices
+                if this.iLoop
+                    [this.iLoopForEveryNesting{end:-1:1}] = ind2sub(this.nLoops(end:-1:1), this.iLoop); 
+                else % iLoop == 0 => all nested loops == 0
+                    [this.iLoopForEveryNesting{:}] = deal(0);
+                end
+
+                yValues = [0 0 1 1];
+                for iNesting = 1:this.nNestings
+                    xValues = [0 this.iLoopForEveryNesting{iNesting} * [1 1] 0];
+
+                    set(this.patchHandle(iNesting), 'vertices', [xValues(:), yValues(:)]);
+
+                    set(this.txtHandle(iNesting), 'string', sprintf('%s  %i of %2.0f ', this.loopNameCell{iNesting}, this.iLoopForEveryNesting{iNesting}, this.nLoops(iNesting)));
+                end
             end
             
             % update time left
@@ -198,8 +211,15 @@ classdef  itaWaitbar < itaHandle
                 end
                 
             end
-            set(this.txtTimeLeft, 'string', remainingTimeStr)
-            drawnow()
+            
+            % if no desktop is available, show the remaining time as disp
+            if ~usejava('desktop')
+                disp(remainingTimeStr)
+            end
+            if this.useJava
+                set(this.txtTimeLeft, 'string', remainingTimeStr)
+                drawnow()
+            end
             
             if this.iLoop == 1
                 this.startTimeWaitbar = this.startTimeLastLoop;
@@ -209,7 +229,9 @@ classdef  itaWaitbar < itaHandle
         end
         
         function close(this) % close itaWaitbar figure
-            close(this.figHandle)
+            if this.useJava
+                close(this.figHandle)
+            end
         end
         
         function pauseCalculation(this, self, eventData)
