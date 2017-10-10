@@ -806,7 +806,7 @@ classdef  itaHRTF < itaAudio
             end
             
             function surf(varargin)
-                sArgs  = struct('pos1_data','itaHRTF', 'earSide', 'L', 'freq' , 5000,'type','directivity','log',1);
+                sArgs  = struct('pos1_data','itaHRTF', 'earSide', 'L', 'freq' , 1000,'type','directivity','log',0);
                 [this,sArgs]   = ita_parse_arguments(sArgs,varargin);
                 
                 idxF = this.freq2index(sArgs.freq);
