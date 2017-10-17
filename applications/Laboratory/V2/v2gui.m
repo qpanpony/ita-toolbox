@@ -77,7 +77,7 @@ guidata(hObject, handles);
 global handlesg;
 handlesg = handles;
 
-image1=imread('logo.png');
+image1=imread('ita_toolbox_logo.png');
 axes(handles.logoAxes);
 imshow(image1);
 handles.currentAxes(1) = axes('tag', 'ax1');
@@ -360,10 +360,11 @@ if(handles.v2.measurementProperties.sourcePositions == 1)
     title(handles.currentAxes(1), ['Signal-to-Noise Ratio in 1/3 octave bands, ' handles.v2.genMaterialString(),...
         ', fftdegree = ',num2str(measurementProperties.samples)], 'FontSize', 9);
     hline = findobj(gcf, 'type', 'line');
-    set(hline,'LineStyle','--', 'LineWidth', 1);
-    set(hline([2:4,21:22]),'LineWidth',2,'LineStyle','-');
+    % set(hline,'LineStyle','--', 'LineWidth', 1);
+    set(hline([3:4]),'LineWidth',2,'LineStyle','-');
     ylim([0 80]);
-    
+    hlegend = findobj(gcf,'Type','axes','Tag','legend');
+    set(hlegend, 'Location', 'best');
     set(handles.gui, 'Name', 'V2 Laboratory: Airborne Sound Insulation');
     
     % ask user if he wants to continue (yes, no)
@@ -423,10 +424,12 @@ elseif(handles.v2.measurementProperties.sourcePositions > 1)
       
     % move legends out of the way
     hl = findobj(handles.gui, 'Tag', 'legend');
-    set(hl(2), 'Position', [0.839 0.6680 0.1431 0.2638]);
-    set(hl(1), 'Position', [0.806 0.322 0.1756 0.2638]);
+    set(hl(2), 'Position', [0.28 0.6680 0.1431 0.2638]);
+    set(hl(1), 'Position', [0.28 0.322 0.1756 0.2638]);
 
-    
+    ax1 = handles.currentAxes(1);
+    ax2 = handles.currentAxes(2);
+
     % move axes to a figure, s.t. it can be passed to export_fig, make it 
     % look good and temporarily save it
     fh = figure();
@@ -436,12 +439,12 @@ elseif(handles.v2.measurementProperties.sourcePositions > 1)
     set(ha1, 'position', [50 350 940 250]);
     hxlbl1 = get(ha1, 'XLabel');
     set(hxlbl1, 'visible', 'off');
-    hla1 = copyobj(hl(2), fh);
+    hla1 = copyobj([hl(1) ax1],fh);
     set(hla1, 'position', [0.79 0.6 0.1760 0.3208])
     ha2 = copyobj(handles.currentAxes(2), fh);
     set(ha2, 'units', 'pixel');
     set(ha2, 'position', [50 50 940 250]);
-    hla2 = copyobj(hl(1), fh);
+    hla2 = copyobj(hl(2), fh);
     set(hla2, 'position', [0.79 0.12 0.1760 0.3208])  
     export_fig(fh,  fullfile(pwd, 'temp.jpg'), '-painters')
     %ita_savethisplot(handles.gui,fullfile(pwd,'temp.fig'),'resolution',300);
@@ -486,8 +489,11 @@ ylabel(handles.currentAxes(1), 'Sound insulation [dB]', 'FontSize', 9);
 xlabel(handles.currentAxes(1), 'Frequency [Hz]', 'FontSize', 9);
 % ... and the reference curve
 hold(handles.currentAxes(1), 'on');
-h = plot(handles.currentAxes(1), handles.v2.R.freqVector(:,1), 20*log10(handles.v2.soundInsulationCurve), 'r', 'LineWidth', 2);
-legend(handles.currentAxes(1), 'R measured', 'R calculated (mass law)', 'Shifted reference curve', 'Location', 'South');
+ref_values = 20*log10(handles.v2.soundInsulationCurve);
+ref_freqs = ~isnan(ref_values)
+h = plot(handles.currentAxes(1), handles.v2.R.freqVector(ref_freqs,1), ref_values(ref_freqs), 'r', 'LineWidth', 2, 'Color', 'g');
+hLegend = legend(handles.currentAxes(1),'R measured', 'R calculated (mass law)', 'Shifted reference curve', 'Location', 'South');
+ylim('auto');
 set(handles.gui, 'Name', 'V2 Laboratory: Airborne Sound Insulation');
 
 str = strcat('Measurement complete. Sound Insulation Index at 500Hz = ', num2str(handles.v2.soundInsulationIndex), 'dB.');

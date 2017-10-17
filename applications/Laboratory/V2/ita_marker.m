@@ -28,7 +28,7 @@ function varargout = ita_marker(varargin)
 % Created:  02-Jun-2010 
 
 %% Initialization and Input Parsing
-narginchk(0,10);
+error(nargchk(0,10,nargin,'string'));
 sArgs        = struct('linevector',[],'marker','s','markersize',5);
 [sArgs] = ita_parse_arguments(sArgs,varargin); 
 
