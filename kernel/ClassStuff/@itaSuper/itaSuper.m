@@ -156,6 +156,12 @@ classdef itaSuper < itaMeta
                     this(idx).mData = deal(nan(varargin{2})); %#ok<AGROW>
                 end
             end
+            
+            %% Add history line
+            commitID = ita_git_getMasterCommitHash;
+            if ~isempty(commitID)
+                this = ita_metainfo_add_historyline(this,'GitVersion',commitID);
+            end
         end
         
         

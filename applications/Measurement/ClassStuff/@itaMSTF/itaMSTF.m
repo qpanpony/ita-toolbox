@@ -653,7 +653,17 @@ classdef itaMSTF < itaMSPlaybackRecord
             % End Display Start Line
             
             % Start Display Values
-            disp(['   type       = ' this.type '       samplingRate  = ' num2str(this.samplingRate) '        nSamples      = ' num2str(this.nSamples)])
+            
+            % someone decided to put an excitation as this.type during
+            % optimization..
+            typeStr = '';
+            if isa(this.type,'itaAudio')
+                typeStr = 'custom';
+            else
+                typeStr = this.type;
+            end
+            
+            disp(['   type       = ' typeStr '       samplingRate  = ' num2str(this.samplingRate) '        nSamples      = ' num2str(this.nSamples)])
             oa = repmat(' ',1,7);
             oa_temp = (this.outputamplification);
             oa(1:length(oa_temp)) = oa_temp;

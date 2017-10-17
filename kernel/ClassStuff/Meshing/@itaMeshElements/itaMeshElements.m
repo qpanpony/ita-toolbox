@@ -1,10 +1,10 @@
 classdef itaMeshElements < itaMeta
-
-% <ITA-Toolbox>
-% This file is part of the application Meshing for the ITA-Toolbox. All rights reserved. 
-% You can find the license for this m-file in the application folder. 
-% </ITA-Toolbox>
-
+    
+    % <ITA-Toolbox>
+    % This file is part of the application Meshing for the ITA-Toolbox. All rights reserved.
+    % You can find the license for this m-file in the application folder.
+    % </ITA-Toolbox>
+    
     
     % Class for mesh elements
     % mmt, 15.8.09
@@ -20,7 +20,7 @@ classdef itaMeshElements < itaMeta
     %
     %   tetra: 4 nodes (linear), 10 nodes (parabolic)
     %   quad : 8 nodes (linear), 20 nodes (parabolic)
- 
+    
     properties(Access = private)
         mID = [];
         mNodes = nan(0,3);
@@ -45,14 +45,43 @@ classdef itaMeshElements < itaMeta
                 if isa(varargin{1},'itaMeshElements')
                     % this is the copy constructor
                     this = varargin{1};
-                elseif isscalar(varargin{1}) && isnumeric(varargin{1})
-                    % user gave number of elements
-                    nElements   = varargin{1};
-                    this.mID    = 1:nElements;
-                    this.mNodes = nan(nElements,3);
+                elseif isnumeric(varargin{1})
+                    if isscalar(varargin{1})
+                        % user gave number of elements
+                        nElements   = varargin{1};
+                        this.mID    = 1:nElements;
+                        this.mNodes = nan(nElements,3);
+                    elseif ismember(size(varargin{1},2),[3 4 6 8 10 20])
+                        % user gave node matrix
+                        this.mNodes = varargin{1};
+                        this.mID    = 1:size(this.mNodes,1);
+                        switch size(varargin{1},2)
+                            case 3
+                                this.mOrder = 'linear';
+                                this.mType = 'shell';
+                                this.mShape = 'tetra';
+                            case 4
+                                this.mOrder = 'linear';
+                                ita_verbose_info('Cannot automatically determine type and shape of elements!',1);
+                            case 6
+                                this.mOrder = 'parabolic';
+                                this.mType = 'shell';
+                                this.mShape = 'tetra';
+                            case 8
+                                ita_verbose_info('Cannot automatically determine order, type and shape of elements!',1)
+                            case 10
+                                this.mOrder = 'parabolic';
+                                this.mType = 'volume';
+                                this.mShape = 'tetra';
+                            case 20
+                                this.mOrder = 'parabolic';
+                                this.mType = 'volume';
+                                this.mShape = 'quad';
+                        end
+                    end
                 elseif isstruct(varargin{1}) % Struct input/convert
                     fieldName = fieldnames(varargin{1});
-                    for ind = 1:numel(fieldName);
+                    for ind = 1:numel(fieldName)
                         try
                             this.(fieldName{ind}) = varargin{1}.(fieldName{ind});
                         catch errmsg
@@ -62,65 +91,88 @@ classdef itaMeshElements < itaMeta
                 end
             elseif nargin > 1
                 if nargin == 4
-                    % user gave number, shape, type and order of elements
-                    this.mOrder = varargin{4};
+                    % user gave order of elements
+                    if ismember(varargin{4},{'linear','parabolic'})
+                        this.mOrder = varargin{4};
+                    else
+                        error('itaMeshElements::wrong element order');
+                    end
                 else
-                    % user gave number and shape of elements (linear)
                     this.mOrder = 'linear';
                 end
                 
-                nElements = varargin{1};
-                this.mID = 1:nElements;
+                if nargin > 2
+                    % user gave shape of elements
+                    if ismember(varargin{3},{'tetra','quad'})
+                        this.mShape  = varargin{3};
+                    else
+                        error('itaMeshElements::wrong element shape');
+                    end
+                else
+                    this.mShape  = 'tetra';
+                end
+                
                 if ismember(varargin{2},{'shell','volume'})
+                    % user gave type of elements
                     this.mType = varargin{2};
                 else
                     error('itaMeshElements::wrong element type');
                 end
                 
-                switch this.mType
-                    case 'shell'
-                        if strcmpi(this.mOrder,'linear')
-                            typeFact = 1;
-                        else
-                            typeFact = 2;
-                        end
-                        if strcmpi(varargin{3},'tetra')
-                            this.mNodes = nan(nElements,3*typeFact);
-                            this.mShape  = 'tetra';
-                        elseif strcmpi(varargin{3},'quad')
-                            this.mNodes = nan(nElements,4*typeFact);
-                            this.mShape  = 'quad';
-                        else
-                            error('itaMeshElements::wrong element type');
-                        end
-                    case 'volume'
-                        if strcmpi(this.mOrder,'linear')
-                            typeFact = 1;
-                        else
-                            typeFact = 2.5;
-                        end
-                        if strcmpi(varargin{3},'tetra')
-                            this.mNodes = nan(nElements,4*typeFact);
-                            this.mShape  = 'tetra';
-                        elseif strcmpi(varargin{3},'quad')
-                            this.mNodes = nan(nElements,8*typeFact);
-                            this.mShape  = 'quad';
-                        else
-                            error('itaMeshElements::wrong element type');
-                        end
+                if strcmpi(this.mOrder,'linear')
+                    typeFact = 1;
+                else
+                    if strcmpi(this.mType,'shell')
+                        typeFact = 2;
+                    else
+                        typeFact = 2.5;
+                    end
                 end
+                
+                if strcmpi(this.mType,'shell')
+                    if strcmpi(this.mShape,'tetra')
+                        connectionSize = 3*typeFact;
+                    else
+                        connectionSize = 4*typeFact;
+                    end
+                else
+                    if strcmpi(this.mShape,'tetra')
+                        connectionSize = 4*typeFact;
+                    else
+                        connectionSize = 8*typeFact;
+                    end
+                end
+                
+                if isscalar(varargin{1})
+                    % user gave number of elements
+                    nElements   = varargin{1};
+                    this.mID    = 1:nElements;
+                    this.mNodes = nan(nElements,connectionSize);
+                    
+                elseif ismember(size(varargin{1},2),[3 4 6 8 10 20])
+                    % user gave node matrix
+                   
+                    if size(varargin{1},2) ~= connectionSize
+                        error('itaMeshElements::dimensions of connectivity list do not match element type');
+                    else
+                        this.mNodes = varargin{1};
+                    end
+                    this.mID    = 1:size(this.mNodes,1);
+                else
+                    error('itaMeshElements::first input must be either number of elements or connectivity list!');
+                end
+                
             end
         end
         
-        function display(this)
+        function display(this) %#ok<DISPLAY>
             prefix = '(ID=';
             middlefix = ['[nodes (n=' num2str(size(this.mNodes,2)) ')] = ['];
-            nElements = size(this.mNodes,1);
             elements = this.mNodes;
-            for iElem = 1:nElements
+            for iElem = 1:this.nElements
                 disp([num2str(iElem) ' ' prefix num2str(this.mID(iElem)) ') ' middlefix num2str(elements(iElem,:)) ']']);
             end
-            disp(['=========== in total ' num2str(nElements) ' elements of type: ' this.mType ' (' this.mOrder ' ' this.mShape ')']);
+            disp(['=========== in total ' num2str(this.nElements) ' elements of type: ' this.mType ' (' this.mOrder ' ' this.mShape ')']);
         end
         
         % replaces subsref
@@ -170,7 +222,7 @@ classdef itaMeshElements < itaMeta
                 error('itaMeshElements:wrong element order');
             end
         end
-            
+        
         function value = get.ID(this), value = this.mID(:); end
         function value = get.nodes(this), value = this.mNodes; end
         function value = get.shape(this), value = this.mShape; end
@@ -199,7 +251,7 @@ classdef itaMeshElements < itaMeta
     
     methods(Static)
         function this = loadobj(sObj)
-            % Called when an object is loaded            
+            % Called when an object is loaded
             sObj = rmfield(sObj,{'classrevision', 'classname'}); % Remove these fields cause no more needed, but we could use them for special case handling (e.g. old versions)
             this = itaMeshElements(sObj); % Just call constructor, he will take care
         end
@@ -209,7 +261,7 @@ classdef itaMeshElements < itaMeta
             rev_str = '$Revision: 2804 $'; % Please dont change this, will be set by svn
             revision = str2double(rev_str(isstrprop(rev_str,'digit')));
         end
-            
+        
         function result = propertiesSaved
             % save ID last
             result = {'nodes','shape','type','order','ID'};

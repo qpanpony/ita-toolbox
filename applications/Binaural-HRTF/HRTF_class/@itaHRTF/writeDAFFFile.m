@@ -71,12 +71,35 @@ assert( betarange( 2 ) >= 0.0 )
 assert( betarange( 1 ) <= 180.0 )
 
 
-%% Assemble metadata
+%% Assemble metadata (if not already present)
 
-metadata = daffv17_add_metadata( metadata, 'Generation script', 'String', 'writeDAFFFile.m' );
-metadata = daffv17_add_metadata( metadata, 'Generation toolkit', 'String', 'ITA-Toolkit' );
-metadata = daffv17_add_metadata( metadata, 'Generation date', 'String', date );
-metadata = daffv17_add_metadata( metadata, 'Web resource', 'String', 'http://www.ita-toolkit.org' );
+keyname = 'Generation script';
+if isempty(metadata) || ~any( strcmpi( { metadata(:).name }, keyname ) )
+    metadata = daffv17_add_metadata( metadata, keyname, 'String', 'writeDAFFFile.m' );
+end
+
+keyname = 'Generation toolkit';
+if ~any( strcmpi( { metadata(:).name }, keyname ) )
+    metadata = daffv17_add_metadata( metadata, keyname, 'String', 'ITA-Toolkit' );
+end
+
+keyname = 'Generation date';
+if ~any( strcmpi( { metadata(:).name }, keyname ) )
+    metadata = daffv17_add_metadata( metadata, keyname, 'String', date );
+end
+
+keyname = 'Git Version';
+if ~any( strcmpi( { metadata(:).name }, keyname ) )
+    versionHash = ita_git_getMasterCommitHash;
+    metadata = daffv17_add_metadata( metadata, keyname, 'String', versionHash );
+end
+
+keyname = 'Web resource';
+if ~any( strcmpi( { metadata(:).name }, keyname ) )
+    metadata = daffv17_add_metadata( metadata, keyname, 'String', 'http://www.ita-toolkit.org' );
+end
+
+
 channels=this.nChannels/this.nDirections;
 if(channels<1)
     warning('Number of channels per record was not detected correctly, assuming 2 channel records');

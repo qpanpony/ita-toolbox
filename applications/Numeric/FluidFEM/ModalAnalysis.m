@@ -26,7 +26,7 @@ if nargin <6
 else
     if isnan(varargin{6})
         mode = varargin{6};
-        if ~strcmp(mode,'komplex') && ~strcmp(mode,'matrix')
+        if ~strcmp(mode,'complex') && ~strcmp(mode,'matrix')
             error('ModalAnalysis:: Wrong input Parameter mode!')
         end
     else
@@ -42,7 +42,7 @@ if fTmp == 0, noEx=1; end
 
 if noEx==0
     switch mode % solver method
-        case 'komplex' % Modal analysis with komplex eigenvectors
+        case 'complex' % Modal analysis with complex eigenvectors
             try
                 ind = 0;
                 for i1 = 1:length(SysMat.A)
@@ -54,7 +54,7 @@ if noEx==0
                     disp('=============================');
                 else
                     p = MAkomplex(SysMat, GUI, dMax, groupMaterial, fluid);
-                    disp('Solution: modal analysis komplex');
+                    disp('Solution: modal analysis complex');
                     disp('================================');
                 end
             catch

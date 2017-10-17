@@ -197,7 +197,7 @@ function [ dataset ] = daffv15_create_dataset( varargin )
             % Partial alpha coverage
             % First and last point do not coincide.
             % Therefore the last point is within the span
-            args.alphapoints = alphaspan / double( args.alphares ) + 1;
+            args.alphapoints = round(alphaspan / double( args.alphares ) + 1);
         end  
       
         if (ceil(args.alphapoints) ~= args.alphapoints)

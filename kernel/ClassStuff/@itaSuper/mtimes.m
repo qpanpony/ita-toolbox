@@ -242,7 +242,7 @@ end
 result.data(~isfinite(result.data)) = 0;
 
 %% Add history line
-result = ita_metainfo_rm_historyline (result,'all');
+% result = ita_metainfo_rm_historyline (result,'all');
 varargout{1} = ita_metainfo_add_historyline(result,'itaSuper.mtimes',varargin,'withSubs');
 end
 

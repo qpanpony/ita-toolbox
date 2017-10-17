@@ -71,14 +71,14 @@ else % linear frequency sampling
     result.freqVector = f; % frequency bins
     result.resultType = 'processed vibrometer data';
 end
-% a channel per node
-data = zeros(numel(ids)+1,nNodes);
-result.freqData = data;
+% allows for multiple channels per scan point (reference signal)
+data = zeros(numel(ids)+1,nNodes,tmp.nChannels);
+result.freq = data;
 interpolationIndices = zeros(nNodes,1);
 channelNames = result.channelNames;
 channelUnits = result.channelUnits;
-channelCoordinates = itaMeshNodes(nNodes);
-channelCoordinates.ID = -nNodes:-1;
+channelCoordinates = itaMeshNodes(tmp.nChannels*nNodes);
+channelCoordinates.ID = (-tmp.nChannels*nNodes:-1).';
 
 for i=1:nNodes                              % for each measurement
     filename         = files(i).name;
@@ -86,25 +86,25 @@ for i=1:nNodes                              % for each measurement
     [direc,fname]    = fileparts(filename); %#ok<ASGLU>
     node             = str2double(fname(4:end)); % get nodeID from filename
     [tmpX,tmpY,tmpZ] = ita_findCoordsFromNode(measurementGrid,node);
-    channelCoordinates.ID(i) = node;
-    channelCoordinates.cart(i,:) = [tmpX,tmpY,tmpZ];
+    channelCoordinates.ID(i + [0 1]*nNodes) = node + [0 1]*nNodes;
+    channelCoordinates.cart(i  + [0 1]*nNodes,:) = repmat([tmpX,tmpY,tmpZ],tmp.nChannels,1);
     windowResult     = ita_frequency_dependent_time_window(ita_read(filename).', ...
         timeVec,sArgs.xfade_freq,'range',sArgs.xfade_range,'symmetric',sArgs.symmetric); % windowing
-    channelNames(i)  = windowResult.channelNames(1);
-    channelUnits(i)  = windowResult.channelUnits(1);
-    data(1,i)        = node; % nodeID
-    data(2:end,i)    = windowResult.freqData(ids); % values at (center) frequencies
+    channelNames(i + [0 1]*nNodes)  = windowResult.channelNames;
+    channelUnits(i + [0 1]*nNodes)  = windowResult.channelUnits;
+    data(1,i,:)      = node + [0 1]*nNodes; % nodeID
+    data(2:end,i,:)  = windowResult.freqData(ids,:); % values at (center) frequencies
     
     % try to detect noisy measurements 
     % TODO: improve detection
-    if (max(abs(diff(data(2:end,i)))) <= 10^-10) % || (20*log10(abs(windowResult.freq2value(200))) < -20)
+    if (max(abs(diff(data(2:end,i,1)))) <= 10^-10) % || (20*log10(abs(windowResult.freq2value(200))) < -20)
         ita_verbose_info([thisFuncStr 'warning, noisy measurements detected for node ' fname(4:end) ', will try interpolation later'],1);
         interpolationIndices(i) = 1;
-        data(2:end,i) = (10^-10);
+        data(2:end,i,1) = (10^-10);
     end
 end
 
-[data,sortIdx]      = sortrows(data.',1); % sort per node ID
+[data,sortIdx]      = sortrows(reshape(data,[numel(ids)+1,nNodes*tmp.nChannels]).',1); % sort per node ID
 result.userData{1}  = 'nodeN';       % save the node IDs in UserData
 result.userData{2}  = data(:,1).';   % save the node IDs in UserData
 result.comment      = 'processed vibro data';
@@ -112,7 +112,7 @@ result.channelUnits = channelUnits(sortIdx);
 
 % save the temporary data before trying to interpolate the noisy
 % measurements
-data               = data(:,2:end).';
+data               = reshape(data(:,2:end).',[numel(ids),nNodes,tmp.nChannels]);
 channelCoordinates = channelCoordinates.n(sortIdx);
 channelNames       = channelNames(sortIdx);
 
@@ -135,7 +135,7 @@ if nInterpolate > 0
     end
 end
 
-result.freqData           = data;
+result.freq               = data;
 result.channelCoordinates = channelCoordinates;
 result.channelNames       = channelNames;
 cd(comeFrom);               % back to where we came from

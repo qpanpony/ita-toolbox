@@ -88,8 +88,10 @@ if handleMode && ~meshOnly
 %     h = unvFilename;
     if isfield(get(h),'FaceVertexCData')
         nodeIDs = get(h,'UserData');
-    elseif isfield(get(h),'Children') && isfield(get(h,'Children'),'FaceVertexCData')
+    elseif isfield(get(h),'Children') && isfield(get(get(h,'Children')),'FaceVertexCData')
         nodeIDs = get(get(h,'Children'),'UserData');
+    else
+        error('Could not find meta data, was this a mesh plot before?');
     end
 else
     nodes    = Mesh.nodesForElement(Mesh.shellElements);
@@ -146,7 +148,7 @@ end
 if handleMode
     if isfield(get(h),'FaceVertexCData')
         set(h,'FaceVertexCData',plotData);
-    elseif isfield(get(h),'Children') && isfield(get(h,'Children'),'FaceVertexCData')
+    elseif isfield(get(h),'Children') && isfield(get(get(h,'Children')),'FaceVertexCData')
         set(get(h,'Children'),'FaceVertexCData',plotData);
     end
 else
@@ -167,16 +169,15 @@ else
 end
 
 %% set title
-
 if meshOnly
     title('Mesh plot');
     set(h,'EdgeAlpha',edgeAlpha,'EdgeColor',edgeColor,'FaceColor',faceColor);
 else
     set(h,'UserData',nodeIDs);
-    if strcmpi(sArgs.plotType,'lin')
+    if ismember(sArgs.plotType,{'lin','real','imag'})
         title(['Magnitude (linear, ' sArgs.plotObject.channelUnits{1} ') at ' sArgs.plotDomain ': ' abscissaStr]);
         if isempty(sArgs.plotRange) || numel(sArgs.plotRange) < 2
-            sArgs.plotRange = [1.2*min(plotData(:)) 1.2*max(plotData(:))];
+            sArgs.plotRange = [-1.2 1.2].*max(abs(plotData(:)));
         end
         set(gca,'CLim',sort(sArgs.plotRange));
     elseif strcmpi(sArgs.plotType,'phase')
@@ -195,7 +196,6 @@ axis equal;
 axis off;
 
 %% Return the handle
-
 varargout(1) = {h};
 
 %end function

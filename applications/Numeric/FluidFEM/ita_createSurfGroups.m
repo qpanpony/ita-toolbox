@@ -1,6 +1,6 @@
 function groups = ita_createSurfGroups(coord,surfElem,maxGroups)
 % This function is called from ita_GUIModeSolve and generates some groups
-% (maxGroups, groups) for the given coordinates (coord) and surfElements 
+% (maxGroups, groups) for the given coordinates (coord) and surfElements
 % (surfElem)
 
 % <ITA-Toolbox>
@@ -41,30 +41,34 @@ for i1=1:size(surfElem.nodes,1)
     normal0(i1,:) = normal'/norm(normal);
 end
 
-normalTmp = normal0;i1 =1;
+normalTmp = normal0;
+i1 =1;
 while ~isempty(normalTmp)
-    posNorm = find((normal0(:,1)==normalTmp(1,1)) & (normal0(:,2)==normalTmp(1,2)) & (normal0(:,3)==normalTmp(1,3)));
-    posNormTmp = find((normalTmp(:,1)==normalTmp(1,1)) & (normalTmp(:,2)==normalTmp(1,2)) & (normalTmp(:,3)==normalTmp(1,3)));
-    normalTmp(posNormTmp,:)=[];
-    groupNode{i1}=posNorm;
-    l_groups(i1) = length(posNorm);
+    refNormal = normalTmp(1,:);
+    posNorm = find(abs(normal0*refNormal.' - 1) < 1e-6);
+    normalTmp(abs(normalTmp*refNormal.' - 1) < 1e-6,:)=[];
+    groupNode{i1}=posNorm; %#ok<AGROW>
+    l_groups(i1) = length(posNorm); %#ok<AGROW>
     i1=i1+1;
 end
 [l_sort, sortPos] = sort(l_groups);
 
-for i1 =1:maxGroups
-    ids = groupNode{sortPos(end-i1+1)};  
+groups = cell(min(numel(l_sort),maxGroups),1);
+for i1 =1:min(numel(l_sort),maxGroups-1)
+    ids = groupNode{sortPos(end-i1+1)};
     groups{i1} = itaMeshGroup(length(ids),['surfGroup' num2str(i1)],'shell elements');
     groups{i1}.ID = ids;
     groups{i1}.groupID = i1;
 end
 
-% all others
-ids = [];
-for i1= 1:length(sortPos)-maxGroups+1
-    ids = [ids; groupNode{sortPos(i1)}];
+% all others, but only if more groups than maxGroups (avoid empty groups)
+if numel(l_sort) > maxGroups-1
+    ids = [];
+    for i1= 1:(numel(l_sort)-maxGroups+1)
+        ids = [ids; groupNode{sortPos(i1)}];
+    end
+    groups{maxGroups} = itaMeshGroup(length(ids),['surfGroup' num2str(maxGroups)],'shell elements');
+    groups{maxGroups}.ID = ids;
+    groups{maxGroups}.groupID = maxGroups;
 end
-groups{maxGroups} = itaMeshGroup(length(ids),['surfGroup' num2str(maxGroups)],'shell elements');
-groups{maxGroups}.ID = ids;
-groups{maxGroups}.groupID = maxGroups;
 

@@ -299,9 +299,9 @@ classdef itaMSTFni < itaMSTF
             for iChannel = 1:numel(outputChannels.name)
                 if outputChannels.isActive(iChannel)
                     iDevice = outputChannels.mapping{iChannel}(1);
-                    iDeviceChannel = inputChannels.mapping{iChannel}(2);
+                    iDeviceChannel = outputChannels.mapping{iChannel}(2);
                     niSession.addAnalogOutputChannel(get(niDevices(iDevice),'ID'),iDeviceChannel-1,outputChannels.type{iChannel});
-                    niSession.Channels(end).Name = inputChannels.name{iChannel};
+                    niSession.Channels(end).Name = outputChannels.name{iChannel};
                 end
             end
             

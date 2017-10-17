@@ -3,7 +3,7 @@ function [SystemMatrices]=sys_mat(coord, elements, groupMaterial)
 % (coord), elements (elements) and groups with boundary conditions
 % (groupMaterial) are needed. systemmatrices are stored in struct
 % SystemMatrices.
-% Currently systemmatrices can only created for 
+% Currently systemmatrices can only created for
 % - surface parabolic triangle elements
 % - surface parabolic quadrilateral elements
 % - volume parabolic triangle elements
@@ -27,10 +27,10 @@ f=cell(length(groupMaterial),1);% weightvector
 SurfElem = elements{2};
 VolumeElem = elements{1};
 
-h = waitbar(0,'Please wait, I integrate over all elements...');
-
 n_nodes = size(VolumeElem.nodes,2);
 l_elem = size(VolumeElem.nodes,1);
+
+h = itaWaitbar(l_elem,'I am integrating over all elements ...','System Matrices');
 
 %% tri
 % - basisfunctions are adjusted for I*DEAS
@@ -46,26 +46,21 @@ if n_nodes==10 || n_nodes==4
                 case 'Acceleration',rb =2; case 'Point Source',rb =3;
                 otherwise, rb=0;
             end
-
+            
             % create admittancematrix
             if rb==1 && (length(groupMaterial{i1}{2}.Value)>1 || groupMaterial{i1}{2}.Value(end) ~=0)
                 try
                     A{i1}=sparse(l_N,l_N);
-                    
                     if n_nodes==10
-                        for i2=1:length(groupMaterial{i1}{1}.ID)
-                            elem  = groupMaterial{i1}{1}.ID(i2);
-                            nodes = SurfElem.nodes(elem,:);
-                            coordT= coord.cart(nodes,:);
-                            A{i1} = sur_tri_gauss_A(A{i1},coordT,nodes);
-                        end
+                        func_handle = @sur_tri_gauss_A;
                     else    %linear elements
-                        for i2=1:length(groupMaterial{i1}{1}.ID)
-                            elem  = groupMaterial{i1}{1}.ID(i2);
-                            nodes = SurfElem.nodes(elem,:);
-                            coordT= coord.cart(nodes,:);
-                            A{i1} = sur_tri_gauss_A_lin(A{i1},coordT,nodes);
-                        end                        
+                        func_handle = @sur_tri_gauss_A_lin;
+                    end
+                    for i2=1:length(groupMaterial{i1}{1}.ID)
+                        elem  = groupMaterial{i1}{1}.ID(i2);
+                        nodes = SurfElem.nodes(elem,:);
+                        coordT= coord.cart(nodes,:);
+                        A{i1} = func_handle(A{i1},coordT,nodes);
                     end
                 catch
                     close(h);
@@ -74,22 +69,16 @@ if n_nodes==10 || n_nodes==4
             elseif rb==2 % create weightvector of surface elements
                 f{i1}=sparse(l_N,1);
                 if n_nodes==10
-                    for i2=1:length(groupMaterial{i1}{1}.ID)
-                        elem  = groupMaterial{i1}{1}.ID(i2);
-                        nodes = SurfElem.nodes(elem,:);
-                        coordT= coord.cart(nodes,:);
-                        f{i1} = sur_tri_gauss_f(f{i1},coordT,nodes);
-                    end
+                    func_handle = @sur_tri_gauss_f;
                 else    %linear elements
-                    for i2=1:length(groupMaterial{i1}{1}.ID)
-                        elem  = groupMaterial{i1}{1}.ID(i2);
-                        nodes = SurfElem.nodes(elem,:);
-                        coordT= coord.cart(nodes,:);
-                        f{i1} = sur_tri_gauss_f_lin(f{i1},coordT,nodes);
-                    end                    
+                    func_handle = @sur_tri_gauss_f_lin;
                 end
-                
-
+                for i2=1:length(groupMaterial{i1}{1}.ID)
+                    elem  = groupMaterial{i1}{1}.ID(i2);
+                    nodes = SurfElem.nodes(elem,:);
+                    coordT= coord.cart(nodes,:);
+                    f{i1} = func_handle(f{i1},coordT,nodes);
+                end
             elseif rb==3 % create weightvector of a point source
                 f{i1}=sparse(l_N,1);
                 f{i1}(groupMaterial{i1}{1}.ID) = 1;
@@ -102,19 +91,15 @@ if n_nodes==10 || n_nodes==4
     % Volume elements: creates mass- and stiffnessmatrices
     %--------------------------------------------------------------------------
     if n_nodes==10
-        for i1=1:l_elem
-            nodes = VolumeElem.nodes(i1,:);
-            coordT = coord.cart(nodes,:);
-            [M S] = vol_tri_gauss(M,S,coordT,nodes);
-            waitbar(i1/l_elem)
-        end
+        func_handle = @vol_tri_gauss;
     else    %linear elements
-        for i1=1:l_elem                         
-            nodes = VolumeElem.nodes(i1,:);
-            coordT = coord.cart(nodes,:);
-            [M S] = vol_tri_gauss_lin(M,S,coordT,nodes);
-            waitbar(i1/l_elem)
-        end        
+        func_handle = @vol_tri_gauss_lin;
+    end
+    for i1=1:l_elem
+        nodes = VolumeElem.nodes(i1,:);
+        coordT = coord.cart(nodes,:);
+        [M, S] = func_handle(M,S,coordT,nodes);
+        h.inc();
     end
     
     %% hex
@@ -137,19 +122,15 @@ elseif n_nodes==20 || n_nodes==8
                 try
                     A{i1}=sparse(l_N,l_N);
                     if n_nodes==20
-                        for i2=1:length(groupMaterial{i1}{1}.ID)
-                            elem  = groupMaterial{i1}{1}.ID(i2);
-                            nodes = SurfElem.nodes(elem,:);
-                            coordT= coord.cart(nodes,:);
-                            A{i1} = sur_hex_gauss_A(A{i1},coordT,nodes);
-                        end
+                        func_handle = @sur_hex_gauss_A;
                     else    %linear elements
-                        for i2=1:length(groupMaterial{i1}{1}.ID)
-                            elem  = groupMaterial{i1}{1}.ID(i2);
-                            nodes = SurfElem.nodes(elem,:);
-                            coordT= coord.cart(nodes,:);
-                            A{i1} = sur_hex_gauss_A_lin(A{i1},coordT,nodes);
-                        end                        
+                        func_handle = @sur_hex_gauss_A_lin;
+                    end
+                    for i2=1:length(groupMaterial{i1}{1}.ID)
+                        elem  = groupMaterial{i1}{1}.ID(i2);
+                        nodes = SurfElem.nodes(elem,:);
+                        coordT= coord.cart(nodes,:);
+                        A{i1} = func_handle(A{i1},coordT,nodes);
                     end
                 catch
                     close(h);
@@ -159,19 +140,15 @@ elseif n_nodes==20 || n_nodes==8
                 % create weightvector of surface elements
                 f{i1}=sparse(l_N,1);
                 if n_nodes==20
-                    for i2=1:length(groupMaterial{i1}{1}.ID)
-                        elem  = groupMaterial{i1}{1}.ID(i2);
-                        nodes = SurfElem.nodes(elem,:);
-                        coordT= coord.cart(nodes,:);
-                        f{i1} = sur_hex_gauss_f(f{i1},coordT,nodes);
-                    end
+                    func_handle = @sur_hex_gauss_f;
                 else    %linear elements
-                    for i2=1:length(groupMaterial{i1}{1}.ID)
-                        elem  = groupMaterial{i1}{1}.ID(i2);
-                        nodes = SurfElem.nodes(elem,:);
-                        coordT= coord.cart(nodes,:);
-                        f{i1} = sur_hex_gauss_f_lin(f{i1},coordT,nodes);
-                    end                    
+                    func_handle = @sur_hex_gauss_f_lin;
+                end
+                for i2=1:length(groupMaterial{i1}{1}.ID)
+                    elem  = groupMaterial{i1}{1}.ID(i2);
+                    nodes = SurfElem.nodes(elem,:);
+                    coordT= coord.cart(nodes,:);
+                    f{i1} = func_handle(f{i1},coordT,nodes);
                 end
             elseif rb==3
                 % create weightvector of point source
@@ -186,19 +163,15 @@ elseif n_nodes==20 || n_nodes==8
     % Volume elements: creates mass- and stiffnessmatrices
     %--------------------------------------------------------------------------
     if n_nodes == 20
-        for i1=1:l_elem
-            nodes = VolumeElem.nodes(i1,:);
-            coordT= coord.cart(nodes,:);
-            [M S] = vol_hex_gauss(M,S,coordT,nodes);
-            waitbar(i1/l_elem)
-        end
+        func_handle = @vol_hex_gauss;
     else
-        for i1=1:l_elem
-            nodes = VolumeElem.nodes(i1,:);
-            coordT= coord.cart(nodes,:);
-            [M S] = vol_hex_gauss_lin(M,S,coordT,nodes);
-            waitbar(i1/l_elem)
-        end        
+        func_handle = @vol_hex_gauss_lin;
+    end
+    for i1=1:l_elem
+        nodes = VolumeElem.nodes(i1,:);
+        coordT= coord.cart(nodes,:);
+        [M, S] = func_handle(M,S,coordT,nodes);
+        h.inc();
     end
 end
 

@@ -80,9 +80,7 @@ surfElements =[];
 volumeNodes = volumeElements.nodes;
 for i1=1:volumeElements.nElements
     nodes_temp = volumeNodes(i1,:);
-    for i2=1:n_surf
-        list((i1-1)*n_surf+i2,:) = nodes_temp(Surf(i2,:));
-    end
+    list((i1-1)*n_surf+(1:n_surf),:) = nodes_temp(Surf);
 end
 
 if length(volumeElements.nodes(1,:))==20|| length(volumeElements.nodes(1,:))==8
@@ -98,12 +96,8 @@ h = waitbar(0,'Please wait... there are no surface elements - and a lot of work 
 
 
 while ~isempty(list)
-    pos=[];
     elem_temp =list_sort(1,:);
-
-    pos = strfind(reshape(list_sort',1,[]),elem_temp);
-    pos = pos((pos-1)/size(list_sort,2) == fix((pos-1)/size(list_sort,2)));
-    pos =(pos-1)/size(list_sort,2)+1;
+    pos = find(sum(abs(elem_temp-list_sort),2)==0);
 
     if length(pos)==1 %surface element found
         surfElements = [surfElements;list(1,:)]; %#ok<AGROW>

@@ -113,9 +113,9 @@ classdef itaResult < itaSuper
                     this.abscissa = abscissaInput(:);
                     switch audioInput.domain
                         case 'time'
-                            this.timeData = audioInput.time2value(abscissaInput(:));
+                            this.time = audioInput.time2value(abscissaInput(:));
                         case 'freq'
-                            this.freqData = audioInput.freq2value(abscissaInput(:));
+                            this.freq = audioInput.freq2value(abscissaInput(:));
                     end
                 else
                     this.abscissa = abscissaInput(:);
