@@ -677,14 +677,14 @@ classdef  itaHRTF < itaAudio
             end
             
             function thetaUni = theta_Unique(this,varargin)
-                thetaUni = unique(this.dirCoord.theta);
+                thetaUni = uniquetol(this.dirCoord.theta,eps);
                 if nargin == 2
                     thetaUni = unique(this.dirCoord.theta,'stable');
                 end
             end
             
             function phiUni = phi_Unique(this,varargin)
-                phiUni = unique(this.dirCoord.phi);
+                phiUni = uniquetol(this.dirCoord.phi,eps);
                 if nargin == 2
                     phiUni = unique(this.dirCoord.phi,'stable');
                 end
@@ -807,7 +807,7 @@ classdef  itaHRTF < itaAudio
             
             function surf(varargin)
                 sArgs  = struct('pos1_data','itaHRTF', 'earSide', 'L', 'freq' , 1000,'type','directivity','log',0);
-                [this,sArgs]   = ita_parse_arguments(sArgs,varargin);
+                [this,sArgs,unused]   = ita_parse_arguments(sArgs,varargin);
                 
                 idxF = this.freq2index(sArgs.freq);
                 
@@ -820,14 +820,14 @@ classdef  itaHRTF < itaAudio
                 end
                 switch sArgs.type
                     case 'directivity'
-                        surf(this.dirCoord,freqData_dB(idxF,:));
+                        surf(this.dirCoord,freqData_dB(idxF,:),unused{:});
                         c = colorbar; ylabel(c,'Magnitude in dB')
                     case 'sphere'
-                        surf(this.dirCoord,this.dirCoord.r,freqData_dB(idxF,:));
+                        surf(this.dirCoord,this.dirCoord.r,freqData_dB(idxF,:),unused{:});
                         c = colorbar;ylabel(c,'Magnitude in dB')
                     case 'phase'
                         phase = unwrap(angle(this.getEar(sArgs.earSide).freqData(idxF,:)));
-                        surf(this.dirCoord,freqData_dB(idxF,:),phase);
+                        surf(this.dirCoord,freqData_dB(idxF,:),phase,unused{:});
                         c = colorbar;ylabel(c,'Phase in rad')
                 end
                 title([sArgs.earSide ', f = ' num2str(round(this.freqVector(idxF)/100)/10) ' kHz'])
@@ -1231,12 +1231,12 @@ classdef  itaHRTF < itaAudio
                 end
                 
                 thetaC_deg  = rad2deg(thisS.theta_Unique);
-                phiC_deg    = sort(mod(round(rad2deg(thisS.phi_Unique)),360));
+                phiC_deg    = sort(mod(rad2deg(thisS.phi_Unique),360));
                 nTheta      = numel(thetaC_deg);
                 nPhi        = numel(phiC_deg);
-                coord       = reshape(mod(round(thisS.dirCoord.phi_deg),360),nTheta,nPhi);
+                coord       = reshape(mod(thisS.dirCoord.phi_deg,360),nTheta,nPhi);
                 [~, idxC]   = sort(coord,2);
-                [~, idxCT]  = unique(thisS.dirCoord.theta_deg);
+                [~, idxCT]  = uniquetol(thisS.dirCoord.theta_deg,eps);
                 
                 ITD    = thisS.ITD('method',...
                     sArgs.method, 'filter' , sArgs.filter , 'thresh',sArgs.thresh,...
