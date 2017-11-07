@@ -173,17 +173,6 @@ classdef itaAudio < itaSuper
             result = ita_impedance_parallel(this,that);
         end
         
-        %% Other stuff
-        % Now implemented as dependent property
-        %         function result = trackLength(this)
-        %             result = (this.nSamples -1)./ this.samplingRate * itaValue('1s');
-        %         end
-        %
-        %
-        %         function result = fftDegree(this)
-        %             result = log2(this.nSamples);
-        %         end
-        
         function result = isEvenSamples(this)
             %isEvenSamples - return 1 if sample number is even
             result = this.mEvenSamples;

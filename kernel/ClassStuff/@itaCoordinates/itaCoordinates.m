@@ -549,9 +549,9 @@ classdef itaCoordinates
         end
         function this = loadobj(sObj)
             % Called when an object is loaded
-            if isfield(sObj,'classrevision'), sObj = rmfield(sObj,{'classrevision'}); end;
-            if isfield(sObj,'classname'), sObj = rmfield(sObj,{'classname'}); end;
-            if isfield(sObj,'userName'), sObj = rmfield(sObj,{'userName'}); end;
+            if isfield(sObj,'classrevision'), sObj = rmfield(sObj,{'classrevision'}); end
+            if isfield(sObj,'classname'), sObj = rmfield(sObj,{'classname'}); end
+            if isfield(sObj,'userName'), sObj = rmfield(sObj,{'userName'}); end
             try
                 this = itaCoordinates(sObj); % Just call constructor, he will take care
             catch errmsg
