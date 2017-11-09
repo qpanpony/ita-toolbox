@@ -2,20 +2,17 @@
 % This assumes you already have set up a virtual scene without listener
 
 % Create itaVA and connect
-va = itaVA( 'localhost' )
+va = itaVA( 'localhost' );
 
-% Create a listener
-L = va.createListener( 'itaVA_Tracked_Listener' );
+% Create a sound receiver
+L = va.create_sound_receiver( 'itaVA_Tracked_Listener' );
 
-% OptiTrack tracker conneection and listener updates
-va.setTrackedListener( L ) % For virtual scene / rendering
-va.setTrackedRealWorldListener( L ) % For CTC reproductions
-va.connectTracker
-pause( 12 ) % Observe how you can move the virtual listener in VAGUI
-va.disconnectTracker
+% OptiTrack tracker conneection and sound receiver updates
+va.set_tracked_sound_receiver( L ) % For virtual scene / rendering
+va.set_tracked_real_world_sound_receiver( L ) % For CTC reproductions
+va.connect_tracker
+pause( 12 ) % Observe how you can move the virtual sound receiver
+va.disconnect_tracker
 
 % Remove listener again
-va.deleteListener( L )
-
-% Now close connection
-va.disconnect()
+va.delete_sound_receiver( L )

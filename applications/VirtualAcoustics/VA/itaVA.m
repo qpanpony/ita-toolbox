@@ -10,7 +10,7 @@ classdef itaVA < handle
     %   In order to get understand to the concepts behind VA
     %   please refer to the VA documentation or have a look at the example scripts.
     %
-    %   See also: itaVA_example_simple, itaVA_example_tracked_listener,
+    %   See also: itaVA_example_simple, itaVA_example_tracked_sound_receiver,
     %   itaVA_example_generic_path_renderer, itaVA_example_random_numbers
     %
     %   Quick usage:
@@ -27,7 +27,7 @@ classdef itaVA < handle
     %     Now, you can call other methods. For instance create a sound
     %     source:
     %
-    %     sourceID = va.createSoundSource( 'My Matlab virtual sound source' )
+    %     sourceID = va.create_sound_source( 'My Matlab virtual sound source' )
     %
     %     When everything is done, do not forget to close the connection.
     %     You can call disconnect on the instance or simply clear it:
@@ -60,7 +60,7 @@ classdef itaVA < handle
             end
         end
         
-        function [version] = getVersion()
+        function [version] = get_version()
             % Return the version of the VA Matlab interface
             %
             % Parameters:
@@ -75,10 +75,10 @@ classdef itaVA < handle
                 error( 'Matlab binding for VA requires VAMatlab executable.' );
             end
 
-            version = VAMatlab('getVersion');
+            version = VAMatlab('get_version');
         end
         
-         function [] = setVerboseMode(mode)
+         function [] = set_verbose_mode(mode)
             % Sets the verbose level of the VA Matlab interface
             %
             % Parameters:
@@ -99,7 +99,7 @@ classdef itaVA < handle
                 error( 'Matlab binding for VA requires VAMatlab executable.' );
             end
 
-            VAMatlab('setVerboseMode', mode);
+            VAMatlab('set_verbose_mode', mode);
         end
     end
 
@@ -139,9 +139,9 @@ classdef itaVA < handle
             this.disconnect
         end 
        
-        function [connected] = isConnected(this)
+        function [connected] = is_connected(this)
             % Returns if a connection to a server is established
-           connected = VAMatlab('isConnected', this.handle);
+           connected = VAMatlab('is_connected', this.handle);
         end
         
         function connect(this, addressstring)
@@ -182,7 +182,7 @@ classdef itaVA < handle
             this.handle = int32(0);
         end
            
-        function [state] = getServerState(this)
+        function [state] = get_server_state(this)
             % Returns the state of the connected server
             %
             % Use this function to check whether the server is
@@ -203,18 +203,18 @@ classdef itaVA < handle
             % - 2 = Connected, but server has failure.
             %
             if this.handle==0, error('Not connected.'); end; 
-            state = VAMatlab('getServerState', this.handle);
+            state = VAMatlab('get_server_state', this.handle);
         end
         
-        function connectTracker( this, remote_ip, local_ip )
+        function connect_tracker( this, remote_ip, local_ip )
             % Connects to a local NatNet tracking server
             % 
-            % The server will update a virtual listener for real-time 
-            % sound synthesis and the real world listener position for
+            % The server will update a virtual sound receiver for real-time 
+            % sound synthesis and the real world sound receiver position for
             % those sound reproductions that need this information, like  
             % Crosstalk-Cancellation.
             %
-            % See also setTrackedListener.
+            % See also set_tracked_sound_receiver.
             %
             % Parameters (optional):
             %
@@ -227,48 +227,53 @@ classdef itaVA < handle
 				local_ip = '127.0.0.1';
 			end
 
-            VAMatlab( 'ConnectTracker', this.handle, remote_ip, local_ip );
+            VAMatlab( 'connect_tracker', this.handle, remote_ip, local_ip );
         end
         
-        function [connected] = isTrackerConnected( this )
+        function [connected] = get_tracker_connected( this )
             % Returns true, if tracker is connected
-            connected = VAMatlab( 'IsTrackerConnected', this.handle );
+            connected = VAMatlab( 'get_tracker_connected', this.handle );
         end
         
-        function disconnectTracker( this )
+        function disconnect_tracker( this )
             % Disconnects from the NatNet tracking server
-            VAMatlab( 'DisconnectTracker', this.handle )
+            VAMatlab( 'disconnect_tracker', this.handle )
         end
         
-		% -- Tracked listener -- %
+		% -- Tracked sound receiver -- %
 		
-        function setTrackedListener( this, listener_id )
-            % Connects a VA listener with the tracked listener rigid body
+        function set_tracked_sound_receiver( this, sound_receiver_id )
+            % Connects a VA sound receiver with the tracked sound receiver rigid body
             %
             % Parameters:
             %
-            % 	listener_id  [integer-1x1]   VA listener id
+            % 	sound_receiver_id  [integer-1x1]   VA sound receiver id
             %
-            VAMatlab( 'SetTrackedListener', this.handle, listener_id );
+            VAMatlab( 'set_tracked_sound_receiver', this.handle, sound_receiver_id );
         end
         
-        function setTrackedListenerRigidBodyIndex( this, index )
-            % Sets the index of the rigid body to be tracked for listener (default is 1)
-            VAMatlab( 'SetTrackedListenerRigidBodyIndex', this.handle, index )
+        function set_tracked_sound_receiver_head_rigid_body_index( this, index )
+            % Sets the index of the rigid body to be tracked for sound receiver (default is 1)
+            VAMatlab( 'set_tracked_sound_receiver_head_rigid_body_index', this.handle, index )
         end
         
-        function setTrackedListenerRigidBodyTranslation( this, translation )
-            % Sets the pivot point translation for the tracked listener rigid body
+        function set_tracked_sound_receiver_torso_rigid_body_index( this, index )
+            % Sets the index of the rigid body to be tracked for sound receiver's absolute torso orientation (default is 1)
+            VAMatlab( 'set_tracked_sound_receiver_torso_rigid_body_index', this.handle, index )
+        end
+        
+        function set_tracked_sound_receiver_head_rigid_body_translation( this, translation )
+            % Sets the pivot point translation for the tracked sound receiver rigid body
 			%
 			% Parameters:
 			%
 			%	translation [double-3x1]	Translation in local coordinate system of rigid body [m]
 			%
-            VAMatlab( 'SetTrackedListenerRigidBodyTranslation', this.handle, translation )
+            VAMatlab( 'set_tracked_sound_receiver_head_rigid_body_translation', this.handle, translation )
         end
         
-        function setTrackedListenerRigidBodyRotation( this, rotation )
-            % Sets the rotation of orientation for the tracked listener rigid body
+        function set_tracked_sound_receiver_head_rigid_body_rotation( this, rotation )
+            % Sets the rotation of orientation for the tracked sound receiver rigid body
 			%
 			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
 			%
@@ -276,38 +281,43 @@ classdef itaVA < handle
 			%
 			%	rotation [quaternion]	Rotation of rigid body
 			%
-            VAMatlab( 'SetTrackedListenerRigidBodyRotation', this.handle, rotation )
+            VAMatlab( 'set_tracked_sound_receiver_head_rigid_body_rotation', this.handle, rotation )
         end
 		
-		% -- Tracked real-world listener -- %
+		% -- Tracked real-world sound receiver -- %
 		
-        function setTrackedRealWorldListener( this, listener_id )
-            % Connects a VA real-world listener with the tracked real-world rigid body
+        function set_tracked_real_world_sound_receiver( this, sound_receiver_id )
+            % Connects a VA real-world sound receiver with the tracked real-world rigid body
             %
             % Parameters:
             %
-            % 	listener_id  [integer-1x1]   VA real-world listener id
+            % 	sound_receiver_id  [integer-1x1]   VA real-world sound receiver id
             %
-            VAMatlab( 'SetTrackedRealWorldListener', this.handle, listener_id );
+            VAMatlab( 'set_tracked_real_world_sound_receiver', this.handle, sound_receiver_id );
         end
 		
-        function setTrackedRealWorldListenerRigidBodyIndex( this, index )
-            % Sets the index of the rigid body to be tracked for real-world listener (default is 1)
-            VAMatlab( 'SetTrackedRealWorldListenerRigidBodyIndex', this.handle, index )
+        function set_tracked_real_world_sound_receiver_head_rigid_body_index( this, index )
+            % Sets the index of the rigid body to be tracked for real-world sound receiver (default is 1)
+            VAMatlab( 'set_tracked_real_world_sound_receiver_rigid_body_index', this.handle, index )
+        end
+		
+        function set_tracked_real_world_sound_receiver_torso_rigid_body_index( this, index )
+            % Sets the index of the rigid body to be tracked for real-world sound receiver' torso (default is 1)
+            VAMatlab( 'set_tracked_real_world_sound_receiver_torso_rigid_body_index', this.handle, index )
         end
         
-        function setTrackedRealWorldListenerRigidBodyTranslation( this, translation )
-            % Sets the pivot point translation for the tracked real-world listener rigid body
+        function set_tracked_real_world_sound_receiver_head_rigid_body_translation( this, translation )
+            % Sets the pivot point translation for the tracked real-world sound receiver rigid body
 			%
 			% Parameters:
 			%
 			%	translation [double-3x1]	Translation in local coordinate system of rigid body [m]
 			%
-            VAMatlab( 'SetTrackedRealWorldListenerRigidBodyTranslation', this.handle, translation )
+            VAMatlab( 'set_tracked_real_world_sound_receiver_head_rigid_body_translation', this.handle, translation )
         end
         
-        function setTrackedRealWorldListenerRigidBodyRotation( this, rotation )
-            % Sets the rotation of orientation for the tracked real-world listener rigid body
+        function set_tracked_real_world_sound_receiver_head_rigid_body_rotation( this, rotation )
+            % Sets the rotation of orientation for the tracked real-world sound receiver rigid body
 			%
 			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
 			%
@@ -315,37 +325,37 @@ classdef itaVA < handle
 			%
 			%	rotation [quaternion]	Rotation of rigid body
 			%
-            VAMatlab( 'SetTrackedRealWorldListenerRigidBodyRotation', this.handle, rotation )
+            VAMatlab( 'set_tracked_real_world_sound_receiver_head_rigid_body_rotation', this.handle, rotation )
         end
 		        
 		% -- Tracked source -- %
 		
-        function setTrackedSource( this, source_id )
+        function set_tracked_sound_source( this, source_id )
             % Connects a VA source with the tracked source rigid body
             %
             % Parameters:
             %
             % 	source_id  [integer-1x1]   VA source id
             %
-            VAMatlab( 'SetTrackedSource', this.handle, source_id );
+            VAMatlab( 'set_tracked_sound_source', this.handle, source_id );
         end
 		
-        function setTrackedSourceRigidBodyIndex( this, index )
+        function set_tracked_source_rigid_body_index( this, index )
             % Sets the index of the rigid body to be tracked for source (default is 1)
-            VAMatlab( 'SetTrackedSourceRigidBodyIndex', this.handle, index )
+            VAMatlab( 'set_tracked_source_rigid_body_index', this.handle, index )
         end
         
-        function setTrackedSourceRigidBodyTranslation( this, translation )
+        function set_tracked_source_rigid_body_translation( this, translation )
             % Sets the pivot point translation for the tracked source rigid body
 			%
 			% Parameters:
 			%
 			%	translation [double-3x1]	Translation in local coordinate system of rigid body [m]
 			%
-            VAMatlab( 'SetTrackedSourceRigidBodyTranslation', this.handle, translation )
+            VAMatlab( 'set_tracked_source_rigid_body_translation', this.handle, translation )
         end
         
-        function setTrackedSourceRigidBodyRotation( this, rotation )
+        function set_tracked_source_rigid_body_rotation( this, rotation )
             % Sets the rotation of orientation for the tracked source rigid body
 			%
 			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
@@ -354,13 +364,13 @@ classdef itaVA < handle
 			%
 			%	rotation [quaternion]	Rotation of rigid body
 			%
-            VAMatlab( 'SetTrackedSourceRigidBodyRotation', this.handle, rotation )
+            VAMatlab( 'set_tracked_source_rigid_body_rotation', this.handle, rotation )
         end
 		
         
         %% --= Functions =--
         
-        	function [valid] = addSearchPath(this, path)
+        	function [valid] = add_search_path(this, path)
 		% adds a search path at core side
 		%
 		% Parameters:
@@ -374,30 +384,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[valid] = VAMatlab('addSearchPath', this.handle, path);
+		[valid] = VAMatlab('add_search_path', this.handle, path);
 	end
 
-	function [playbackID] = addSoundPlayback(this, signalSourceID,soundID,flags,timecode)
-		% Adds a sound playback for a sequencer signal source
-		%
-		% Parameters:
-		%
-		% 	signalSourceID [string] Sequencer signal source ID
-		% 	soundID [integer-1x1] Sound ID
-		% 	flags [integer-1x1] Playback flags
-		% 	timecode [double-1x1] Playback time (expressed in core clock time, 0 => instant playback)
-		%
-		% Return values:
-		%
-		% 	playbackID [integer-1x1] Playback ID
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[playbackID] = VAMatlab('addSoundPlayback', this.handle, signalSourceID,soundID,flags,timecode);
-	end
-
-	function [ret] = callModule(this, module,mstruct)
+	function [ret] = call_module(this, module,mstruct)
 		% Calls an internal module of the VA server
 		%
 		% Parameters:
@@ -412,10 +402,67 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[ret] = VAMatlab('callModule', this.handle, module,mstruct);
+		[ret] = VAMatlab('call_module', this.handle, module,mstruct);
 	end
 
-	function [signalSourceID] = createAudiofileSignalSource(this, filename,name)
+	function [material_id] = create_acoustic_material_from_file(this, file_path,material_name)
+		% Create acoustic material
+		%
+		% Parameters:
+		%
+		% 	file_path [string] Material file path
+		% 	material_name [string] Material name (optional, default: '')
+		%
+		% Return values:
+		%
+		% 	material_id [double-1x1] Material identifier
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		if ~exist('material_name','var'), material_name = ''; end
+		[material_id] = VAMatlab('create_acoustic_material_from_file', this.handle, file_path,material_name);
+	end
+
+	function [directivityID] = create_directivity(this, filename,name)
+		% Loads a directivity from a file
+		%
+		% Parameters:
+		%
+		% 	filename [string] Filename
+		% 	name [string] Displayed name (optional, default: '')
+		%
+		% Return values:
+		%
+		% 	directivityID [integer-1x1] Directivity ID
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		if ~exist('name','var'), name = ''; end
+		[directivityID] = VAMatlab('create_directivity', this.handle, filename,name);
+	end
+
+	function [geo_mesh_id] = create_geometry_mesh_from_file(this, file_path,geo_mesh_name)
+		% Create geometry mesh from file
+		%
+		% Parameters:
+		%
+		% 	file_path [string] Geometry mesh file path
+		% 	geo_mesh_name [string] Geometry mesh name (optional, default: '')
+		%
+		% Return values:
+		%
+		% 	geo_mesh_id [double-1x1] Geometry mesh identifier
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		if ~exist('geo_mesh_name','var'), geo_mesh_name = ''; end
+		[geo_mesh_id] = VAMatlab('create_geometry_mesh_from_file', this.handle, file_path,geo_mesh_name);
+	end
+
+	function [signalSourceID] = create_signal_source_buffer_from_file(this, filename,name)
 		% Creates a signal source which plays an audiofile
 		%
 		% Parameters:
@@ -431,14 +478,15 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('name','var'), name = ''; end
-		[signalSourceID] = VAMatlab('createAudiofileSignalSource', this.handle, filename,name);
+		[signalSourceID] = VAMatlab('create_signal_source_buffer_from_file', this.handle, filename,name);
 	end
 
-	function [signalSourceID] = createEngineSignalSource(this, name)
-		% Creates an engine signal source
+	function [signalSourceID] = create_signal_source_buffer_from_parameters(this, params,name)
+		% Creates an buffer signal source
 		%
 		% Parameters:
 		%
+		% 	params [struct] Parameters
 		% 	name [string] Displayed name (optional, default: '')
 		%
 		% Return values:
@@ -449,32 +497,29 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('name','var'), name = ''; end
-		[signalSourceID] = VAMatlab('createEngineSignalSource', this.handle, name);
+		[signalSourceID] = VAMatlab('create_signal_source_buffer_from_parameters', this.handle, params,name);
 	end
 
-	function [id] = createListener(this, name,auralizationMode,hrirID)
-		% Creates a listener
+	function [signalSourceID] = create_signal_source_engine(this, params,name)
+		% Creates an engine signal source
 		%
 		% Parameters:
 		%
+		% 	params [struct] Parameters
 		% 	name [string] Displayed name (optional, default: '')
-		% 	auralizationMode [string] Auralization mode (optional, default: 'default')
-		% 	hrirID [integer-1x1] HRIR dataset ID (optional, default: -1)
 		%
 		% Return values:
 		%
-		% 	id [integer-1x1] Sound source ID
+		% 	signalSourceID [string] Signal source ID
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('name','var'), name = ''; end
-		if ~exist('auralizationMode','var'), auralizationMode = 'default'; end
-		if ~exist('hrirID','var'), hrirID = -1; end
-		[id] = VAMatlab('createListener', this.handle, name,auralizationMode,hrirID);
+		[signalSourceID] = VAMatlab('create_signal_source_engine', this.handle, params,name);
 	end
 
-	function [signalSourceID] = createNetworkStreamSignalSource(this, address,port,name)
+	function [signalSourceID] = create_signal_source_network_stream(this, address,port,name)
 		% Creates a signal source which receives audio samples via network
 		%
 		% Parameters:
@@ -491,10 +536,10 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('name','var'), name = ''; end
-		[signalSourceID] = VAMatlab('createNetworkStreamSignalSource', this.handle, address,port,name);
+		[signalSourceID] = VAMatlab('create_signal_source_network_stream', this.handle, address,port,name);
 	end
 
-	function [signalSourceID] = createSequencerSignalSource(this, name)
+	function [signalSourceID] = create_signal_source_sequencer(this, name)
 		% Creates a sequencer signal source
 		%
 		% Parameters:
@@ -509,50 +554,10 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('name','var'), name = ''; end
-		[signalSourceID] = VAMatlab('createSequencerSignalSource', this.handle, name);
+		[signalSourceID] = VAMatlab('create_signal_source_sequencer', this.handle, name);
 	end
 
-	function [id] = createSoundSource(this, name,auralizationMode,volume)
-		% Creates a sound source
-		%
-		% Parameters:
-		%
-		% 	name [string] Displayed name (optional, default: '')
-		% 	auralizationMode [string] Auralization mode (optional, default: 'default')
-		% 	volume [double-1x1] Volume [factor] (optional, default: 1)
-		%
-		% Return values:
-		%
-		% 	id [integer-1x1] Sound source ID
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		if ~exist('name','var'), name = ''; end
-		if ~exist('auralizationMode','var'), auralizationMode = 'default'; end
-		if ~exist('volume','var'), volume = 1; end
-		[id] = VAMatlab('createSoundSource', this.handle, name,auralizationMode,volume);
-	end
-
-	function [id] = createSoundSourceExplicitRenderer(this, name,renderer)
-		% Creates a sound source explicitly for a certain renderer
-		%
-		% Parameters:
-		%
-		% 	name [string] Name
-		% 	renderer [string] Renderer identifier
-		%
-		% Return values:
-		%
-		% 	id [integer-1x1] Sound source ID
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[id] = VAMatlab('createSoundSourceExplicitRenderer', this.handle, name,renderer);
-	end
-
-	function [signalSourceID] = createTextToSpeechSignalSource(this, name)
+	function [signalSourceID] = create_signal_source_text_to_speech(this, name)
 		% Creates a text to speech signal
 		%
 		% Parameters:
@@ -567,78 +572,81 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('name','var'), name = ''; end
-		[signalSourceID] = VAMatlab('createTextToSpeechSignalSource', this.handle, name);
+		[signalSourceID] = VAMatlab('create_signal_source_text_to_speech', this.handle, name);
 	end
 
-	function [] = deleteListener(this, listenerID)
-		% Deletes a listener from the scene
+	function [id] = create_sound_receiver(this, name)
+		% Creates a sound receiver
 		%
 		% Parameters:
 		%
-		% 	listenerID [integer-1x1] Listener ID
+		% 	name [string] Displayed name (optional, default: '')
 		%
 		% Return values:
 		%
-		% 	None
+		% 	id [integer-1x1] Sound receiver ID
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('deleteListener', this.handle, listenerID);
+		if ~exist('name','var'), name = ''; end
+		[id] = VAMatlab('create_sound_receiver', this.handle, name);
 	end
 
-	function [result] = deleteSignalSource(this, signalSourceID)
-		% Deletes a signal source
+	function [id] = create_sound_source(this, name)
+		% Creates a sound source
 		%
 		% Parameters:
 		%
-		% 	signalSourceID [string] Signal source ID
+		% 	name [string] Displayed name (optional, default: '')
 		%
 		% Return values:
 		%
-		% 	result [logical-1x1] Signal source deleted?
+		% 	id [integer-1x1] Sound source ID
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[result] = VAMatlab('deleteSignalSource', this.handle, signalSourceID);
+		if ~exist('name','var'), name = ''; end
+		[id] = VAMatlab('create_sound_source', this.handle, name);
 	end
 
-	function [] = deleteSoundSource(this, soundSourceID)
-		% Deletes an existing sound source in the scene
+	function [id] = create_sound_source_explicit_renderer(this, renderer,name)
+		% Creates a sound source explicitly for a certain renderer
 		%
 		% Parameters:
 		%
-		% 	soundSourceID [integer-1x1] Sound source ID
+		% 	renderer [string] Renderer identifier
+		% 	name [string] Name
 		%
 		% Return values:
 		%
-		% 	None
+		% 	id [integer-1x1] Sound source ID
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('deleteSoundSource', this.handle, soundSourceID);
+		[id] = VAMatlab('create_sound_source_explicit_renderer', this.handle, renderer,name);
 	end
 
-	function [modules] = enumerateModules(this)
-		% Enumerates internal modules of the VA server
+	function [success_flag] = delete_acoustic_material(this, material_id)
+		% Delete acoustic material
 		%
 		% Parameters:
 		%
-		% 	None
+		% 	material_id [double-1x1] Material identifier
 		%
 		% Return values:
 		%
-		% 	modules [cell-array of struct-1x1] Module informations (names, descriptions, etc.)
+		% 	success_flag [logical-1x1] Removal success
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[modules] = VAMatlab('enumerateModules', this.handle);
+		[success_flag] = VAMatlab('delete_acoustic_material', this.handle, material_id);
 	end
 
-	function [result] = freeDirectivity(this, directivityID)
+	function [result] = delete_directivity(this, directivityID)
 		% Frees a directivity and releases its memory
 		%
 		% Parameters:
@@ -652,45 +660,97 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[result] = VAMatlab('freeDirectivity', this.handle, directivityID);
+		[result] = VAMatlab('delete_directivity', this.handle, directivityID);
 	end
 
-	function [result] = freeHRIRDataset(this, hrirID)
-		% Frees a loaded HRIR dataset
+	function [success_flag] = delete_geometry_mesh(this, geo_mesh_id)
+		% Delete geometry mesh
 		%
 		% Parameters:
 		%
-		% 	hrirID [integer-1x1] HRIR dataset ID
+		% 	geo_mesh_id [double-1x1] Geometry mesh identifier
 		%
 		% Return values:
 		%
-		% 	result [logical-1x1] HRIR dataset freed?
+		% 	success_flag [logical-1x1] Removal success
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[result] = VAMatlab('freeHRIRDataset', this.handle, hrirID);
+		[success_flag] = VAMatlab('delete_geometry_mesh', this.handle, geo_mesh_id);
 	end
 
-	function [result] = freeSound(this, soundID)
-		% Frees a loaded sound
+	function [result] = delete_signal_source(this, signalSourceID)
+		% Deletes a signal source
 		%
 		% Parameters:
 		%
-		% 	soundID [integer-1x1] Sound ID
+		% 	signalSourceID [string] Signal source ID
 		%
 		% Return values:
 		%
-		% 	result [logical-1x1] Sound freed?
+		% 	result [logical-1x1] Signal source deleted?
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[result] = VAMatlab('freeSound', this.handle, soundID);
+		[result] = VAMatlab('delete_signal_source', this.handle, signalSourceID);
 	end
 
-	function [listenerID] = getActiveListener(this)
-		% Returns the active listener
+	function [] = delete_sound_receiver(this, soundreceiverID)
+		% Deletes a sound receiver from the scene
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('delete_sound_receiver', this.handle, soundreceiverID);
+	end
+
+	function [] = delete_sound_source(this, soundSourceID)
+		% Deletes an existing sound source in the scene
+		%
+		% Parameters:
+		%
+		% 	soundSourceID [integer-1x1] Sound source ID
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('delete_sound_source', this.handle, soundSourceID);
+	end
+
+	function [params] = get_acoustic_magerial_parameters(this, material_id,args)
+		% Acoustic material parameter getter
+		%
+		% Parameters:
+		%
+		% 	material_id [integer-1x1] Acoustic material identifier
+		% 	args [mstruct] Requested parameters
+		%
+		% Return values:
+		%
+		% 	params [mstruct] Parameters
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[params] = VAMatlab('get_acoustic_magerial_parameters', this.handle, material_id,args);
+	end
+
+	function [soundreceiverID] = get_active_sound_receiver(this)
+		% Returns the active sound receiver
 		%
 		% Parameters:
 		%
@@ -698,49 +758,15 @@ classdef itaVA < handle
 		%
 		% Return values:
 		%
-		% 	listenerID [integer-1x1] Listener ID
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[listenerID] = VAMatlab('getActiveListener', this.handle);
+		[soundreceiverID] = VAMatlab('get_active_sound_receiver', this.handle);
 	end
 
-	function [isLooping] = getAudiofileSignalSourceIsLooping(this, signalSourceID)
-		% Returns the playback state of an audiofile signal source. Available modes: PLAYING, STOPPED, PAUSED
-		%
-		% Parameters:
-		%
-		% 	signalSourceID [string] Signal source ID
-		%
-		% Return values:
-		%
-		% 	isLooping [logical-1x1] Looping enabled/disabled
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[isLooping] = VAMatlab('getAudiofileSignalSourceIsLooping', this.handle, signalSourceID);
-	end
-
-	function [playState] = getAudiofileSignalSourcePlaybackState(this, signalSourceID)
-		% Returns the playback state of an audiofile signal source. Available modes: PLAYING, STOPPED, PAUSED
-		%
-		% Parameters:
-		%
-		% 	signalSourceID [string] Signal source ID
-		%
-		% Return values:
-		%
-		% 	playState [string] Playback state
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[playState] = VAMatlab('getAudiofileSignalSourcePlaybackState', this.handle, signalSourceID);
-	end
-
-	function [clk] = getCoreClock(this)
+	function [clk] = get_core_clock(this)
 		% Returns the current core time
 		%
 		% Parameters:
@@ -754,10 +780,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[clk] = VAMatlab('getCoreClock', this.handle);
+		[clk] = VAMatlab('get_core_clock', this.handle);
 	end
 
-	function [info] = getDirectivityInfo(this, directivityID)
+	function [info] = get_directivity_info(this, directivityID)
 		% Returns information on a loaded directivity
 		%
 		% Parameters:
@@ -771,10 +797,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[info] = VAMatlab('getDirectivityInfo', this.handle, directivityID);
+		[info] = VAMatlab('get_directivity_info', this.handle, directivityID);
 	end
 
-	function [info] = getDirectivityInfos(this)
+	function [info] = get_directivity_infos(this)
 		% Returns information on all loaded directivities
 		%
 		% Parameters:
@@ -788,10 +814,45 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[info] = VAMatlab('getDirectivityInfos', this.handle);
+		[info] = VAMatlab('get_directivity_infos', this.handle);
 	end
 
-	function [auralizationMode] = getGlobalAuralizationMode(this)
+	function [result] = get_geometry_mesh_enabled(this, geo_mesh_id)
+		% Geometry mesh enabled getter
+		%
+		% Parameters:
+		%
+		% 	geo_mesh_id [integer-1x1] Geometry mesh identifier
+		%
+		% Return values:
+		%
+		% 	result [logical-1x1] Enabled flag
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[result] = VAMatlab('get_geometry_mesh_enabled', this.handle, geo_mesh_id);
+	end
+
+	function [params] = get_geometry_mesh_parameters(this, geo_mesh_id,args)
+		% Geometry mesh parameter getter
+		%
+		% Parameters:
+		%
+		% 	geo_mesh_id [integer-1x1] Geometry mesh identifier
+		% 	args [mstruct] Requested parameters
+		%
+		% Return values:
+		%
+		% 	params [mstruct] Parameters
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[params] = VAMatlab('get_geometry_mesh_parameters', this.handle, geo_mesh_id,args);
+	end
+
+	function [auralizationMode] = get_global_auralization_mode(this)
 		% Returns the global auralization mode
 		%
 		% Parameters:
@@ -805,28 +866,11 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[auralizationMode] = VAMatlab('getGlobalAuralizationMode', this.handle);
+		[auralizationMode] = VAMatlab('get_global_auralization_mode', this.handle);
 	end
 
-	function [info] = getHRIRDatasetInfo(this, hrirID)
-		% Returns information on a loaded HRIR dataset
-		%
-		% Parameters:
-		%
-		% 	hrirID [integer-1x1] HRIR dataset ID
-		%
-		% Return values:
-		%
-		% 	info [struct-1x1] Information structs (name, filename, resolution, etc.)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[info] = VAMatlab('getHRIRDatasetInfo', this.handle, hrirID);
-	end
-
-	function [info] = getHRIRDatasetInfos(this)
-		% Returns information on all loaded HRIR datasets
+	function [shift_speed] = get_homogeneous_medium_relative_humidity(this)
+		% Get homogeneous medium relative humidity
 		%
 		% Parameters:
 		%
@@ -834,15 +878,100 @@ classdef itaVA < handle
 		%
 		% Return values:
 		%
-		% 	info [cell-array of struct-1x1] Information structs (name, filename, resolution, etc.)
+		% 	shift_speed [double-1x1] Relative humidity [Percent]
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[info] = VAMatlab('getHRIRDatasetInfos', this.handle);
+		[shift_speed] = VAMatlab('get_homogeneous_medium_relative_humidity', this.handle);
 	end
 
-	function [gain] = getInputGain(this)
+	function [params] = get_homogeneous_medium_shift_parameters(this, args)
+		% Returns homogeneous medium parameters
+		%
+		% Parameters:
+		%
+		% 	args [mstruct] Requested parameters
+		%
+		% Return values:
+		%
+		% 	params [mstruct] Parameters
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[params] = VAMatlab('get_homogeneous_medium_shift_parameters', this.handle, args);
+	end
+
+	function [shift_speed] = get_homogeneous_medium_shift_speed(this)
+		% Get homogeneous medium shift speed
+		%
+		% Parameters:
+		%
+		% 	None
+		%
+		% Return values:
+		%
+		% 	shift_speed [double-3x1] Shift speed vector [m/s]
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[shift_speed] = VAMatlab('get_homogeneous_medium_shift_speed', this.handle);
+	end
+
+	function [sound_speed] = get_homogeneous_medium_sound_speed(this)
+		% Get homogeneous medium sound speed
+		%
+		% Parameters:
+		%
+		% 	None
+		%
+		% Return values:
+		%
+		% 	sound_speed [double-1x1] Sound speed [m/s]
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[sound_speed] = VAMatlab('get_homogeneous_medium_sound_speed', this.handle);
+	end
+
+	function [static_pressure] = get_homogeneous_medium_static_pressure(this)
+		% Get homogeneous medium static pressure
+		%
+		% Parameters:
+		%
+		% 	None
+		%
+		% Return values:
+		%
+		% 	static_pressure [double-1x1] Static pressure [Pa]
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[static_pressure] = VAMatlab('get_homogeneous_medium_static_pressure', this.handle);
+	end
+
+	function [temperature] = get_homogeneous_medium_temperature(this)
+		% Get homogeneous medium temperature
+		%
+		% Parameters:
+		%
+		% 	None
+		%
+		% Return values:
+		%
+		% 	temperature [double-1x1] Temperature [degree Celsius]
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[temperature] = VAMatlab('get_homogeneous_medium_temperature', this.handle);
+	end
+
+	function [gain] = get_input_gain(this)
 		% Returns the gain the audio device input channels
 		%
 		% Parameters:
@@ -856,45 +985,11 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[gain] = VAMatlab('getInputGain', this.handle);
+		[gain] = VAMatlab('get_input_gain', this.handle);
 	end
 
-	function [auralizationMode] = getListenerAuralizationMode(this, listenerID)
-		% Returns the auralization mode of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		%
-		% Return values:
-		%
-		% 	auralizationMode [string] Auralization mode
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[auralizationMode] = VAMatlab('getListenerAuralizationMode', this.handle, listenerID);
-	end
-
-	function [hrirID] = getListenerHRIRDataset(this, listenerID)
-		% Returns for a listener the assigned HRIR dataset
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		%
-		% Return values:
-		%
-		% 	hrirID [integer-1x1] HRIR dataset ID
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[hrirID] = VAMatlab('getListenerHRIRDataset', this.handle, listenerID);
-	end
-
-	function [ids] = getListenerIDs(this)
-		% Returns the IDs of all listeners in the scene
+	function [result] = get_input_muted(this)
+		% Returns if the audio device inputs are muted
 		%
 		% Parameters:
 		%
@@ -902,197 +997,32 @@ classdef itaVA < handle
 		%
 		% Return values:
 		%
-		% 	ids [integer-1xN] Vector containing the IDs
+		% 	result [logical-1x1] Inputs muted?
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[ids] = VAMatlab('getListenerIDs', this.handle);
+		[result] = VAMatlab('get_input_muted', this.handle);
 	end
 
-	function [name] = getListenerName(this, listenerID)
-		% Returns name of a listener
+	function [modules] = get_modules(this)
+		% Enumerates internal modules of the VA server
 		%
 		% Parameters:
 		%
-		% 	listenerID [integer-1x1] Listener ID
+		% 	None
 		%
 		% Return values:
 		%
-		% 	name [string] Displayed name
+		% 	modules [cell-array of struct-1x1] Module informations (names, descriptions, etc.)
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[name] = VAMatlab('getListenerName', this.handle, listenerID);
+		[modules] = VAMatlab('get_modules', this.handle);
 	end
 
-	function [view,up] = getListenerOrientationVU(this, listenerID)
-		% Returns the orientation of a listener (as view- and up-vector)
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		%
-		% Return values:
-		%
-		% 	view [double-3] View vector
-		% 	up [double-3] Up vector
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[view,up] = VAMatlab('getListenerOrientationVU', this.handle, listenerID);
-	end
-
-	function [ypr] = getListenerOrientationYPR(this, listenerID)
-		% Returns the orientation of a listener (in yaw-pitch-roll angles)
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		%
-		% Return values:
-		%
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[ypr] = VAMatlab('getListenerOrientationYPR', this.handle, listenerID);
-	end
-
-	function [params] = getListenerParameters(this, ID,args)
-		% Returns the current listener parameters
-		%
-		% Parameters:
-		%
-		% 	ID [integer-1x1] Listener identifier
-		% 	args [mstruct] Requested parameters
-		%
-		% Return values:
-		%
-		% 	params [mstruct] Parameters
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[params] = VAMatlab('getListenerParameters', this.handle, ID,args);
-	end
-
-	function [pos] = getListenerPosition(this, listenerID)
-		% Returns the position of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		%
-		% Return values:
-		%
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[pos] = VAMatlab('getListenerPosition', this.handle, listenerID);
-	end
-
-	function [pos,view,up,velocity] = getListenerPositionOrientationVelocityVU(this, listenerID)
-		% Returns the position, orientation (as view- and up vector) and velocity of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		%
-		% Return values:
-		%
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		% 	view [double-3] View vector
-		% 	up [double-3] Up vector
-		% 	velocity [double-3] velocity vector
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[pos,view,up,velocity] = VAMatlab('getListenerPositionOrientationVelocityVU', this.handle, listenerID);
-	end
-
-	function [pos,ypr,velocity] = getListenerPositionOrientationVelocityYPR(this, listenerID)
-		% Returns the position, orientation (in yaw-pitch-roll angles) and velocity of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		%
-		% Return values:
-		%
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		% 	velocity [double-3] velocity vector
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[pos,ypr,velocity] = VAMatlab('getListenerPositionOrientationVelocityYPR', this.handle, listenerID);
-	end
-
-	function [pos,view,up] = getListenerPositionOrientationVU(this, listenerID)
-		% Returns the position and orientation (as view- and up-vector) of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		%
-		% Return values:
-		%
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		% 	view [double-3] View vector
-		% 	up [double-3] Up vector
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[pos,view,up] = VAMatlab('getListenerPositionOrientationVU', this.handle, listenerID);
-	end
-
-	function [pos,ypr] = getListenerPositionOrientationYPR(this, listenerID)
-		% Returns the position and orientation (in yaw-pitch-roll angles) of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		%
-		% Return values:
-		%
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[pos,ypr] = VAMatlab('getListenerPositionOrientationYPR', this.handle, listenerID);
-	end
-
-	function [pos,view,up] = getListenerRealWorldHeadPositionOrientationVU(this, listenerID)
-		% Returns the real-world position and orientation (as view- and up vector) of the listener's head
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		%
-		% Return values:
-		%
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		% 	view [double-3] View vector
-		% 	up [double-3] Up vector
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[pos,view,up] = VAMatlab('getListenerRealWorldHeadPositionOrientationVU', this.handle, listenerID);
-	end
-
-	function [gain] = getOutputGain(this)
+	function [gain] = get_output_gain(this)
 		% Returns the global output gain
 		%
 		% Parameters:
@@ -1106,11 +1036,11 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[gain] = VAMatlab('getOutputGain', this.handle);
+		[gain] = VAMatlab('get_output_gain', this.handle);
 	end
 
-	function [ids] = getPortalIDs(this)
-		% Return the IDs of all portal in the scene
+	function [result] = get_output_muted(this)
+		% Returns if the global output is muted
 		%
 		% Parameters:
 		%
@@ -1118,66 +1048,15 @@ classdef itaVA < handle
 		%
 		% Return values:
 		%
-		% 	ids [integer-1xN] Vector containing the IDs
+		% 	result [logical-1x1] Output muted?
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[ids] = VAMatlab('getPortalIDs', this.handle);
+		[result] = VAMatlab('get_output_muted', this.handle);
 	end
 
-	function [name] = getPortalName(this, portalID)
-		% Returns the name of a portal
-		%
-		% Parameters:
-		%
-		% 	portalID [integer-1x1] Portal ID
-		%
-		% Return values:
-		%
-		% 	name [string] Displayed name
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[name] = VAMatlab('getPortalName', this.handle, portalID);
-	end
-
-	function [name] = getPortalState(this, portalID)
-		% Returns the state of a portal
-		%
-		% Parameters:
-		%
-		% 	portalID [integer-1x1] Portal ID
-		%
-		% Return values:
-		%
-		% 	name [double-1x1] Portal state (range [0,1] where 0 => fully closed, 1 => fully opened)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[name] = VAMatlab('getPortalState', this.handle, portalID);
-	end
-
-	function [dGain] = getRenderingModuleGain(this, sModuleID)
-		% Get rendering module output gain
-		%
-		% Parameters:
-		%
-		% 	sModuleID [string] Module identifier
-		%
-		% Return values:
-		%
-		% 	dGain [double-1x1] Gain (scalar)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[dGain] = VAMatlab('getRenderingModuleGain', this.handle, sModuleID);
-	end
-
-	function [renderers] = getRenderingModules(this, bFilterEnabled)
+	function [renderers] = get_rendering_modules(this, bFilterEnabled)
 		% Get list of rendering modules
 		%
 		% Parameters:
@@ -1192,11 +1071,28 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('bFilterEnabled','var'), bFilterEnabled = 1; end
-		[renderers] = VAMatlab('getRenderingModules', this.handle, bFilterEnabled);
+		[renderers] = VAMatlab('get_rendering_modules', this.handle, bFilterEnabled);
 	end
 
-	function [dGain] = getReproductionModuleGain(this, sModuleID)
-		% Returns the reproduction module output gain
+	function [auralization_mode] = get_rendering_module_auralization_mode(this, sModuleID)
+		% Returns the current rendering module parameters
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		%
+		% Return values:
+		%
+		% 	auralization_mode [string] Auralization mode as string
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[auralization_mode] = VAMatlab('get_rendering_module_auralization_mode', this.handle, sModuleID);
+	end
+
+	function [dGain] = get_rendering_module_gain(this, sModuleID)
+		% Get rendering module output gain
 		%
 		% Parameters:
 		%
@@ -1209,10 +1105,45 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[dGain] = VAMatlab('getReproductionModuleGain', this.handle, sModuleID);
+		[dGain] = VAMatlab('get_rendering_module_gain', this.handle, sModuleID);
 	end
 
-	function [reproductionmodules] = getReproductionModules(this, bFilterEnabled)
+	function [bMuted] = get_rendering_module_muted(this, sModuleID)
+		% Is reproduction module muted?
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		%
+		% Return values:
+		%
+		% 	bMuted [logical-1x1] true if muted, false if unmuted
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[bMuted] = VAMatlab('get_rendering_module_muted', this.handle, sModuleID);
+	end
+
+	function [params] = get_rendering_module_parameters(this, sModuleID,args)
+		% Returns the current rendering module parameters
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		% 	args [mstruct] Requested parameters
+		%
+		% Return values:
+		%
+		% 	params [mstruct] Parameters
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[params] = VAMatlab('get_rendering_module_parameters', this.handle, sModuleID,args);
+	end
+
+	function [reproductionmodules] = get_reproduction_modules(this, bFilterEnabled)
 		% Get list of rendering modules
 		%
 		% Parameters:
@@ -1227,27 +1158,62 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('bFilterEnabled','var'), bFilterEnabled = 1; end
-		[reproductionmodules] = VAMatlab('getReproductionModules', this.handle, bFilterEnabled);
+		[reproductionmodules] = VAMatlab('get_reproduction_modules', this.handle, bFilterEnabled);
 	end
 
-	function [info] = getSceneInfo(this)
-		% Returns information on the loaded scene
+	function [dGain] = get_reproduction_module_gain(this, sModuleID)
+		% Returns the reproduction module output gain
 		%
 		% Parameters:
 		%
-		% 	None
+		% 	sModuleID [string] Module identifier
 		%
 		% Return values:
 		%
-		% 	info [struct-1x1] Information struct (name, filename, num polygons, etc.)
+		% 	dGain [double-1x1] Gain (scalar)
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[info] = VAMatlab('getSceneInfo', this.handle);
+		[dGain] = VAMatlab('get_reproduction_module_gain', this.handle, sModuleID);
 	end
 
-	function [addr] = getServerAddress(this)
+	function [bMuted] = get_reproduction_module_muted(this, sModuleID)
+		% Is reproduction module muted?
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		%
+		% Return values:
+		%
+		% 	bMuted [logical-1x1] true if muted, false if unmuted
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[bMuted] = VAMatlab('get_reproduction_module_muted', this.handle, sModuleID);
+	end
+
+	function [params] = get_reproduction_module_parameters(this, sModuleID,args)
+		% Returns the current reproduction module parameters
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		% 	args [mstruct] Requested parameters
+		%
+		% Return values:
+		%
+		% 	params [mstruct] Parameters
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[params] = VAMatlab('get_reproduction_module_parameters', this.handle, sModuleID,args);
+	end
+
+	function [addr] = get_server_address(this)
 		% Returns for an opened connection the server it is connected to
 		%
 		% Parameters:
@@ -1261,10 +1227,44 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[addr] = VAMatlab('getServerAddress', this.handle);
+		[addr] = VAMatlab('get_server_address', this.handle);
 	end
 
-	function [info] = getSignalSourceInfo(this, signalSourceID)
+	function [isLooping] = get_signal_source_buffer_looping(this, signalSourceID)
+		% Returns the playback state of an audiofile signal source. Available modes: PLAYING, STOPPED, PAUSED
+		%
+		% Parameters:
+		%
+		% 	signalSourceID [string] Signal source ID
+		%
+		% Return values:
+		%
+		% 	isLooping [logical-1x1] Looping enabled/disabled
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[isLooping] = VAMatlab('get_signal_source_buffer_looping', this.handle, signalSourceID);
+	end
+
+	function [playState] = get_signal_source_buffer_playback_state(this, signalSourceID)
+		% Returns the playback state of an audiofile signal source. Available modes: PLAYING, STOPPED, PAUSED
+		%
+		% Parameters:
+		%
+		% 	signalSourceID [string] Signal source ID
+		%
+		% Return values:
+		%
+		% 	playState [string] Playback state
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[playState] = VAMatlab('get_signal_source_buffer_playback_state', this.handle, signalSourceID);
+	end
+
+	function [info] = get_signal_source_info(this, signalSourceID)
 		% Returns information on signal source
 		%
 		% Parameters:
@@ -1278,10 +1278,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[info] = VAMatlab('getSignalSourceInfo', this.handle, signalSourceID);
+		[info] = VAMatlab('get_signal_source_info', this.handle, signalSourceID);
 	end
 
-	function [info] = getSignalSourceInfos(this)
+	function [info] = get_signal_source_infos(this)
 		% Returns information on all existing signal sources
 		%
 		% Parameters:
@@ -1295,10 +1295,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[info] = VAMatlab('getSignalSourceInfos', this.handle);
+		[info] = VAMatlab('get_signal_source_infos', this.handle);
 	end
 
-	function [params] = getSignalSourceParameters(this, ID,args)
+	function [params] = get_signal_source_parameters(this, ID,args)
 		% Returns the current signal source parameters
 		%
 		% Parameters:
@@ -1313,28 +1313,11 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[params] = VAMatlab('getSignalSourceParameters', this.handle, ID,args);
+		[params] = VAMatlab('get_signal_source_parameters', this.handle, ID,args);
 	end
 
-	function [info] = getSoundInfo(this, soundID)
-		% Returns information on a loaded sound
-		%
-		% Parameters:
-		%
-		% 	soundID [integer-1x1] Sound ID
-		%
-		% Return values:
-		%
-		% 	info [struct-1x1] Information struct (name, filename, length, etc.)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[info] = VAMatlab('getSoundInfo', this.handle, soundID);
-	end
-
-	function [info] = getSoundInfos(this)
-		% Returns information on all loaded sounds
+	function [ids] = get_sound_portal_ids(this)
+		% Return the IDs of all portal in the scene
 		%
 		% Parameters:
 		%
@@ -1342,15 +1325,241 @@ classdef itaVA < handle
 		%
 		% Return values:
 		%
-		% 	info [cell-array of struct-1x1] Information structs (name, filename, length, etc.)
+		% 	ids [integer-1xN] Vector containing the IDs
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[info] = VAMatlab('getSoundInfos', this.handle);
+		[ids] = VAMatlab('get_sound_portal_ids', this.handle);
 	end
 
-	function [auralizationMode] = getSoundSourceAuralizationMode(this, soundSourceID)
+	function [name] = get_sound_portal_name(this, portalID)
+		% Returns the name of a portal
+		%
+		% Parameters:
+		%
+		% 	portalID [integer-1x1] Portal ID
+		%
+		% Return values:
+		%
+		% 	name [string] Displayed name
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[name] = VAMatlab('get_sound_portal_name', this.handle, portalID);
+	end
+
+	function [auralizationMode] = get_sound_receiver_auralization_mode(this, soundreceiverID)
+		% Returns the auralization mode of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	auralizationMode [string] Auralization mode
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[auralizationMode] = VAMatlab('get_sound_receiver_auralization_mode', this.handle, soundreceiverID);
+	end
+
+	function [directivityID] = get_sound_receiver_directivity(this, soundreceiverID)
+		% Returns for a sound receiver the assigned directivity
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	directivityID [integer-1x1] Directivity ID
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[directivityID] = VAMatlab('get_sound_receiver_directivity', this.handle, soundreceiverID);
+	end
+
+	function [orient] = get_sound_receiver_head_above_torso_orientation(this, soundreceiverID)
+		% Returns the head-above-torso (relative) orientation of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	orient [double-4] Rotation angles [w,x,y,z]
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[orient] = VAMatlab('get_sound_receiver_head_above_torso_orientation', this.handle, soundreceiverID);
+	end
+
+	function [ids] = get_sound_receiver_ids(this)
+		% Returns the IDs of all sound receivers in the scene
+		%
+		% Parameters:
+		%
+		% 	None
+		%
+		% Return values:
+		%
+		% 	ids [integer-1xN] Vector containing the IDs
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[ids] = VAMatlab('get_sound_receiver_ids', this.handle);
+	end
+
+	function [name] = get_sound_receiver_name(this, soundreceiverID)
+		% Returns name of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	name [string] Displayed name
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[name] = VAMatlab('get_sound_receiver_name', this.handle, soundreceiverID);
+	end
+
+	function [orient] = get_sound_receiver_orientation(this, soundreceiverID)
+		% Returns the orientation of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	orient [double-4] Rotation angles [w,x,y,z]
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[orient] = VAMatlab('get_sound_receiver_orientation', this.handle, soundreceiverID);
+	end
+
+	function [view,up] = get_sound_receiver_orientation_view_up(this, soundreceiverID)
+		% Returns the orientation of a sound receiver (as view- and up-vector)
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	view [double-3] View vector
+		% 	up [double-3] Up vector
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[view,up] = VAMatlab('get_sound_receiver_orientation_view_up', this.handle, soundreceiverID);
+	end
+
+	function [params] = get_sound_receiver_parameters(this, ID,args)
+		% Returns the current sound receiver parameters
+		%
+		% Parameters:
+		%
+		% 	ID [integer-1x1] Sound receiver identifier
+		% 	args [mstruct] Requested parameters
+		%
+		% Return values:
+		%
+		% 	params [mstruct] Parameters
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[params] = VAMatlab('get_sound_receiver_parameters', this.handle, ID,args);
+	end
+
+	function [pos,ypr] = get_sound_receiver_pose(this, soundreceiverID)
+		% Returns the position and orientation of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
+		% 	ypr [double-4] Rotation quaternion [w,x,y,z]
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[pos,ypr] = VAMatlab('get_sound_receiver_pose', this.handle, soundreceiverID);
+	end
+
+	function [pos] = get_sound_receiver_position(this, soundreceiverID)
+		% Returns the position of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[pos] = VAMatlab('get_sound_receiver_position', this.handle, soundreceiverID);
+	end
+
+	function [view] = get_sound_receiver_real_world_head_above_torso_orientation(this, soundreceiverID)
+		% Returns the real-world orientation (as quaterion) of the sound receiver's head over the torso
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	view [double-4] Rotation quaternion [w,x,y,z]
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[view] = VAMatlab('get_sound_receiver_real_world_head_above_torso_orientation', this.handle, soundreceiverID);
+	end
+
+	function [pos,view,up] = get_sound_receiver_real_world_head_position_orientation_view_up(this, soundreceiverID)
+		% Returns the real-world position and orientation (as view- and up vector) of the sound receiver's head
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
+		% 	view [double-3] View vector
+		% 	up [double-3] Up vector
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[pos,view,up] = VAMatlab('get_sound_receiver_real_world_head_position_orientation_view_up', this.handle, soundreceiverID);
+	end
+
+	function [auralizationMode] = get_sound_source_auralization_mode(this, soundSourceID)
 		% Returns the auralization mode of a sound source
 		%
 		% Parameters:
@@ -1364,10 +1573,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[auralizationMode] = VAMatlab('getSoundSourceAuralizationMode', this.handle, soundSourceID);
+		[auralizationMode] = VAMatlab('get_sound_source_auralization_mode', this.handle, soundSourceID);
 	end
 
-	function [directivityID] = getSoundSourceDirectivity(this, soundSourceID)
+	function [directivityID] = get_sound_source_directivity(this, soundSourceID)
 		% Returns the directivity of a sound source
 		%
 		% Parameters:
@@ -1381,10 +1590,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[directivityID] = VAMatlab('getSoundSourceDirectivity', this.handle, soundSourceID);
+		[directivityID] = VAMatlab('get_sound_source_directivity', this.handle, soundSourceID);
 	end
 
-	function [ids] = getSoundSourceIDs(this)
+	function [ids] = get_sound_source_ids(this)
 		% Returns the IDs of all sound sources in the scene
 		%
 		% Parameters:
@@ -1398,10 +1607,27 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[ids] = VAMatlab('getSoundSourceIDs', this.handle);
+		[ids] = VAMatlab('get_sound_source_ids', this.handle);
 	end
 
-	function [name] = getSoundSourceName(this, soundSourceID)
+	function [result] = get_sound_source_muted(this, soundSourceID)
+		% Returns if a sound source is muted
+		%
+		% Parameters:
+		%
+		% 	soundSourceID [integer-1x1] Sound source ID
+		%
+		% Return values:
+		%
+		% 	result [logical-1x1] Muted?
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[result] = VAMatlab('get_sound_source_muted', this.handle, soundSourceID);
+	end
+
+	function [name] = get_sound_source_name(this, soundSourceID)
 		% Returns name of a sound source
 		%
 		% Parameters:
@@ -1415,10 +1641,27 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[name] = VAMatlab('getSoundSourceName', this.handle, soundSourceID);
+		[name] = VAMatlab('get_sound_source_name', this.handle, soundSourceID);
 	end
 
-	function [view,up] = getSoundSourceOrientationVU(this, soundSourceID)
+	function [orient] = get_sound_source_orientation(this, soundSourceID)
+		% Returns the orientation of a sound source
+		%
+		% Parameters:
+		%
+		% 	soundSourceID [integer-1x1] Sound source ID
+		%
+		% Return values:
+		%
+		% 	orient [double-4] Rotation as quaternion (w,x,y,z)
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[orient] = VAMatlab('get_sound_source_orientation', this.handle, soundSourceID);
+	end
+
+	function [view,up] = get_sound_source_orientation_view_up(this, soundSourceID)
 		% Returns the orientation of a sound source as view- and up-vector
 		%
 		% Parameters:
@@ -1433,27 +1676,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[view,up] = VAMatlab('getSoundSourceOrientationVU', this.handle, soundSourceID);
+		[view,up] = VAMatlab('get_sound_source_orientation_view_up', this.handle, soundSourceID);
 	end
 
-	function [ypr] = getSoundSourceOrientationYPR(this, soundSourceID)
-		% Returns the orientation of a sound source (in yaw-pitch-roll angles)
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		%
-		% Return values:
-		%
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[ypr] = VAMatlab('getSoundSourceOrientationYPR', this.handle, soundSourceID);
-	end
-
-	function [params] = getSoundSourceParameters(this, ID,args)
+	function [params] = get_sound_source_parameters(this, ID,args)
 		% Returns the current sound source parameters
 		%
 		% Parameters:
@@ -1468,10 +1694,28 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[params] = VAMatlab('getSoundSourceParameters', this.handle, ID,args);
+		[params] = VAMatlab('get_sound_source_parameters', this.handle, ID,args);
 	end
 
-	function [pos] = getSoundSourcePosition(this, soundSourceID)
+	function [pos,orient] = get_sound_source_pose(this, soundSourceID)
+		% Returns the position and orientation of a sound source
+		%
+		% Parameters:
+		%
+		% 	soundSourceID [integer-1x1] Sound source ID
+		%
+		% Return values:
+		%
+		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
+		% 	orient [double-4] Rotation quaternion (w,x,y,z)
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[pos,orient] = VAMatlab('get_sound_source_pose', this.handle, soundSourceID);
+	end
+
+	function [pos] = get_sound_source_position(this, soundSourceID)
 		% Returns the position of a sound source
 		%
 		% Parameters:
@@ -1485,86 +1729,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[pos] = VAMatlab('getSoundSourcePosition', this.handle, soundSourceID);
+		[pos] = VAMatlab('get_sound_source_position', this.handle, soundSourceID);
 	end
 
-	function [pos,view,up,vel] = getSoundSourcePositionOrientationVelocityVU(this, soundSourceID)
-		% Returns the position, orientation (as view- and up-vector) and velocity of a sound source
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		%
-		% Return values:
-		%
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		% 	view [double-3] View vector (length: 1)
-		% 	up [double-3] Up vector (length: 1)
-		% 	vel [double-3] Velocity vector (vx, vy, vz) (unit: meters/second)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[pos,view,up,vel] = VAMatlab('getSoundSourcePositionOrientationVelocityVU', this.handle, soundSourceID);
-	end
-
-	function [pos,ypr,vel] = getSoundSourcePositionOrientationVelocityYPR(this, soundSourceID)
-		% Returns the position, orientation (in yaw-pitch-roll angles) and velocity of a sound source
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		%
-		% Return values:
-		%
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		% 	vel [double-3] Velocity vector [vx,vy,vz] (unit: meters/second)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[pos,ypr,vel] = VAMatlab('getSoundSourcePositionOrientationVelocityYPR', this.handle, soundSourceID);
-	end
-
-	function [pos,view,up] = getSoundSourcePositionOrientationVU(this, soundSourceID)
-		% Returns the position and orientation (as view- and up-vector) of a sound source
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		%
-		% Return values:
-		%
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		% 	view [double-3] View vector (length: 1)
-		% 	up [double-3] Up vector (length: 1)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[pos,view,up] = VAMatlab('getSoundSourcePositionOrientationVU', this.handle, soundSourceID);
-	end
-
-	function [pos,ypr] = getSoundSourcePositionOrientationYPR(this, soundSourceID)
-		% Returns the position and orientation (in yaw-pitch-roll angles) of a sound source
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		%
-		% Return values:
-		%
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[pos,ypr] = VAMatlab('getSoundSourcePositionOrientationYPR', this.handle, soundSourceID);
-	end
-
-	function [signalSourceID] = getSoundSourceSignalSource(this, soundSourceID)
+	function [signalSourceID] = get_sound_source_signal_source(this, soundSourceID)
 		% Returns for a sound source, the attached signal source
 		%
 		% Parameters:
@@ -1578,10 +1746,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[signalSourceID] = VAMatlab('getSoundSourceSignalSource', this.handle, soundSourceID);
+		[signalSourceID] = VAMatlab('get_sound_source_signal_source', this.handle, soundSourceID);
 	end
 
-	function [volume] = getSoundSourceVolume(this, soundSourceID)
+	function [volume] = get_sound_source_sound_power(this, soundSourceID)
 		% Returns the volume of a sound source
 		%
 		% Parameters:
@@ -1590,100 +1758,15 @@ classdef itaVA < handle
 		%
 		% Return values:
 		%
-		% 	volume [double-1x1] Volume
+		% 	volume [double-1x1] Sound source power
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[volume] = VAMatlab('getSoundSourceVolume', this.handle, soundSourceID);
+		[volume] = VAMatlab('get_sound_source_sound_power', this.handle, soundSourceID);
 	end
 
-	function [result] = isInputMuted(this)
-		% Returns if the audio device inputs are muted
-		%
-		% Parameters:
-		%
-		% 	None
-		%
-		% Return values:
-		%
-		% 	result [logical-1x1] Inputs muted?
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[result] = VAMatlab('isInputMuted', this.handle);
-	end
-
-	function [result] = isOutputMuted(this)
-		% Returns if the global output is muted
-		%
-		% Parameters:
-		%
-		% 	None
-		%
-		% Return values:
-		%
-		% 	result [logical-1x1] Output muted?
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[result] = VAMatlab('isOutputMuted', this.handle);
-	end
-
-	function [bMuted] = isRenderingModuleMuted(this, sModuleID)
-		% Is reproduction module muted?
-		%
-		% Parameters:
-		%
-		% 	sModuleID [string] Module identifier
-		%
-		% Return values:
-		%
-		% 	bMuted [logical-1x1] true if muted, false if unmuted
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[bMuted] = VAMatlab('isRenderingModuleMuted', this.handle, sModuleID);
-	end
-
-	function [bMuted] = isReproductionModuleMuted(this, sModuleID)
-		% Is reproduction module muted?
-		%
-		% Parameters:
-		%
-		% 	sModuleID [string] Module identifier
-		%
-		% Return values:
-		%
-		% 	bMuted [logical-1x1] true if muted, false if unmuted
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[bMuted] = VAMatlab('isReproductionModuleMuted', this.handle, sModuleID);
-	end
-
-	function [result] = isSceneLoaded(this)
-		% Returns if a scene is loaded
-		%
-		% Parameters:
-		%
-		% 	None
-		%
-		% Return values:
-		%
-		% 	result [logical-1x1] Is a scene loaded?
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[result] = VAMatlab('isSceneLoaded', this.handle);
-	end
-
-	function [result] = isSceneLocked(this)
+	function [result] = get_update_locked(this)
 		% Is scene locked?
 		%
 		% Parameters:
@@ -1697,101 +1780,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[result] = VAMatlab('isSceneLocked', this.handle);
+		[result] = VAMatlab('get_update_locked', this.handle);
 	end
 
-	function [result] = isSoundSourceMuted(this, soundSourceID)
-		% Returns if a sound source is muted
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		%
-		% Return values:
-		%
-		% 	result [logical-1x1] Muted?
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[result] = VAMatlab('isSoundSourceMuted', this.handle, soundSourceID);
-	end
-
-	function [directivityID] = loadDirectivity(this, filename,name)
-		% Loads a directivity from a file
-		%
-		% Parameters:
-		%
-		% 	filename [string] Filename
-		% 	name [string] Displayed name (optional, default: '')
-		%
-		% Return values:
-		%
-		% 	directivityID [integer-1x1] Directivity ID
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		if ~exist('name','var'), name = ''; end
-		[directivityID] = VAMatlab('loadDirectivity', this.handle, filename,name);
-	end
-
-	function [id] = loadHRIRDataset(this, filename,name)
-		% Loads a HRIR dataset from a file
-		%
-		% Parameters:
-		%
-		% 	filename [string] Filename
-		% 	name [string] Displayed name (optional, default: '')
-		%
-		% Return values:
-		%
-		% 	id [integer-1x1] HRIR dataset ID
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		if ~exist('name','var'), name = ''; end
-		[id] = VAMatlab('loadHRIRDataset', this.handle, filename,name);
-	end
-
-	function [] = loadScene(this, filename)
-		% Loads a scene from a file (e.g. RAVEN project file)
-		%
-		% Parameters:
-		%
-		% 	filename [string] Filename
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('loadScene', this.handle, filename);
-	end
-
-	function [id] = loadSound(this, filename,name)
-		% Loads a sound from an audiofile
-		%
-		% Parameters:
-		%
-		% 	filename [string] Filename
-		% 	name [string] Displayed name (optional, default: '')
-		%
-		% Return values:
-		%
-		% 	id [integer-1x1] Sound ID
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		if ~exist('name','var'), name = ''; end
-		[id] = VAMatlab('loadSound', this.handle, filename,name);
-	end
-
-	function [] = lockScene(this)
+	function [] = lock_update(this)
 		% Locks the scene (modifications of scene can be applied synchronously)
 		%
 		% Parameters:
@@ -1805,46 +1797,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('lockScene', this.handle);
+		VAMatlab('lock_update', this.handle);
 	end
 
-	function [id] = playSound(this, soundID,volume)
-		% Plays a sound
-		%
-		% Parameters:
-		%
-		% 	soundID [integer-1x1] Sound ID
-		% 	volume [double-1x1] Volume [factor] (optional, default: 1)
-		%
-		% Return values:
-		%
-		% 	id [integer-1x1] Playback ID
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		if ~exist('volume','var'), volume = 1; end
-		[id] = VAMatlab('playSound', this.handle, soundID,volume);
-	end
-
-	function [result] = removeSoundPlayback(this, playbackID)
-		% Removes an existing sound playback from a sequencer signal source
-		%
-		% Parameters:
-		%
-		% 	playbackID [integer-1x1] Playback ID
-		%
-		% Return values:
-		%
-		% 	result [logical-1x1] Playback removed?
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		[result] = VAMatlab('removeSoundPlayback', this.handle, playbackID);
-	end
-
-	function [] = removeSoundSourceSignalSource(this, ID)
+	function [] = remove_sound_source_signal_source(this, ID)
 		% Removes the signal source of a sound source
 		%
 		% Parameters:
@@ -1858,7 +1814,7 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('removeSoundSourceSignalSource', this.handle, ID);
+		VAMatlab('remove_sound_source_signal_source', this.handle, ID);
 	end
 
 	function [] = reset(this)
@@ -1878,12 +1834,13 @@ classdef itaVA < handle
 		VAMatlab('reset', this.handle);
 	end
 
-	function [] = setActiveListener(this, listenerID)
-		% Sets the active listener
+	function [] = set_acoustic_magerial_parameters(this, material_id,params)
+		% Acoustic material parameter setter
 		%
 		% Parameters:
 		%
-		% 	listenerID [integer-1x1] Listener ID
+		% 	material_id [integer-1x1] Acoustic material identifier
+		% 	params [mstruct] Parameters
 		%
 		% Return values:
 		%
@@ -1892,10 +1849,394 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setActiveListener', this.handle, listenerID);
+		VAMatlab('set_acoustic_magerial_parameters', this.handle, material_id,params);
 	end
 
-	function [] = setAudiofileSignalSourceIsLooping(this, signalSourceID,isLooping)
+	function [] = set_active_sound_receiver(this, soundreceiverID)
+		% Sets the active sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_active_sound_receiver', this.handle, soundreceiverID);
+	end
+
+	function [] = set_core_clock(this, clk)
+		% Sets the core clock time
+		%
+		% Parameters:
+		%
+		% 	clk [double-1x1] New core clock time (unit: seconds)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_core_clock', this.handle, clk);
+	end
+
+	function [] = set_geometry_mesh_enabled(this, geo_mesh_id,enabled)
+		% Geometry mesh enabled setter
+		%
+		% Parameters:
+		%
+		% 	geo_mesh_id [integer-1x1] Geometry mesh identifier
+		% 	enabled [logical-1x1] Enabled flag (optional, default: 1)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		if ~exist('enabled','var'), enabled = 1; end
+		VAMatlab('set_geometry_mesh_enabled', this.handle, geo_mesh_id,enabled);
+	end
+
+	function [] = set_geometry_mesh_parameters(this, geo_mesh_id,params)
+		% Geometry mesh parameter setter
+		%
+		% Parameters:
+		%
+		% 	geo_mesh_id [integer-1x1] Geometry mesh identifier
+		% 	params [mstruct] Parameters
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_geometry_mesh_parameters', this.handle, geo_mesh_id,params);
+	end
+
+	function [] = set_global_auralization_mode(this, auralizationMode)
+		% Sets global auralization mode
+		%
+		% Parameters:
+		%
+		% 	auralizationMode [string] Auralization mode
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_global_auralization_mode', this.handle, auralizationMode);
+	end
+
+	function [] = set_homogeneous_medium_relative_humidity(this, shift_speed)
+		% Set homogeneous medium relative humidity
+		%
+		% Parameters:
+		%
+		% 	shift_speed [double-1x1] Relative humidity [Percent]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_homogeneous_medium_relative_humidity', this.handle, shift_speed);
+	end
+
+	function [] = set_homogeneous_medium_shift_parameters(this, params)
+		% Sets homogeneous medium parameters
+		%
+		% Parameters:
+		%
+		% 	params [mstruct] Parameters
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_homogeneous_medium_shift_parameters', this.handle, params);
+	end
+
+	function [] = set_homogeneous_medium_shift_speed(this, shift_speed)
+		% Set homogeneous medium shift speed
+		%
+		% Parameters:
+		%
+		% 	shift_speed [double-3x1] Shift speed vector [m/s]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_homogeneous_medium_shift_speed', this.handle, shift_speed);
+	end
+
+	function [] = set_homogeneous_medium_sound_speed(this, sound_speed)
+		% Set homogeneous medium sound speed
+		%
+		% Parameters:
+		%
+		% 	sound_speed [double-1x1] Sound speed [m/s]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_homogeneous_medium_sound_speed', this.handle, sound_speed);
+	end
+
+	function [] = set_homogeneous_medium_static_pressure(this, static_pressure)
+		% Set homogeneous medium static pressure
+		%
+		% Parameters:
+		%
+		% 	static_pressure [double-1x1] Static pressure [Pa]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_homogeneous_medium_static_pressure', this.handle, static_pressure);
+	end
+
+	function [] = set_homogeneous_medium_temperature(this, temperature)
+		% Set homogeneous medium temperature
+		%
+		% Parameters:
+		%
+		% 	temperature [double-1x1] Temperature [degree Celsius]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_homogeneous_medium_temperature', this.handle, temperature);
+	end
+
+	function [] = set_input_gain(this, gain)
+		% Sets the gain the audio device input channels
+		%
+		% Parameters:
+		%
+		% 	gain [double-1x1] Input gain (amplification factor >=0)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_input_gain', this.handle, gain);
+	end
+
+	function [] = set_input_muted(this, muted)
+		% Sets the audio device inputs muted or unmuted
+		%
+		% Parameters:
+		%
+		% 	muted [logical-1x1] Muted?
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_input_muted', this.handle, muted);
+	end
+
+	function [] = set_output_gain(this, gain)
+		% Sets global output gain
+		%
+		% Parameters:
+		%
+		% 	gain [double-1x1] Output gain (amplification factor >=0)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_output_gain', this.handle, gain);
+	end
+
+	function [] = set_output_muted(this, muted)
+		% Sets the global output muted or unmuted
+		%
+		% Parameters:
+		%
+		% 	muted [logical-1x1] Output muted?
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_output_muted', this.handle, muted);
+	end
+
+	function [] = set_rendering_module_auralization_mode(this, sModuleID,am_str)
+		% Sets the output gain of a reproduction module
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		% 	am_str [string] auralization mode string
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_rendering_module_auralization_mode', this.handle, sModuleID,am_str);
+	end
+
+	function [] = set_rendering_module_gain(this, sModuleID,dGain)
+		% Sets the output gain of a reproduction module
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		% 	dGain [double-1x1] gain (factor)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_rendering_module_gain', this.handle, sModuleID,dGain);
+	end
+
+	function [] = set_rendering_module_muted(this, sModuleID,bMuted)
+		% Mutes a reproduction module
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		% 	bMuted [logical-1x1] Mute (true) or unmute (false)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_rendering_module_muted', this.handle, sModuleID,bMuted);
+	end
+
+	function [] = set_rendering_module_parameters(this, sModuleID,params)
+		% Sets rendering module parameters
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		% 	params [mstruct] Parameters
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_rendering_module_parameters', this.handle, sModuleID,params);
+	end
+
+	function [] = set_reproduction_module_gain(this, sModuleID,dGain)
+		% Sets the output gain of a reproduction module
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		% 	dGain [double-1x1] gain (factor)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_reproduction_module_gain', this.handle, sModuleID,dGain);
+	end
+
+	function [] = set_reproduction_module_muted(this, sModuleID,bMuted)
+		% Mutes a reproduction module
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		% 	bMuted [logical-1x1] Mute (true) or unmute (false)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_reproduction_module_muted', this.handle, sModuleID,bMuted);
+	end
+
+	function [] = set_reproduction_module_parameters(this, sModuleID,params)
+		% Sets reproduction module parameters
+		%
+		% Parameters:
+		%
+		% 	sModuleID [string] Module identifier
+		% 	params [mstruct] Parameters
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_reproduction_module_parameters', this.handle, sModuleID,params);
+	end
+
+	function [] = set_signal_source_buffer_looping(this, signalSourceID,isLooping)
 		% Change the playback state of an audiofile signal source. Available actions: PLAY STOP PAUSE
 		%
 		% Parameters:
@@ -1910,10 +2251,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setAudiofileSignalSourceIsLooping', this.handle, signalSourceID,isLooping);
+		VAMatlab('set_signal_source_buffer_looping', this.handle, signalSourceID,isLooping);
 	end
 
-	function [] = setAudiofileSignalSourcePlaybackAction(this, signalSourceID,playAction)
+	function [] = set_signal_source_buffer_playback_action(this, signalSourceID,playAction)
 		% Change the playback state of an audiofile signal source. Available actions: PLAY STOP PAUSE
 		%
 		% Parameters:
@@ -1928,10 +2269,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setAudiofileSignalSourcePlaybackAction', this.handle, signalSourceID,playAction);
+		VAMatlab('set_signal_source_buffer_playback_action', this.handle, signalSourceID,playAction);
 	end
 
-	function [] = setAudiofileSignalSourcePlayPosition(this, signalSourceID,playPosition)
+	function [] = set_signal_source_buffer_playback_position(this, signalSourceID,playPosition)
 		% Sets the playback position of an audiofile signal source.
 		%
 		% Parameters:
@@ -1946,447 +2287,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setAudiofileSignalSourcePlayPosition', this.handle, signalSourceID,playPosition);
+		VAMatlab('set_signal_source_buffer_playback_position', this.handle, signalSourceID,playPosition);
 	end
 
-	function [] = setCoreClock(this, clk)
-		% Sets the core clock time
-		%
-		% Parameters:
-		%
-		% 	clk [double-1x1] New core clock time (unit: seconds)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setCoreClock', this.handle, clk);
-	end
-
-	function [] = setGlobalAuralizationMode(this, auralizationMode)
-		% Sets global auralization mode
-		%
-		% Parameters:
-		%
-		% 	auralizationMode [string] Auralization mode
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setGlobalAuralizationMode', this.handle, auralizationMode);
-	end
-
-	function [] = setInputGain(this, gain)
-		% Sets the gain the audio device input channels
-		%
-		% Parameters:
-		%
-		% 	gain [double-1x1] Input gain (amplification factor >=0)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setInputGain', this.handle, gain);
-	end
-
-	function [] = setInputMuted(this, muted)
-		% Sets the audio device inputs muted or unmuted
-		%
-		% Parameters:
-		%
-		% 	muted [logical-1x1] Muted?
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setInputMuted', this.handle, muted);
-	end
-
-	function [] = setListenerAuralizationMode(this, listenerID,auralizationMode)
-		% Sets the auralization mode of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	auralizationMode [string] Auralization mode
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerAuralizationMode', this.handle, listenerID,auralizationMode);
-	end
-
-	function [] = setListenerHRIRDataset(this, listenerID,hrirID)
-		% Set the HRIR dataset of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	hrirID [integer-1x1] HRIR dataset ID
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerHRIRDataset', this.handle, listenerID,hrirID);
-	end
-
-	function [] = setListenerName(this, listenerID,name)
-		% Sets the name of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	name [string] Displayed name
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerName', this.handle, listenerID,name);
-	end
-
-	function [] = setListenerOrientationVU(this, listenerID,view,up)
-		% Sets the orientation of a listener (as view- and up-vector)
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	view [double-3] View vector
-		% 	up [double-3] Up vector
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerOrientationVU', this.handle, listenerID,view,up);
-	end
-
-	function [] = setListenerOrientationYPR(this, listenerID,ypr)
-		% Sets the orientation of a listener (in yaw-pitch-roll angles)
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerOrientationYPR', this.handle, listenerID,ypr);
-	end
-
-	function [] = setListenerParameters(this, ID,params)
-		% Sets listener parameters
-		%
-		% Parameters:
-		%
-		% 	ID [integer-1x1] Listener identifier
-		% 	params [mstruct] Parameters
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerParameters', this.handle, ID,params);
-	end
-
-	function [] = setListenerPosition(this, listenerID,pos)
-		% Sets the position of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerPosition', this.handle, listenerID,pos);
-	end
-
-	function [] = setListenerPositionOrientationVelocityVU(this, listenerID,pos,view,up,velocity)
-		% Sets the position, orientation (as view- and up vector) and velocity of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
-		% 	view [double-3] view vector
-		% 	up [double-3] up vector
-		% 	velocity [double-3] velocity vector
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerPositionOrientationVelocityVU', this.handle, listenerID,pos,view,up,velocity);
-	end
-
-	function [] = setListenerPositionOrientationVelocityYPR(this, listenerID,pos,ypr,velocity)
-		% Sets the position, orientation (in yaw-pitch-roll angles) and velocity of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		% 	velocity [double-3] velocity vector
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerPositionOrientationVelocityYPR', this.handle, listenerID,pos,ypr,velocity);
-	end
-
-	function [] = setListenerPositionOrientationVU(this, listenerID,pos,view,up)
-		% Sets the position and orientation (as view- and up vector) of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
-		% 	view [double-3] View vector
-		% 	up [double-3] Up vector
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerPositionOrientationVU', this.handle, listenerID,pos,view,up);
-	end
-
-	function [] = setListenerPositionOrientationYPR(this, listenerID,pos,ypr)
-		% Sets the position and orientation (in yaw-pitch-roll angles) of a listener
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerPositionOrientationYPR', this.handle, listenerID,pos,ypr);
-	end
-
-	function [] = setListenerRealWorldHeadPositionOrientationVU(this, listenerID,pos,view,up)
-		% Updates the real-world position and orientation (as view- and up vector) of the listener's head
-		%
-		% Parameters:
-		%
-		% 	listenerID [integer-1x1] Listener ID
-		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
-		% 	view [double-3] View vector
-		% 	up [double-3] Up vector
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setListenerRealWorldHeadPositionOrientationVU', this.handle, listenerID,pos,view,up);
-	end
-
-	function [] = setOutputGain(this, gain)
-		% Sets global output gain
-		%
-		% Parameters:
-		%
-		% 	gain [double-1x1] Output gain (amplification factor >=0)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setOutputGain', this.handle, gain);
-	end
-
-	function [] = setOutputMuted(this, muted)
-		% Sets the global output muted or unmuted
-		%
-		% Parameters:
-		%
-		% 	muted [logical-1x1] Output muted?
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setOutputMuted', this.handle, muted);
-	end
-
-	function [] = setPortalName(this, portalID,name)
-		% Sets the name of a portal
-		%
-		% Parameters:
-		%
-		% 	portalID [integer-1x1] Portal ID
-		% 	name [string] Displayed name
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setPortalName', this.handle, portalID,name);
-	end
-
-	function [] = setPortalState(this, portalID,state)
-		% Sets the state of a portal
-		%
-		% Parameters:
-		%
-		% 	portalID [integer-1x1] Portal ID
-		% 	state [double-1x1] Portal state (range [0,1] where 0 => fully closed, 1 => fully opened)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setPortalState', this.handle, portalID,state);
-	end
-
-	function [] = setRenderingModuleGain(this, sModuleID,dGain)
-		% Sets the output gain of a reproduction module
-		%
-		% Parameters:
-		%
-		% 	sModuleID [string] Module identifier
-		% 	dGain [double-1x1] gain (factor)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setRenderingModuleGain', this.handle, sModuleID,dGain);
-	end
-
-	function [] = setRenderingModuleMuted(this, sModuleID,bMuted)
-		% Mutes a reproduction module
-		%
-		% Parameters:
-		%
-		% 	sModuleID [string] Module identifier
-		% 	bMuted [logical-1x1] Mute (true) or unmute (false)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setRenderingModuleMuted', this.handle, sModuleID,bMuted);
-	end
-
-	function [] = setReproductionModuleGain(this, sModuleID,dGain)
-		% Sets the output gain of a reproduction module
-		%
-		% Parameters:
-		%
-		% 	sModuleID [string] Module identifier
-		% 	dGain [double-1x1] gain (factor)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setReproductionModuleGain', this.handle, sModuleID,dGain);
-	end
-
-	function [] = setReproductionModuleMuted(this, sModuleID,bMuted)
-		% Mutes a reproduction module
-		%
-		% Parameters:
-		%
-		% 	sModuleID [string] Module identifier
-		% 	bMuted [logical-1x1] Mute (true) or unmute (false)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setReproductionModuleMuted', this.handle, sModuleID,bMuted);
-	end
-
-	function [] = setSignalSourceParameters(this, ID,params)
+	function [] = set_signal_source_parameters(this, ID,params)
 		% Sets signal source parameters
 		%
 		% Parameters:
@@ -2401,10 +2305,230 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setSignalSourceParameters', this.handle, ID,params);
+		VAMatlab('set_signal_source_parameters', this.handle, ID,params);
 	end
 
-	function [] = setSoundSourceAuralizationMode(this, soundSourceID,auralizationMode)
+	function [] = set_sound_portal_name(this, portalID,name)
+		% Sets the name of a portal
+		%
+		% Parameters:
+		%
+		% 	portalID [integer-1x1] Portal ID
+		% 	name [string] Displayed name
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_portal_name', this.handle, portalID,name);
+	end
+
+	function [] = set_sound_receiver_auralization_mode(this, soundreceiverID,auralizationMode)
+		% Sets the auralization mode of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		% 	auralizationMode [string] Auralization mode
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_auralization_mode', this.handle, soundreceiverID,auralizationMode);
+	end
+
+	function [] = set_sound_receiver_directivity(this, soundreceiverID,directivityID)
+		% Set the directivity of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		% 	directivityID [integer-1x1] HRIR dataset ID
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_directivity', this.handle, soundreceiverID,directivityID);
+	end
+
+	function [] = set_sound_receiver_head_above_torso_orientation(this, soundreceiverID,orient)
+		% Sets the head-above-torso (relative) orientation of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		% 	orient [double-4] Rotation quaternion [w,x,y,z]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_head_above_torso_orientation', this.handle, soundreceiverID,orient);
+	end
+
+	function [] = set_sound_receiver_name(this, soundreceiverID,name)
+		% Sets the name of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		% 	name [string] Displayed name
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_name', this.handle, soundreceiverID,name);
+	end
+
+	function [] = set_sound_receiver_orientation(this, soundreceiverID,orient)
+		% Sets the orientation of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		% 	orient [double-4] Rotation quaternion [w,x,y,z]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_orientation', this.handle, soundreceiverID,orient);
+	end
+
+	function [] = set_sound_receiver_orientation_view_up(this, soundreceiverID,view,up)
+		% Sets the orientation of a sound receiver (as view- and up-vector)
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		% 	view [double-3] View vector
+		% 	up [double-3] Up vector
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_orientation_view_up', this.handle, soundreceiverID,view,up);
+	end
+
+	function [] = set_sound_receiver_parameters(this, ID,params)
+		% Sets sound receiver parameters
+		%
+		% Parameters:
+		%
+		% 	ID [integer-1x1] Sound receiver identifier
+		% 	params [mstruct] Parameters
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_parameters', this.handle, ID,params);
+	end
+
+	function [] = set_sound_receiver_pose(this, soundreceiverID,pos,ypr)
+		% Sets the position and orientation (in yaw-pitch-roll angles) of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
+		% 	ypr [double-4] Rotation angles [w,x,y,z]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_pose', this.handle, soundreceiverID,pos,ypr);
+	end
+
+	function [] = set_sound_receiver_position(this, soundreceiverID,pos)
+		% Sets the position of a sound receiver
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_position', this.handle, soundreceiverID,pos);
+	end
+
+	function [] = set_sound_receiver_real_world_head_above_torso_orientation(this, soundreceiverID,pos)
+		% Updates the real-world position and orientation (as view- and up vector) of the sound receiver's head
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		% 	pos [double-4] Rotation quaternion [w, x, y, z]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_real_world_head_above_torso_orientation', this.handle, soundreceiverID,pos);
+	end
+
+	function [] = set_sound_receiver_real_world_position_orientation_view_up(this, soundreceiverID,pos,view,up)
+		% Updates the real-world position and orientation (as view- and up vector) of the sound receiver's head
+		%
+		% Parameters:
+		%
+		% 	soundreceiverID [integer-1x1] Sound receiver ID
+		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
+		% 	view [double-3] View vector
+		% 	up [double-3] Up vector
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_receiver_real_world_position_orientation_view_up', this.handle, soundreceiverID,pos,view,up);
+	end
+
+	function [] = set_sound_source_auralization_mode(this, soundSourceID,auralizationMode)
 		% Returns the auralization mode of a sound source
 		%
 		% Parameters:
@@ -2419,10 +2543,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setSoundSourceAuralizationMode', this.handle, soundSourceID,auralizationMode);
+		VAMatlab('set_sound_source_auralization_mode', this.handle, soundSourceID,auralizationMode);
 	end
 
-	function [] = setSoundSourceDirectivity(this, soundSourceID,directivityID)
+	function [] = set_sound_source_directivity(this, soundSourceID,directivityID)
 		% Sets the directivity of a sound source
 		%
 		% Parameters:
@@ -2437,10 +2561,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setSoundSourceDirectivity', this.handle, soundSourceID,directivityID);
+		VAMatlab('set_sound_source_directivity', this.handle, soundSourceID,directivityID);
 	end
 
-	function [] = setSoundSourceMuted(this, soundSourceID,muted)
+	function [] = set_sound_source_muted(this, soundSourceID,muted)
 		% Sets a sound source muted or unmuted
 		%
 		% Parameters:
@@ -2455,10 +2579,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setSoundSourceMuted', this.handle, soundSourceID,muted);
+		VAMatlab('set_sound_source_muted', this.handle, soundSourceID,muted);
 	end
 
-	function [] = setSoundSourceName(this, soundSourceID,name)
+	function [] = set_sound_source_name(this, soundSourceID,name)
 		% Name
 		%
 		% Parameters:
@@ -2473,10 +2597,28 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setSoundSourceName', this.handle, soundSourceID,name);
+		VAMatlab('set_sound_source_name', this.handle, soundSourceID,name);
 	end
 
-	function [] = setSoundSourceOrientationVU(this, soundSourceID,view,up)
+	function [] = set_sound_source_orientation(this, soundSourceID,orient)
+		% Sets the orientation of a sound source
+		%
+		% Parameters:
+		%
+		% 	soundSourceID [integer-1x1] Sound source ID
+		% 	orient [double-4] Rotation quaterion [w,x,y,z]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_source_orientation', this.handle, soundSourceID,orient);
+	end
+
+	function [] = set_sound_source_orientation_view_up(this, soundSourceID,view,up)
 		% Sets the orientation of a sound source (as view- and up-vector)
 		%
 		% Parameters:
@@ -2492,28 +2634,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setSoundSourceOrientationVU', this.handle, soundSourceID,view,up);
+		VAMatlab('set_sound_source_orientation_view_up', this.handle, soundSourceID,view,up);
 	end
 
-	function [] = setSoundSourceOrientationYPR(this, soundSourceID,ypr)
-		% Sets the orientation of a sound source (in yaw-pitch-roll angles)
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setSoundSourceOrientationYPR', this.handle, soundSourceID,ypr);
-	end
-
-	function [] = setSoundSourceParameters(this, ID,params)
+	function [] = set_sound_source_parameters(this, ID,params)
 		% Sets sound source parameters
 		%
 		% Parameters:
@@ -2528,10 +2652,29 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setSoundSourceParameters', this.handle, ID,params);
+		VAMatlab('set_sound_source_parameters', this.handle, ID,params);
 	end
 
-	function [] = setSoundSourcePosition(this, id,pos)
+	function [] = set_sound_source_pose(this, soundSourceID,pos,orient)
+		% Sets the position and orientation (in yaw, pitch, roll angles) of a sound source
+		%
+		% Parameters:
+		%
+		% 	soundSourceID [integer-1x1] Sound source ID
+		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
+		% 	orient [double-3] Rotation angles [q,x,y,z]
+		%
+		% Return values:
+		%
+		% 	None
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		VAMatlab('set_sound_source_pose', this.handle, soundSourceID,pos,orient);
+	end
+
+	function [] = set_sound_source_position(this, id,pos)
 		% Sets the position of a sound source
 		%
 		% Parameters:
@@ -2546,90 +2689,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setSoundSourcePosition', this.handle, id,pos);
+		VAMatlab('set_sound_source_position', this.handle, id,pos);
 	end
 
-	function [] = setSoundSourcePositionOrientationVelocityVU(this, soundSourceID,pos,view,up,velocity)
-		% Sets the position, orientation (as view- and up vector) and velocity of a sound source
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
-		% 	view [double-3] View vector
-		% 	up [double-3] Up vector
-		% 	velocity [double-3] Velocity vector (unit: meters/second)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setSoundSourcePositionOrientationVelocityVU', this.handle, soundSourceID,pos,view,up,velocity);
-	end
-
-	function [] = setSoundSourcePositionOrientationVelocityYPR(this, soundSourceID,pos,ypr,velocity)
-		% Sets the position, orientation (in yaw, pitch, roll angles) and velocity of a sound source
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		% 	velocity [double-3] Velocity vector (unit: meters/second)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setSoundSourcePositionOrientationVelocityYPR', this.handle, soundSourceID,pos,ypr,velocity);
-	end
-
-	function [] = setSoundSourcePositionOrientationVU(this, soundSourceID,pos,view,up)
-		% Sets the position and orientation (as view- and up vector) of a sound source
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
-		% 	view [double-3] View vector
-		% 	up [double-3] Up vector
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setSoundSourcePositionOrientationVU', this.handle, soundSourceID,pos,view,up);
-	end
-
-	function [] = setSoundSourcePositionOrientationYPR(this, soundSourceID,pos,ypr)
-		% Sets the position and orientation (in yaw, pitch, roll angles) of a sound source
-		%
-		% Parameters:
-		%
-		% 	soundSourceID [integer-1x1] Sound source ID
-		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
-		% 	ypr [double-3] Rotation angles [yaw, pitch, roll] (unit: degrees, not radians!)
-		%
-		% Return values:
-		%
-		% 	None
-		%
-
-		if this.handle==0, error('Not connected.'); end;
-
-		VAMatlab('setSoundSourcePositionOrientationYPR', this.handle, soundSourceID,pos,ypr);
-	end
-
-	function [] = setSoundSourceSignalSource(this, soundSourceID,signalSourceID)
+	function [] = set_sound_source_signal_source(this, soundSourceID,signalSourceID)
 		% Sets the signal source of a sound source
 		%
 		% Parameters:
@@ -2644,16 +2707,16 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setSoundSourceSignalSource', this.handle, soundSourceID,signalSourceID);
+		VAMatlab('set_sound_source_signal_source', this.handle, soundSourceID,signalSourceID);
 	end
 
-	function [] = setSoundSourceVolume(this, soundSourceID,volume)
+	function [] = set_sound_source_sound_power(this, soundSourceID,soundpower)
 		% Sets the volume of a sound source
 		%
 		% Parameters:
 		%
 		% 	soundSourceID [integer-1x1] Sound source ID
-		% 	volume [double-1x1] Volume
+		% 	soundpower [double-1x1] Sound power
 		%
 		% Return values:
 		%
@@ -2662,10 +2725,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setSoundSourceVolume', this.handle, soundSourceID,volume);
+		VAMatlab('set_sound_source_sound_power', this.handle, soundSourceID,soundpower);
 	end
 
-	function [] = setTimer(this, period)
+	function [] = set_timer(this, period)
 		% Sets up the high-precision timer
 		%
 		% Parameters:
@@ -2679,10 +2742,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('setTimer', this.handle, period);
+		VAMatlab('set_timer', this.handle, period);
 	end
 
-	function [newStateID] = unlockScene(this)
+	function [newStateID] = unlock_update(this)
 		% Unlocks scene and applied synchronously modifications made
 		%
 		% Parameters:
@@ -2696,10 +2759,10 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[newStateID] = VAMatlab('unlockScene', this.handle);
+		[newStateID] = VAMatlab('unlock_update', this.handle);
 	end
 
-	function [] = waitForTimer(this)
+	function [] = wait_for_timer(this)
 		% Wait for a signal of the high-precision timer
 		%
 		% Parameters:
@@ -2713,7 +2776,7 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('waitForTimer', this.handle);
+		VAMatlab('wait_for_timer', this.handle);
 	end
 
 
@@ -2721,7 +2784,7 @@ classdef itaVA < handle
         function display(this)
             % TODO: Define nice behaviour
 %             if this.handle
-%                 fprintf('Connection established to server ''%s''\n', this.getServerAddress())
+%                 fprintf('Connection established to server ''%s''\n', this.get_server_address())
 %             else
 %                 fprintf('Not connected\n');
 %             end
