@@ -14,7 +14,7 @@ classdef v2
     % v2gui.
     %
     % v1.0, 7.10.2014
-    % Florian Theviï¿½en, Florian.Thevissen@rwth-aachen.de
+    % Florian Thevißen, Florian.Thevissen@rwth-aachen.de
     % Institute of Technical Acoustics (ITA), RWTH Aachen University
     
     properties (Access=public)
@@ -113,7 +113,7 @@ classdef v2
             obj.MS.outputamplification = 22;
             obj.MS.fftDegree = 16; %init.
             obj.MS.averages = 1;
-            obj.MS.nSamples = obj.measurementProperties.samples;
+            obj.MS.fftDegree = obj.measurementProperties.samples;
         end
         
         % measure SNR and Signals in both sending and receiving room
@@ -141,25 +141,27 @@ classdef v2
             % do this only for the first measurement of the lab course to discuss
             % the measurement wrt. to modes and Schroeder frequency
             if ~exist([obj.outputDirectory,'\measurement_result_S.jpg'],'file')
-               plotSignalsS = ita_merge([obj.Signals.ch(1:4),ita_mean(obj.Signals.ch(1:4))]);
-               plotSignalsS.channelNames = {'ch(1)','ch(2)','ch(3)','ch(4)','mean(ch(1:4))'};
+               % plotSignalsS = ita_merge([ita_merge(obj.Signals.ch(1:4)),ita_mean(obj.Signals.ch(1:4))]);
+               plotSignalsS = ita_merge([obj.Signals.ch(1:4)]);
+               plotSignalsS.channelNames = {'ch(1)','ch(2)','ch(3)','ch(4)'};
                plotSignalsS.comment = 'Sound pressure measured at the 4 microphone positions in transmitter room';
                hS=ita_plot_freq(plotSignalsS);
                hline = findobj(hS, 'type', 'line');
-               set(hline,'LineStyle','--', 'LineWidth', 1);
-               set(hline(11),'LineWidth',2,'LineStyle','-');
+               set(hline,'LineStyle','-', 'LineWidth', 1);
+%                set(hline(11),'LineWidth',2,'LineStyle','-');
                
                mkdir(obj.outputDirectory)
                saveas(hS,[obj.outputDirectory,'\measurement_result_S'],'jpg')
                saveas(hS,[obj.outputDirectory,'\measurement_result_S'],'fig')
                
-               plotSignalsR = ita_merge([obj.Signals.ch(5:8),ita_mean(obj.Signals.ch(5:8))]);
-               plotSignalsR.channelNames = {'ch(5)','ch(6)','ch(7)','ch(8)','mean(ch(5:8))'};
+               % plotSignalsR = ita_merge([obj.Signals.ch(5:8),ita_mean(obj.Signals.ch(5:8))]);
+               plotSignalsR = ita_merge([obj.Signals.ch(5:8)]);
+               plotSignalsR.channelNames = {'ch(5)','ch(6)','ch(7)','ch(8)'};
                plotSignalsR.comment = 'Sound pressure measured at the 4 microphone positions in receiver room';
                hR=ita_plot_freq(plotSignalsR);
                hline = findobj(hR, 'type', 'line');
-               set(hline,'LineStyle','--', 'LineWidth', 1);
-               set(hline(11),'LineWidth',2,'LineStyle','-');
+               set(hline,'LineStyle','-', 'LineWidth', 1);
+%                set(hline(11),'LineWidth',2,'LineStyle','-');
                
                saveas(hR,[obj.outputDirectory,'\measurement_result_R'],'jpg')
                saveas(hR,[obj.outputDirectory,'\measurement_result_R'],'fig')

@@ -95,6 +95,7 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
         wait                =   true;        % Status - do we wait for motors to reach final position? -> Set by prepare-functions!
         
         mMotorControl = [];
+        mRepetitionsSave = 0;
     end
     % *********************************************************************
     properties(Constant, Hidden = true)
@@ -206,6 +207,7 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             % the pre angle is needed because the measurement setup will
             % not start recording imidiately
             numRepetitions = this.measurementSetup.repetitions;
+            this.measurementSetup.repetitions = numRepetitions;
             timePerRepetition = this.measurementSetup.twait*length(this.measurementSetup.outputChannels);
             speed   =   360/(numRepetitions*timePerRepetition);
             motorControl = this.getMotorControl;
@@ -259,7 +261,7 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             result = this.measurementSetup.deconvolve(result_raw);
 %             this.stop;
             this.mMotorControl.setWait(true);
-            
+            this.measurementSetup.repetitions = this.mRepetitionsSave;
             % add history line
             commitID = ita_git_getMasterCommitHash;
             if ~isempty(commitID)

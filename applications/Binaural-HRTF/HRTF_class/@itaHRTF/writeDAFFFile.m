@@ -74,7 +74,7 @@ assert( betarange( 1 ) <= 180.0 )
 %% Assemble metadata (if not already present)
 
 keyname = 'Generation script';
-if ~any( strcmpi( { metadata(:).name }, keyname ) )
+if isempty(metadata) || ~any( strcmpi( { metadata(:).name }, keyname ) )
     metadata = daffv17_add_metadata( metadata, keyname, 'String', 'writeDAFFFile.m' );
 end
 
@@ -86,6 +86,12 @@ end
 keyname = 'Generation date';
 if ~any( strcmpi( { metadata(:).name }, keyname ) )
     metadata = daffv17_add_metadata( metadata, keyname, 'String', date );
+end
+
+keyname = 'Git Version';
+if ~any( strcmpi( { metadata(:).name }, keyname ) )
+    versionHash = ita_git_getMasterCommitHash;
+    metadata = daffv17_add_metadata( metadata, keyname, 'String', versionHash );
 end
 
 keyname = 'Web resource';
