@@ -181,10 +181,8 @@ classdef  itaHRTF < itaAudio
                     this.dirCoord.sph = this.mCoordSave;
                     % saving channelNames in itaHRTF does not work at the
                     % moment
-                    for iCh = 1:this.dimensions
-                        this.channelNames{iCh} = this.mChNames(iCh,:);
-                    end
-                    
+                    this.channelNames = cellstr(this.mChNames);
+
                 elseif isa(varargin{1},'itaAudio')
                     this.itaAudio2itaHRTF = varargin{1};
                     
