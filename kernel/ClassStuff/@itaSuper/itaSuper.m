@@ -159,7 +159,7 @@ classdef itaSuper < itaMeta
             
             %% Add history line
             commitID = ita_git_getMasterCommitHash;
-            if ~isempty(commitID)
+            if ~(isempty(commitID) || strcmp(commitID,'0'))
                 this = ita_metainfo_add_historyline(this,'GitVersion',commitID);
             end
         end
