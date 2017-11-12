@@ -662,6 +662,10 @@ classdef  itaHRTF < itaAudio
                 %HRTFout = this.direction(idxCoord);
             end
             
+            function this = buildsearchdatabase(this)
+               this.dirCoord = this.dirCoord.build_search_database; 
+            end
+            
             function obj = direction(this, idxCoord)
                 idxDir = zeros(numel(idxCoord)*2,1);
                 idxDir(1:2:numel(idxCoord)*2,:) = 2*idxCoord-1;
