@@ -95,7 +95,7 @@ lowerTolVal = sArgs.distortionLimit * (1-sArgs.tolerance);
 
 %% go through the excitation frequencies, process measurement
 ita_verbose_info('Measurement process',1);
-
+wb = itaWaitbar([numel(excitationFreq),numel(sArgs.distortionLimit)],'maxSPL',{'Frequencies','Limits'});
 % frequency band loop with freqIdx
 for freqIdx = 1:numel(excitationFreq)
     
@@ -108,7 +108,7 @@ for freqIdx = 1:numel(excitationFreq)
 
     % distortion limit loop
     for distIdx = 1:numel(sArgs.distortionLimit)
-
+        wb.inc
         % Amplification and measurement
         while outputVoltage >= (outputVoltageRange(1)/10) && outputVoltage <= outputVoltageRange(2)
 
@@ -211,11 +211,10 @@ for freqIdx = 1:numel(excitationFreq)
         if breakFlag
             breakFlag = false;
             break;
-        end
-        
+        end  
     end
 end
-
+wb.close;
 %% Post-processing and Results
 
 
