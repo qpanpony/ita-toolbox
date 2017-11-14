@@ -92,7 +92,7 @@ if playback
     peak_value = max(max(abs(data.timeData)));
     if (peak_value > outputClipping) || (normalize_output)
         ita_verbose_info('Oh Lord! Levels too high for playback. Normalizing...',0)
-        data = ita_normalize_dat(data);
+        data = data/peak_value*outputClipping;
     end
 end
 
