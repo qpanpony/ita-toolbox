@@ -710,6 +710,12 @@ classdef  itaHRTF < itaAudio
                 if ~exactSearch
                     phiU = rad2deg(this.phi_Unique);
                     thetaU = rad2deg(this.theta_Unique);
+                    switch dirID
+                        case {'phi_deg', 'p'}
+                            slice = this.findnearestHRTF(thetaU,dir_deg);
+                        case {'theta_deg', 't'}
+                            slice = this.findnearestHRTF(dir_deg,phiU);
+                    end
                 else
                     earCoords = this.getEar('L').channelCoordinates;
                     switch dirID
@@ -731,12 +737,7 @@ classdef  itaHRTF < itaAudio
                             slice = this.findnearestHRTF(dir_deg,phiU);
                     end
                 end
-%                 switch dirID
-%                     case {'phi_deg', 'p'}
-%                         slice = this.findnearestHRTF(thetaU,dir_deg);
-%                     case {'theta_deg', 't'}
-%                         slice = this.findnearestHRTF(dir_deg,phiU);
-%                 end
+
             end
             
             function slice = ss(this,dirID,dir_deg)
@@ -1318,10 +1319,10 @@ classdef  itaHRTF < itaAudio
                     ita_verbose_info(' More than one elevation in this object!', 0);
                     if strcmp(sArgs.plane,'horizontal')
                         thetaC_deg  = 90;
-                        thisC       = this.sphericalSlice('theta_deg', thetaC_deg);
+                        thisC       = this.sphericalSlice('theta_deg', thetaC_deg,1);
                     elseif strcmp(sArgs.plane,'median')
                         phiC_deg    = 0;
-                        thisC       = this.sphericalSlice('phi_deg', phiC_deg);
+                        thisC       = this.sphericalSlice('phi_deg', phiC_deg,1);
                     end
                 else thisC = this;
                 end
