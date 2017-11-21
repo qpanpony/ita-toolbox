@@ -414,6 +414,7 @@ function [] = daffv17_write( varargin )
     % note: use round here to avoid errors if alphapoints are not exactly
     % integers but within epsilon
     x = cell( round( args.alphapoints ), round( args.betapoints ), args.channels );
+    args.userdata = args.userdata.buildsearchdatabase;
     for b=1:args.betapoints
         beta = betastart + (b-1)*args.betares;
         
@@ -422,13 +423,11 @@ function [] = daffv17_write( varargin )
             points = 1;
         else
             points = args.alphapoints;
-        end
-        
+        end      
         for a=1:points
             alpha = alphastart + (a-1)*args.alphares;
           
-            % --= Impulse responses =--
-            
+            % --= Impulse responses =--         
             if strcmp( args.content, 'IR' ) 
                 % Get the data
                 [ data, samplerate, metadata ] = args.datafunc( alpha, beta, args.userdata );

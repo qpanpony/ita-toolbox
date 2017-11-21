@@ -88,8 +88,8 @@ classdef itaMSTFni < itaMSTF
             % Define listeners to automatically call the init function of
             % this class in case of a change in the below specified
             % properties.
-            addlistener(this,'inputChannels','PostSet',@this.init);
-            addlistener(this,'outputChannels','PostSet',@this.init);
+            addlistener(this,'inputChannels','PostSet',@this.init_ni);
+            addlistener(this,'outputChannels','PostSet',@this.init_ni);
         end
         
         function this = edit(this)
@@ -100,11 +100,10 @@ classdef itaMSTFni < itaMSTF
             this = ita_mstfni_gui(this);
         end
         
-        function this = init(this,varargin)
+        function this = init_ni(this,varargin)
             % init - Initialize the itaMSTFni class object.
-            init@itaMSTF(this);
             % if this is an object loaded from disk (niSession is empty),
-            % we do not need to initialize the card
+            % we do not need to re-initialize the card
             if ~isempty(this.niSession)
                 this.niSession = init_NI_card(this);
             end
@@ -281,9 +280,6 @@ classdef itaMSTFni < itaMSTF
                     niSession.Channels(end).Name = inputChannels.name{iChannel};
                     % set to AC coupling to get rid of large DC offset
                     niSession.Channels(end).Coupling = 'AC';
-                    % if any(strcmpi(Channels.type{iDevice,iChannel},{'Accelerometer' 'Microphone'}))
-                    %    niSession.Channels(end).Sensitivity = Channels.sensitivity(iDevice,iChannel);
-                    % end
                 end
             end
             
@@ -305,6 +301,46 @@ classdef itaMSTFni < itaMSTF
                 end
             end
             
+        end % function
+        
+        function this = set_IEPE_channels(this,channelIds)
+            if isempty(this.niSession)
+                this.niSession = this.init_NI_card();
+            end
+            % first get NI info
+            [inputChannels,~,niDevices,~] = ita_get_ni_deviceinfo();
+            
+            % INPUT
+            % set channel data from MS
+            channelIds = intersect(channelIds,this.inputChannels);
+            if isempty(channelIds)
+                error('Nothing to do, maybe your channels are not active?');
+            end
+            inputChannels.mapping = inputChannels.mapping(channelIds);
+            inputChannels.name = inputChannels.name(channelIds);
+            inputChannels.type = inputChannels.type(channelIds);
+            inputChannels.sensitivity = inputChannels.sensitivity(channelIds);
+            inputChannels.isActive = inputChannels.isActive(channelIds);
+            
+            % Add analog input channels with IEPE supply
+            for iChannel = 1:numel(channelIds)
+                devIdx = [];
+                for iCh = 1:numel(this.niSession.Channels)
+                    if strcmpi(inputChannels.name{iChannel},this.niSession.Channels(iCh).Name)
+                        devIdx = iCh;
+                    end
+                end
+                if ~isempty(devIdx)
+                    this.niSession.removeChannel(devIdx);
+                else
+                    error('Could not find your channel');
+                end
+                % then add again
+                iDevice = inputChannels.mapping{iChannel}(1);
+                iDeviceChannel = inputChannels.mapping{iChannel}(2);
+                this.niSession.addAnalogInputChannel(get(niDevices(iDevice),'ID'),iDeviceChannel-1,'IEPE');
+                this.niSession.Channels(end).Name = inputChannels.name{iChannel};
+            end
         end % function
         
         function sObj = saveobj(this)

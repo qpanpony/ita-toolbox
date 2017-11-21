@@ -508,7 +508,7 @@ classdef itaSuper < itaMeta
 
         function res = get_diag(this)
 			% use eye as mask for diagonal
-			res = this(eye(size(this,1)));
+			res = this(logical(eye(size(this,1))));
         end
 
         function this = diag(this,diagonalshift,blocksize)

@@ -24,39 +24,35 @@ function varargout = ita_multiple_time_windows(varargin)
 
 sArgs   = struct('pos1_a','itaAudioTime','blocksize',1024,'window',@hann,'overlap',0.5);
 [a,sArgs] = ita_parse_arguments(sArgs,varargin); 
-b = sArgs.blocksize;
 
-nWindow   = b;
+nWindow = sArgs.blocksize;
 if sArgs.overlap < 1
     nOverlap  = round(nWindow*sArgs.overlap);
 else
     nOverlap = round(sArgs.overlap);
 end
 
-nSegments = ceil(a.nSamples / nWindow * 2 + 1);
-nNewLength = (nSegments -1) * nWindow / 2;
+% half a window length at beginning and end
+ext_zeros = zeros(nWindow/2,a.nChannels);
+data = [ext_zeros; a.time; ext_zeros];
+
+nSegments = ceil((size(data,1) - nWindow) / (nWindow - nOverlap)) + 1;
+nNewLength = (nSegments - 1) * (nWindow - nOverlap) + nWindow;
 if nNewLength > a.nSamples
     a = ita_extend_dat(a,nNewLength,'forcesamples');
 end
 
 %% generate window
-win_vec = window(sArgs.window,nWindow+1).';
+win_vec = window(sArgs.window,nWindow+1);
 win_vec(end) = [];
-
-ext_zeros = zeros(a.nChannels,nWindow/2);
-
-data = [ext_zeros a.dat(:,:) ext_zeros];
 
 resultDummy = a;
 resultDummy.data = zeros(1,a.nChannels);
 
 result = repmat(resultDummy,nSegments,1);
-
 for idx = 1:nSegments
-    iLow = (idx-1)*(nWindow-nOverlap)+1;
-    iHigh = iLow+nWindow-1;
-    slice  = bsxfun(@times,data(:,iLow:iHigh),win_vec);
-    result(idx).time = slice.'; 
+    sliceIds = (idx-1)*(nWindow-nOverlap) + (1:nWindow);
+    result(idx).time = bsxfun(@times,data(sliceIds,:),win_vec);
 end
 
 %%
