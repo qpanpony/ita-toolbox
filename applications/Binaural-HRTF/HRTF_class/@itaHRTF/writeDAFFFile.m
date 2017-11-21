@@ -33,7 +33,7 @@ if strcmp( this.domain, 'freq' )
 end
 
 [ file_path, file_base_name, file_suffix ] = fileparts( file_name );
-if ~strcmp( file_suffix, '.daff' )
+if ~strcmp( file_suffix, '.daff' ) && ~isempty( file_suffix )
     file_path = fullfile( file_path, strjoin( {file_base_name file_suffix 'v17' ct_indicator 'daff' }, '.' ) );
 else
     file_path = fullfile( file_path, strjoin( {file_base_name 'v17' ct_indicator 'daff'}, '.' ) );
@@ -121,7 +121,8 @@ if strcmp( this.domain, 'time' )
                'orient', [ 0 0 0 ], ...
                'metadata', metadata, ...
                'userdata', this, ...
-               'quantization', 'float32' );
+               'quantization', 'float32', ...
+               'zthreshold', -inf );
            
 elseif strcmp( this.domain, 'freq' )
     
