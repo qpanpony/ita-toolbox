@@ -85,28 +85,42 @@ function [] = daffv17_write( varargin )
     
     % Parse the arguments
     args = struct();
-    for i=1:length(nonarg), args.(nonarg{i}) = false; end
     
-    i=1;
-    while i<=nargin
-        if ~ischar(varargin{i}), error(['Parameter ' num2str(i) ': String expected']); end
-        key = lower(varargin{i});
-        i = i+1;
-        r = nargin-i+1; % Number of remaining arguments
+    % Switch between single cell argument call and option list
+    if isa( varargin, 'cell' ) && length( varargin ) == 1 && isstruct( varargin{ 1 } )
         
-        switch key
-        case nonarg
-            args.(key) = true;
+        args = varargin{ 1 };
+        for i=1:length(nonarg)
+            if ~isfield( args, nonarg{ i } )
+                args.(  nonarg{ i } ) = false;
+            end
+        end
         
-        % Options with one argument
-        case onearg
-            if (r < 1), error(['Option ''' key ''' requires an argument']); end
-            args.(key) = varargin{i};
+    else
+
+        for i=1:length(nonarg), args.(nonarg{i}) = false; end
+        
+        i=1;
+        while i<=nargin
+            if ~ischar(varargin{i}), error(['Parameter ' num2str(i) ': String expected']); end
+            key = lower(varargin{i});
             i = i+1;
-            
-        otherwise
-            error(['Invalid option (''' key ''')']);
-        end        
+            r = nargin-i+1; % Number of remaining arguments
+
+            switch key
+            case nonarg
+                args.(key) = true;
+
+            % Options with one argument
+            case onearg
+                if (r < 1), error(['Option ''' key ''' requires an argument']); end
+                args.(key) = varargin{i};
+                i = i+1;
+
+            otherwise
+                error(['Invalid option (''' key ''')']);
+            end        
+        end
     end
     
     % Validate the arguments
