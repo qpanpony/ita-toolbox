@@ -158,19 +158,19 @@ for freqIdx = 1:numel(excitationFreq)
                     % the next frequency
                     voltageFirstDistortionLimit = outputVoltage;
                 end
-                ita_verbose_info([num2str(sArgs.distortionLimit(distIdx)*100) '% ' sArgs.signalReference ' reached, exact value: ' num2str(signalReferenceValue*100) '%'],0);
+                ita_verbose_info([num2str(sArgs.distortionLimit(distIdx)*100) '% ' sArgs.signalReference ' reached, exact value: ' num2str(signalReferenceValue*100,'%0.2f') '%'],0);
                 outputVoltage = outputVoltage * gain;
                 break;
                 
             elseif aboveTol
                 % went above limit -> decrement and show info
-                ita_verbose_info([num2str(sArgs.distortionLimit(distIdx)*100) '% ' sArgs.signalReference ' too high, exact value: ' num2str(signalReferenceValue*100) '%'],0);
+                ita_verbose_info([num2str(sArgs.distortionLimit(distIdx)*100) '% ' sArgs.signalReference ' too high, exact value: ' num2str(signalReferenceValue*100,'%0.2f') '%'],0);
                 % factor to avoid getting stuck
                 outputVoltage = outputVoltage / (0.8*gain);
             elseif belowTol
                 % keep increasing
                 outputVoltage = outputVoltage * gain;
-                ita_verbose_info([num2str(sArgs.distortionLimit(distIdx)*100) '% ' sArgs.signalReference ' not reached, exact value: ' num2str(signalReferenceValue*100) '%'],0);
+                ita_verbose_info([num2str(sArgs.distortionLimit(distIdx)*100) '% ' sArgs.signalReference ' not reached, exact value: ' num2str(signalReferenceValue*100,'%0.2f') '%'],0);
             end
 
             
@@ -179,7 +179,7 @@ for freqIdx = 1:numel(excitationFreq)
                     outputVoltage = outputVoltageRange(2);
                     lastMeasurement = true;
                 else
-                    ita_verbose_info(['maximum output voltage reached: ' num2str(min(outputVoltage,outputVoltageRange(2)))],0); % show some info
+                    ita_verbose_info(['maximum output voltage reached: ' num2str(min(outputVoltage,outputVoltageRange(2)),'%0.2f')],0); % show some info
                     
                     % write remaining distortion limit values in case we
                     % reached the maximum voltage at a lower distortion
@@ -210,6 +210,9 @@ for freqIdx = 1:numel(excitationFreq)
         end
         if breakFlag
             breakFlag = false;
+            for iter = distIdx+1:numel(sArgs.distortionLimit)
+                wb.inc();
+            end
             break;
         end  
     end
