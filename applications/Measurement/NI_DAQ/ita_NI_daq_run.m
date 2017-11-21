@@ -83,7 +83,7 @@ if playback
     % Check levels - Normalizing
     % determine clipping limit from NI session information
     outputClipping = 1; % standard
-    for iChannel = numel(niSession.Channels)
+    for iChannel = 1:numel(niSession.Channels)
         isOutput = ~isempty(strfind(niSession.Channels(iChannel).ID,'ao'));
         if isOutput
             outputClipping = max(outputClipping,max(abs(double(niSession.Channels(iChannel).Range))));
