@@ -171,6 +171,9 @@ classdef itaMSTFni < itaMSTF
                 imcIdx(chIdx) = find(this.inputMeasurementChain.hw_ch == inputChannels(chIdx));
             end
             tmpChain = this.inputMeasurementChain(imcIdx);
+            % we need this to have the correct dimensions for the zeros at the output
+            outputChannels = this.outputChannels;
+            this.outputChannels = outputChannels(1);
             % element by element
             for iElement = elementIds
                 for iCh = 1:numel(imcIdx)
@@ -189,6 +192,7 @@ classdef itaMSTFni < itaMSTF
             end
             this.inputMeasurementChain(imcIdx) = tmpChain;
             this.inputChannels = inputChannels;
+            this.outputChannels = outputChannels;
             disp('****************************** FINISHED *********************************')
         end
         
