@@ -34,7 +34,7 @@ classdef itaOptitrackData
         
         
         function varargout = plot(this, varargin)
-           varargout = itaOptitrack.plot(this,varargin{:}); 
+           varargout{:} = itaOptitrack.plot(this,varargin{:}); 
         end
     end
     
