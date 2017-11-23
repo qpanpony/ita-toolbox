@@ -117,6 +117,7 @@ classdef  itaHRTF < itaAudio
     methods % Special functions that implement operations that are usually performed only on instances of the class
         %% Input
         function this = itaHRTF(varargin)
+            iniAudio = [];
             % initialize itaHRTF with itaAudio properties (only for nargin == 1)
             if nargin > 1 || (nargin == 1 && (ischar(varargin{1}) || isa(varargin{1},'itaAudio')))
                 iniAudio = [];
@@ -1017,7 +1018,7 @@ classdef  itaHRTF < itaAudio
                 end
             end
             
-            % function this = interp(varargin)
+            this = interp(varargin);
             %
             % Function to calculate HRTFs for arbitrary field points using a N-th order
             % spherical harmonics (SH) interpolation / range extrapolation, as described in [1],
@@ -1055,7 +1056,8 @@ classdef  itaHRTF < itaAudio
             % Version: 2016-02-05
             
             
-            
+            this = reduce_spatial(this,coords,varargin);
+            % Function to spatially reduce the HRTF. 
             
             function this = smooth_linphase(this,varargin)
                 % function this = smooth_linphase(varargin)
