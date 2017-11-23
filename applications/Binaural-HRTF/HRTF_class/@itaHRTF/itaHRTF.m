@@ -917,11 +917,11 @@ classdef  itaHRTF < itaAudio
                             ITD = phasenDiff./(2*pi*repmat(thisC.freqVector,1,size(phase1,2)));
                         else % averaged
                             usedBins = thisC.freq2index(sArgs.filter(1)):thisC.freq2index(sArgs.filter(2));
-                            phase = unwrap(angle(thisC.freqData(2:end,:)));
+                            phase = unwrap(angle(thisC.freqData(3:end,:)));
                             freqVector = thisC.freqVector;
-                            t0_freq = bsxfun(@rdivide, phase,2*pi*freqVector(2:end));
+                            t0_freq = bsxfun(@rdivide, phase,2*pi*freqVector(3:end));
                             t0_freq = t0_freq(~isnan(t0_freq(:,1)),:);
-                            t0_mean = mean(t0_freq(usedBins,:)); %mean is smoother than max; lower freq smooths also the result
+                            t0_mean = mean(t0_freq(3+usedBins,:)); %mean is smoother than max; lower freq smooths also the result
                             ITD =  t0_mean(thisC.EarSide == 'L') - t0_mean(thisC.EarSide == 'R');
                         end
                     case 'xcorr'
