@@ -50,7 +50,8 @@ function cThis = interp(this,varargin)
 
 sArgs           = struct('order',50,'eps',1e-5,'shiftToEar',false,'shiftAxis','y','shiftOffset',[-0.0725 0.0725]);
 sArgs           = ita_parse_arguments(sArgs,varargin,2);
-if ~isa(varargin{1},'itaCoordinates'),error('itaHRTF:interp', ' An itaCoordinate object is needed!')
+if isempty(varargin) || ~isa(varargin{1},'itaCoordinates')
+    error('itaHRTF:interp', ' An itaCoordinate object is needed!')
 end
 field_in        = varargin{1};
 
