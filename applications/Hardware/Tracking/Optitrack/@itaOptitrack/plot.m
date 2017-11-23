@@ -146,9 +146,9 @@ for idx=2:stepSize:this.info.TotalFrames
             
         end
         
-        drawnow
-        
     end
+    
+    drawnow
 end
 
 if nargout
