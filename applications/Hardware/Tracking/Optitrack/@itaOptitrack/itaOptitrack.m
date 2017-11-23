@@ -399,7 +399,7 @@ classdef itaOptitrack < handle
                 end
                 
                 % get tracker frame rate
-                byteArray               = Optitrack_obj.theClient.SendMessageAndWait('FrameRate'); % request current system’s tracking frame rate
+                byteArray               = Optitrack_obj.theClient.SendMessageAndWait('FrameRate'); % request current systemï¿½s tracking frame rate
                 byteArray               = uint8(byteArray); % decode frame rate
                 Optitrack_obj.frameRate = typecast(byteArray,'single');
                 fprintf('[itaOptitrack] Tracker frame rate: %d Hz\n', Optitrack_obj.frameRate)
@@ -1195,6 +1195,10 @@ classdef itaOptitrack < handle
             set(pushButtonHandle, 'String', sprintf('Calibrate (%d)',Optitrack_obj.countdownDuration-numTasksExecuted));
         end
         
+    end
+    
+    methods(Static)
+        output = plot(this,varargin);
     end
     
 end
