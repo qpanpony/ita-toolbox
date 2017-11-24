@@ -65,7 +65,7 @@ classdef itaOptitrack < handle
     %                        (default: 1, only for recMethod 0)
     %           'singleShot' only log 1 frame of tracking data [logical]
     %                        (e.g. for geometric measurement purposes)
-    %           'saveMe'     save tracked data (default: true) [bool]
+    %           'autoSave'     save tracked data (default: true) [logical]
     %                        if savePath and/or saveName are unset,
     %                        savePath -> pwd, saveName -> trackerData_time_stamp
     %           'savePath'   path to save file containing logged data [string]
@@ -242,7 +242,7 @@ classdef itaOptitrack < handle
     properties(SetAccess = 'public', GetAccess = 'public')
         recMethod        = 0;     % recording method, 0: record data for recTime seconds (default), 1: record data without time limitation (stop via Optitrack_obj.stopTracking) [double]
         recTime          = 1;     % preferred logging time in sec (default: 1, only for recMethod 0) [double]
-        saveMe           = true;  % save tracked data to pwd or to 'savePath' if defined [bool]
+        autoSave           = true;  % save tracked data to pwd or to 'savePath' if defined [logical]
         savePath         = [];    % path to save file containing logged data [string]
         saveName         = [];    % name of file containing logged data [string]
 
@@ -758,23 +758,20 @@ classdef itaOptitrack < handle
                         end
 
                         % save data and info
-                        if Optitrack_obj.saveMe % == true
+                        if Optitrack_obj.autoSave % == true
                             if isempty(Optitrack_obj.savePath)
                                 Optitrack_obj.savePath = pwd;
                             end
                             if isempty(Optitrack_obj.saveName)
-                                cl = clock;
-                                Optitrack_obj.saveName = sprintf('trackerData_%04i%02i%02i_%02i%02i', cl(1), cl(2), cl(3), cl(4), cl(5));
+                                Optitrack_obj.saveName = sprintf('trackerData_%s', Optitrack_obj.info.CaptureStartTime);
                             end
-                            if ~isempty(Optitrack_obj.savePath)&&~isempty(Optitrack_obj.saveName)
-                                LogData = Optitrack_obj.data; %#ok
-                                LogInfo = Optitrack_obj.info; %#ok
-                                save(fullfile(Optitrack_obj.savePath,[Optitrack_obj.saveName,'.mat']), 'LogData','LogInfo');
-                                fprintf('[itaOptitrack] Saved logged tracking data successfully to %s\n\n',fullfile(Optitrack_obj.savePath,[Optitrack_obj.saveName,'.mat']))
-                            else 
-                                fprintf('[\b[itaOptitrack] Logged tracking data is only stored temporarily in Optitrack_obj.data]\b\n\n')
-                            end
-                        else %2DO: remove q&d solution (mentioned twice)
+                            
+                            LogData = Optitrack_obj.data; %#ok
+                            LogInfo = Optitrack_obj.info; %#ok
+                            save(fullfile(Optitrack_obj.savePath,[Optitrack_obj.saveName,'.mat']), 'LogData','LogInfo');
+                            fprintf('[itaOptitrack] Saved logged tracking data successfully to %s\n\n',fullfile(Optitrack_obj.savePath,[Optitrack_obj.saveName,'.mat']))
+                        
+                        else
                             fprintf('[\b[itaOptitrack] Logged tracking data is only stored temporarily in Optitrack_obj.data]\b\n\n')
                         end
                         
