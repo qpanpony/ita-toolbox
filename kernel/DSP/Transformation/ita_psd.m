@@ -16,8 +16,6 @@ function varargout = ita_psd(varargin)
 %               blocksize (signal_length):   FFT-Size for psd or cpsd
 %               fftsize ([]):                expand signal to this fftsize by adding zeros, no reduction will be done, if fftsize < blocksize nothing will happen!
 %
-%  TODO HUHU: Speed improvements
-%
 %   See also ita_roomacoustics, ita_sqrt, ita_roomacoustics_reverberation_time, ita_roomacoustics_reverberation_time_hirata, ita_roomacoustics_energy_parameters, test, ita_sum, ita_audio2struct, test, ita_channelnames_to_numbers, ita_test_all, ita_test_rsc, ita_arguments_to_cell, ita_test_isincellstr, ita_empty_header, ita_metainfo_check ita_metainfo_to_filename, ita_filename_to_header, ita_metainfo_coordinates, ita_metainfo_coordinates, ita_metainfo_coordinates, ita_roomacoustics_EDC, test_ita_class, ita_metainfo_find_frequencystring, clear_struct, ita_italian, ita_italian_init, ita_metainfo_check.
 %
 %   Reference page in Help browser
@@ -77,10 +75,10 @@ if sArgs.blocksize > size(data.dat,2)
     end
 end
 
-
 %% +++Body - Your Code here+++ 'result' is an audioObj and is given back
 seg_window = hanning(sArgs.blocksize);
 result = data;
+resultspk = zeros(data.nChannels,sArgs.fftsize/2+1);
 for idx = 1:data.nChannels
     % X(f)
     thischannel = ita_split(data,idx); %Get only one channel
@@ -99,8 +97,10 @@ for idx = 1:data.nChannels
     % Set channel names
     if calc_cpsd
         result.channelNames{idx} = ['CPSD: ' data.channelNames{idx} ', ' data2.channelNames{idx}];
+        result.channelUnits{idx} = ita_deal_units(data.channelUnits{idx},data2.channelUnits{idx},'*');
     else
         result.channelNames{idx} = ['PSD: ' data.channelNames{idx}];
+        result.channelUnits{idx} = ita_deal_units(data.channelUnits{idx},data.channelUnits{idx},'*');
     end
 end
 
@@ -109,8 +109,6 @@ result.freqData = resultspk.';
 %% Add history line
 result.history = data.history; %Restore old history as we screewed it up with quite a lot calculations
 result = ita_metainfo_add_historyline(result,'ita_psd',varargin);
-
-
 
 %% Find output parameters
     varargout(1) = {result};
