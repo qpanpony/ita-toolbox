@@ -2,7 +2,7 @@ function varargout = ita_sound_power(varargin)
 %ITA_SOUND_POWER - calculate the sound power of a source in a specific room
 %  This function takes spl-data and RT of the empty room to calculate the
 %  equivalent absorption area of the tested room. This is used to calculate
-%  and give back the source's sound power.
+%  the sound power of the source according to ISO 3741.
 %
 %  Syntax:
 %   audioObjOut = ita_sound_power(audioObjIn, T_empty, options)
@@ -29,28 +29,37 @@ function varargout = ita_sound_power(varargin)
 % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder. 
 % </ITA-Toolbox>
 
-
 % Author: Christian Haar -- Email: christian.haar@akustik.rwth-aachen.de
 % Created:  24-Jun-2010 
-
-
 
 %% Initialization and Input Parsing
 sArgs        = struct('pos1_spl', 'itaSuper', 'pos2_T_empty', 'itaSuper', 'room_volume', 124,'room_surface',181,'T',20,'RH',0.5, 'freqRange', ita_preferences('freqRange'), 'bandsPerOctave', ita_preferences('bandsPerOctave') );
 [spl,T_empty,sArgs] = ita_parse_arguments(sArgs,varargin); 
 
+% acoustic constants
+c = 20.05*sqrt(273 + sArgs.T);
+% correction factors for the meteorological conditions (not in dB!)
+% (assumes static pressure is the reference value)
+C1 = sqrt((273.15 + sArgs.T)/314);
+C2 = sqrt((273.15 + sArgs.T)/296).^3;
 
-%% calculate sound power
-spl_m = sqrt(mean(abs(spl)^2));
+%% calculate sound pressure level data
+spl_m = sqrt(mean(abs(spl')^2));
 spl_m = ita_spk2frequencybands(spl_m, 'freqRange',sArgs.freqRange , 'bandsPerOctave',sArgs.bandsPerOctave);
-% T_empty = mean(T_empty(3));
-spl_m = itaResult(spl_m',T_empty.freqVector);
-[c,rho_0,m] = ita_constants({'c','rho_0','m'},'f',T_empty.freqVector,'T',sArgs.T,'phi',sArgs.RH);
-alpha = ita_sabine('c',c,'m',m,'t60',T_empty,'v',sArgs.room_volume,'s',sArgs.room_surface); 
-A = itaValue(double(sArgs.room_surface),'m^2')*alpha;
-sound_power = (spl_m^2 / (4*rho_0*c)) * A;
+spl_m = itaResult(spl_m,T_empty.freqVector);
 
-% sound_power.bar
+%% calculate equivalent absorption area
+A = 55.26*itaValue(double(sArgs.room_volume)/c,'s*m^2')/T_empty;
+
+%% calculate sound power (Eq 20 in ISO 3741)
+sound_power = spl_m^2 * A * 0.5 * C1 * C2;
+% exponent and frequency-dependent part
+sound_power.freq = sound_power.freq.*exp(A.freq./double(sArgs.room_surface)).*(1 + double(sArgs.room_surface)*c./(8*double(sArgs.room_volume).*sound_power.freqVector));
+% getting the reference values right
+sound_power = sound_power*itaValue(1e-12,'W')/itaValue(20e-6,'Pa')^2/itaValue(1,'m^2');
+
+% or the straight-forward way: 
+% sound_power = spl_m^2 * A/(2*itaValue(c,'m/s')*itaValue(1.2,'kg/m^3'));
 
 %% Add history line
 sound_power = ita_metainfo_add_historyline(sound_power,mfilename,varargin);
