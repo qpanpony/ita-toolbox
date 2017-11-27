@@ -63,7 +63,7 @@ classdef itaAudioAnalyticRational < itaAudioAnalyticSuper
             end
             
         end
-        function varargout = plot_single_components(this)
+        function varargout = plot_single_components(this,varargin)
             % plot all resonators as separate channels
             x = this;
             
@@ -86,7 +86,7 @@ classdef itaAudioAnalyticRational < itaAudioAnalyticSuper
             if nargout == 1
                 varargout{1} = x;
             else
-                x.plot_spk
+                x.plot_spk(varargin{:})
                 clear varargout;
             end
             
