@@ -44,15 +44,16 @@ C1 = sqrt((273.15 + sArgs.T)/314);
 C2 = sqrt((273.15 + sArgs.T)/296).^3;
 
 %% calculate sound pressure level data
-spl_m = sqrt(mean(abs(spl')^2));
-spl_m = ita_spk2frequencybands(spl_m, 'freqRange',sArgs.freqRange , 'bandsPerOctave',sArgs.bandsPerOctave);
+% first third-octaves then average
+spl = ita_spk2frequencybands(spl, 'freqRange',sArgs.freqRange , 'bandsPerOctave',sArgs.bandsPerOctave);
+spl_m = sqrt(mean(spl^2));
 spl_m = itaResult(spl_m,T_empty.freqVector);
 
 %% calculate equivalent absorption area
 A = 55.26*itaValue(double(sArgs.room_volume)/c,'s*m^2')/T_empty;
 
 %% calculate sound power (Eq 20 in ISO 3741)
-sound_power = spl_m^2 * A * 0.5 * C1 * C2;
+sound_power = spl_m^2 * A * 10^(-6/10) * C1 * C2;
 % exponent and frequency-dependent part
 sound_power.freq = sound_power.freq.*exp(A.freq./double(sArgs.room_surface)).*(1 + double(sArgs.room_surface)*c./(8*double(sArgs.room_volume).*sound_power.freqVector));
 % getting the reference values right
