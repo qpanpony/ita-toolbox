@@ -65,7 +65,7 @@ classdef itaOptitrack < handle
     %                        (default: 1, only for recMethod 0)
     %           'singleShot' only log 1 frame of tracking data [logical]
     %                        (e.g. for geometric measurement purposes)
-    %           'autoSave'     save tracked data (default: true) [logical]
+    %           'autoSave'   save tracked data (default: true) [logical]
     %                        if savePath and/or saveName are unset,
     %                        savePath -> pwd, saveName -> trackerData_time_stamp
     %           'savePath'   path to save file containing logged data [string]
@@ -242,7 +242,7 @@ classdef itaOptitrack < handle
     properties(SetAccess = 'public', GetAccess = 'public')
         recMethod        = 0;     % recording method, 0: record data for recTime seconds (default), 1: record data without time limitation (stop via Optitrack_obj.stopTracking) [double]
         recTime          = 1;     % preferred logging time in sec (default: 1, only for recMethod 0) [double]
-        autoSave           = true;  % save tracked data to pwd or to 'savePath' if defined [logical]
+        autoSave         = true;  % save tracked data to pwd or to 'savePath' if defined [logical]
         savePath         = [];    % path to save file containing logged data [string]
         saveName         = [];    % name of file containing logged data [string]
 
@@ -763,7 +763,10 @@ classdef itaOptitrack < handle
                                 Optitrack_obj.savePath = pwd;
                             end
                             if isempty(Optitrack_obj.saveName)
-                                Optitrack_obj.saveName = sprintf('trackerData_%s', Optitrack_obj.info.CaptureStartTime);
+                                timeStamp = Optitrack_obj.info.CaptureStartTime;
+                                Optitrack_obj.saveName = sprintf('trackerData_%s%s%s_%s%s%s', ...
+                                                        timeStamp(1:2),timeStamp(4:6),timeStamp(8:11), ...
+                                                        timeStamp(13:14), timeStamp(16:17), timeStamp(19:20));
                             end
                             
                             LogData = Optitrack_obj.data; %#ok
@@ -776,7 +779,7 @@ classdef itaOptitrack < handle
                         end
                         
                     else
-                        fprintf('[itaOptitrack] Stopped logging of tracker data.\n')
+                        fprintf('[itaOptitrack] Stoped logging of tracker data.\n')
                     end
                     
                 else
