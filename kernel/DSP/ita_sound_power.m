@@ -14,6 +14,7 @@ function varargout = ita_sound_power(varargin)
 %                                  chamber 
 %           'T' (20)            :  Temperature in deg Celsius
 %           'RH' (0.5)          :  Relative Humidity
+%           'p_s' (101325)      :  Static pressure in Pa
 %
 %  Example:
 %   audioObjOut = ita_sound_power(audioObjIn)
@@ -31,17 +32,19 @@ function varargout = ita_sound_power(varargin)
 
 % Author: Christian Haar -- Email: christian.haar@akustik.rwth-aachen.de
 % Created:  24-Jun-2010 
+% Re-write to conform with ISO 3741: Markus Mueller-Trapet -- Email: markus.mueller-trapet@nrc.ca
+% Modified: 28-Nov-2017
 
 %% Initialization and Input Parsing
-sArgs        = struct('pos1_spl', 'itaSuper', 'pos2_T_empty', 'itaSuper', 'room_volume', 124,'room_surface',181,'T',20,'RH',0.5, 'freqRange', ita_preferences('freqRange'), 'bandsPerOctave', ita_preferences('bandsPerOctave') );
+sArgs        = struct('pos1_spl', 'itaSuper', 'pos2_T_empty', 'itaSuper', 'room_volume', 124,'room_surface',181,'T',20,'RH',0.5,'p_s',101325, 'freqRange', ita_preferences('freqRange'), 'bandsPerOctave', ita_preferences('bandsPerOctave') );
 [spl,T_empty,sArgs] = ita_parse_arguments(sArgs,varargin); 
 
 % acoustic constants
 c = 20.05*sqrt(273 + sArgs.T);
+Z_0 = itaValue(400,'kg/(m^2*s)'); % this is the fixed value to get the reference for 1pW right
 % correction factors for the meteorological conditions (not in dB!)
-% (assumes static pressure is the reference value)
-C1 = sqrt((273.15 + sArgs.T)/314);
-C2 = sqrt((273.15 + sArgs.T)/296).^3;
+C1 = 101325./double(sArgs.p_s).*sqrt((273.15 + sArgs.T)/314);
+C2 = 101325./double(sArgs.p_s).*sqrt((273.15 + sArgs.T)/296).^3;
 
 %% calculate sound pressure level data
 % first third-octaves then average
@@ -53,14 +56,9 @@ spl_m = itaResult(spl_m,T_empty.freqVector);
 A = 55.26*itaValue(double(sArgs.room_volume)/c,'s*m^2')/T_empty;
 
 %% calculate sound power (Eq 20 in ISO 3741)
-sound_power = spl_m^2 * A * 10^(-6/10) * C1 * C2;
-% exponent and frequency-dependent part
-sound_power.freq = sound_power.freq.*exp(A.freq./double(sArgs.room_surface)).*(1 + double(sArgs.room_surface)*c./(8*double(sArgs.room_volume).*sound_power.freqVector));
-% getting the reference values right
-sound_power = sound_power*itaValue(1e-12,'W')/itaValue(20e-6,'Pa')^2/itaValue(1,'m^2');
-
-% or the straight-forward way: 
-% sound_power = spl_m^2 * A/(2*itaValue(c,'m/s')*itaValue(1.2,'kg/m^3'));
+sound_power = spl_m^2 * A /(4*Z_0);
+% apply exponent and frequency-dependent corrections
+sound_power.freq =  C1.*C2.*sound_power.freq.*exp(A.freq./double(sArgs.room_surface)).*(1 + double(sArgs.room_surface)*c./(8*double(sArgs.room_volume).*sound_power.freqVector));
 
 %% Add history line
 sound_power = ita_metainfo_add_historyline(sound_power,mfilename,varargin);
