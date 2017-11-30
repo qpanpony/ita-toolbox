@@ -65,7 +65,7 @@ try
         commitID = strrep(commitID,'[\n\r]+','');
     else
         ita_verbose_info(sprintf('Git Hash Failed: %s',commitID), 1);
-        commitID = '';
+        commitID = '0';
     end
     cd(workingDir);
     

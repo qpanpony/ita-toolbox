@@ -203,7 +203,7 @@ classdef itaMSmls < itaMSTF
             tmpRes = ita_fht(result);
             
             % pemute & drop first sample & add zero
-            result = itaAudio([tmpRes(this.mPermuteVec2+1,:) / nMLSsamples ;zeros(1,result.nChannels) ], result.samplingRate, 'time');
+            result.time = [tmpRes(this.mPermuteVec2+1,:) / nMLSsamples ;zeros(1,result.nChannels)];
             % Set signaltype.
             result.signalType = 'energy';
         end

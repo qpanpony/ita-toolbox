@@ -117,6 +117,7 @@ classdef  itaHRTF < itaAudio
     methods % Special functions that implement operations that are usually performed only on instances of the class
         %% Input
         function this = itaHRTF(varargin)
+            iniAudio = [];
             % initialize itaHRTF with itaAudio properties (only for nargin == 1)
             if nargin > 1 || (nargin == 1 && (ischar(varargin{1}) || isa(varargin{1},'itaAudio')))
                 iniAudio = [];
@@ -181,10 +182,8 @@ classdef  itaHRTF < itaAudio
                     this.dirCoord.sph = this.mCoordSave;
                     % saving channelNames in itaHRTF does not work at the
                     % moment
-                    for iCh = 1:this.dimensions
-                        this.channelNames{iCh} = this.mChNames(iCh,:);
-                    end
-                    
+                    this.channelNames = cellstr(this.mChNames);
+
                 elseif isa(varargin{1},'itaAudio')
                     this.itaAudio2itaHRTF = varargin{1};
                     
@@ -664,6 +663,10 @@ classdef  itaHRTF < itaAudio
                 %HRTFout = this.direction(idxCoord);
             end
             
+            function this = buildsearchdatabase(this)
+               this.dirCoord = this.dirCoord.build_search_database; 
+            end
+            
             function obj = direction(this, idxCoord)
                 idxDir = zeros(numel(idxCoord)*2,1);
                 idxDir(1:2:numel(idxCoord)*2,:) = 2*idxCoord-1;
@@ -708,11 +711,17 @@ classdef  itaHRTF < itaAudio
                 if ~exactSearch
                     phiU = rad2deg(this.phi_Unique);
                     thetaU = rad2deg(this.theta_Unique);
+                    switch dirID
+                        case {'phi_deg', 'p'}
+                            slice = this.findnearestHRTF(thetaU,dir_deg);
+                        case {'theta_deg', 't'}
+                            slice = this.findnearestHRTF(dir_deg,phiU);
+                    end
                 else
                     earCoords = this.getEar('L').channelCoordinates;
                     switch dirID
                         case {'phi_deg', 'p'}
-                            phiValues = unique(earCoords.phi_deg);
+                            phiValues = uniquetol(earCoords.phi_deg);
                             [~,index] = min(abs(phiValues - dir_deg));
                             exactPhiValue = phiValues(index);
                             tmp = earCoords.n(earCoords.phi_deg == exactPhiValue);
@@ -720,7 +729,7 @@ classdef  itaHRTF < itaAudio
                             
                             slice = this.findnearestHRTF(thetaU,dir_deg);
                         case {'theta_deg', 't'}
-                            thetaValues = unique(earCoords.theta_deg);
+                            thetaValues = uniquetol(earCoords.theta_deg);
                             [~,index] = min(abs(thetaValues - dir_deg));
                             exactThetaValue = thetaValues(index);
                             tmp = earCoords.n(earCoords.theta_deg == exactThetaValue);
@@ -729,12 +738,7 @@ classdef  itaHRTF < itaAudio
                             slice = this.findnearestHRTF(dir_deg,phiU);
                     end
                 end
-                switch dirID
-                    case {'phi_deg', 'p'}
-                        slice = this.findnearestHRTF(thetaU,dir_deg);
-                    case {'theta_deg', 't'}
-                        slice = this.findnearestHRTF(dir_deg,phiU);
-                end
+
             end
             
             function slice = ss(this,dirID,dir_deg)
@@ -913,10 +917,12 @@ classdef  itaHRTF < itaAudio
                             
                             ITD = phasenDiff./(2*pi*repmat(thisC.freqVector,1,size(phase1,2)));
                         else % averaged
-                            phase = unwrap(angle(thisC.freqData));
-                            t0_freq = bsxfun(@rdivide, phase,2*pi*thisC.freqVector);
+                            usedBins = thisC.freq2index(sArgs.filter(1)):thisC.freq2index(sArgs.filter(2));
+                            phase = unwrap(angle(thisC.freqData(3:end,:)));
+                            freqVector = thisC.freqVector;
+                            t0_freq = bsxfun(@rdivide, phase,2*pi*freqVector(3:end));
                             t0_freq = t0_freq(~isnan(t0_freq(:,1)),:);
-                            t0_mean = mean(t0_freq(unique(thisC.freq2index(sArgs.filter(1)):thisC.freq2index(sArgs.filter(2))),:)); %mean is smoother than max; lower freq smooths also the result
+                            t0_mean = mean(t0_freq(3+usedBins,:)); %mean is smoother than max; lower freq smooths also the result
                             ITD =  t0_mean(thisC.EarSide == 'L') - t0_mean(thisC.EarSide == 'R');
                         end
                     case 'xcorr'
@@ -1012,7 +1018,7 @@ classdef  itaHRTF < itaAudio
                 end
             end
             
-            % function this = interp(varargin)
+            this = interp(varargin);
             %
             % Function to calculate HRTFs for arbitrary field points using a N-th order
             % spherical harmonics (SH) interpolation / range extrapolation, as described in [1],
@@ -1050,7 +1056,8 @@ classdef  itaHRTF < itaAudio
             % Version: 2016-02-05
             
             
-            
+            this = reduce_spatial(this,coords,varargin);
+            % Function to spatially reduce the HRTF. 
             
             function this = smooth_linphase(this,varargin)
                 % function this = smooth_linphase(varargin)
@@ -1314,10 +1321,10 @@ classdef  itaHRTF < itaAudio
                     ita_verbose_info(' More than one elevation in this object!', 0);
                     if strcmp(sArgs.plane,'horizontal')
                         thetaC_deg  = 90;
-                        thisC       = this.sphericalSlice('theta_deg', thetaC_deg);
+                        thisC       = this.sphericalSlice('theta_deg', thetaC_deg,1);
                     elseif strcmp(sArgs.plane,'median')
                         phiC_deg    = 0;
-                        thisC       = this.sphericalSlice('phi_deg', phiC_deg);
+                        thisC       = this.sphericalSlice('phi_deg', phiC_deg,1);
                     end
                 else thisC = this;
                 end

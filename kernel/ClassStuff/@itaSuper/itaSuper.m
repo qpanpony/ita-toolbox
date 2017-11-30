@@ -159,7 +159,7 @@ classdef itaSuper < itaMeta
             
             %% Add history line
             commitID = ita_git_getMasterCommitHash;
-            if ~isempty(commitID)
+            if ~(isempty(commitID) || strcmp(commitID,'0'))
                 this = ita_metainfo_add_historyline(this,'GitVersion',commitID);
             end
         end
@@ -508,7 +508,7 @@ classdef itaSuper < itaMeta
 
         function res = get_diag(this)
 			% use eye as mask for diagonal
-			res = this(eye(size(this,1)));
+			res = this(logical(eye(size(this,1))));
         end
 
         function this = diag(this,diagonalshift,blocksize)
