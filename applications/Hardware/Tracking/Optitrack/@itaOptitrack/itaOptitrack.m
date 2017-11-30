@@ -937,6 +937,7 @@ classdef itaOptitrack < handle
                     Optitrack_obj.useCalibration      = sArgs.useCalibration;
                     Optitrack_obj.savePathCalibration = sArgs.savePathCalibration;
                     Optitrack_obj.saveNameCalibration = sArgs.saveNameCalibration;
+                    Optitrack_obj.countdownDuration   = sArgs.countdownDuration;
                     
                     if ~Optitrack_obj.isCalibrated
                         
