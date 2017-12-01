@@ -1305,7 +1305,7 @@ classdef  itaHRTF < itaAudio
                     xlabel('Azimuth Angle in Degree');
                     ylabel('ITD in Milliseconds');
                     set(gca,'xTick',0:30:360)
-                    legend(ita_sprintf('%i�', round(thetaC_deg)))
+                    legend(ita_sprintf('%i^\circ', round(thetaC_deg)))
                 end
             end
             
@@ -1327,6 +1327,8 @@ classdef  itaHRTF < itaAudio
                     elseif strcmp(sArgs.plane,'median')
                         phiC_deg    = 0;
                         thisC       = this.sphericalSlice('phi_deg', phiC_deg,1);
+                    else
+                       error('Unknown plane option: Either horizontal or median'); 
                     end
                 else thisC = this;
                 end
@@ -1334,11 +1336,11 @@ classdef  itaHRTF < itaAudio
                 % multi defined coordinates
                 if numel(phiC_deg)<thisC.dirCoord.nPoints && numel(thetaC_deg) ==1
                     ita_verbose_info(' Coordinates are not unique!', 0);
-                    [~,ia] = unique(thisC.dirCoord.phi,'stable');
+                    [~,ia] = uniquetol(thisC.dirCoord.phi,'stable');
                     thisC = thisC.direction(ia);
                 elseif numel(thetaC_deg)<thisC.dirCoord.nPoints && numel(phiC_deg) ==1
                     ita_verbose_info(' Coordinates are not unique!', 0);
-                    [~,ia] = unique(thisC.dirCoord.theta,'stable');
+                    [~,ia] = uniquetol(thisC.dirCoord.theta,'stable');
                     thisC = thisC.direction(ia);
                 end
                 
@@ -1357,11 +1359,11 @@ classdef  itaHRTF < itaAudio
                 earSidePlot = sArgs.earSide;
                 if numel(phiC_deg)>1,
                     xData = phiC_deg;
-                    strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) '�'];
+                    strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) '^\circ'];
                     strXlabel = '\phi in Degree';
                 else
-                    xData = thetaC_deg;
-                    strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) '�'];
+                    xData = thisC.theta_UniqueDeg;
+                    strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) '^\circ'];
                     strXlabel = '\theta in Degree';
                 end
                 
@@ -1373,7 +1375,7 @@ classdef  itaHRTF < itaAudio
                 idxfMax = find(this.freqVector>2e4,1,'first');
                 if isempty(idxfMax), idxfMax = this.nBins; end
                 fMax = thisCs.freqVector(idxfMax);
-                [tick, lab] = ita_plottools_ticks('log');
+%                 [tick, lab] = ita_plottools_ticks('log');
                 
                 data_dB= thisCs.freqData_dB;
                 cMax = max(max(data_dB(2:idxfMax,:)));
@@ -1383,7 +1385,7 @@ classdef  itaHRTF < itaAudio
                 [xticks, xlabels] = ita_plottools_ticks('log');
                 
                 set(ah,'xTick',xticks,'xticklabel',xlabels)
-                set(ah,'yTick',yticks,'xticklabel',yticks)
+                set(ah,'yTick',yticks,'yticklabel',yticks)
                 
                 caxis([cMin cMax]);
                 set(ah, 'XScale', 'log')
@@ -1395,7 +1397,7 @@ classdef  itaHRTF < itaAudio
                 zlab = get(cb,'ylabel');
                 set(zlab,'String','Level in [dB]');
                 
-                set(ah,'xtick',tick,'xticklabel',lab)
+%                 set(ah,'xtick',tick,'xticklabel',lab)
                 xlabel('Frequency in Hertz');xlim([thisCs.freqVector(2) fMax ]);
                 ylabel(strXlabel);
                 
