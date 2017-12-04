@@ -7,5 +7,5 @@ function d = dot(v1,v2)
 % </ITA-Toolbox>
 
 
-d = dot(v1.cart,v2.cart);
+d = dot(v1.cart,v2.cart,2);
 end %eof
