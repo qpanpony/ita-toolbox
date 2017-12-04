@@ -817,7 +817,7 @@ classdef  itaHRTF < itaAudio
                 
                 if ~(~isempty(unused) && find(strcmp(unused,'parent')))
                     position = get(0,'ScreenSize');
-                    figure('Position',[10 50 position(3:4)*0.85]);
+                    figure('units','normalized','outerposition',[0 0 1 1]);
                 end
                 if sArgs.log 
                     freqData_dB = this.getEar(sArgs.earSide).freqData_dB;
