@@ -26,8 +26,8 @@ end
 % errors
 newCoordinates.r = mean(oldCoords.r);
 
-
-oldCoords = oldCoords.build_search_database;
+% don't use the mex file to make use of bugfix as poles
+% oldCoords = oldCoords.build_search_database;
 
 newIndex = oldCoords.findnearest(newCoordinates);
 
