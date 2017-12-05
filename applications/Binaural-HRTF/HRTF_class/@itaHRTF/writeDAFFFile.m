@@ -141,9 +141,12 @@ end
 %% Channels
 
 channels=this.nChannels/this.nDirections;
-if(channels<1)
-    warning('Number of channels per record was not detected correctly, assuming 2 channel records');
+if( channels < 1 )
+    warning( 'Number of channels per record was smaller than one, assuming 2 channel records' );
     channels = 2;
+elseif( mod( channels, 2 ) ~= 0 )
+    warning( [ 'Number of channels per record was not and integer number, trying floor() of ' num2str( channels ) ] );
+    channels = floor( channels );
 end
 
 daff_write_args.channels = channels;
