@@ -34,6 +34,12 @@ else
         dists = sqrt(sum((this.cart-repmat(coords.cart(idinput,:),size(this.cart,1),1)).^2,2));
         for idx = 1:num
             [dist(idinput, idx), ind(idinput, idx)] = min(dists); %#ok<AGROW>
+            
+            if sum(dists == min(dists)) > 1
+                distsSph = sqrt(sum((this.sph-repmat(coords.sph(idinput,:),size(this.sph,1),1)).^2,2));
+                [dist(idinput, idx), ind(idinput, idx)] = min(distsSph);
+            end
+            
             dists(ind(idinput, idx)) = inf;
         end
     end
