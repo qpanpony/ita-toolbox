@@ -410,6 +410,8 @@ classdef  itaHRTF < itaAudio
                         else
                             datatype='float';
                         end
+                    case 'int32'
+                            datatype='int';
                 end
                 metadata=daffv17_add_metadata(metadata,cell2mat(names(k)),datatype,tempMetadata.(names{k}));
             end
