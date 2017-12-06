@@ -39,7 +39,7 @@ newSamplingDistance = getVectorLength(newCoordinates.n(1),newCoordinates.n(2));
 
 % the maximum of the found points should always be smaller
 if max(pointDistances) > newSamplingDistance
-   error('The found points are further apart than the sampling allows. Something is wrong') 
+   ita_verbose_info('The found points are further apart than the sampling allows. Something is wrong',0) 
 end
 
 
