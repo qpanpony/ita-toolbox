@@ -19,6 +19,11 @@ function cThis = interp(this,varargin)
 %                                    set to 1 if no range extrapolation is required
 %     order            ...  order of spherical harmonics matrix (default: 50)
 %     epsilon          ...  regularization coefficient (default: 1e-8)
+%     shiftToEar            to a shift to approximate ear position to
+%                           improve sh transformation (see [2])
+%     shiftAxis             shift along this axis ('x','y' (default),'z')
+%     shiftOffset           shift ears (L - R) by these values 
+%                           (default:  [-0.0725 0.0725])
 %
 % OUTPUT:
 %     itaHRTF object
@@ -26,28 +31,34 @@ function cThis = interp(this,varargin)
 %     .timeData: interpolated / range-extrapolated HRIRs for defined field points
 %     .dirCoord: itaCoordinates object
 %
-% Required: SphericalHarmonics functions of ITA Toolbox
+% 
 %
 % [1] Pollow, Martin et al., "Calculation of Head-Related Transfer Functions
 %     for Arbitrary Field Points Using Spherical Harmonics Decomposition",
 %     Acta Acustica united with Acustica, Volume 98, Number 1, January/February 2012,
 %     pp. 72-82(11)
 %
+% [2] Richter, Jan-Gerrit et al. "Spherical harmonics based hrtf datasets: 
+%     Implementation and evaluation for real-time auralization",
+%     Acta Acustica united with Acustica, Volume 100, Number 4, July/August 2014,
+%     pp. 667-675(9)
+%
+%
+%
 % Author:  Florian Pausch <fpa@akustik.rwth-aachen.de>
 % Version: 2016-02-05
 
-% TODO: check why this is still not working (coordinate assignment???)
-
-sArgs           = struct('order',50,'eps',1e-5);
+sArgs           = struct('order',50,'eps',1e-5,'shiftToEar',false,'shiftAxis','y','shiftOffset',[-0.0725 0.0725]);
 sArgs           = ita_parse_arguments(sArgs,varargin,2);
-if ~isa(varargin{1},'itaCoordinates'),error('itaHRTF:interp', ' An itaCoordinate object is needed!')
+if isempty(varargin) || ~isa(varargin{1},'itaCoordinates')
+    error('itaHRTF:interp', ' An itaCoordinate object is needed!')
 end
 field_in        = varargin{1};
 
 % only take unique direction coordinates (round to 0.01deg resolution) 
 tempfield       = unique(round([field_in.phi_deg*100 field_in.theta_deg*100]),'rows'); % may cause problems with older Matlab versions (<=R2013)!
 tempfield = tempfield./100;
-temp_r          = this.dirCoord.r(1);
+temp_r          = field_in.r(1);
 field           = itaCoordinates(size(tempfield,1));
 field.r         = repmat(temp_r,size(tempfield,1),1);
 field.phi_deg   = tempfield(:,1);
@@ -67,46 +78,34 @@ if ~isequal(this.dirCoord.r(1),field.r(1))
     kr0 = k*this.dirCoord.r(1);                         % measurement radius
     kr1 = k*field.r(1);                                 % extrapolation radius
     
-    hankel_r0 = ita_sph_besselh(1:Nmax,2,kr0);
-    hankel_r1 = ita_sph_besselh(1:Nmax,2,kr1);
+    hankel_r0 = ita_sph_besselh(ita_sph_linear2degreeorder(1:Nmax),2,kr0);
+    hankel_r1 = ita_sph_besselh(ita_sph_linear2degreeorder(1:Nmax),2,kr1);
     hankel_div = hankel_r1 ./ hankel_r0;
     
     hankel_rep = hankel_div(:,1);
 end
 
-dweights = 1 + (0:Nmax).*((0:Nmax)+1);                        % calculate regularization weights
-
-dweights_rep  = zeros(sum(2*(0:Nmax)'+1),1);
-dweights_rep(1)=dweights(1);
-counter = 2;
-for n=1:Nmax
-    nTimes = 2*n+1;
-    dweights_rep(counter:counter+nTimes-1)=dweights(n+1)*ones(nTimes,1);
-    
-    if ~isequal(this.dirCoord.r(1),field.r(1))
-        hankel_rep=[hankel_rep, repmat(hankel_div(:,n),1,2*n+1)];
-    end
-    counter = counter + nTimes;
-end
+nSH = (Nmax+1).^2;
+I = sparse(eye(nSH));
+n = ita_sph_linear2degreeorder(1:round(nSH)).';
 
 %% move data from earcenter
-ear_d       =   [-0.07 0.07];
+copyData = this;
+if sArgs.shiftToEar
+    ear_d       =   sArgs.shiftOffset;
+    for ear=1:2
+        movedData = moveFullDataSet(this.ch(ear:2:this.nChannels),sArgs,ear_d(ear));
+        copyData.freqData(:,ear:2:copyData.nChannels) = movedData;
+    end
+end
 
 %% Weights
 [~,w]= this.dirCoord.spherical_voronoi;         % calculate weighting coefficients (Voronoi surfaces <-> measurement points)
 
-% sG_full = ita_sph_sampling_equiangular(73,144,'theta_type','[]','phi_type','[)');
-% % sG_full = ita_sph_sampling_gaussian(71);
-% sG = sG_full;
-% isOnArc = sG.theta < 2.75;
-% sG.cart = sG.cart(isOnArc,:);
-% sG.weights = sG.weights(isOnArc);
-% % rescale the weights for the sum to be 4*pi again
-% w = sG.weights .* 4.*pi ./ sum(sG.weights);
 
 W = sparse(diag(w));                                      % diagonal matrix containing weights
-D = sparse(diag(dweights_rep));                                  % decomposition order-dependent Tikhonov regularization
-Y = ita_sph_base(this.dirCoord,Nmax,'real');   % calculate real-valued SHs using the measurement grid
+D = I .* diag(1 + n.*(n+1));                                % decomposition order-dependent Tikhonov regularization
+Y = ita_sph_base(this.dirCoord,Nmax,'orthonormal',true);   % calculate real-valued SHs using the measurement grid
 
 %% Calculate HRTF data for field points
 if Nmax > 25
@@ -117,60 +116,36 @@ end
 hrtf_arbi = zeros(this.nBins,2*field.nPoints); % columns: LRLRLR...
 for ear=1:2
     
-    freqData_temp   = this.freqData(:,ear:2:end);
-    
-
-%     newCoords = this.dirCoord;
-%     newCoords.y = newCoords.y + ear_d(ear);
-%     
-%     data.channelCoordinates = newCoords;
-%     data.freqData = freqData_temp;
-%     data.freqVector = this.freqVector;
-%     data.c_meas = 344;
-%     data = process_result_delay_correction(data,this.dirCoord.r(1));
-%     % calculate weighted SH coefficients using a decomposition order-dependent Tikhonov regularization
-%     
-%     freqData_temp = data.freqData;
-%     Y = ita_sph_base(data.channelCoordinates,Nmax,'real');
-    
+    % sh transformation
+    freqData_temp   = copyData.freqData(:,ear:2:end);
     a0              = (Y.'*W*Y + epsilon*D) \ Y.'*W * freqData_temp.';
-    %a0 = (Y.'*W*Y + epsilon*D) \ Y.' *
-    %this.freqData(:,ear:2:end).'; % fpa version
-    %a0 = pinv(Y)* this.freqData(:,ear:2:end).'; % jck version
+
+%     %% test the sh transformation results by plotting both spatial and sh data with surf
+%     s = itaSamplingSph(field);
+%     s.nmax = Nmax;
+%     figure
+%     surf(s,a0(:,10))
+%     figure
+%     surf(s,freqData_temp(10,:))
     
+    
+    % range extrapolation
     if ~isequal(this.dirCoord.r(1),field.r(1))
         % calculate range-extrapolated HRTFs
         a1 = a0 .* hankel_rep.';
         
-        Yest = ita_sph_base(field,N,'real');  % use real-valued SH's
+        %%% test here to see extrapolation results in spatial domain
+        %     surf(s,a1(:,10))
+        
+        % reconstruction to spatial data
+        Yest = ita_sph_base(field,N,'orthonormal',true);  % use real-valued SH's
         hrtf_arbi(:,ear:2:end) = (Yest*a1).';           % interpolated + range-extrapolated HRTFs
     else
-        Yest = ita_sph_base(field,Nmax,'real');  % use real-valued SH's
+        % reconstruction to spatial data
+        Yest = ita_sph_base(field,Nmax,'orthonormal',true);  % use real-valued SH's
         hrtf_arbi(:,ear:2:end) = (Yest*a0).';           % interpolated HRTFs
     end
 end
-
-
-%% move back to head center
-% todo
-
-% for ear=1:2
-%     
-%     newCoords = field;
-%     newCoords.y = newCoords.y - ear_d(ear);
-%     
-%     freqData = hrtf_arbi(:,ear:2:end);
-%   
-%     
-%     data.channelCoordinates = newCoords;
-%     data.freqData = freqData;
-%     data.freqVector = this.freqVector;
-%     data.c_meas = 344;
-%     data = process_result_delay_correction(data,this.dirCoord.r(1));
-%     
-%     hrtf_arbi(:,ear:2:end) = data.freqData;
-%     
-% end
 
 
 % set new direction coordinates
@@ -179,11 +154,20 @@ sph(1:2:end,:)              = field.sph;
 sph(2:2:end,:)              = field.sph;
 
 % write new HRTF data set
-cAudio                      = itaAudio(hrtf_arbi, 44100, 'freq');
-cAudio.channelCoordinates.sph= sph;
+cThis                       = this;
+cThis.freqData = hrtf_arbi;
+cThis.channelCoordinates.sph= sph;
 
-cThis                       = itaHRTF(cAudio);
-cThis.freqData              = hrtf_arbi;
+
+%% move back to head center
+if sArgs.shiftToEar
+    ear_d_back       =  -ear_d;
+%     movedData = zeros(size(hrtf_arbi));
+    for ear=1:2
+        movedData = moveFullDataSet(cThis.ch(ear:2:cThis.nChannels),sArgs,ear_d_back(ear));
+        cThis.freqData(:,ear:2:cThis.nChannels) = movedData;
+    end    
+end
 
 if ~isequal(cThis.dirCoord.r(1),field.r(1))%???
     cThis.dirCoord.r = field.r;
@@ -195,15 +179,44 @@ end
 end
 
 
-function result = process_result_delay_correction(result, target_d)
-    % shift every measurement point to target_d by applying a
-    % phase shift to the channel: (simplified!)
-    freq_L              =   result.freqVector;
 
-    add_phase_L         =   (result.channelCoordinates.r - target_d)* (freq_L./result.c_meas)' .* 2.*pi;
+function [ data ] = moveFullDataSet(data,options,offsetShift)
+    fullCoords = data.channelCoordinates;
+    freqVector = data.freqVector;
+    shiftedData = zeros(size(data.freqData));
+    axis = options.shiftAxis;
+    for index = 1:length(freqVector)
+        shiftedData(index,:) = moveHRTF(fullCoords,data.freqData(index,:),freqVector(index),axis,offsetShift);
+    end
+
+
+    data = shiftedData;
+end
+
+
+function [data] = moveHRTF(s, data, frequency, axis, offset)
+    % the offset is given in m
     
-    result.freqData  =   result.freqData .* exp(1i.*add_phase_L');
+    origAxis = s.r;
     
-    result.channelCoordinates.r  =   target_d;
+    if (size(data,2) > size(data,1))
+       data = data.'; 
+    end
+    offset = real(offset); % ??
+    switch axis
+        case 'x' 
+            s.x = s.x + offset;
+        case 'y'
+            s.y = s.y + offset;
+        case 'z'
+            s.z = s.z + offset;
+    end
+    
+    newAxis = s.r;
+    k = 2*pi*frequency/340;
+    % the phase is moved by the difference of the axis points
+    data = data .* exp(1i*k*(newAxis - origAxis));
+    % amplitude manipulation did not yield better results
+%     data = data .* newAxis ./ origAxis;
 
 end

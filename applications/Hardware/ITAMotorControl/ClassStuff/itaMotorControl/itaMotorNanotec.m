@@ -22,6 +22,7 @@ classdef itaMotorNanotec < itaHandle
         stop(this);
         active = isActive(this);
         setActive(this,value);
+        
 %         isInitialized(this);
         getStatus(this);
         getMotorID(this);
@@ -29,7 +30,14 @@ classdef itaMotorNanotec < itaHandle
         % basic moves: requires execution to halt while something is moving
         this = moveToReferencePosition(this);
         this = startMoveToPosition(this);
-        
+        disableReference(this,value);
+%         this = freeFromStopButton(this);
         ret = prepareMove(this,position,varargin);
-    end    
+    end
+    
+    methods
+        function setReferenced(this,value)
+           this.mIsReferenced = value; 
+        end
+    end
 end

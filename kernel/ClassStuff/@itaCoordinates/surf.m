@@ -81,8 +81,12 @@ else
     end
     isComplex = ~all(isreal(r)) || sArgs.complex; 
     if isComplex
-        % if the radius is complex, set the color
-        color = mod(angle(r),2*pi);
+        if sArgs.complex && ~isempty(sArgs.radius)
+            color = mod(data,2*pi);
+        else
+            % if the radius is complex, set the color
+            color = mod(angle(r),2*pi);
+        end
         colorbar_settings = 'complex';
     else
         % if it is real, use the magnitude as color
@@ -92,7 +96,7 @@ else
     end
     r = abs(r);
     
-    if ~isempty(sArgs.radius)
+    if ~isempty(sArgs.radius) && ~sArgs.complex
         % if a color is given explicitly
         % negative radii are set to 0
         if sum(abs(imag(r))) > 0, ita_verbose_info('ignoring imaginary part of radius'); end

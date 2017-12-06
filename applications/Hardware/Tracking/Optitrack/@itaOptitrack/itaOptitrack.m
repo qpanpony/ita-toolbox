@@ -65,6 +65,9 @@ classdef itaOptitrack < handle
     %                        (default: 1, only for recMethod 0)
     %           'singleShot' only log 1 frame of tracking data [logical]
     %                        (e.g. for geometric measurement purposes)
+    %           'autoSave'   save tracked data (default: true) [logical]
+    %                        if savePath and/or saveName are unset,
+    %                        savePath -> pwd, saveName -> trackerData_time_stamp
     %           'savePath'   path to save file containing logged data [string]
     %           'saveName'   name of file containing logged data [string]
     %
@@ -239,6 +242,7 @@ classdef itaOptitrack < handle
     properties(SetAccess = 'public', GetAccess = 'public')
         recMethod        = 0;     % recording method, 0: record data for recTime seconds (default), 1: record data without time limitation (stop via Optitrack_obj.stopTracking) [double]
         recTime          = 1;     % preferred logging time in sec (default: 1, only for recMethod 0) [double]
+        autoSave         = true;  % save tracked data to pwd or to 'savePath' if defined [logical]
         savePath         = [];    % path to save file containing logged data [string]
         saveName         = [];    % name of file containing logged data [string]
 
@@ -399,7 +403,7 @@ classdef itaOptitrack < handle
                 end
                 
                 % get tracker frame rate
-                byteArray               = Optitrack_obj.theClient.SendMessageAndWait('FrameRate'); % request current system’s tracking frame rate
+                byteArray               = Optitrack_obj.theClient.SendMessageAndWait('FrameRate'); % request current systemï¿½s tracking frame rate
                 byteArray               = uint8(byteArray); % decode frame rate
                 Optitrack_obj.frameRate = typecast(byteArray,'single');
                 fprintf('[itaOptitrack] Tracker frame rate: %d Hz\n', Optitrack_obj.frameRate)
@@ -600,19 +604,19 @@ classdef itaOptitrack < handle
             %% stop data logging
             
             if Optitrack_obj.isConnected
-                
+
                 if Optitrack_obj.loggingState
-                    
+
                     % stop Matlab timer
                     stop(Optitrack_obj.timerData);
                     Optitrack_obj.loggingState = Optitrack_obj.stopped;
-                    
+
                     % delete all existing timers
                     existingTimers = timerfindall;
                     if ~isempty(existingTimers)
                         delete(existingTimers(:));
                     end
-                                       
+
                     if Optitrack_obj.singleShot
                         % delete rows in rigidBodyLogData containing NaN's in
                         % 'singleShot' measurment, TODO: find real reason for
@@ -620,7 +624,7 @@ classdef itaOptitrack < handle
                         Optitrack_obj.rigidBodyLogData.data(isnan(Optitrack_obj.rigidBodyLogData.data(:,1)),:,:) = [];
                         Optitrack_obj.rigidBodyLogData.droppedFrames = [];
                     end
-                    
+
                     % display info about tracked data (if some data was logged)
                     if ~isempty(Optitrack_obj.rigidBodyLogData.data)
                         if ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
@@ -643,12 +647,12 @@ classdef itaOptitrack < handle
                                     (numel(Optitrack_obj.rigidBodyLogData.data(:,1))+numel(Optitrack_obj.rigidBodyLogData.droppedFrames(:,1)))/Optitrack_obj.frameRate);
                             end
                         end
-                        
+
                         if Optitrack_obj.recMethod == 0 && ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
                            % delete NaN entries
                            Optitrack_obj.rigidBodyLogData.data(isnan(Optitrack_obj.rigidBodyLogData.data(:,1)),:,:) = [];
                         end
-                                               
+
                         % create NaN entries
                         if ~Optitrack_obj.singleShot && ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
                            tempNaN = NaN(numel(Optitrack_obj.rigidBodyLogData.data(:,1,1))+numel((Optitrack_obj.rigidBodyLogData.droppedFrames(:,1))),13,Optitrack_obj.numRigidBodies);
@@ -659,14 +663,14 @@ classdef itaOptitrack < handle
                                Optitrack_obj.rigidBodyLogData.data(:,:,idx) = sortrows(tempNaN(:,:,idx),1);
                            end
                         end
-                        
+
                         if all(diff(Optitrack_obj.rigidBodyLogData.data(:,1,1)))==0 % grid vectors are not monotonically increasing
                            % duplicate frames have been written (strange: needs further investigation)
                            % quick fix: erase duplicate frames and append NaN frames at the end
                            % TODO: find real reason
-                           
+
                            kickout = diff(Optitrack_obj.rigidBodyLogData.data(:,1,1))==0;
-                          
+
                            Optitrack_obj.rigidBodyLogData.data(kickout,:,:) = [];
                            Optitrack_obj.rigidBodyLogData.data = [Optitrack_obj.rigidBodyLogData.data; NaN(sum(kickout),13,Optitrack_obj.numRigidBodies)];
                            Optitrack_obj.rigidBodyLogData.data(end-sum(kickout)+1:end,1,:) = repmat(Optitrack_obj.rigidBodyLogData.data(end-sum(kickout),1,:),sum(kickout),1,1) + ...
@@ -674,7 +678,7 @@ classdef itaOptitrack < handle
                            Optitrack_obj.rigidBodyLogData.data(end-sum(kickout)+1:end,2,:) = repmat(Optitrack_obj.rigidBodyLogData.data(end-sum(kickout),2,:),sum(kickout),1,1) + ...
                                reshape(repmat((1:sum(kickout))',1,Optitrack_obj.numRigidBodies),[sum(kickout)',1,Optitrack_obj.numRigidBodies]).*1/Optitrack_obj.frameRate;
                         end
-                        
+
                         % create final data struct
                         for idx = 1:Optitrack_obj.numRigidBodies %TODO: implement without for loop
                             if idx==1
@@ -685,12 +689,12 @@ classdef itaOptitrack < handle
                                 Optitrack_obj.info.TotalFrames          = numel(Optitrack_obj.rigidBodyLogData.data(:,1,1));
                                 Optitrack_obj.info.LengthUnits          = 'Meters'; % TODO: query somehow if possible?
                                 Optitrack_obj.info.CoordinateSpace      = 'Global'; % TODO: query somehow if possible?
-                                
+
                                 dataDescriptions = Optitrack_obj.theClient.GetDataDescriptions();
                             end
-                            
+
                             descriptor = dataDescriptions.Item(idx-1);
-                            
+
                             Optitrack_obj.data(idx).frameID     = Optitrack_obj.rigidBodyLogData.data(:,1,idx);
                             Optitrack_obj.data(idx).frameTime   = Optitrack_obj.rigidBodyLogData.data(:,2,idx);
                             Optitrack_obj.data(idx).rigidBodyID = Optitrack_obj.rigidBodyLogData.data(1,3,idx);
@@ -698,7 +702,7 @@ classdef itaOptitrack < handle
 
                             % interpolate missing data points using PCHIP interpolation
                             if ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
-                           
+
                                 Optitrack_obj.data(idx).position    = itaCoordinates( interp1(Optitrack_obj.data(idx).frameID(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx))), ...
                                                                                       Optitrack_obj.rigidBodyLogData.data(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx)),4:6,idx), ...
                                                                                       Optitrack_obj.data(idx).frameID, 'pchip') );
@@ -706,12 +710,12 @@ classdef itaOptitrack < handle
                                 Optitrack_obj.data(idx).orientation = itaOrientation( interp1(Optitrack_obj.data(idx).frameID(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx))),...
                                                                                      Optitrack_obj.rigidBodyLogData.data(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx)),7:10,idx), ...
                                                                                       Optitrack_obj.data(idx).frameID, 'pchip') );
-                                
+
                             else
                                 Optitrack_obj.data(idx).position    = itaCoordinates( Optitrack_obj.rigidBodyLogData.data(:,4:6,idx) );
                                 Optitrack_obj.data(idx).orientation = itaOrientation( Optitrack_obj.rigidBodyLogData.data(:,7:10,idx) );
                             end
-                            
+
                             % apply calibration data on first rigid body
                             if Optitrack_obj.data(idx).rigidBodyID == 1
                                 if Optitrack_obj.useCalibration
@@ -727,7 +731,7 @@ classdef itaOptitrack < handle
                                     Optitrack_obj.rigidBodyLogData.info.calibratedData = false;
                                 end
                             end
-                            
+
                             % interpolate mean error
                             if ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
                                 Optitrack_obj.data(idx).meanError   = interp1(1:sum(~isnan(Optitrack_obj.rigidBodyLogData.data(:,11,idx))),...
@@ -735,36 +739,47 @@ classdef itaOptitrack < handle
                             else
                                 Optitrack_obj.data(idx).meanError   = Optitrack_obj.rigidBodyLogData.data(:,11,idx);
                             end
-                            
+
                             Optitrack_obj.data(idx).isTracked   = Optitrack_obj.rigidBodyLogData.data(:,12,idx);
                             Optitrack_obj.data(idx).nMarkers    = Optitrack_obj.rigidBodyLogData.data(:,13,idx);
-                            
+
                             if ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
                                 Optitrack_obj.data(idx).isTracked(isnan(Optitrack_obj.data(idx).isTracked)) = false; % mark dropped frames as not tracked
                                 Optitrack_obj.data(idx).nMarkers(isnan(Optitrack_obj.data(idx).nMarkers)) = 0;       % zero markers had been available because frame was dropped / "not tracked"
                                 Optitrack_obj.data(idx).droppedFrameID   = Optitrack_obj.rigidBodyLogData.droppedFrames(:,1);
                                 Optitrack_obj.data(idx).droppedFrameTime = Optitrack_obj.rigidBodyLogData.droppedFrames(:,2);
                             end
-                            
+
                             if Optitrack_obj.data(idx).rigidBodyID == 1; % set calibratedData flag
                                 Optitrack_obj.data(idx).calibratedData = Optitrack_obj.rigidBodyLogData.info.calibratedData;
                             else
                                 Optitrack_obj.data(idx).calibratedData = false;
                             end;
                         end
-                        
+
                         % save data and info
-                        if ~isempty(Optitrack_obj.savePath)&&~isempty(Optitrack_obj.saveName)
+                        if Optitrack_obj.autoSave % == true
+                            if isempty(Optitrack_obj.savePath)
+                                Optitrack_obj.savePath = pwd;
+                            end
+                            if isempty(Optitrack_obj.saveName)
+                                timeStamp = Optitrack_obj.info.CaptureStartTime;
+                                Optitrack_obj.saveName = sprintf('trackerData_%s%s%s_%s%s%s', ...
+                                                        timeStamp(1:2),timeStamp(4:6),timeStamp(8:11), ...
+                                                        timeStamp(13:14), timeStamp(16:17), timeStamp(19:20));
+                            end
+                            
                             LogData = Optitrack_obj.data; %#ok
                             LogInfo = Optitrack_obj.info; %#ok
                             save(fullfile(Optitrack_obj.savePath,[Optitrack_obj.saveName,'.mat']), 'LogData','LogInfo');
                             fprintf('[itaOptitrack] Saved logged tracking data successfully to %s\n\n',fullfile(Optitrack_obj.savePath,[Optitrack_obj.saveName,'.mat']))
+                        
                         else
                             fprintf('[\b[itaOptitrack] Logged tracking data is only stored temporarily in Optitrack_obj.data]\b\n\n')
                         end
                         
                     else
-                        fprintf('[itaOptitrack] Stopped logging of tracker data.\n')
+                        fprintf('[itaOptitrack] Stoped logging of tracker data.\n')
                     end
                     
                 else
@@ -774,7 +789,6 @@ classdef itaOptitrack < handle
             else
                 fprintf('[\b[itaOptitrack] Logging cannot be stopped as there is no connection to an OptiTrack server.]\b\n')
             end
-            
         end
      
 %         function decodeMotiveLogFile(Optitrack_obj,varargin)successfully
@@ -923,6 +937,7 @@ classdef itaOptitrack < handle
                     Optitrack_obj.useCalibration      = sArgs.useCalibration;
                     Optitrack_obj.savePathCalibration = sArgs.savePathCalibration;
                     Optitrack_obj.saveNameCalibration = sArgs.saveNameCalibration;
+                    Optitrack_obj.countdownDuration   = sArgs.countdownDuration;
                     
                     if ~Optitrack_obj.isCalibrated
                         
@@ -1195,6 +1210,10 @@ classdef itaOptitrack < handle
             set(pushButtonHandle, 'String', sprintf('Calibrate (%d)',Optitrack_obj.countdownDuration-numTasksExecuted));
         end
         
+    end
+    
+    methods(Static)
+        output = plot(this,varargin);
     end
     
 end

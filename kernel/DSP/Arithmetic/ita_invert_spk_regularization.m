@@ -111,7 +111,7 @@ for idx = 1:data.nChannels
 end
 
 %% Add history line
-result = ita_metainfo_rm_historyline(result,'all');
+% result = ita_metainfo_rm_historyline(result,'all');
 result = ita_metainfo_add_historyline(result,mfilename,varargin);
 
 varargout{1} = result;

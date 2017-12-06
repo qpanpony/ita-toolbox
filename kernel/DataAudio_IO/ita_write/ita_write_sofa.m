@@ -8,6 +8,7 @@ function result = ita_write_sofa(varargin)
 %   Options (default):
 %           'dataType' (HRTF) : sets the data type. currently only HRTF
 %           supported
+%           userData          : a struct with userDataFields
 
 %
 %  Example:
@@ -35,7 +36,7 @@ if nargin == 0 % Return possible argument layout
     return;
 end
 
-sArgs = struct('pos1_data','itaAudio','pos2_filename','char','dataType','HRTF');
+sArgs = struct('pos1_data','itaAudio','pos2_filename','char','dataType','HRTF','userdata',[]);
 [data, filename, sArgs] = ita_parse_arguments(sArgs,varargin); 
 
 
@@ -55,9 +56,14 @@ switch(sArgs.dataType)
    
     case 'HRTF'
         sofaObj = SOFAgetConventions('SimpleFreeFieldHRIR');   
-        sofaObj = createSofaHRTF(sofaObj,data,userDataFields);
+        sofaObj = createSofaHRTF(sofaObj,data,userDataFields); % userdatafields are generated from sofaObj.userdata
         sofaObj = ita_sofa_setCoordinates(sofaObj,data,'channelCoordinateType','SourcePosition');
-        
+        if ~isempty(sArgs.userdata) % user data are replaced by the struct
+            fNames = fieldnames(sArgs.userdata);
+            for idxFN = 1:numel(fNames)
+                sofaObj.(fNames{idxFN}) = sArgs.userdata.(fNames{idxFN});
+            end
+        end
     
 %     case 'Directivity'
 %         sofaObj = SOFAgetConventions('GeneralTF');   
@@ -72,11 +78,10 @@ switch(sArgs.dataType)
         error('ITA_WRITE_SOFA: Only HRTF Type is defined');
 end
 
-sofaObj.GLOBAL_ApplicationName = 'itaToolbox';
-sofaObj.GLOBAL_AuthorContact = sprintf('%s (%s)',AuthorStr,EmailStr);
-sofaObj.GLOBAL_Comment = data.comment;
-sofaObj.GLOBAL_DateCreated = date;
-sofaObj.GLOBAL_DataType = 'Directivity';
+sofaObj.GLOBAL_ApplicationName  = 'ITA-Toolbox';
+sofaObj.GLOBAL_AuthorContact    = sprintf('%s (%s)',AuthorStr,EmailStr);
+sofaObj.GLOBAL_Comment          = data.comment;
+sofaObj.GLOBAL_DataType         = 'Directivity';
 
 SOFAupdateDimensions(sofaObj);
 SOFAsave(filename,sofaObj);
@@ -107,15 +112,17 @@ function sofaObj = createSofaHRTF(sofaObj,data,userDataFields)
         end
     end
     
+    % two channels are needed
     if ~isempty(data.objectCoordinates.cart)
         sofaObj.ReceiverPosition = data.objectCoordinates.cart;
     end
-    if ~isempty(data.objectUpVector.cart)
-        sofaObj.ReceiverUp = data.objectUpVector.cart;
-    end
-    if ~isempty(data.objectViewVector.cart)
-        sofaObj.ReceiverView = data.objectViewVector.cart;
-    end
+%     if ~isempty(data.objectUpVector.cart) % is not working with one or
+%     two channels
+%         sofaObj.ReceiverUp = data.objectUpVector.cart;
+%     end
+%     if ~isempty(data.objectViewVector.cart)
+%         sofaObj.ReceiverView = data.objectViewVector.cart;
+%     end
     
 end
 

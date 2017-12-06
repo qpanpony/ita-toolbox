@@ -117,10 +117,21 @@ classdef  itaHRTF < itaAudio
     methods % Special functions that implement operations that are usually performed only on instances of the class
         %% Input
         function this = itaHRTF(varargin)
-            
-            this = this@itaAudio();
-            
+            iniAudio = [];
+            % initialize itaHRTF with itaAudio properties (only for nargin == 1)
+            if nargin > 1 || (nargin == 1 && (ischar(varargin{1}) || isa(varargin{1},'itaAudio')))
+                iniAudio = [];
+            elseif nargin == 1 && isstruct(varargin{1})
+                fNames = {'domain','data','signalType','samplingRate'};
+                for idxFN = 1:numel(fNames)
+                    iniAudio.(fNames{idxFN}) = varargin{1}.(fNames{idxFN});
+                end
+            end
+                            
+            this = this@itaAudio(iniAudio);
+
             if nargin >1
+
                 % itaAudio input
                 TF_types = this.propertiesTF_type;
                 for iTF = 1:numel(TF_types)
@@ -148,6 +159,7 @@ classdef  itaHRTF < itaAudio
                 end
                 
             elseif nargin == 1
+
                 if isa(varargin{1},'itaHRTF')
                     this = varargin{1};
                     
@@ -170,13 +182,17 @@ classdef  itaHRTF < itaAudio
                     this.dirCoord.sph = this.mCoordSave;
                     % saving channelNames in itaHRTF does not work at the
                     % moment
-                    for iCh = 1:this.dimensions
-                        this.channelNames{iCh} = this.mChNames(iCh,:);
-                    end
-                    
+                    this.channelNames = cellstr(this.mChNames);
+
                 elseif isa(varargin{1},'itaAudio')
                     this.itaAudio2itaHRTF = varargin{1};
-                end
+                    
+                elseif ischar(varargin{1}) % openDaff/ sofa/ hdf5 input
+                    if strfind(lower(varargin{1}),'.daff'), this.openDAFF2itaHRTF = varargin{1};
+                    elseif strfind(lower(varargin{1}),'.hdf5'), this.hdf2itaHRTF = varargin{1};
+                    elseif strfind(lower(varargin{1}),'.sofa'), this.sofa2itaHRTF = varargin{1};
+                    end
+                 end
             end
         end
         
@@ -373,7 +389,7 @@ classdef  itaHRTF < itaAudio
                     counter= counter+2;
                 end
                 
-                tempMetadata=DAFFv17('getMetadata', handleDaff);
+                metadata = DAFFv17('getMetadata', handleDaff);
                 
             catch
                 disp( 'Could not read DAFF file right away, falling back to old version and retrying ...' );
@@ -388,7 +404,27 @@ classdef  itaHRTF < itaAudio
                 counter = 1;
                 data = zeros(props.filterLength,props.numRecords*2,'double' ) ;
                 coordDaff = zeros(props.numRecords,2) ;
-                tempMetadata=DAFFv15('getMetadata', handleDaff);
+                                
+                tempMetadata = DAFFv15('getMetadata', handleDaff);
+                
+                % Convert old-style metadata format to v17.
+                names = fieldnames( tempMetadata );
+                for k = 1:numel( tempMetadata )
+                    switch class(tempMetadata.(names{k}))
+                        case 'logical'
+                            datatype='bool';
+                        case 'char'
+                            datatype='string';
+                        case 'double'
+                            if rem(tempMetadata.(names{k}),1)==0
+                                datatype='int';
+                            else
+                                datatype='float';
+                            end
+                    end
+                    metadata = daffv17_add_metadata( metadata,cell2mat(names(k)),datatype,tempMetadata.(names{k}) );
+                end
+                
                 for iDir = 1:props.numRecords
                     data(:,[counter counter+1]) = DAFFv15( 'getRecordByIndex', handleDaff,iDir )';
                     coordDaff(iDir,:) = DAFFv15( 'getRecordCoords', handleDaff, 'data', iDir )';
@@ -396,6 +432,7 @@ classdef  itaHRTF < itaAudio
                 end
             end
             
+<<<<<<< HEAD
             % Proceed (version independent)
             names=fieldnames(tempMetadata);
             for k=1:(numel(names))
@@ -415,36 +452,36 @@ classdef  itaHRTF < itaAudio
                 end
                 metadata=daffv17_add_metadata(metadata,cell2mat(names(k)),datatype,tempMetadata.(names{k}));
             end
-                
-                phiM = coordDaff(:,1)*pi/180;
-                %phiM = mod(coordDaff(:,1),360)*pi/180;
-                %if ~isempty(find(0<coordDaff(:,2),1,'first'))
-                thetaM = coordDaff(:,2)*pi/180;
-                %thetaM = mod(180-(coordDaff(:,2)+90),180)*pi/180;
-                %else
-                %    thetaM = coordDaff(:,2)*pi/180;
-                %end
-                radius = ones(props.numRecords,1);
-                
-                chCoord = itaCoordinates;
-                chCoord.sph = ones(size(data,2),3);
-                
-                chCoord.phi(1:2:2*props.numRecords) = phiM;
-                chCoord.phi(2:2:2*props.numRecords) = phiM;
-                chCoord.theta(1:2:2*props.numRecords) = thetaM;
-                chCoord.theta(2:2:2*props.numRecords) = thetaM;
-                
-                this.mMetadata = metadata;
-                this.data = data;
-                this.mDirCoord = itaCoordinates([radius thetaM phiM],'sph');
-                this.channelCoordinates = chCoord;
-                this.mEarSide = repmat(['L'; 'R'],props.numRecords, 1);
-                this.signalType = 'energy';
-                % channelnames coordinates
-                this.channelNames = ita_sprintf('%s ( %2.0f, \\theta= %2.0f)',...
-                    this.mEarSide ,   this.channelCoordinates.theta_deg,  this.channelCoordinates.phi_deg);
-                
-            end
+            
+            phiM = coordDaff(:,1)*pi/180;
+            %phiM = mod(coordDaff(:,1),360)*pi/180;
+            %if ~isempty(find(0<coordDaff(:,2),1,'first'))
+            thetaM = coordDaff(:,2)*pi/180;
+            %thetaM = mod(180-(coordDaff(:,2)+90),180)*pi/180;
+            %else
+            %    thetaM = coordDaff(:,2)*pi/180;
+            %end
+            radius = ones(props.numRecords,1);
+
+            chCoord = itaCoordinates;
+            chCoord.sph = ones(size(data,2),3);
+
+            chCoord.phi(1:2:2*props.numRecords) = phiM;
+            chCoord.phi(2:2:2*props.numRecords) = phiM;
+            chCoord.theta(1:2:2*props.numRecords) = thetaM;
+            chCoord.theta(2:2:2*props.numRecords) = thetaM;
+
+            this.mMetadata = metadata;
+            this.data = data;
+            this.mDirCoord = itaCoordinates([radius thetaM phiM],'sph');
+            this.channelCoordinates = chCoord;
+            this.mEarSide = repmat(['L'; 'R'],props.numRecords, 1);
+            this.signalType = 'energy';
+            % channelnames coordinates
+            this.channelNames = ita_sprintf('%s ( %2.0f, \\theta= %2.0f)',...
+                this.mEarSide ,   this.channelCoordinates.theta_deg,  this.channelCoordinates.phi_deg);
+
+        end
             
             function this = set.init(this,var)
                 % TO DO !!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -514,6 +551,7 @@ classdef  itaHRTF < itaAudio
                 
                 % data
                 % the data is saved as positions x channel x filterdata
+                this.samplingRate = handleSofa.Data.SamplingRate;
                 
                 data = zeros(size(handleSofa.Data.IR,3),numPositions*2);
                 data(:,1:2:numPositions*2) = squeeze(handleSofa.Data.IR(:,1,:)).';
@@ -645,6 +683,10 @@ classdef  itaHRTF < itaAudio
                 %HRTFout = this.direction(idxCoord);
             end
             
+            function this = buildsearchdatabase(this)
+               this.dirCoord = this.dirCoord.build_search_database; 
+            end
+            
             function obj = direction(this, idxCoord)
                 idxDir = zeros(numel(idxCoord)*2,1);
                 idxDir(1:2:numel(idxCoord)*2,:) = 2*idxCoord-1;
@@ -658,14 +700,14 @@ classdef  itaHRTF < itaAudio
             end
             
             function thetaUni = theta_Unique(this,varargin)
-                thetaUni = unique(this.dirCoord.theta);
+                thetaUni = uniquetol(this.dirCoord.theta,eps);
                 if nargin == 2
                     thetaUni = unique(this.dirCoord.theta,'stable');
                 end
             end
             
             function phiUni = phi_Unique(this,varargin)
-                phiUni = unique(this.dirCoord.phi);
+                phiUni = uniquetol(this.dirCoord.phi,eps);
                 if nargin == 2
                     phiUni = unique(this.dirCoord.phi,'stable');
                 end
@@ -679,18 +721,44 @@ classdef  itaHRTF < itaAudio
                 phiUni = rad2deg(phi_Unique(this,varargin));
             end
             
-            function slice = sphericalSlice(this,dirID,dir_deg)
+            function slice = sphericalSlice(this,dirID,dir_deg,exactSearch)
                 % dir in degree
                 % dirID [phi, theta]
-                
-                phiU = rad2deg(this.phi_Unique);
-                thetaU = rad2deg(this.theta_Unique);
-                switch dirID
-                    case {'phi_deg', 'p'}
-                        slice = this.findnearestHRTF(thetaU,dir_deg);
-                    case {'theta_deg', 't'}
-                        slice = this.findnearestHRTF(dir_deg,phiU);
+                if ~exist('exactSearch','var')
+                    exactSearch = 0;
                 end
+                
+                if ~exactSearch
+                    phiU = rad2deg(this.phi_Unique);
+                    thetaU = rad2deg(this.theta_Unique);
+                    switch dirID
+                        case {'phi_deg', 'p'}
+                            slice = this.findnearestHRTF(thetaU,dir_deg);
+                        case {'theta_deg', 't'}
+                            slice = this.findnearestHRTF(dir_deg,phiU);
+                    end
+                else
+                    earCoords = this.getEar('L').channelCoordinates;
+                    switch dirID
+                        case {'phi_deg', 'p'}
+                            phiValues = uniquetol(earCoords.phi_deg);
+                            [~,index] = min(abs(phiValues - dir_deg));
+                            exactPhiValue = phiValues(index);
+                            tmp = earCoords.n(earCoords.phi_deg == exactPhiValue);
+                            thetaU = tmp.theta_deg;
+                            
+                            slice = this.findnearestHRTF(thetaU,dir_deg);
+                        case {'theta_deg', 't'}
+                            thetaValues = uniquetol(earCoords.theta_deg);
+                            [~,index] = min(abs(thetaValues - dir_deg));
+                            exactThetaValue = thetaValues(index);
+                            tmp = earCoords.n(earCoords.theta_deg == exactThetaValue);
+                            phiU = tmp.phi_deg;
+                            
+                            slice = this.findnearestHRTF(dir_deg,phiU);
+                    end
+                end
+
             end
             
             function slice = ss(this,dirID,dir_deg)
@@ -762,13 +830,15 @@ classdef  itaHRTF < itaAudio
             end
             
             function surf(varargin)
-                sArgs  = struct('pos1_data','itaHRTF', 'earSide', 'L', 'freq' , 5000,'type','directivity','log',1);
-                [this,sArgs]   = ita_parse_arguments(sArgs,varargin);
+                sArgs  = struct('pos1_data','itaHRTF', 'earSide', 'L', 'freq' , 1000,'type','directivity','log',0);
+                [this,sArgs,unused]   = ita_parse_arguments(sArgs,varargin);
                 
                 idxF = this.freq2index(sArgs.freq);
                 
-                position = get(0,'ScreenSize');
-                figure('Position',[10 50 position(3:4)*0.85]);
+                if ~(~isempty(unused) && find(strcmp(unused,'parent')))
+                    position = get(0,'ScreenSize');
+                    figure('units','normalized','outerposition',[0 0 1 1]);
+                end
                 if sArgs.log 
                     freqData_dB = this.getEar(sArgs.earSide).freqData_dB;
                 else
@@ -776,14 +846,14 @@ classdef  itaHRTF < itaAudio
                 end
                 switch sArgs.type
                     case 'directivity'
-                        surf(this.dirCoord,freqData_dB(idxF,:));
+                        surf(this.dirCoord,freqData_dB(idxF,:),unused{:});
                         c = colorbar; ylabel(c,'Magnitude in dB')
                     case 'sphere'
-                        surf(this.dirCoord,this.dirCoord.r,freqData_dB(idxF,:));
+                        surf(this.dirCoord,this.dirCoord.r,freqData_dB(idxF,:),unused{:});
                         c = colorbar;ylabel(c,'Magnitude in dB')
                     case 'phase'
                         phase = unwrap(angle(this.getEar(sArgs.earSide).freqData(idxF,:)));
-                        surf(this.dirCoord,freqData_dB(idxF,:),phase);
+                        surf(this.dirCoord,freqData_dB(idxF,:),phase,unused{:});
                         c = colorbar;ylabel(c,'Phase in rad')
                 end
                 title([sArgs.earSide ', f = ' num2str(round(this.freqVector(idxF)/100)/10) ' kHz'])
@@ -869,10 +939,12 @@ classdef  itaHRTF < itaAudio
                             
                             ITD = phasenDiff./(2*pi*repmat(thisC.freqVector,1,size(phase1,2)));
                         else % averaged
-                            phase = unwrap(angle(thisC.freqData));
-                            t0_freq = bsxfun(@rdivide, phase,2*pi*thisC.freqVector);
+                            usedBins = thisC.freq2index(sArgs.filter(1)):thisC.freq2index(sArgs.filter(2));
+                            phase = unwrap(angle(thisC.freqData(3:end,:)));
+                            freqVector = thisC.freqVector;
+                            t0_freq = bsxfun(@rdivide, phase,2*pi*freqVector(3:end));
                             t0_freq = t0_freq(~isnan(t0_freq(:,1)),:);
-                            t0_mean = mean(t0_freq(unique(thisC.freq2index(sArgs.filter(1)):thisC.freq2index(sArgs.filter(2))),:)); %mean is smoother than max; lower freq smooths also the result
+                            t0_mean = mean(t0_freq(3+usedBins,:)); %mean is smoother than max; lower freq smooths also the result
                             ITD =  t0_mean(thisC.EarSide == 'L') - t0_mean(thisC.EarSide == 'R');
                         end
                     case 'xcorr'
@@ -968,7 +1040,7 @@ classdef  itaHRTF < itaAudio
                 end
             end
             
-            % function this = interp(varargin)
+            this = interp(varargin);
             %
             % Function to calculate HRTFs for arbitrary field points using a N-th order
             % spherical harmonics (SH) interpolation / range extrapolation, as described in [1],
@@ -1006,7 +1078,8 @@ classdef  itaHRTF < itaAudio
             % Version: 2016-02-05
             
             
-            
+            this = reduce_spatial(this,coords,varargin);
+            % Function to spatially reduce the HRTF. 
             
             function this = smooth_linphase(this,varargin)
                 % function this = smooth_linphase(varargin)
@@ -1187,12 +1260,12 @@ classdef  itaHRTF < itaAudio
                 end
                 
                 thetaC_deg  = rad2deg(thisS.theta_Unique);
-                phiC_deg    = sort(mod(round(rad2deg(thisS.phi_Unique)),360));
+                phiC_deg    = sort(mod(rad2deg(thisS.phi_Unique),360));
                 nTheta      = numel(thetaC_deg);
                 nPhi        = numel(phiC_deg);
-                coord       = reshape(mod(round(thisS.dirCoord.phi_deg),360),nTheta,nPhi);
+                coord       = reshape(mod(thisS.dirCoord.phi_deg,360),nTheta,nPhi);
                 [~, idxC]   = sort(coord,2);
-                [~, idxCT]  = unique(thisS.dirCoord.theta_deg);
+                [~, idxCT]  = uniquetol(thisS.dirCoord.theta_deg,eps);
                 
                 ITD    = thisS.ITD('method',...
                     sArgs.method, 'filter' , sArgs.filter , 'thresh',sArgs.thresh,...
@@ -1252,7 +1325,7 @@ classdef  itaHRTF < itaAudio
                     xlabel('Azimuth Angle in Degree');
                     ylabel('ITD in Milliseconds');
                     set(gca,'xTick',0:30:360)
-                    legend(ita_sprintf('%i�', round(thetaC_deg)))
+                    legend(ita_sprintf('%i^\circ', round(thetaC_deg)))
                 end
             end
             
@@ -1270,10 +1343,12 @@ classdef  itaHRTF < itaAudio
                     ita_verbose_info(' More than one elevation in this object!', 0);
                     if strcmp(sArgs.plane,'horizontal')
                         thetaC_deg  = 90;
-                        thisC       = this.sphericalSlice('theta_deg', thetaC_deg);
+                        thisC       = this.sphericalSlice('theta_deg', thetaC_deg,1);
                     elseif strcmp(sArgs.plane,'median')
                         phiC_deg    = 0;
-                        thisC       = this.sphericalSlice('phi_deg', phiC_deg);
+                        thisC       = this.sphericalSlice('phi_deg', phiC_deg,1);
+                    else
+                       error('Unknown plane option: Either horizontal or median'); 
                     end
                 else thisC = this;
                 end
@@ -1281,11 +1356,11 @@ classdef  itaHRTF < itaAudio
                 % multi defined coordinates
                 if numel(phiC_deg)<thisC.dirCoord.nPoints && numel(thetaC_deg) ==1
                     ita_verbose_info(' Coordinates are not unique!', 0);
-                    [~,ia] = unique(thisC.dirCoord.phi,'stable');
+                    [~,ia] = uniquetol(thisC.dirCoord.phi,'stable');
                     thisC = thisC.direction(ia);
                 elseif numel(thetaC_deg)<thisC.dirCoord.nPoints && numel(phiC_deg) ==1
                     ita_verbose_info(' Coordinates are not unique!', 0);
-                    [~,ia] = unique(thisC.dirCoord.theta,'stable');
+                    [~,ia] = uniquetol(thisC.dirCoord.theta,'stable');
                     thisC = thisC.direction(ia);
                 end
                 
@@ -1304,11 +1379,11 @@ classdef  itaHRTF < itaAudio
                 earSidePlot = sArgs.earSide;
                 if numel(phiC_deg)>1,
                     xData = phiC_deg;
-                    strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) '�'];
+                    strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) '^\circ'];
                     strXlabel = '\phi in Degree';
                 else
-                    xData = thetaC_deg;
-                    strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) '�'];
+                    xData = thisC.theta_UniqueDeg;
+                    strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) '^\circ'];
                     strXlabel = '\theta in Degree';
                 end
                 
@@ -1320,7 +1395,7 @@ classdef  itaHRTF < itaAudio
                 idxfMax = find(this.freqVector>2e4,1,'first');
                 if isempty(idxfMax), idxfMax = this.nBins; end
                 fMax = thisCs.freqVector(idxfMax);
-                [tick, lab] = ita_plottools_ticks('log');
+%                 [tick, lab] = ita_plottools_ticks('log');
                 
                 data_dB= thisCs.freqData_dB;
                 cMax = max(max(data_dB(2:idxfMax,:)));
@@ -1330,7 +1405,7 @@ classdef  itaHRTF < itaAudio
                 [xticks, xlabels] = ita_plottools_ticks('log');
                 
                 set(ah,'xTick',xticks,'xticklabel',xlabels)
-                set(ah,'yTick',yticks,'xticklabel',yticks)
+                set(ah,'yTick',yticks,'yticklabel',yticks)
                 
                 caxis([cMin cMax]);
                 set(ah, 'XScale', 'log')
@@ -1342,7 +1417,7 @@ classdef  itaHRTF < itaAudio
                 zlab = get(cb,'ylabel');
                 set(zlab,'String','Level in [dB]');
                 
-                set(ah,'xtick',tick,'xticklabel',lab)
+%                 set(ah,'xtick',tick,'xticklabel',lab)
                 xlabel('Frequency in Hertz');xlim([thisCs.freqVector(2) fMax ]);
                 ylabel(strXlabel);
                 
@@ -1489,11 +1564,8 @@ classdef  itaHRTF < itaAudio
             
             function result = propertiesSphereType
                 result = {'cap', 'ring','full','undefined'};
-            end
+            end         
             
-            function result = propertiesInit
-                result = {'channelCoordinates','domain','data'};
-            end
         end
 end
 

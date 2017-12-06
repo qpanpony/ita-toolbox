@@ -83,7 +83,7 @@ if playback
     % Check levels - Normalizing
     % determine clipping limit from NI session information
     outputClipping = 1; % standard
-    for iChannel = numel(niSession.Channels)
+    for iChannel = 1:numel(niSession.Channels)
         isOutput = ~isempty(strfind(niSession.Channels(iChannel).ID,'ao'));
         if isOutput
             outputClipping = max(outputClipping,max(abs(double(niSession.Channels(iChannel).Range))));
@@ -92,7 +92,7 @@ if playback
     peak_value = max(max(abs(data.timeData)));
     if (peak_value > outputClipping) || (normalize_output)
         ita_verbose_info('Oh Lord! Levels too high for playback. Normalizing...',0)
-        data = ita_normalize_dat(data);
+        data = data/peak_value*outputClipping;
     end
 end
 

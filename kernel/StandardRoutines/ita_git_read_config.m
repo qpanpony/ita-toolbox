@@ -26,13 +26,9 @@ workingDir = pwd;
 cd(ita_toolbox_path)
 
 % This will only work if git bash bindings are installed.
-% TODO: check TortoiseGit command line version
 [userName,userMail,statusName,statusMail] = read_config_with_bindings();
 
 if statusName ~= 0 || statusMail ~= 0
-    % Do not use ita_verbose_info here, as it will result in an infinite
-    % loop because of an ita_preferences call
-	disp('Either git was not found on your machine or your username and e-mail are not set in the configuration. You can set them manually using ita_preferences.');
 	userName = [];
 	userMail = [];
 end
@@ -53,7 +49,6 @@ if statusName ~= 0
 end
 if statusMail ~= 0
     [statusMail,userMail] = system('git config --global user.email');
-    disp('I took your E-Mail from the global git configuration');
 end
 
 end

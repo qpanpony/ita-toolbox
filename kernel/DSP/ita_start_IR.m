@@ -39,6 +39,8 @@ else
     sampleStart = local_search_minPhase_correlation(input,sArgs);
 end
 
+% nonFound = sampleStart == 1;
+% sampleStart(nonFound) = local_search_minPhase_correlation(input.ch(nonFound),sArgs);
 
 %% Local Functions
 function sampleStart = local_search_ISO3382(input,sArgs)
@@ -98,7 +100,7 @@ for idx = 1:input.nChannels
 end
 
 function sampleStart = local_search_minPhase_correlation(input,sArgs)
-%Tamim, Noor Shafiza Mohd; Ghani, Farid (2010): Techniques for optimization in time delay estimation from cross correlation function. In: Int J Eng Technol 10, S. 69ÿ75.
+%Tamim, Noor Shafiza Mohd; Ghani, Farid (2010): Techniques for optimization in time delay estimation from cross correlation function. In: Int J Eng Technol 10, S. 69ï¿½75.
 
 
 % define polynomial order of approximation. Must be at bigger than 1.

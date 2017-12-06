@@ -263,8 +263,8 @@ classdef itaValue
                             val = 1e-12;
                             log_prefix = 10;
                         case 'm/s'
-                            res = '0.5nm/s';
-                            val = .5e-9;
+                            res = '1nm/s';
+                            val = 1e-9;
                         case 'Pa'
                             res = '20uPa';
                             val = 20e-6;

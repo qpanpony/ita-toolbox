@@ -33,17 +33,38 @@ classdef load_ac3d
         
         % OTHER FUNCTIONS
         function obj = readAc3DModelFile(obj, fullFilename)
+                       
+            % new read method for loading ac3d file 
+            % (works also with Matlab 2016 and newer)
             
             if exist(fullFilename, 'file')
-%                 ac3d_import = importdata(fullfile(pwd, fullFilename));
-                ac3d_import = importdata(fullFilename);
                 obj.modelFilename = fullFilename;
+                fileID = fopen(fullFilename);
+                allRows = textscan(fileID, '%s','Delimiter', '\n');
+                
+                maxLengthRow=0;
+                for iRows=1:length(allRows{1})
+                    if (~isempty(allRows{1}{iRows}))
+                        currentLine = textscan(allRows{1}{iRows},'%s','Delimiter', ' ');
+                        if length(currentLine{1}) > maxLengthRow
+                            maxLengthRow = length(currentLine{1});
+                        end
+                    end
+                end
+                
+                ac3d = cell(length(allRows{1}),maxLengthRow);
+                
+                for iRows=1:length(allRows{1})
+                    if (~isempty(allRows{1}{iRows}))
+                        currentLine = textscan(allRows{1}{iRows},'%s','Delimiter', ' ');
+                        ac3d(iRows,1:length(currentLine{1})) = currentLine{1}';
+                    end
+                end
+                fclose(fileID);
             else
                 error('The specified file does not exist!');
             end
-            ac3d = ac3d_import.textdata; % nur textdata von "importdata" interessant
-            
-            
+      
             % Materialnamen und Farben
             
             mat_rows  = find(strcmp(ac3d,'MATERIAL')==1);  % Zeilenindizes der Materialien
@@ -289,7 +310,27 @@ classdef load_ac3d
         function S = getSurface(obj)
             S = obj.totalSurface;
         end
-       
+        
+        function SMat = getMaterialSurface(obj,materialName)
+            
+             % sometimes multiple materials with the same name are defined. in this case, sum up all of them
+            matchingMatIDs = [];   
+            SMat = 0;
+            for matID = 1:length(obj.bcGroups)
+                if (strcmp(obj.bcGroups{matID}.name, materialName))
+                    matchingMatIDs = [matchingMatIDs matID];
+                    SMat = SMat + obj.bcGroups{matID}.surface;     
+                end
+            end
+            
+            if isempty(matchingMatIDs)
+                error(['Material "' materialName '" is not part of the model. Please check materialname and or your *.ac file']);
+            end
+            
+           
+        end
+        
+        
         function [A, S] = getEquivalentAbsorptionArea_sabine(obj, material_path, portal_surface_materials)
             if nargin < 2
                 material_path = '..\RavenDatabase\MaterialDatabase';

@@ -1,18 +1,18 @@
-function writeDAFFFile( this, file_path, metadata_user )
-% Exports itaHRTF to a DAFF file
+function writeDAFFFile( this, file_path, varargin )
+% Exports itaHRTF to a DAFF file using daffv17_write
+%
+% Will export the entire angle range of the itaHRTF data set from
+% minimum angle to maximum angle in theta and phi by an angular 
+% resulution of the range divided by the number of available spatial
+% points as a equi-angular grid (regular grid, Gaussian sampling).
 %
 % Input:    file_path (string) [optional]
-%           user metadata (struct created with daff_add_metadata) [optional]
+%           write_daff_args optional arguments (passed to daffv17_write) [optional]
 %
 % Required: OpenDAFF matlab scripts, http://www.opendaff.org
 %           (but included in ITA-Toolbox)
 %
 % Output: none
-
-metadata = this.mMetadata;
-if nargin >= 3
-    metadata = metadata_user;
-end
 
 hrtf_variable_name = inputname( 1 );
 file_name = [ hrtf_variable_name '_' int2str( this.nSamples ) 'samples_' int2str( this.resAzimuth ) 'x' int2str( this.resElevation ) '.daff'];
@@ -25,6 +25,37 @@ if nargin == 0
 end
 
 
+%% Prepare daff_write arguments
+
+if strcmp( this.domain, 'time' )
+
+    % Content type switcher between time domain (ir) and frequency domain (dft)
+    % (requires different data functions and content descriptor)
+    
+    sIn.content = 'ir';
+    sIn.datafunc = @dfitaHRIRDAFFDataFunc;
+    sIn.zthreshold = -400; % zero threshold for discarding samples in beginning and end region of IR (where only noise is present)
+    
+elseif strcmp( this.domain, 'freq' )
+    
+    sIn.content = 'dft';
+    sIn.datafunc = @dfitaHRTFDAFFDataFunc;
+    
+end
+
+sIn.metadata = this.mMetadata;
+sIn.quantization = 'float32';
+sIn.userdata = this;
+sIn.orient = [ 0 0 0 ];
+sIn.quiet = false;
+
+if ~isempty( varargin )
+    daff_write_args = ita_parse_arguments( sIn, varargin{ 1 } );
+else
+    daff_write_args = ita_parse_arguments( sIn, varargin );
+end
+
+
 %% Inject content type indicator 'ir' or 'dft' into file name
 
 ct_indicator = 'ir';
@@ -33,11 +64,13 @@ if strcmp( this.domain, 'freq' )
 end
 
 [ file_path, file_base_name, file_suffix ] = fileparts( file_name );
-if ~strcmp( file_suffix, '.daff' )
+if ~strcmp( file_suffix, '.daff' ) && ~isempty( file_suffix )
     file_path = fullfile( file_path, strjoin( {file_base_name file_suffix 'v17' ct_indicator 'daff' }, '.' ) );
 else
     file_path = fullfile( file_path, strjoin( {file_base_name 'v17' ct_indicator 'daff'}, '.' ) );
 end
+
+daff_write_args.filename = file_path;
 
 
 %% Prepare angle ranges and resolution
@@ -70,49 +103,58 @@ betarange = 180 - [ theta_start_deg theta_end_deg ]; % Flip poles (DAFF starts a
 assert( betarange( 2 ) >= 0.0 )
 assert( betarange( 1 ) <= 180.0 )
 
+daff_write_args.betarange = alpharange;
+daff_write_args.alphares = alphares;
+daff_write_args.betarange = betarange;
+daff_write_args.betares = betares;
 
-%% Assemble metadata
 
-metadata = daffv17_add_metadata( metadata, 'Generation script', 'String', 'writeDAFFFile.m' );
-metadata = daffv17_add_metadata( metadata, 'Generation toolkit', 'String', 'ITA-Toolkit' );
-metadata = daffv17_add_metadata( metadata, 'Generation date', 'String', date );
-metadata = daffv17_add_metadata( metadata, 'Web resource', 'String', 'http://www.ita-toolkit.org' );
-channels=this.nChannels/this.nDirections;
-if(channels<1)
-    warning('Number of channels per record was not detected correctly, assuming 2 channel records');
-    channels = 2;
+%% Assemble metadata (if not already present)
+
+keyname = 'Generation script';
+if isempty(daff_write_args.metadata) || ~any( strcmpi( { daff_write_args.metadata(:).name }, keyname ) )
+    daff_write_args.metadata = daffv17_add_metadata( daff_write_args.metadata, keyname, 'String', 'writeDAFFFile.m' );
 end
 
-% Content type switcher between time domain (ir) and frequency domain (dft)
-% (requires different data functions)
-if strcmp( this.domain, 'time' )
+keyname = 'Generation toolkit';
+if ~any( strcmpi( { daff_write_args.metadata(:).name }, keyname ) )
+    daff_write_args.metadata = daffv17_add_metadata( daff_write_args.metadata, keyname, 'String', 'ITA-Toolkit' );
+end
 
-    daffv17_write('filename', file_path, ...
-               'content', 'ir', ...
-               'datafunc', @dfitaHRIRDAFFDataFunc, ...
-               'channels', channels, ...
-               'alphares', alphares, ...
-               'alpharange', alpharange, ...
-               'betares', betares, ...
-               'betarange', betarange, ...
-               'orient', [ 0 0 0 ], ...
-               'metadata', metadata, ...
-               'userdata', this, ...
-               'quantization', 'float32' );
-           
-elseif strcmp( this.domain, 'freq' )
-    
-    daffv17_write('filename', file_path, ...
-               'content', 'dft', ...
-               'datafunc', @dfitaHRTFDAFFDataFunc, ...
-               'channels', channels, ...
-               'alphares', alphares, ...
-               'alpharange', alpharange, ...
-               'betares', betares, ...
-               'betarange', betarange, ...
-               'orient', [ 0 0 0 ], ...
-               'metadata', metadata, ...
-               'userdata', this, ...
-               'quantization', 'float32' );
-           
+keyname = 'Generation date';
+if ~any( strcmpi( { daff_write_args.metadata(:).name }, keyname ) )
+    daff_write_args.metadata = daffv17_add_metadata( daff_write_args.metadata, keyname, 'String', date );
+end
+
+keyname = 'Git Version';
+if ~any( strcmpi( { daff_write_args.metadata(:).name }, keyname ) )
+    versionHash = ita_git_getMasterCommitHash;
+    daff_write_args.metadata = daffv17_add_metadata( daff_write_args.metadata, keyname, 'String', versionHash );
+end
+
+keyname = 'Web resource';
+if ~any( strcmpi( { daff_write_args.metadata(:).name }, keyname ) )
+    daff_write_args.metadata = daffv17_add_metadata( daff_write_args.metadata, keyname, 'String', 'http://www.ita-toolkit.org' );
+end
+
+
+%% Channels
+
+channels=this.nChannels/this.nDirections;
+if( channels < 1 )
+    warning( 'Number of channels per record was smaller than one, assuming 2 channel records' );
+    channels = 2;
+elseif( mod( channels, 2 ) ~= 0 )
+    warning( [ 'Number of channels per record was not and integer number, trying floor() of ' num2str( channels ) ] );
+    channels = floor( channels );
+end
+
+daff_write_args.channels = channels;
+
+
+%% Call daff_write and pass argument list
+
+daffv17_write( daff_write_args );
+
+
 end

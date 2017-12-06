@@ -2656,8 +2656,10 @@ classdef itaRavenProject < handle
         function S = getMaterialSurfaceArea(obj, materialName)
             %S = getRoomSurfaceArea(roomID)
             %
-            %   returns the total surface area of the current room.
+            %   returns the surface area of the current material.
             %
+            %   WARNING: NOT IMPLEMENTED!
+            % 
             if nargin < 2
                 error('Please provide a material name.');
             end
@@ -2680,7 +2682,7 @@ classdef itaRavenProject < handle
                 end
             end
             
-            % get all materials in room
+            % return surface area of given material
             S = roommodel.getMaterialSurface(materialName);
         end       
         

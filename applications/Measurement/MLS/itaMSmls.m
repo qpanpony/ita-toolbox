@@ -66,7 +66,7 @@ classdef itaMSmls < itaMSTF
                     fieldName = fieldnames(rmfield(this.saveobj,'dateSaved'));
                 end
                 
-                for ind = 1:numel(fieldName);
+                for ind = 1:numel(fieldName)
                     try
                         this.(fieldName{ind}) = varargin{1}.(fieldName{ind});
                     catch errmsg
@@ -203,7 +203,7 @@ classdef itaMSmls < itaMSTF
             tmpRes = ita_fht(result);
             
             % pemute & drop first sample & add zero
-            result = itaAudio([tmpRes(this.mPermuteVec2+1,:) / nMLSsamples ;zeros(1,result.nChannels) ], result.samplingRate, 'time');
+            result.time = [tmpRes(this.mPermuteVec2+1,:) / nMLSsamples ;zeros(1,result.nChannels)];
             % Set signaltype.
             result.signalType = 'energy';
         end
@@ -217,7 +217,7 @@ classdef itaMSmls < itaMSTF
             if this.lineardeconvolution
                 excitation = ita_extend_dat(excitation,2*excitation.nSamples);
             end
-            a = excitation * this.compensation;
+            a = this.deconvolve(excitation)/this.outputamplification_lin;
             a.signalType = 'energy';
             a.comment = 'IR of Measurement Setup - excitation*compensation';
             ita_plot_all(a);
@@ -291,7 +291,7 @@ classdef itaMSmls < itaMSTF
                 token = this.(list{idx});
                 if isempty(token)
                     continue;
-                end;
+                end
                 
                 if ischar(token)
                     token = ['''' token ''''];
@@ -303,7 +303,7 @@ classdef itaMSmls < itaMSTF
                     end
                 else
                     error('what is this')
-                end;
+                end
                 str = [str '''' list{idx} '''' ',' token ];
                 
                 if idx < numel(list)
@@ -324,7 +324,7 @@ classdef itaMSmls < itaMSTF
             % saveobj - Saves the important properties of the current
             % measurement setup to a struct.
             
-            sObj = saveobj@itaMSPlaybackRecord(this);
+            sObj = saveobj@itaMSTF(this);
             % Get list of properties to be saved for this measurement
             % class.
             propertylist = itaMSmls.propertiesSaved;
@@ -421,7 +421,7 @@ classdef itaMSmls < itaMSTF
             % This function creates a new measurement setup by calling the
             % class constructor and passes it the specified save struct.
             
-            this = itaMSmsl(sObj);
+            this = itaMSmls(sObj);
         end
         
         function result = propertiesSaved
@@ -430,9 +430,8 @@ classdef itaMSmls < itaMSTF
             %
             % This function gets the list of all
             % properties to be saved during the saving process.
-            error('muss man noch anpassen')
             % Get list of saved properties for this class.
-            result = {'mCompensation','mPreScaling','mFinalCompensation', 'stopMargin', 'mPreemphesis','mType','mFinalFreqRange','mBandwidth'};
+            result = {'mPermuteVec1','mPermuteVec2','mRealAverages'};
         end
     end
     

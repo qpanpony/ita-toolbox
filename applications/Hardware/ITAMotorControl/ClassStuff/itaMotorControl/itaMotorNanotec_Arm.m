@@ -13,7 +13,7 @@ classdef itaMotorNanotec_Arm < itaMotorNanotec
     end
     
     properties 
-
+        horizontalCorrectionFactor = 0;
     end
     
     properties(Constant, Hidden = true)
@@ -79,6 +79,10 @@ classdef itaMotorNanotec_Arm < itaMotorNanotec
         
         function name = getMotorName(this)
            name = this.motorName; 
+        end
+        
+        function disableReference(this,value)
+
         end
         
         function sendConfiguration(this)
@@ -220,14 +224,14 @@ classdef itaMotorNanotec_Arm < itaMotorNanotec
                 return;
             end
 
-            if (angle < this.ARM_limit(1)) || (angle > this.ARM_limit(2))
-                ita_verbose_info(['Arm: Only values between ' num2str(this.ARM_limit(1)) ' and ' num2str(this.ARM_limit(2)) ' are allowed!'], 0)
+            if (angle < this.motorLimits(1)) || (angle > this.motorLimits(2))
+                ita_verbose_info(['Arm: Only values between ' num2str(this.motorLimits(1)) ' and ' num2str(this.motorLimits(2)) ' are allowed!'], 0)
                 ret         =   false;
 %                 this.wait   =   false;
                 return;
             end
             
-            angle = angle - 120.1; % Larger substractive value: Higher position. Checkt at 90�.
+            angle = angle - 120-1.7+this.horizontalCorrectionFactor; % Larger substractive value: Higher position. Checkt at 90�.
             
             motorControl = this.mMotorControl;
             

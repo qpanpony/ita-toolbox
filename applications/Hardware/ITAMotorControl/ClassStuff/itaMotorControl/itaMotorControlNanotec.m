@@ -122,6 +122,7 @@ classdef itaMotorControlNanotec < itaMotorControl
                 pause(this.waitForSerialPort);
             end
         end
+         
         
         function moveTo(this,varargin)
             % if itaCoordinates are given, the position is passed to all
@@ -178,6 +179,13 @@ classdef itaMotorControlNanotec < itaMotorControl
             
         end
         
+        
+        function freeFromStopButton(this)
+            for index = 1:length(this.motorList)
+                    this.motorList{index}.freeFromStopButton();
+            end            
+        end
+        
         function reference(this)
             this.clear_commandlist;
             for index = 1:length(this.motorList)
@@ -190,6 +198,10 @@ classdef itaMotorControlNanotec < itaMotorControl
 
             end
             this.wait4everything;
+            
+            for index = 1:length(this.motorList)
+               this.motorList{index}.setReferenced(true); 
+            end
         end
         
         function prepareForContinuousMeasurement(this,varargin)
@@ -207,17 +219,21 @@ classdef itaMotorControlNanotec < itaMotorControl
             % get the preangle and the speed
             sArgs.preAngle = 0;
             sArgs.speed = 2;
+            sArgs.postAngle = 10;
             [sArgs notFound] = ita_parse_arguments(sArgs, varargin);
 
             % first, do a reference move
             ita_verbose_info('Moving to reference',1)
             this.reference
+            ita_verbose_info('Disable reference position',1)
+            this.motorList{1}.disableReference(1);
             ita_verbose_info('Moving to pre angle',1)
-            this.moveTo(motorName,-sArgs.preAngle,'absolut',false,'speed',1)
+            this.moveTo(motorName,-sArgs.preAngle,'absolut',false,'speed',2)
             
             
             % now prepare the big move but don't start it
-            this.moveTo(motorName,360+sArgs.preAngle+15,'speed',sArgs.speed,'absolut',false,'start',0,'limit',0);
+            moveAngle = 360 + sArgs.preAngle + sArgs.postAngle;
+            this.moveTo(motorName,moveAngle,'speed',sArgs.speed,'absolut',false,'start',0,'limit',0,'direct',1);
             this.preparedList = motorName;
             ita_verbose_info('Finished preparing',2)
         end
@@ -246,6 +262,8 @@ classdef itaMotorControlNanotec < itaMotorControl
             end
             this.wait4everything
             this.preparedList = [];
+            ita_verbose_info('Enable reference position',1)
+%             this.sendControlSequenceAndPrintResults(':port_in_a=7');
         end
         
         function success = add_to_commandlist(this, string_to_send)
@@ -456,7 +474,11 @@ classdef itaMotorControlNanotec < itaMotorControl
                     ita_verbose_info('Position reached',1);
                 else
                     ita_verbose_info('Position NOT reached! - Check for errors!', 0);
-                    this.send_commandlist(this.failed_command_repititions); % mpo: bugfix: send_commandlist needs argument
+                    
+                    %assuming stop button clicked
+                    %call freefrombutton function
+%                     this.freeFromStopButton
+%                     this.send_commandlist(this.failed_command_repititions); % mpo: bugfix: send_commandlist needs argument
 %                     this.isReferenced = false;
                 end
                 this.clear_receivedlist;
