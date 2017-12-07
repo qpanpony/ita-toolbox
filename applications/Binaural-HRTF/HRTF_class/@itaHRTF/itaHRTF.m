@@ -432,7 +432,6 @@ classdef  itaHRTF < itaAudio
                 end
             end
             
-<<<<<<< HEAD
             % Proceed (version independent)
             names=fieldnames(tempMetadata);
             for k=1:(numel(names))
