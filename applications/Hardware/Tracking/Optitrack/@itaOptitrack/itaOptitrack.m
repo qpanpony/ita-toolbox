@@ -1184,9 +1184,9 @@ classdef itaOptitrack < handle
             frameID       = varargin{3};
             frameTime     = varargin{4};
             
-            Optitrack_obj.tempRigidBodyLogData = zeros(1,13,Optitrack_obj.numRigidBodies);
+            Optitrack_obj.tempRigidBodyLogData = nan(1,13,Optitrack_obj.numRigidBodies);
             
-            for idx=1:Optitrack_obj.numRigidBodies % TODO: quick and dirty solution with for loop, implement without for loop
+            for idx=1:data.nRigidBodies % TODO: quick and dirty solution with for loop, implement without for loop
                 rigidBodyData = data.RigidBodies(idx); %#ok
                                 
                 % Rigid body position [X,Y,Z]
