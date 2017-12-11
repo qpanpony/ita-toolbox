@@ -237,10 +237,10 @@ classdef itaPZ
             %             res = (resp+d+e*s) .* exp(1i*-2*pi*value*ddelay);
         end
         
-        function plot_spk(this)
+        function plot_spk(this,varargin)
             % plot spectrum (freq)
             res = itaAudioAnalyticRational(this);
-            res.plot_spk;
+            res.plot_spk(varargin{:});
         end
         function res = res_mixed_poles(this)
             %pdi implementation using conjugate complex pole pairs

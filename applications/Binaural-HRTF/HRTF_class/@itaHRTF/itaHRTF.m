@@ -1342,12 +1342,9 @@ classdef  itaHRTF < itaAudio
                 [this,sArgs]= ita_parse_arguments(sArgs,varargin);
                 ah          = sArgs.axes_handle;
                 
-                phiC_deg    = uniquetol(round(this.phi_UniqueDeg,1),0.05);
-                thetaC_deg  = uniquetol(round(this.theta_UniqueDeg,1),0.05);
-                
-                %hbr: changed to round to 1 decimal in deg, seems more stable
-                %phiC_deg    = rad2deg(unique(round(this.phi_Unique*100)/100));
-                %thetaC_deg  = rad2deg(unique(round(this.theta_Unique*100)/100));
+                %round to 0.5Deg
+                phiC_deg    = unique(round(this.phi_UniqueDeg *2)/2);
+                thetaC_deg  = unique(round(this.theta_UniqueDeg *2)/2);
                 
                 % create slice
                 if numel(thetaC_deg)>1 && numel( phiC_deg)>1
@@ -1367,11 +1364,11 @@ classdef  itaHRTF < itaAudio
                 % multi defined coordinates
                 if numel(phiC_deg)<thisC.dirCoord.nPoints && numel(thetaC_deg) ==1
                     ita_verbose_info(' Coordinates are not unique!', 0);
-                    [~,ia] = uniquetol(thisC.dirCoord.phi,'stable');
+                    [~,ia] = unique(thisC.dirCoord.phi,'stable');
                     thisC = thisC.direction(ia);
                 elseif numel(thetaC_deg)<thisC.dirCoord.nPoints && numel(phiC_deg) ==1
                     ita_verbose_info(' Coordinates are not unique!', 0);
-                    [~,ia] = uniquetol(thisC.dirCoord.theta,'stable');
+                    [~,ia] = unique(thisC.dirCoord.theta,'stable');
                     thisC = thisC.direction(ia);
                 end
                 
