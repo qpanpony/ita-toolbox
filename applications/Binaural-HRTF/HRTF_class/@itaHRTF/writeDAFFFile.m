@@ -141,7 +141,7 @@ end
 %% Channels
 
 channels=this.nChannels/this.nDirections;
-if(channels<1)
+if( channels < 1 || mod( channels, 2 ) ~= 0 )
     warning('Number of channels per record was not detected correctly, assuming 2 channel records');
     channels = 2;
 end
