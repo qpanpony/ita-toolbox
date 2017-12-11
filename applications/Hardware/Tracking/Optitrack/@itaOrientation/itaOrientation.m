@@ -203,12 +203,17 @@ classdef itaOrientation
         %% set methods
         function this = set.quat(this,value)
             % set quat, nPoints x 4 [double]
-            assert( isequal(size(value,2),4),['Size of input must be ',num2str(this.nPoints),' x 4 [double].'])
-            if size(value,1)~=this.nPoints;
-                fprintf('[\b[itaOrientation]\tSize of input does not match %d x 4.]\b\n',this.nPoints)
-                fprintf('[\b\t\t\t\t\tSize of class object is changed.]\b\n')
+            if ~isa(value,'quaternion')
+                assert( isequal(size(value,2),4),['Size of input must be ',num2str(this.nPoints),' x 4 [double].'])
+                if size(value,1)~=this.nPoints;
+                    fprintf('[\b[itaOrientation]\tSize of input does not match %d x 4.]\b\n',this.nPoints)
+                    fprintf('[\b\t\t\t\t\tSize of class object is changed.]\b\n')
+                end
+                this.mOrient = quaternion(value);
+            else
+                this.mOrient = value;
             end
-            this.mOrient = quaternion(value);
+            
         end
         
         function this = set.qw(this,value)

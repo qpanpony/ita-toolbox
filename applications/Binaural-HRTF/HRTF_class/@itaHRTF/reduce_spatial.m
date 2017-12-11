@@ -26,8 +26,8 @@ end
 % errors
 newCoordinates.r = mean(oldCoords.r);
 
-
-oldCoords = oldCoords.build_search_database;
+% don't use the mex file to make use of bugfix as poles
+% oldCoords = oldCoords.build_search_database;
 
 newIndex = oldCoords.findnearest(newCoordinates);
 
@@ -39,7 +39,7 @@ newSamplingDistance = getVectorLength(newCoordinates.n(1),newCoordinates.n(2));
 
 % the maximum of the found points should always be smaller
 if max(pointDistances) > newSamplingDistance
-   error('The found points are further apart than the sampling allows. Something is wrong') 
+   ita_verbose_info('The found points are further apart than the sampling allows. Something is wrong',0) 
 end
 
 

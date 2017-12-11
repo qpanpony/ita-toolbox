@@ -14,23 +14,26 @@ opts.heightCorrection   = 0.0597;          % in meter  || ensures that the louds
 
 opts=ita_parse_arguments(opts, varargin);
 
-hc=opts.heightCorrection;
+
 % X     Y     Z    (openGL)
 pos = itaCoordinates(zeros(12,3));
 pos.r= 2.28;
 pos.phi_deg=[45 315 225 135 0 270 180 90 0 270 180 90];
 pos.theta_deg=[88.5 88.5 88.5 88.5 60 60 60 60 118 118 118 118];
     
-pos.z=pos.z-hc;
+
 
 if opts.virtualSpeaker
-    pos = [pos;...
-        0  0+hc  0;... % virtual speaker
-        0  3+hc  0];   % virtual speaker
+    pos.cart = [pos.cart;...
+        0  0  -2.3;... % virtual speaker
+        0  0  2.3];   % virtual speaker
 end
 
-if strcmp(opts.coordSystem,'openGL')
-    pos = ita_matlab2openGL(pos);
+% Correction of head height
+pos.z=pos.z-opts.heightCorrection;
+
+if strcmpi(opts.coordSystem,'opengl')
+    pos.cart = ita_matlab2openGL(pos);
 end
 
 if (~opts.isItaCoordinates)

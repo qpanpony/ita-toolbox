@@ -1,5 +1,5 @@
-function d = dot(v1,v2)
-% calculate the scalar product of two vectors
+function d = norm2(v1)
+% calculate the length of vectors
 
 % <ITA-Toolbox>
 % This file is part of the ITA-Toolbox. Some rights reserved. 
@@ -7,5 +7,5 @@ function d = dot(v1,v2)
 % </ITA-Toolbox>
 
 
-d = dot(v1.cart,v2.cart,2);
+d = sqrt(v1.x.^2+v1.y.^2+v1.z.^2);
 end %eof

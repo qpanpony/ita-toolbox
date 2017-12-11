@@ -432,6 +432,25 @@ classdef  itaHRTF < itaAudio
                 end
             end
             
+            % Proceed (version independent)
+            names=fieldnames(tempMetadata);
+            for k=1:(numel(names))
+                switch class(tempMetadata.(names{k}))
+                    case 'logical'
+                        datatype='bool';
+                    case 'char'
+                        datatype='string';
+                    case 'double'
+                        if rem(tempMetadata.(names{k}),1)==0
+                            datatype='int';
+                        else
+                            datatype='float';
+                        end
+                    case 'int32'
+                            datatype='int';
+                end
+                metadata=daffv17_add_metadata(metadata,cell2mat(names(k)),datatype,tempMetadata.(names{k}));
+            end
             
             phiM = coordDaff(:,1)*pi/180;
             %phiM = mod(coordDaff(:,1),360)*pi/180;
@@ -668,6 +687,14 @@ classdef  itaHRTF < itaAudio
             end
             
             function obj = direction(this, idxCoord)
+                %return the HRTF (L&R) for a/multiple given direction indices
+                %   hOut = hObj.direction(idxCoord)
+                %       
+                %       idxCoord: index of the direction in hObj.dirCoord
+                %
+                %           hOut: HRTF in given direction    
+                %
+                % see also: hObj.findnearestHRTF
                 idxDir = zeros(numel(idxCoord)*2,1);
                 idxDir(1:2:numel(idxCoord)*2,:) = 2*idxCoord-1;
                 idxDir(idxDir==0)=1;
@@ -694,11 +721,11 @@ classdef  itaHRTF < itaAudio
             end
             
             function thetaUni = theta_UniqueDeg(this,varargin)
-                thetaUni = rad2deg(theta_Unique(this,varargin));
+                thetaUni = rad2deg(theta_Unique(this,varargin{:}));
             end
             
             function phiUni = phi_UniqueDeg(this,varargin)
-                phiUni = rad2deg(phi_Unique(this,varargin));
+                phiUni = rad2deg(phi_Unique(this,varargin{:}));
             end
             
             function slice = sphericalSlice(this,dirID,dir_deg,exactSearch)
@@ -815,8 +842,10 @@ classdef  itaHRTF < itaAudio
                 
                 idxF = this.freq2index(sArgs.freq);
                 
-                position = get(0,'ScreenSize');
-                figure('Position',[10 50 position(3:4)*0.85]);
+                if ~(~isempty(unused) && find(strcmp(unused,'parent')))
+                    position = get(0,'ScreenSize');
+                    figure('units','normalized','outerposition',[0 0 1 1]);
+                end
                 if sArgs.log 
                     freqData_dB = this.getEar(sArgs.earSide).freqData_dB;
                 else
@@ -1303,7 +1332,7 @@ classdef  itaHRTF < itaAudio
                     xlabel('Azimuth Angle in Degree');
                     ylabel('ITD in Milliseconds');
                     set(gca,'xTick',0:30:360)
-                    legend(ita_sprintf('%i�', round(thetaC_deg)))
+                    legend(ita_sprintf('%i^\circ', round(thetaC_deg)))
                 end
             end
             
@@ -1313,8 +1342,12 @@ classdef  itaHRTF < itaAudio
                 [this,sArgs]= ita_parse_arguments(sArgs,varargin);
                 ah          = sArgs.axes_handle;
                 
-                phiC_deg    = rad2deg(unique(round(this.phi_Unique*100)/100));
-                thetaC_deg  = rad2deg(unique(round(this.theta_Unique*100)/100));
+                phiC_deg    = uniquetol(round(this.phi_UniqueDeg,1),0.05);
+                thetaC_deg  = uniquetol(round(this.theta_UniqueDeg,1),0.05);
+                
+                %hbr: changed to round to 1 decimal in deg, seems more stable
+                %phiC_deg    = rad2deg(unique(round(this.phi_Unique*100)/100));
+                %thetaC_deg  = rad2deg(unique(round(this.theta_Unique*100)/100));
                 
                 % create slice
                 if numel(thetaC_deg)>1 && numel( phiC_deg)>1
@@ -1325,6 +1358,8 @@ classdef  itaHRTF < itaAudio
                     elseif strcmp(sArgs.plane,'median')
                         phiC_deg    = 0;
                         thisC       = this.sphericalSlice('phi_deg', phiC_deg,1);
+                    else
+                       error('Unknown plane option: Either horizontal or median'); 
                     end
                 else thisC = this;
                 end
@@ -1332,11 +1367,11 @@ classdef  itaHRTF < itaAudio
                 % multi defined coordinates
                 if numel(phiC_deg)<thisC.dirCoord.nPoints && numel(thetaC_deg) ==1
                     ita_verbose_info(' Coordinates are not unique!', 0);
-                    [~,ia] = unique(thisC.dirCoord.phi,'stable');
+                    [~,ia] = uniquetol(thisC.dirCoord.phi,'stable');
                     thisC = thisC.direction(ia);
                 elseif numel(thetaC_deg)<thisC.dirCoord.nPoints && numel(phiC_deg) ==1
                     ita_verbose_info(' Coordinates are not unique!', 0);
-                    [~,ia] = unique(thisC.dirCoord.theta,'stable');
+                    [~,ia] = uniquetol(thisC.dirCoord.theta,'stable');
                     thisC = thisC.direction(ia);
                 end
                 
@@ -1355,11 +1390,11 @@ classdef  itaHRTF < itaAudio
                 earSidePlot = sArgs.earSide;
                 if numel(phiC_deg)>1,
                     xData = phiC_deg;
-                    strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) '�'];
+                    strTitle =[ earSidePlot ' ear, \theta = ' num2str(round(thetaC_deg)) '^\circ'];
                     strXlabel = '\phi in Degree';
                 else
-                    xData = thetaC_deg;
-                    strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) '�'];
+                    xData = thisC.theta_UniqueDeg;
+                    strTitle =[earSidePlot ' ear, \phi = ' num2str(round(phiC_deg)) '^\circ'];
                     strXlabel = '\theta in Degree';
                 end
                 
@@ -1371,7 +1406,7 @@ classdef  itaHRTF < itaAudio
                 idxfMax = find(this.freqVector>2e4,1,'first');
                 if isempty(idxfMax), idxfMax = this.nBins; end
                 fMax = thisCs.freqVector(idxfMax);
-                [tick, lab] = ita_plottools_ticks('log');
+%                 [tick, lab] = ita_plottools_ticks('log');
                 
                 data_dB= thisCs.freqData_dB;
                 cMax = max(max(data_dB(2:idxfMax,:)));
@@ -1381,7 +1416,7 @@ classdef  itaHRTF < itaAudio
                 [xticks, xlabels] = ita_plottools_ticks('log');
                 
                 set(ah,'xTick',xticks,'xticklabel',xlabels)
-                set(ah,'yTick',yticks,'xticklabel',yticks)
+                set(ah,'yTick',yticks,'yticklabel',yticks)
                 
                 caxis([cMin cMax]);
                 set(ah, 'XScale', 'log')
@@ -1393,7 +1428,7 @@ classdef  itaHRTF < itaAudio
                 zlab = get(cb,'ylabel');
                 set(zlab,'String','Level in [dB]');
                 
-                set(ah,'xtick',tick,'xticklabel',lab)
+%                 set(ah,'xtick',tick,'xticklabel',lab)
                 xlabel('Frequency in Hertz');xlim([thisCs.freqVector(2) fMax ]);
                 ylabel(strXlabel);
                 

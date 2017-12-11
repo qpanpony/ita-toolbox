@@ -96,10 +96,9 @@ if strcmp(mode,'filter') %mli version
     end
     
     % sum the squared values
-    band_values = zeros(numel(fmExact),input.nChannels);
-    for idxch = 1:numel(fmExact)
-        % don't be confused: sqrt will be extracted at the end!
-        band_values(idxch,:) = sum(abs(squeeze(result.freq(:,idxch,:))).^exponent);
+    band_values = squeeze(sum(abs(result.freq).^exponent,1));
+    if input.nChannels == 1
+        band_values = band_values(:);
     end
     
     % FFT Mode

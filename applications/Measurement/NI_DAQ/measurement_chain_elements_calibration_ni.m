@@ -14,8 +14,24 @@ hw_ch = MC(1).hardware_channel;
 preamp_var = false;
 switch(lower(MCE.type))
     case {'sensor'}
-        sInit.Reference = '94';
-        sInit.Unit = 'dB re Pa';
+        tmp = itaValue(1,'V')/MCE.sensitivity;
+        switch tmp.unit
+            case 'Pa'
+                sInit.Reference = '94';
+                sInit.Unit = 'dB re Pa';
+            case 'm/s'
+                sInit.Reference = '1';
+                sInit.Unit = 'm/s';
+            case 'm/s^2'
+                sInit.Reference = '9.8';
+                sInit.Unit = 'm/s^2';
+            case 'N'
+                sInit.Reference = '1';
+                sInit.Unit = 'N';
+            otherwise
+                sInit.Reference = '1';
+                sInit.Unit = '1';
+        end
     case {'preamp','ad','preamp_robo_fix'}
         sInit.Reference = '1';
         sInit.Unit = 'V';
@@ -118,8 +134,10 @@ oldSens = MCE.sensitivity;
 sInit.Channel       = hw_ch;
 if strcmpi(sInit.Unit,'V')
     sInit.Reference = itaValue(pList{1},'V');
-else
+elseif strcmpi(sInit.Unit,'dB re Pa')
     sInit.Reference = itaValue(10^(pList{1}/20)*2e-5,'Pa');
+else
+    sInit.Reference = itaValue(pList{1},sInit.Unit);
 end
 sInit.samplingRate = pList{2};
 sInit.length = pList{3}*sInit.samplingRate;
