@@ -200,9 +200,6 @@ classdef itaOptitrack < handle
     %        calculated (instantenous) offset won't be valid anymore as soon
     %        as the orientation of the head-mounted rigid body is changed.
     %
-    % Author:  Florian Pausch, fpa@akustik.rwth-aachen.de
-    % Version: 2016-11-18
-    %
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.
     % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
@@ -306,7 +303,7 @@ classdef itaOptitrack < handle
                     openStream(urljava);
                 catch
                     % url is not existing or computer is not connected to Internet
-                    error(['[itaOptitrack] No Internet connection or, ',url,' does not exist. Missing NatNet SDK cannot be downloaded. Please update URL (l.297) and version (l. 313/317/321).'])
+                    error(['[itaOptitrack] No Internet connection or, ',url,' does not exist. Missing NatNet SDK cannot be downloaded. Please update download URL and NatNet version number.'])
                 end
                     
                 % create directory
@@ -323,6 +320,10 @@ classdef itaOptitrack < handle
                 % delete zip file
                 fprintf('.\n')
                 delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10.zip'))
+                
+                % delete downloaded quaternion.m version
+                delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10\NatNetSDK\Samples\Matlab\quaternion.m'))
+                delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10\NatNetSDK\Samples\Matlab\quaternion-license.txt'))
                 
                 fprintf( '[itaOptitrack] NatNet SDK has been successfully downloaded.\n' );
 
@@ -1183,9 +1184,9 @@ classdef itaOptitrack < handle
             frameID       = varargin{3};
             frameTime     = varargin{4};
             
-            Optitrack_obj.tempRigidBodyLogData = zeros(1,13,Optitrack_obj.numRigidBodies);
+            Optitrack_obj.tempRigidBodyLogData = nan(1,13,Optitrack_obj.numRigidBodies);
             
-            for idx=1:Optitrack_obj.numRigidBodies % TODO: quick and dirty solution with for loop, implement without for loop
+            for idx=1:data.nRigidBodies % TODO: quick and dirty solution with for loop, implement without for loop
                 rigidBodyData = data.RigidBodies(idx); %#ok
                                 
                 % Rigid body position [X,Y,Z]

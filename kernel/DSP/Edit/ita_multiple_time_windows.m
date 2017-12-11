@@ -32,15 +32,15 @@ else
     nOverlap = round(sArgs.overlap);
 end
 
+nSegments = ceil(a.nSamples / (nWindow - nOverlap)) + 1;
+nNewLength = (nSegments - 1) * (nWindow - nOverlap) + nWindow;
+if nNewLength-nWindow > a.nSamples
+    a = ita_extend_dat(a,nNewLength - nWindow,'forcesamples');
+end
+
 % half a window length at beginning and end
 ext_zeros = zeros(nWindow/2,a.nChannels);
 data = [ext_zeros; a.time; ext_zeros];
-
-nSegments = ceil((size(data,1) - nWindow) / (nWindow - nOverlap)) + 1;
-nNewLength = (nSegments - 1) * (nWindow - nOverlap) + nWindow;
-if nNewLength > a.nSamples
-    a = ita_extend_dat(a,nNewLength,'forcesamples');
-end
 
 %% generate window
 win_vec = window(sArgs.window,nWindow+1);

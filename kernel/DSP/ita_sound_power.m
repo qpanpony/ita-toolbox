@@ -36,7 +36,7 @@ function varargout = ita_sound_power(varargin)
 % Modified: 28-Nov-2017
 
 %% Initialization and Input Parsing
-sArgs        = struct('pos1_spl', 'itaSuper', 'pos2_T_empty', 'itaSuper', 'room_volume', 124,'room_surface',181,'T',20,'RH',0.5,'p_s',101325, 'freqRange', ita_preferences('freqRange'), 'bandsPerOctave', ita_preferences('bandsPerOctave') );
+sArgs        = struct('pos1_spl', 'itaSuper', 'pos2_T_empty', 'itaSuper', 'room_volume', 124,'room_surface',181,'T',20,'RH',0.5,'p_s',101325, 'freqRange', ita_preferences('freqRange'), 'bandsPerOctave', ita_preferences('bandsPerOctave'), 'bandMode','fft');
 [spl,T_empty,sArgs] = ita_parse_arguments(sArgs,varargin); 
 
 % acoustic constants
@@ -48,7 +48,7 @@ C2 = 101325./double(sArgs.p_s).*sqrt((273.15 + sArgs.T)/296).^3;
 
 %% calculate sound pressure level data
 % first third-octaves then average
-spl = ita_spk2frequencybands(spl, 'freqRange',sArgs.freqRange , 'bandsPerOctave',sArgs.bandsPerOctave);
+spl = ita_spk2frequencybands(spl, 'freqRange',sArgs.freqRange , 'bandsPerOctave',sArgs.bandsPerOctave,'mode',sArgs.bandMode);
 spl_m = sqrt(mean(spl^2));
 spl_m = itaResult(spl_m,T_empty.freqVector);
 
