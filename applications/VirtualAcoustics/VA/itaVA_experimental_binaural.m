@@ -13,8 +13,8 @@ myhrir.pf
 
 %% Exchange (variables prepared by itaVA_experimental_renderer_prepare)
 mStruct = struct;
-mStruct.listener = L;
+mStruct.receiver = L;
 mStruct.source = S;
 mStruct.ch1 = double( myhrir.ch( 1 ).timeData )';
 mStruct.ch2 = double( myhrir.ch( 2 ).timeData )';
-mRes = va.callModule( mod_id, mStruct )
+va.set_rendering_module_parameters( mod_id, mStruct )

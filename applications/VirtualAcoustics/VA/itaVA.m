@@ -139,9 +139,9 @@ classdef itaVA < handle
             this.disconnect
         end 
        
-        function [connected] = is_connected(this)
+        function [connected] = get_connected(this)
             % Returns if a connection to a server is established
-           connected = VAMatlab('is_connected', this.handle);
+           connected = VAMatlab('get_connected', this.handle);
         end
         
         function connect(this, addressstring)

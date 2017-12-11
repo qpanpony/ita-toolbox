@@ -91,16 +91,16 @@ function connect_connect_va_Callback( hObject, ~, handles )
 % hObject    handle to connect_connect_va (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if handles.va.isConnected
+if handles.va.get_connected
     handles.va.disconnect;
 end
 handles.va.connect;
 handles.va.reset;
 
 gpg_renderer_list = [];
-for n=1:numel( handles.va.getRenderingModules )
-    if strcmp( handles.va.getRenderingModules( n ).class, 'PrototypeGenericPath' )
-        gpg_renderer_list = [ gpg_renderer_list handles.va.getRenderingModules( n ) ];
+for n=1:numel( handles.va.get_rendering_modules )
+    if strcmp( handles.va.get_rendering_modules( n ).class, 'PrototypeGenericPath' )
+        gpg_renderer_list = [ gpg_renderer_list handles.va.get_renderers( n ) ];
     end
 end
 
@@ -118,7 +118,7 @@ disp( [ 'Using channel prototype generic path renderer with identifier: ' gpg_re
 % Classic VA module call with input and output arguments
 handles.module_id = [ gpg_renderer.class ':' gpg_renderer.id ];
 in_args.info = true;
-out_args = handles.va.callModule( handles.module_id, in_args );
+out_args = handles.va.call_module( handles.module_id, in_args );
 handles.module_channels = out_args.numchannels;
 handles.module_filter_length_samples = out_args.irfilterlengthsamples;
 disp( [ 'Your experimental renderer "' handles.module_id '" has ' num2str( handles.module_channels ) ' channels and an FIR filter length of ' num2str( out_args.irfilterlengthsamples ) ' samples' ] )
@@ -224,26 +224,26 @@ filepath_list = handles.listbox_sourcesignals.UserData;
 filepath_selected = filepath_list{ index_selected };
 filename_selected = filename_list{ index_selected };
 
-if handles.va.isConnected
+if handles.va.get_connected
     
     last_index = handles.listbox_sourcesignals_last_index;
     
     if last_index == index_selected
         % play/pause current
-        va_signal_id = handles.va.getSoundSourceSignalSource( handles.va_source_id );
+        va_signal_id = handles.va.get_sound_source_signal_source( handles.va_source_id );
         assert( ~isempty( va_signal_id ) )
-        playstate = handles.va.getAudiofileSignalSourcePlaybackState( va_signal_id );
+        playstate = handles.va.get_signal_source_buffer_playback_state( va_signal_id );
         if strcmpi( playstate, 'playing' )
-            handles.va.setAudiofileSignalSourcePlaybackAction( va_signal_id, 'pause' );
+            handles.va.set_signal_source_buffer_playback_action( va_signal_id, 'pause' );
         else
-            handles.va.setAudiofileSignalSourcePlaybackAction( va_signal_id, 'play' );
+            handles.va.set_signal_source_buffer_playback_action( va_signal_id, 'play' );
         end
     else
         % new selected, remove old?
         if last_index ~= -1
-            va_signal_id = handles.va.getSoundSourceSignalSource( handles.va_source_id );
-            handles.va.setSoundSourceSignalSource( handles.va_source_id, '' );
-            handles.va.deleteSignalSource( va_signal_id );
+            va_signal_id = handles.va.get_sound_source_signal_source( handles.va_source_id );
+            handles.va.get_sound_source_signal_source( handles.va_source_id, '' );
+            handles.va.delete_si( va_signal_id );
         end
         
         % create new
@@ -300,7 +300,7 @@ end
 if ~isempty( stringlist )
     handles.listbox_filters.String = stringlist;
 else
-    if handles.va.isConnected
+    if handles.va.get_connected
         warning( [ 'No itaAudio objects with matching ' handles.module_channels ' channels found in current workspace' ] )
     else
         %warning( [ 'No itaAudio objects found in current workspace' ] )
