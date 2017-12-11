@@ -687,6 +687,14 @@ classdef  itaHRTF < itaAudio
             end
             
             function obj = direction(this, idxCoord)
+                %return the HRTF (L&R) for a/multiple given direction indices
+                %   hOut = hObj.direction(idxCoord)
+                %       
+                %       idxCoord: index of the direction in hObj.dirCoord
+                %
+                %           hOut: HRTF in given direction    
+                %
+                % see also: hObj.findnearestHRTF
                 idxDir = zeros(numel(idxCoord)*2,1);
                 idxDir(1:2:numel(idxCoord)*2,:) = 2*idxCoord-1;
                 idxDir(idxDir==0)=1;
@@ -713,11 +721,11 @@ classdef  itaHRTF < itaAudio
             end
             
             function thetaUni = theta_UniqueDeg(this,varargin)
-                thetaUni = rad2deg(theta_Unique(this,varargin));
+                thetaUni = rad2deg(theta_Unique(this,varargin{:}));
             end
             
             function phiUni = phi_UniqueDeg(this,varargin)
-                phiUni = rad2deg(phi_Unique(this,varargin));
+                phiUni = rad2deg(phi_Unique(this,varargin{:}));
             end
             
             function slice = sphericalSlice(this,dirID,dir_deg,exactSearch)
@@ -1334,8 +1342,12 @@ classdef  itaHRTF < itaAudio
                 [this,sArgs]= ita_parse_arguments(sArgs,varargin);
                 ah          = sArgs.axes_handle;
                 
-                phiC_deg    = rad2deg(unique(round(this.phi_Unique*100)/100));
-                thetaC_deg  = rad2deg(unique(round(this.theta_Unique*100)/100));
+                phiC_deg    = uniquetol(round(this.phi_UniqueDeg,1),0.05);
+                thetaC_deg  = uniquetol(round(this.theta_UniqueDeg,1),0.05);
+                
+                %hbr: changed to round to 1 decimal in deg, seems more stable
+                %phiC_deg    = rad2deg(unique(round(this.phi_Unique*100)/100));
+                %thetaC_deg  = rad2deg(unique(round(this.theta_Unique*100)/100));
                 
                 % create slice
                 if numel(thetaC_deg)>1 && numel( phiC_deg)>1
