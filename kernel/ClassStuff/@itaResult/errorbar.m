@@ -9,7 +9,7 @@ function varargout = errorbar(varargin)
 sArgs = struct('pos1_data','itaSuper','nodb',ita_preferences('nodb'),'figure_handle',[],'axes_handle',[],'linfreq',ita_preferences('linfreq'),...
     'linewidth',ita_preferences('linewidth'),'fontname',ita_preferences('fontname'),'fontsize',ita_preferences('fontsize'),...
     'xlim',[],'ylim',[],'axis',[],'aspectratio',[],'hold','off','precise',true,'ylog',false,'unwrap',false,'stderr',false,'stdDev',[],'N',[],'color','blue');
-[data sArgs] = ita_parse_arguments(sArgs, varargin);
+[data, sArgs] = ita_parse_arguments(sArgs, varargin);
 
 %% Get Defaults
 matlabdefaults = ita_set_plot_preferences; %set ita toolbox preferences and get the matlab default settings
@@ -105,7 +105,7 @@ if isempty(sArgs.axes_handle)
     sArgs.axes_handle = gca;
     sArgs.resize_axes = true;
 else
-    axes(sArgs.axes_handle); %#ok<MAXES>
+    axes(sArgs.axes_handle);
     sArgs.resize_axes = false;
 end
 
