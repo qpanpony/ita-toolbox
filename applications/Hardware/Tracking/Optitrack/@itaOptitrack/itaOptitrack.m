@@ -65,7 +65,7 @@ classdef itaOptitrack < handle
     %                        (default: 1, only for recMethod 0)
     %           'singleShot' only log 1 frame of tracking data [logical]
     %                        (e.g. for geometric measurement purposes)
-    %           'autoSave'   save tracked data (default: true) [logical]
+    %           'autoSave'   save tracked data (default: false) [logical]
     %                        if savePath and/or saveName are unset,
     %                        savePath -> pwd, saveName -> trackerData_time_stamp
     %           'savePath'   path to save file containing logged data [string]
@@ -239,7 +239,7 @@ classdef itaOptitrack < handle
     properties(SetAccess = 'public', GetAccess = 'public')
         recMethod        = 0;     % recording method, 0: record data for recTime seconds (default), 1: record data without time limitation (stop via Optitrack_obj.stopTracking) [double]
         recTime          = 1;     % preferred logging time in sec (default: 1, only for recMethod 0) [double]
-        autoSave         = true;  % save tracked data to pwd or to 'savePath' if defined [logical]
+        autoSave         = false;  % save tracked data to pwd or to 'savePath' if defined [logical]
         savePath         = [];    % path to save file containing logged data [string]
         saveName         = [];    % name of file containing logged data [string]
 
