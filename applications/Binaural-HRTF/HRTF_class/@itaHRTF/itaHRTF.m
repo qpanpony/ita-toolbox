@@ -433,25 +433,6 @@ classdef  itaHRTF < itaAudio
             end
             
             % Proceed (version independent)
-            names=fieldnames(tempMetadata);
-            for k=1:(numel(names))
-                switch class(tempMetadata.(names{k}))
-                    case 'logical'
-                        datatype='bool';
-                    case 'char'
-                        datatype='string';
-                    case 'double'
-                        if rem(tempMetadata.(names{k}),1)==0
-                            datatype='int';
-                        else
-                            datatype='float';
-                        end
-                    case 'int32'
-                            datatype='int';
-                end
-                metadata=daffv17_add_metadata(metadata,cell2mat(names(k)),datatype,tempMetadata.(names{k}));
-            end
-            
             phiM = coordDaff(:,1)*pi/180;
             %phiM = mod(coordDaff(:,1),360)*pi/180;
             %if ~isempty(find(0<coordDaff(:,2),1,'first'))
