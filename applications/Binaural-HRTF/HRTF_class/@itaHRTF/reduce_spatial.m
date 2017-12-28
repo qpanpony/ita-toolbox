@@ -43,6 +43,10 @@ if max(pointDistances) > newSamplingDistance
 end
 
 
+if length(unique(newIndex)) < length(newIndex)
+   ita_verbose_info('Multiple identical points found. This is not ideal.'); 
+end
+
 cThis = this.direction(newIndex);
 
 end
