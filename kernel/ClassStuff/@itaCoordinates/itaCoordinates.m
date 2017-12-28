@@ -446,8 +446,19 @@ classdef itaCoordinates
         end
         
         function this = merge(varargin)
-            if numel(varargin) == 1 && numel(varargin{1}) == 1 %Only one element
-                this = varargin{1};
+            if numel(varargin) == 1 
+                if numel(varargin{1}) == 1
+                    this = varargin{1};
+                else
+                    % merging multi instance
+                    data = varargin{1};
+                    this = merge(data(1));
+                    data(1) = [];
+                    for idx = 1:numel(data)
+                        input = merge(data(idx));
+                        this.(this.coordSystem) = [this.(this.coordSystem); input.(this.coordSystem)];
+                    end
+                end
             else
                 this = merge(varargin{1});
                 varargin(1) = [];
