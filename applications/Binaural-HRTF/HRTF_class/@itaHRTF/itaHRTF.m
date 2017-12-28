@@ -199,7 +199,7 @@ classdef  itaHRTF < itaAudio
         %% ......................GET.......................................
         
         function nDirections = get.nDirections(this)
-            [~,idxDim] =  unique([this.channelCoordinates.phi_deg this.channelCoordinates.theta_deg] ,'rows');
+            [~,idxDim] =  uniquetol([this.channelCoordinates.phi_deg this.channelCoordinates.theta_deg] ,'ByRows',true);
             nDirections = numel(idxDim);
         end
         
