@@ -436,8 +436,9 @@ classdef  itaHRTF < itaAudio
             phiM = coordDaff(:,1)*pi/180;
             %phiM = mod(coordDaff(:,1),360)*pi/180;
             %if ~isempty(find(0<coordDaff(:,2),1,'first'))
-            thetaM = coordDaff(:,2)*pi/180;
-            %thetaM = mod(180-(coordDaff(:,2)+90),180)*pi/180;
+            thetaM = mod(180-(coordDaff(:,2)),180)*pi/180;
+%             thetaM = coordDaff(:,2)*pi/180;
+
             %else
             %    thetaM = coordDaff(:,2)*pi/180;
             %end
