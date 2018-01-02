@@ -79,6 +79,7 @@ if isempty(t60)
     T = (24.*v.*log(10)./c)./bsxfun(@plus,4.*m(:).*v,A); % Vgl. Kuttruff, Room Acoustics, Gl. 4.10 S. 101
     result = T;
     t60 = T;
+    outputUnit = 's';
 elseif isempty(alpha)
 
     idxInvalidRevTime = (t60<0) | isinf(t60);
@@ -95,6 +96,7 @@ elseif isempty(alpha)
         alpha_m = 1-exp(-A./s);
     end
     result = alpha_m;
+    outputUnit = '1';
 end
 
 r_h = 0.1.*(v./pi./t60).^(1/2);
@@ -114,14 +116,14 @@ if ita_result
     result = tmpresult;
     result.channelNames(:) = {'Absorption coefficient'};
     result.comment = 'Absorption coefficient';
-    result.channelUnits(:) = {'1'};
+    result.channelUnits(:) = {outputUnit};
     r_h.channelNames(:) = {'Critical distance'};
     r_h.comment = 'Critical distance';
     r_h.channelUnits(:) = {'m'};
     r_h = ita_metainfo_add_historyline(r_h,mfilename,varargin);
     result = ita_metainfo_add_historyline(result,mfilename,varargin);
 else
-    result = itaValue(result,'1');
+    result = itaValue(result,outputUnit);
     r_h = itaValue(r_h,'m');
 end
 
