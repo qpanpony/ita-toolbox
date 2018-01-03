@@ -83,6 +83,16 @@ narginchk(2,3);
 sArgs   = struct('pos1_num','itaAudioTime');
 [audioObj, sArgs] = ita_parse_arguments(sArgs,varargin(1)); 
 
+if numel(audioObj) > 1
+    ita_verbose_info([thisFuncStr 'Calling for all instances.'],1)
+    result = itaAudio(size(audioObj));
+    for idx = 1:numel(audioObj)
+        result(idx) = ita_time_crop(audioObj(idx),varargin{2:end}); 
+    end
+    varargout{1} = result;
+    return
+end
+
 interval = varargin{2};
 
 % set the used unit type
