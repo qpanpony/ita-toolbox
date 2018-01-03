@@ -302,6 +302,8 @@ function [] = daffv17_write( varargin )
         args.betapoints = (betaspan / args.betares) + 1;
         if (abs(args.betapoints - round(args.betapoints)) > 1e-5 )
             error('Beta range and beta resolution are not an integer multiple')
+        else
+           args.betapoints = round(args.betapoints); 
         end
     else
         args.betares = betaspan / (args.betapoints-1);
