@@ -161,7 +161,7 @@ cThis.channelCoordinates.sph= sph;
 
 %% move back to head center
 if sArgs.shiftToEar
-    ear_d_back       =  -ear_d;
+    ear_d_back       =  ear_d;
 %     movedData = zeros(size(hrtf_arbi));
     for ear=1:2
         movedData = moveFullDataSet(cThis.ch(ear:2:cThis.nChannels),sArgs,ear_d_back(ear),2);
