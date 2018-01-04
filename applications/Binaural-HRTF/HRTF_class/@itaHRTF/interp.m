@@ -94,7 +94,7 @@ copyData = this;
 if sArgs.shiftToEar
     ear_d       =   sArgs.shiftOffset;
     for ear=1:2
-        movedData = moveFullDataSet(this.ch(ear:2:this.nChannels),sArgs,ear_d(ear));
+        movedData = moveFullDataSet(this.ch(ear:2:this.nChannels),sArgs,ear_d(ear),1);
         copyData.freqData(:,ear:2:copyData.nChannels) = movedData;
     end
 end
@@ -164,7 +164,7 @@ if sArgs.shiftToEar
     ear_d_back       =  -ear_d;
 %     movedData = zeros(size(hrtf_arbi));
     for ear=1:2
-        movedData = moveFullDataSet(cThis.ch(ear:2:cThis.nChannels),sArgs,ear_d_back(ear));
+        movedData = moveFullDataSet(cThis.ch(ear:2:cThis.nChannels),sArgs,ear_d_back(ear),2);
         cThis.freqData(:,ear:2:cThis.nChannels) = movedData;
     end    
 end
@@ -180,13 +180,13 @@ end
 
 
 
-function [ data ] = moveFullDataSet(data,options,offsetShift)
+function [ data ] = moveFullDataSet(data,options,offsetShift,mode)
     fullCoords = data.channelCoordinates;
     freqVector = data.freqVector;
     shiftedData = zeros(size(data.freqData));
     axis = options.shiftAxis;
     for index = 1:length(freqVector)
-        shiftedData(index,:) = moveHRTF(fullCoords,data.freqData(index,:),freqVector(index),axis,offsetShift);
+        shiftedData(index,:) = moveHRTF(fullCoords,data.freqData(index,:),freqVector(index),axis,offsetShift,mode);
     end
 
 
@@ -194,7 +194,7 @@ function [ data ] = moveFullDataSet(data,options,offsetShift)
 end
 
 
-function [data] = moveHRTF(s, data, frequency, axis, offset)
+function [data] = moveHRTF(s, data, frequency, axis, offset,mode)
     % the offset is given in m
     
     origAxis = s.r;
@@ -215,7 +215,12 @@ function [data] = moveHRTF(s, data, frequency, axis, offset)
     newAxis = s.r;
     k = 2*pi*frequency/340;
     % the phase is moved by the difference of the axis points
-    data = data .* exp(1i*k*(newAxis - origAxis));
+    switch mode
+        case 1
+            data = data .* exp(1i*k*(newAxis - origAxis));
+        case 2
+            data = data .* exp(1i*k*(origAxis - newAxis));     
+    end
     % amplitude manipulation did not yield better results
 %     data = data .* newAxis ./ origAxis;
 
