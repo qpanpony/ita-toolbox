@@ -976,6 +976,10 @@ classdef itaOptitrack < handle
                         
                         % get info about singleShot measurement
                         Optitrack_obj.infoCalibration = Optitrack_obj.info;
+                        for index = 1:Optitrack_obj.numRigidBodies
+                           trackedData(index) =  Optitrack_obj.data(index).isTracked;
+                        end
+                        Optitrack_obj.infoCalibration.isTracked = trackedData;
                         Optitrack_obj.infoCalibration.TakeName = fullfile(Optitrack_obj.savePathCalibration,Optitrack_obj.saveNameCalibration);
                         
                         % calculate offset
