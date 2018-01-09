@@ -7,6 +7,7 @@ function output = ita_headphone_equalization(HPTF,type)
 % </ITA-Toolbox>
 
 output = HPTF(1,1);
+output.channelUnits(:) = {''};
 for cdx = 1:HPTF(1,1).nChannels
     
     hp = merge(HPTF.ch(cdx));
@@ -38,7 +39,7 @@ for cdx = 1:HPTF(1,1).nChannels
     R.freqData = aux;
     
     % do smoothing
-    %R = ita_smooth(R,'LogFreqOctave1',1/6,'Abs');
+    R = ita_smooth(R,'LogFreqOctave1',1/6,'Abs');
     R = ita_invert_spk_regularization(R,[0 18000],'beta',.01);
     
     % minimum phase
@@ -63,14 +64,11 @@ for cdx = 1:HPTF(1,1).nChannels
     % H = ita_time_window(H,[2^12 2^13],'samples');
     % H = ita_time_window(H,[0.1 0.2],'time','dc',true);
     H = ita_time_window(H,[2^9 2^10],'samples');
-    H.channelUnits = {''};
     % It is necessary to correct the overall level of the filter
     % we can either guaranty no gain
     % H = H/max(abs(H.freqData));
     
-       
 %     spl = ita_spk2level(H,3,'averaged');
-%     
 %     H = H/mean(spl.data);
 
     output.freqData(:,cdx) = H.freqData;
@@ -79,4 +77,4 @@ end
 % or guaranty that the average level of the signal is not altered
 % this also means that the overall loudness of the signal will not be
 % considerably altered.
-% output = output/norm(output.rms);
+output = output/mean(output.rms);
