@@ -107,11 +107,15 @@ classdef itaMeshNodes < itaMeta & itaCoordinates
                     input = merge(varargin{idx});
                     tmpID = this.ID(:);
                     this = merge@itaCoordinates(this,input);
-                    if numel(unique([tmpID(:); input.ID(:)])) < numel(tmpID(:))+numel(input.ID(:))
-                        ita_verbose_info('itaMeshNodes.merge:elements have been renumbered due to ID conflicts',0);
-                        this.ID = [tmpID(:); input.ID(:)+max(tmpID)];
+                    if strcmpi(class(input),'itaCoordinates')
+                        this.ID = [tmpID(:); max(tmpID(:)) + (1:input.nPoints).'];
                     else
-                        this.ID = [tmpID(:); input.ID(:)];
+                        if numel(unique([tmpID(:); input.ID(:)])) < numel(tmpID(:))+numel(input.ID(:))
+                            ita_verbose_info('itaMeshNodes.merge:elements have been renumbered due to ID conflicts',0);
+                            this.ID = [tmpID(:); input.ID(:)+max(tmpID)];
+                        else
+                            this.ID = [tmpID(:); input.ID(:)];
+                        end
                     end
                 end
             end
