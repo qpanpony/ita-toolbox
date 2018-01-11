@@ -500,7 +500,7 @@ classdef itaOptitrack < handle
             if Optitrack_obj.isConnected
             
             % parse input arguments
-            sArgs          = struct('recMethod',0,'recTime',1,'savePath',[],'saveName',[],'singleShot',0,'debugInfo',0);
+            sArgs          = struct('recMethod',0,'recTime',1,'savePath',[],'saveName',[],'singleShot',0,'debugInfo',0,'autoSave',1);
             sArgs          = ita_parse_arguments(sArgs,varargin,1);
             Optitrack_obj.recMethod      = sArgs.recMethod;  % recording method, 0: record data for recTime seconds
             %                                                                    1: manually abort logging by closing msgbox
@@ -509,6 +509,7 @@ classdef itaOptitrack < handle
             Optitrack_obj.saveName       = sArgs.saveName;   % name of log file to be saved
             Optitrack_obj.debugInfo      = sArgs.debugInfo;  % name of log file to be saved
             Optitrack_obj.singleShot     = sArgs.singleShot; % only log 1 frame of tracking data
+            Optitrack_obj.autoSave       = sArgs.autoSave;
             
             % clear old data
             Optitrack_obj.data = [];
@@ -703,14 +704,16 @@ classdef itaOptitrack < handle
 
                             % interpolate missing data points using PCHIP interpolation
                             if ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
-
-                                Optitrack_obj.data(idx).position    = itaCoordinates( interp1(Optitrack_obj.data(idx).frameID(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx))), ...
-                                                                                      Optitrack_obj.rigidBodyLogData.data(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx)),4:6,idx), ...
-                                                                                      Optitrack_obj.data(idx).frameID, 'pchip') );
-                                %                                 
-                                Optitrack_obj.data(idx).orientation = itaOrientation( interp1(Optitrack_obj.data(idx).frameID(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx))),...
-                                                                                     Optitrack_obj.rigidBodyLogData.data(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx)),7:10,idx), ...
-                                                                                      Optitrack_obj.data(idx).frameID, 'pchip') );
+                                try
+                                    Optitrack_obj.data(idx).position    = itaCoordinates( interp1(Optitrack_obj.data(idx).frameID(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx))), ...
+                                                                                          Optitrack_obj.rigidBodyLogData.data(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx)),4:6,idx), ...
+                                                                                          Optitrack_obj.data(idx).frameID, 'pchip') );
+                                    %                                 
+                                    Optitrack_obj.data(idx).orientation = itaOrientation( interp1(Optitrack_obj.data(idx).frameID(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx))),...
+                                                                                         Optitrack_obj.rigidBodyLogData.data(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx)),7:10,idx), ...
+                                                                                          Optitrack_obj.data(idx).frameID, 'pchip') );
+                                catch e
+                                end
 
                             else
                                 Optitrack_obj.data(idx).position    = itaCoordinates( Optitrack_obj.rigidBodyLogData.data(:,4:6,idx) );
@@ -735,8 +738,11 @@ classdef itaOptitrack < handle
 
                             % interpolate mean error
                             if ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
-                                Optitrack_obj.data(idx).meanError   = interp1(1:sum(~isnan(Optitrack_obj.rigidBodyLogData.data(:,11,idx))),...
+                                try
+                                    Optitrack_obj.data(idx).meanError   = interp1(1:sum(~isnan(Optitrack_obj.rigidBodyLogData.data(:,11,idx))),...
                                     Optitrack_obj.rigidBodyLogData.data(~isnan(Optitrack_obj.rigidBodyLogData.data(:,11,idx)),11,idx),1:Optitrack_obj.info.TotalFrames,'PCHIP');
+                                catch e
+                                end
                             else
                                 Optitrack_obj.data(idx).meanError   = Optitrack_obj.rigidBodyLogData.data(:,11,idx);
                             end
