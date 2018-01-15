@@ -95,7 +95,8 @@ end
 current_natnet_dir = which( 'NatNetML.dll' );
 if ~isempty( current_natnet_dir )
     ainfo = NET.addAssembly( current_natnet_dir );
-    natnetversion_raw = NatNetML.NatNetClientML( 0 ).NatNetVersion();
+    client = NatNetML.NatNetClientML( 0 );
+    natnetversion_raw = client.NatNetVersion;
     vs = sprintf( 'NatNetML (OptiTrack) %d.%d', natnetversion_raw(1), natnetversion_raw(2) );
     set( handles.edit_natnet_version, 'String', vs )
 end
