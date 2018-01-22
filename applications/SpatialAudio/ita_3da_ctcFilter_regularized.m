@@ -20,11 +20,17 @@ function [ varargout ] = ita_3da_ctcFilter_regularized( varargin )
 
 
 %% Options
+% Calculation
 opts.beta            = 0.001; % regularization parameter
 opts.delay           = 400; % required delay to allow for causal filter
-opts.threshold       = 20; % threshold for ita_start_IR()
-opts.useStartIr      = false;
-opts.filterlength    = -1;
+opts.thresholdStartIR       = -1; % threshold for ita_start_IR() to cut out the start delay, -1 will disable the feature
+opts.filterLength    = -1; % resulting filter lengt if set to -1: maximum of 4096 and nSamples*2
+opts.winLim          = [.7 85]; % limits for windowing (suppress artifacts at the end of HRIR caused by time shifting)
+opts.postProcessing  = true; % Indicates if a time shift and windowing operation is performed on the calculated filter. WARNING: May lead to non-causal filters (echo effect)
+
+%Pre-processing
+%% Post-processing
+
 
 %% Init
 hrtf=varargin(1);
@@ -51,7 +57,20 @@ else
     H = ita_extend_dat(H,opts.filterLength,'forceSamples');
 end
 
-if opts.
+if (opts.thresholdStartIR~=-1)
+    ind = zeros(size(H));
+    for idx = 1:numel(H)
+        ind(idx) = ita_start_IR(H(idx),'threshold',opts.threshold);
+    end
+    
+    IND = min(ind(:))-1;
+    for idx = 1:numel(H)
+        H(idx) = ita_time_shift(H(idx),-ind(idx),'samples');
+        H(idx) = ita_time_window(H(idx),opts.winLim*H(idx).trackLength,'time');
+        H(idx) = ita_time_shift(H(idx),ind(idx)-IND,'samples');
+    end
+end
+
 
 
 %% Calculation
@@ -74,11 +93,22 @@ for idx = 1:hn
 end
 
 
-
 %% Postprocessing
+if opts.postProcessing
+    FilterWindow = itaAudio;
+    FilterWindow.time = hann(H.nSamples);
+    FilterWindow.samplingRate = CTC(1).samplingRate;
+    for idx = 1 : numel(CTC)
+        CTC(idx) = ita_time_shift(CTC(idx), H.nSamples/2, 'samples');
+        CTC(idx) = CTC(idx) .* FilterWindow;
+    end
+end
 
-
-
-
+%% Metadata
+[Cm Cn]=size(CTC);
+for idx=1:Cm
+    CTC(idx,1).channelNames = {['CTC-' num2str(idx) 'L''']};
+    CTC(idx,2).channelNames = {['CTC-' num2str(idx) 'R''']};
+end
 end
 
