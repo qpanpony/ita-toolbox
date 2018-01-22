@@ -122,7 +122,7 @@ if opts.smoothing
             H = smooth_balasz(H);
             
         case 'gammatone'
-            % according to Breebard´s Gamatone Smoothing algorithm
+            % according to Breebards Gamatone Smoothing algorithm
             H = ita_smooth(H,'gammatoneSmooth',1,'abs+gopts.delay');
             
         case 'lifter'
@@ -919,7 +919,7 @@ switch lower(opts.filterType)
     case {'regularized','reg'}
         h = merge(H);
         N = h.nSamples;
-        %         h = ita_time_window(h,round(opts.winLim*h.nSamples),'samples');
+        h = ita_time_window(h,round(opts.winLim*h.nSamples),'samples'); % this was commented out, but leads to errors if the inital shift due to start IR cycles something from the impulse to the end. MKO
         h = ita_extend_dat(h,max(2*N,2^12),'forceSamples');
         
         %speed up for 2x2 matrices
