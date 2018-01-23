@@ -27,7 +27,7 @@ classdef itaRavenProject < handle
     %
     %
     % Author:         Soenke Pelzer (spe@akustik.rwth-aachen.de)
-	%				  Lukas Aspöck (las@akustik.rwth-aachen.de)
+	%				  Lukas Aspï¿½ck (las@akustik.rwth-aachen.de)
     % Version:        0.1
     % First release:  01.11.10
     % Last revision:  12.09.16
@@ -153,8 +153,9 @@ classdef itaRavenProject < handle
 	
     properties (GetAccess = 'private', SetAccess = 'private')
         
-        ravenExe64 = '..\bin64\RavenConsole64.exe'
-        ravenExe32 = '..\bin32\RavenConsole.exe'
+        ravenExe64 = fullfile('..', 'bin64', 'RavenConsole64.exe');
+        ravenExe32 = fullfile('..', 'bin32', 'RavenConsole.exe');
+        ravenExeLinux = fullfile('..', 'bin64', 'RavenConsole');
         
         rpf_ini
         raven_ini
@@ -216,6 +217,8 @@ classdef itaRavenProject < handle
                 obj.ravenExe = obj.ravenExe32;
             elseif strcmp(computer('arch'), 'win64')
                 obj.ravenExe = obj.ravenExe64;
+            elseif strcmp(computer('arch'), 'glnxa64')
+                obj.ravenExe = obj.ravenExeLinux;
             else
                 error('Only Windows OS are supported.');
             end
@@ -242,7 +245,11 @@ classdef itaRavenProject < handle
         
                     if isempty(locatedRavenExe) 
                         disp('[itaRaven]: No raven binary was found! Please select path to RavenConsole.exe!');
-                        [ selectedRavenExe, selectedRavenPath] = uigetfile('*.exe',' No raven binary was found! Please select path to RavenConsole.exe');
+                        if ~isunix
+                            [ selectedRavenExe, selectedRavenPath] = uigetfile('*.exe',' No raven binary was found! Please select path to RavenConsole.exe');
+                        else
+                            [ selectedRavenExe, selectedRavenPath] = uigetfile('*',' No raven binary was found! Please select path to RavenConsole');
+                        end
                         obj.ravenExe = [ selectedRavenPath selectedRavenExe];
                     else
                         obj.ravenExe = locatedRavenExe;
@@ -302,8 +309,8 @@ classdef itaRavenProject < handle
             %
             
             % change relative to absolute path
-            if (~strcmp(filename(2),':'))
-                obj.ravenProjectFile = [pwd '\' filename];
+            if ((~strcmp(filename(2),':') && ispc) || (~strcmp(filename(1), filesep) && isunix))
+                obj.ravenProjectFile = fullfile(pwd, filename);
             else
                 obj.ravenProjectFile = filename;
             end
@@ -366,11 +373,11 @@ classdef itaRavenProject < handle
             % [PrimarySources] %
             obj.sourceNameString    = obj.rpf_ini.GetValues('PrimarySources', 'sourceNames', 'Sender');
             obj.sourceNames         = textscan(obj.sourceNameString, '%s', 'Delimiter', ',');
-            obj.sourceNames         = obj.sourceNames{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rückgängig gemacht
+            obj.sourceNames         = obj.sourceNames{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rï¿½ckgï¿½ngig gemacht
             obj.sourceDirectivityString = obj.rpf_ini.GetValues('PrimarySources', 'sourceDirectivity', '');
             if ~isempty(obj.sourceDirectivityString)
                 obj.sourceDirectivity   = textscan(obj.sourceDirectivityString, '%s', 'Delimiter', ',');
-                obj.sourceDirectivity   = obj.sourceDirectivity{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rückgängig gemacht
+                obj.sourceDirectivity   = obj.sourceDirectivity{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rï¿½ckgï¿½ngig gemacht
             else
                 obj.sourceDirectivity   = {};
             end
@@ -386,7 +393,7 @@ classdef itaRavenProject < handle
             % [Receiver] %
             obj.receiverNameString  = obj.rpf_ini.GetValues('Receiver', 'receiverNames', 'Receiver');
             obj.receiverNames       = textscan(obj.receiverNameString, '%s', 'Delimiter', ',');
-            obj.receiverNames       = obj.receiverNames{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rückgängig gemacht
+            obj.receiverNames       = obj.receiverNames{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rï¿½ckgï¿½ngig gemacht
             obj.receiverPositions   = obj.rpf_ini.GetValues('Receiver', 'receiverPositions');
             obj.receiverPositions   = reshape(obj.receiverPositions, 3, numel(obj.receiverPositions)/3)';
             obj.receiverViewVectors = obj.rpf_ini.GetValues('Receiver', 'receiverViewVectors', '1, 0 ,0');
@@ -762,8 +769,8 @@ classdef itaRavenProject < handle
                 currentMaterial.freqData = [ currentMaterial.freqData absorp' ];
                 currentSurfaceArea = obj.getSurfaceAreaOfMaterial(allMaterials{iMat});
                 allMaterials{iMat} = strrep(allMaterials{iMat},'_',' ');
-                allMaterials{iMat} = [ allMaterials{iMat} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m² ;'];
-                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18,iMat)),'%5.2f') ' m² )'];
+                allMaterials{iMat} = [ allMaterials{iMat} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' mï¿½ ;'];
+                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18,iMat)),'%5.2f') ' mï¿½ )'];
             end
 
             currentMaterial.channelNames = allMaterials;
@@ -822,7 +829,7 @@ classdef itaRavenProject < handle
                 currentMaterial.freqData = [ currentMaterial.freqData scatter' ];
                                 currentSurfaceArea = obj.getSurfaceAreaOfMaterial(allMaterials{i});
                 allMaterials{i} = strrep(allMaterials{i},'_',' ');
-                allMaterials{i} = [ allMaterials{i} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m² )'];
+                allMaterials{i} = [ allMaterials{i} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' mï¿½ )'];
             end
 
             currentMaterial.channelNames = allMaterials;
@@ -1034,7 +1041,7 @@ classdef itaRavenProject < handle
             else
                 obj.sourceNameString = sourceNames;
                 obj.sourceNames      = textscan(obj.sourceNameString, '%s', 'Delimiter', ',');
-                obj.sourceNames      = obj.sourceNames{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rückgängig gemacht
+                obj.sourceNames      = obj.sourceNames{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rï¿½ckgï¿½ngig gemacht
             end
             obj.rpf_ini.SetValues('PrimarySources', 'sourceNames', obj.sourceNameString);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
@@ -1047,7 +1054,7 @@ classdef itaRavenProject < handle
             if ~isempty(readstring)
                 
                 readstring   = textscan(readstring, '%s', 'Delimiter', ',');
-                readstring   = readstring{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rückgängig gemacht
+                readstring   = readstring{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rï¿½ckgï¿½ngig gemacht
                 if nargin<2
                     directivityName=readstring;
                 else
@@ -1063,7 +1070,7 @@ classdef itaRavenProject < handle
             %                 directivityName = obj.sourceDirectivity{sourceID + 1};
             %             else
             %                 obj.sourceDirectivity   = textscan(obj.sourceDirectivityString, '%s', 'Delimiter', ',');
-            %                 obj.sourceDirectivity   = obj.sourceDirectivity{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rückgängig gemacht
+            %                 obj.sourceDirectivity   = obj.sourceDirectivity{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rï¿½ckgï¿½ngig gemacht
             %                 directivityName = obj.sourceDirectivity{sourceID + 1};
             %             end
         end
@@ -1076,7 +1083,7 @@ classdef itaRavenProject < handle
             else
                 obj.sourceDirectivityString = directivity;
                 obj.sourceDirectivity   = textscan(obj.sourceDirectivityString, '%s', 'Delimiter', ',');
-                obj.sourceDirectivity   = obj.sourceDirectivity{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rückgängig gemacht
+                obj.sourceDirectivity   = obj.sourceDirectivity{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rï¿½ckgï¿½ngig gemacht
             end
             obj.rpf_ini.SetValues('PrimarySources', 'sourceDirectivity', obj.sourceDirectivityString);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
@@ -1184,7 +1191,7 @@ classdef itaRavenProject < handle
             else
                 obj.receiverNameString = rec_names;
                 obj.receiverNames      = textscan(obj.receiverNameString, '%s', 'Delimiter', ',');
-                obj.receiverNames      = obj.receiverNames{1}; % textscan liefer cell array in nochmal einer zelle, diese doppelkapselung wird hier rückgängig gemacht
+                obj.receiverNames      = obj.receiverNames{1}; % textscan liefer cell array in nochmal einer zelle, diese doppelkapselung wird hier rï¿½ckgï¿½ngig gemacht
             end
             obj.rpf_ini.SetValues('Receiver', 'receiverNames', obj.receiverNameString);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
@@ -2456,7 +2463,7 @@ classdef itaRavenProject < handle
                         
                         histo{iSrc,iRec}.data(:, iBand) = airAbs' .* sum(bsxfun(@times, reshape(M, obj.numParticles_Sphere, numTimeSteps), obj.initialParticleEnergy{iSrc,iBand}));
                         
-                        % todo: mal ohne exp/log probieren... könnte schneller sein
+                        % todo: mal ohne exp/log probieren... kï¿½nnte schneller sein
                         
                         
                         %                         % loop all detections
@@ -4868,9 +4875,9 @@ classdef itaRavenProject < handle
             end
             
             if obj.generateRIR
-                ir_files = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\RIR_Combined', 'PrimarySource', 'Receiver'}, '.wav');
-                ir_files_IS = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\RIR_IS', 'PrimarySource', 'Receiver'}, '.wav');
-                ir_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\RIR_RT', 'PrimarySource', 'Receiver'}, '.wav');
+                ir_files = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'RIR_Combined', 'PrimarySource', 'Receiver'}, '.wav');
+                ir_files_IS = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'RIR_IS', 'PrimarySource', 'Receiver'}, '.wav');
+                ir_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'RIR_RT', 'PrimarySource', 'Receiver'}, '.wav');
                 
                 % read the wave files back from disk
                 obj.monauralIR = obj.loadWaveFile(ir_files);
@@ -4882,9 +4889,9 @@ classdef itaRavenProject < handle
                 obj.monauralIR_RT = [];
             end
             if obj.generateBRIR
-                ir_files = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\BRIR_Combined', 'PrimarySource', 'Receiver'}, '.wav');
-                ir_files_IS = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\BRIR_IS', 'PrimarySource', 'Receiver'}, '.wav');
-                ir_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\BRIR_RT', 'PrimarySource', 'Receiver'}, '.wav');
+                ir_files = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'BRIR_Combined', 'PrimarySource', 'Receiver'}, '.wav');
+                ir_files_IS = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'BRIR_IS', 'PrimarySource', 'Receiver'}, '.wav');
+                ir_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'BRIR_RT', 'PrimarySource', 'Receiver'}, '.wav');
                 
                 % read the wave files back from disk
                 obj.binauralIR = obj.loadWaveFile(ir_files);
@@ -4896,14 +4903,14 @@ classdef itaRavenProject < handle
                 obj.binauralIR_RT = [];
             end
             if obj.generateISHOA
-                ir_files_IS = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\HOA_IS', 'PrimarySource', 'Receiver'}, '.wav');
+                ir_files_IS = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'HOA_IS', 'PrimarySource', 'Receiver'}, '.wav');
                 
                 % read the wave files back from disk
                 obj.ambisonicsIR_IS = obj.loadWaveFile(ir_files_IS);
                 
                 % check for combined results with ray tracing
                 if obj.generateRTHOA
-                    ir_files_combined = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\HOA_Combined', 'PrimarySource', 'Receiver'}, '.wav');
+                    ir_files_combined = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'HOA_Combined', 'PrimarySource', 'Receiver'}, '.wav');
                     
                     % read the wave files back from disk
                     obj.ambisonicsIR = obj.loadWaveFile(ir_files_combined);
@@ -4914,7 +4921,7 @@ classdef itaRavenProject < handle
                 obj.ambisonicsIR_IS = [];
             end
             if obj.generateRTHOA
-                ir_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\HOA_RT', 'PrimarySource', 'Receiver'}, '.wav');
+                ir_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'HOA_RT', 'PrimarySource', 'Receiver'}, '.wav');
                 
                 % read the wave files back from disk
                 obj.ambisonicsIR_RT = obj.loadWaveFile(ir_files_RT);
@@ -4923,7 +4930,7 @@ classdef itaRavenProject < handle
             end
             
             if obj.generateISVBAP
-                ir_files_IS = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\VBAP_IS', 'PrimarySource', 'Receiver'}, '.wav');
+                ir_files_IS = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'VBAP_IS', 'PrimarySource', 'Receiver'}, '.wav');
                 
                 % read the wave files back from disk
                 obj.vbapIR_IS = obj.loadWaveFile(ir_files_IS);
