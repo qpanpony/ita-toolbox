@@ -1,4 +1,4 @@
-function  weights = panVBAP(pos_LS,pos_VS)
+function  weights = ita_3da_panVBAP(pos_LS,pos_VS)
 %panVBAP - Calculate weights for VBAP
 %
 %  This function receives the position of the loudspeakers and the position

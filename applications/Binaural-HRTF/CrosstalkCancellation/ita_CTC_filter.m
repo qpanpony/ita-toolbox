@@ -35,7 +35,7 @@ function [CTC,Horig] = ita_CTC_filter(varargin)
 % </ITA-Toolbox>
 
 %% Initialization
-
+warning('No longer supported version that is reported to be bugged, consider using ita_3da_ctcFilter_regularized.')
 if nargin < 2
     error('CTC:InputArguments','Man! We need at least two loudspeakers for CTC! The input variable must be itaAudio objects.');
 end

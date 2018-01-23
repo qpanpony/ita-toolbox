@@ -24,7 +24,7 @@ function [ CTC ] = ita_3da_ctcFilter_regularized( varargin )
 opts.beta            = 0.001; % regularization parameter
 opts.thresholdStartIR       = -1; % threshold for ita_start_IR() to cut out the start delay, -1 will disable the feature
 opts.filterLength    = -1; % resulting filter lengt if set to -1: maximum of 4096 and nSamples*2
-opts.winLim          = [.7 85]; % limits for windowing (suppress artifacts at the end of HRIR caused by time shifting)
+opts.winLim          = [.7 85]; % limits for windowing (suppress artifacts at the end of HRIR caused by time shifting), needed for ita_start_ir
 opts.postProcessing  = true; % Indicates if a time shift and windowing operation is performed on the calculated filter. WARNING: May lead to non-causal filters (echo effect)
 
 %% Init
