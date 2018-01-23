@@ -1,4 +1,4 @@
-function [ varargout ] = ita_3da_ctcFilter_regularized( varargin )
+function [ CTC ] = ita_3da_ctcFilter_regularized( varargin )
 %ITA_3DA_CTCFILTER_REGULARIZED Generates a set of CTC Filter for a
 %loudspeaker system with an arbitrary number of loudspeaker.
 
@@ -22,19 +22,14 @@ function [ varargout ] = ita_3da_ctcFilter_regularized( varargin )
 %% Options
 % Calculation
 opts.beta            = 0.001; % regularization parameter
-opts.delay           = 400; % required delay to allow for causal filter
 opts.thresholdStartIR       = -1; % threshold for ita_start_IR() to cut out the start delay, -1 will disable the feature
 opts.filterLength    = -1; % resulting filter lengt if set to -1: maximum of 4096 and nSamples*2
 opts.winLim          = [.7 85]; % limits for windowing (suppress artifacts at the end of HRIR caused by time shifting)
 opts.postProcessing  = true; % Indicates if a time shift and windowing operation is performed on the calculated filter. WARNING: May lead to non-causal filters (echo effect)
 
-%Pre-processing
-%% Post-processing
-
-
 %% Init
-hrtf=varargin(1);
-H=merge(hrtf);
+hrtf=varargin{1};
+H=ita_merge(hrtf(:));
 
 if ~isa(hrtf,'itaAudio')
     error('First input (HRTF) has to be itaAudio')
@@ -48,10 +43,10 @@ if ~strcmpi(H.signalType,'energy')
     warning('HRTFs are not energy signals! Changing them to energy');
     H.signalType='energy';
 end
-opts=ita_parse_arguments(opts,varargin(2:end));
+opts=ita_parse_arguments(opts,varargin{2:end});
 
 %% Preprocessing
-if (opts.filterlength==-1)
+if (opts.filterLength==-1)
     H = ita_extend_dat(H,max(2*H.nSamples,2^12),'forceSamples');
 else
     H = ita_extend_dat(H,opts.filterLength,'forceSamples');
@@ -75,7 +70,8 @@ end
 
 %% Calculation
 N = H.nSamples;
-[hm,hn] = size(H);
+hm=2;
+hn=H.nChannels/2;
 f = H.nBins;
 hfq = H.freqData;
 c = zeros(hn,hm,f);
