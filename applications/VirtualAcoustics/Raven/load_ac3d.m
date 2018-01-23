@@ -75,13 +75,13 @@ classdef load_ac3d
             % Vertizes Koordinaten finden
             
             % Es wird davon ausgegangen, dass bei jedem Objekt einmal der Begriff
-            % "numvert" auftaucht, die Länge von vert_rows ist daher auch mit der
+            % "numvert" auftaucht, die Lï¿½nge von vert_rows ist daher auch mit der
             % Anzahl der Objekte in der ac3d Datei identisch.
             % Die find Funktion liefert dabei die Zeilennummer, in der "numvert" steht.
-            % In die vertex_cell werden für jedes Objekt alle Koordinaten der Vertizes
+            % In die vertex_cell werden fï¿½r jedes Objekt alle Koordinaten der Vertizes
             % geschrieben.
-            % Hierbei wird über die ac3d Dateistruktur der Anfang und das Ende der
-            % Liste der Vertizes über die jeweilige Anzahl der Vertizes pro Objekt
+            % Hierbei wird ï¿½ber die ac3d Dateistruktur der Anfang und das Ende der
+            % Liste der Vertizes ï¿½ber die jeweilige Anzahl der Vertizes pro Objekt
             % angegeben.
             
             % Orientierung der Koordinatenbasis            
@@ -93,7 +93,7 @@ classdef load_ac3d
             
             for i = 1:length(vert_rows)
                 % Speichere alle Vertex Koordinaten in (nx3) numerical arrays.
-                % Jede Cell in vertex_cell enthält die Knoten für ein Objekt
+                % Jede Cell in vertex_cell enthï¿½lt die Knoten fï¿½r ein Objekt
                 vertex_cell{i} = str2double(ac3d((vert_rows(i)+1):(vert_rows(i)+numVertsInObj(i)),1:3));
                 
                 if size(vert_rows,1) == size(loc_rows,1)
@@ -103,7 +103,7 @@ classdef load_ac3d
                 end
             end
             
-            %wird später für die richtige Zuordnung der Knoten Liste benötigt
+            %wird spï¿½ter fï¿½r die richtige Zuordnung der Knoten Liste benï¿½tigt
             globalNumOfFirstVertexInObj = ones(length(vertex_cell),1);
             for i = 2:length(globalNumOfFirstVertexInObj)
                 globalNumOfFirstVertexInObj(i) = sum(numVertsInObj(1:(i-1))) + 1;
@@ -120,11 +120,11 @@ classdef load_ac3d
             % in matnum_rows_cell sind diese Zeilennummern den unterschiedlichen
             % Materialien zugeordnet.
             
-            matnum_rows = find(strcmp(ac3d,'mat')==1);           % alle Materialzuordnungen für die einzelnen Polygone finden
+            matnum_rows = find(strcmp(ac3d,'mat')==1);           % alle Materialzuordnungen fï¿½r die einzelnen Polygone finden
             matnum_rows_cell = cell(1, length(MatNames));
-            for i = 1:length(MatNames)                           % speichert zeilen der unterschiedlichen mat NUMMER für die unterschiedlichen Materialien ab
-                % jede cell in matnum_rows enthält die Zeilenindizes aller Polygone,
-                % die zum Material mit der Nummer i gehören
+            for i = 1:length(MatNames)                           % speichert zeilen der unterschiedlichen mat NUMMER fï¿½r die unterschiedlichen Materialien ab
+                % jede cell in matnum_rows enthï¿½lt die Zeilenindizes aller Polygone,
+                % die zum Material mit der Nummer i gehï¿½ren
                 matnum_rows_cell{i} = matnum_rows( strcmpi(ac3d(matnum_rows,2),num2str(i-1)) );
             end
             
@@ -145,7 +145,7 @@ classdef load_ac3d
             end
             
             
-            % Bestimmung von Anfangs und Endzeilen der Objekte in der ac3d Datei über numvert
+            % Bestimmung von Anfangs und Endzeilen der Objekte in der ac3d Datei ï¿½ber numvert
             
             object_start = vert_rows;
             object_end   = vert_rows;
@@ -156,7 +156,7 @@ classdef load_ac3d
             
             
             % Alle Daten der Datenstruktur zuordnen
-            % hier wird über die objID sichergestellt, dass die richtigen Vertizes
+            % hier wird ï¿½ber die objID sichergestellt, dass die richtigen Vertizes
             % verwendet werden
             globalIdx = 1;
             for matID = 1:length(MatNames) %Materialien durchgehen
@@ -176,10 +176,10 @@ classdef load_ac3d
             end
             
             
-            % Dreiecksberechnung und Flächenberechnung
+            % Dreiecksberechnung und Flï¿½chenberechnung
             % durch Triangulisieren und Satz des Heron
             % Triangulisation: Polygon wird in Dreiecke unterteilt
-            % Satz des Heron: Fläche eines Dreiecks A = 1/4 sqrt( (a+b+c)*(a+b-c)*(-a+b+c)*(a-b+c) )
+            % Satz des Heron: Flï¿½che eines Dreiecks A = 1/4 sqrt( (a+b+c)*(a+b-c)*(-a+b+c)*(a-b+c) )
             
             triaID = 1;
             for matID = 1:length(obj.bcGroups)
@@ -193,14 +193,14 @@ classdef load_ac3d
                         % Dreieck nach Triangulation abspeichern
                         triangles{triaID} = [node1;node2;node3];
                         
-                        % Flächenberechnung für Dreieck
+                        % Flï¿½chenberechnung fï¿½r Dreieck
                         a = norm( node1  - node2 );
                         b = norm( node1  - node3 );
                         c = norm( node2  - node3 );
                         surfTriangles(triaID) = real( 1/4 * sqrt( (a+b+c) * (-a+b+c) * (a-b+c) * (a+b-c) ) );
                         
-                        % Normalenberechnung für Dreieck
-                        if norm( cross( (node2-node1), (node3-node1) ) ) == 0 % Schutz gegen Krüppel Linien Polygone
+                        % Normalenberechnung fï¿½r Dreieck
+                        if norm( cross( (node2-node1), (node3-node1) ) ) == 0 % Schutz gegen Krï¿½ppel Linien Polygone
                             normals{triaID} = [0 0 0];
                         else
                             normals{triaID} = cross( (node2-node1), (node3-node1) ) / norm( cross( (node2-node1), (node3-node1) ) );
@@ -333,7 +333,7 @@ classdef load_ac3d
         
         function [A, S] = getEquivalentAbsorptionArea_sabine(obj, material_path, portal_surface_materials)
             if nargin < 2
-                material_path = '..\RavenDatabase\MaterialDatabase';
+                material_path = fullfile('..', 'RavenDatabase', 'MaterialDatabase');
             end
             countPortals = 1;
             
@@ -366,7 +366,7 @@ classdef load_ac3d
 
         function [A, S] = getEquivalentAbsorptionArea_eyring(obj, material_path, portal_surface_materials)
             if nargin < 2
-                material_path = '..\RavenDatabase\MaterialDatabase';
+                material_path = fullfile('..', 'RavenDatabase', 'MaterialDatabase');
             end
             countPortals = 1;
             
@@ -412,7 +412,7 @@ classdef load_ac3d
                 sabine_or_eyring = 'eyring';
             end
             if nargin < 2
-                material_path = '..\RavenDatabase\MaterialDatabase';
+                material_path = fullfile('..', 'RavenDatabase', 'MaterialDatabase');
             end
                
             if nargin > 4
@@ -456,10 +456,10 @@ classdef load_ac3d
             
             % check if path model has absolute or relative path (if ':" is
             % in path, path is absolute)
-            if ~isempty(strfind(obj.modelFilename, ':'))
-                pathToModel = obj.modelFilename;
-            else
+            if ((~strcmp(obj.modelFilename(2),':') && ispc) || (~strcmp(obj.modelFilename(1), filesep) && isunix))
                 pathToModel = fullfile(pwd, obj.modelFilename);
+            else
+                pathToModel = obj.modelFilename;
             end
                                 
             if exist(pathToModel, 'file') 
@@ -487,12 +487,12 @@ classdef load_ac3d
         end
                 
         function setMaterialNames(obj, materialNamesCell)
-            % check if path model has absolute or relative path (if ':" is
-            % in path, path is absolute)
-            if ~isempty(strfind(obj.modelFilename, ':'))
-                pathToModel = obj.modelFilename;
-            else
+            % check if path model has absolute or relative path (in windows, 
+            % if ':" is, in UNIX, if path starts with '/' , path is absolute)
+            if ((~strcmp(obj.modelFilename(2),':') && ispc) || (~strcmp(obj.modelFilename(1), filesep) && isunix))
                 pathToModel = fullfile(pwd, obj.modelFilename);
+            else
+                pathToModel = obj.modelFilename;
             end
                                 
             if exist(pathToModel, 'file') 
@@ -519,14 +519,6 @@ classdef load_ac3d
             end
             
             % WRITE FILE WITH CHANGES TO MATERIAL NAMES
-            % check if path model has absolute or relative path (if ':" is
-            % in path, path is absolute)
-            if ~isempty(strfind(obj.modelFilename, ':'))
-                pathToModel = obj.modelFilename;
-            else
-                pathToModel = fullfile(pwd, obj.modelFilename);
-            end
-                                
             if exist(pathToModel, 'file') 
                 ac3d_file = fopen(pathToModel, 'w');
             else

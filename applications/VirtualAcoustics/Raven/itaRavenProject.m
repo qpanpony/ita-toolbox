@@ -769,8 +769,8 @@ classdef itaRavenProject < handle
                 currentMaterial.freqData = [ currentMaterial.freqData absorp' ];
                 currentSurfaceArea = obj.getSurfaceAreaOfMaterial(allMaterials{iMat});
                 allMaterials{iMat} = strrep(allMaterials{iMat},'_',' ');
-                allMaterials{iMat} = [ allMaterials{iMat} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m� ;'];
-                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18,iMat)),'%5.2f') ' m� )'];
+                allMaterials{iMat} = [ allMaterials{iMat} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m^2 ;'];
+                allMaterials{iMat} = [ allMaterials{iMat} ' A (Eyring, f=1000 Hz) = ' num2str(-currentSurfaceArea*log(1-currentMaterial.freqData(18,iMat)),'%5.2f') ' m^2 )'];
             end
 
             currentMaterial.channelNames = allMaterials;
@@ -829,7 +829,7 @@ classdef itaRavenProject < handle
                 currentMaterial.freqData = [ currentMaterial.freqData scatter' ];
                                 currentSurfaceArea = obj.getSurfaceAreaOfMaterial(allMaterials{i});
                 allMaterials{i} = strrep(allMaterials{i},'_',' ');
-                allMaterials{i} = [ allMaterials{i} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m� )'];
+                allMaterials{i} = [ allMaterials{i} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m^2 )'];
             end
 
             currentMaterial.channelNames = allMaterials;
