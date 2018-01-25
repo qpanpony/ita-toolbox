@@ -3,7 +3,7 @@
 %
 
 % The ITA Artificial Head HRIR data set can be obtained from:
-% http://www.akustik.rwth-aachen.de/cms/Technische-Akustik/Studium/~edgv/Lehrmaterialien/
+% http://www.akustik.rwth-aachen.de/go/id/pein/lidx/1
 %
 % Requires the ITA Toolbox: http://git.rwth-aachen.de/ita/toolbox
 %
