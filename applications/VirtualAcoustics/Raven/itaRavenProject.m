@@ -309,7 +309,9 @@ classdef itaRavenProject < handle
             %
             
             % change relative to absolute path
-            if ((~strcmp(filename(2),':') && ispc) || (~strcmp(filename(1), filesep) && isunix))
+			% On Windows machines a absolute path will have a ':' as the second character,
+			% On UNIX machines an absolute path will either start with a '/' or '~/'
+            if ((~strcmp(filename(2),':') && ispc) || ((~strcmp(filename(1), filesep) && ~strcmp(filename(1), '~')) && isunix))
                 obj.ravenProjectFile = fullfile(pwd, filename);
             else
                 obj.ravenProjectFile = filename;
@@ -321,10 +323,10 @@ classdef itaRavenProject < handle
             % [Global] %
             obj.projectName         = obj.rpf_ini.GetValues('Global', 'ProjectName', 'Matlab');
             obj.projectTag          = obj.projectName;
-            obj.pathResults         = obj.rpf_ini.GetValues('Global', 'ProjectPath_Output', '..\RavenOutput');
-            obj.pathDirectivities   = obj.rpf_ini.GetValues('Global', 'ProjectPath_DirectivityDB', '..\RavenDatabase\DirectivityDatabase');
-            obj.pathMaterials       = obj.rpf_ini.GetValues('Global', 'ProjectPath_MaterialDB', '..\RavenDatabase\MaterialDatabase');
-            obj.fileHRTF            = obj.rpf_ini.GetValues('Global', 'ProjectPath_HRTFDB', '..\RavenDatabase\HRTF\ITA-Kunstkopf_HRIR_AP11_Pressure_Equalized_3x3_256.daff');
+            obj.pathResults         = obj.rpf_ini.GetValues('Global', 'ProjectPath_Output', fullfile('..', 'RavenOutput'));
+            obj.pathDirectivities   = obj.rpf_ini.GetValues('Global', 'ProjectPath_DirectivityDB', fullfile('..', 'RavenDatabase', 'DirectivityDatabase'));
+            obj.pathMaterials       = obj.rpf_ini.GetValues('Global', 'ProjectPath_MaterialDB', fullfile('..', 'RavenDatabase', 'MaterialDatabase'));
+            obj.fileHRTF            = obj.rpf_ini.GetValues('Global', 'ProjectPath_HRTFDB', fullfile('..', 'RavenDatabase', 'HRTF', 'ITA-Kunstkopf_HRIR_AP11_Pressure_Equalized_3x3_256.daff'));
             obj.fileSpeakers        = obj.rpf_ini.GetValues('Global', 'SpeakerConfigFile', 'Speakers.ini');
             obj.simulationTypeIS    = obj.rpf_ini.GetValues('Global', 'simulationTypeIS', 1);
             obj.simulationTypeRT    = obj.rpf_ini.GetValues('Global', 'simulationTypeRT', 1);
@@ -344,13 +346,16 @@ classdef itaRavenProject < handle
             
             
             % change relative to absolute paths
-            if obj.ravenExe(2) == ':' % absolute path
+			% On Windows machines a absolute path will have a ':' as the second character,
+			% On UNIX machines an absolute path will either start with a '/' or '~/'
+            if ((~strcmp(obj.ravenExe(2),':') && ispc) || ...
+					((~strcmp(obj.ravenExe(1), filesep) || ~strcmp(obj.ravenExe(1), '~')) && isunix))
                 ravenBasePath = fileparts(fileparts(obj.ravenExe)); % base path of raven
-                
-                if (strcmp(obj.pathResults(1:2),'..')), obj.pathResults = [ ravenBasePath obj.pathResults(3:end) ]; end
-                if (strcmp(obj.pathDirectivities(1:2),'..')), obj.pathDirectivities = [ ravenBasePath obj.pathDirectivities(3:end) ]; end
-                if (strcmp(obj.pathMaterials(1:2),'..')), obj.pathMaterials = [ ravenBasePath obj.pathMaterials(3:end) ]; end
-                if (strcmp(obj.fileHRTF(1:2),'..')), obj.fileHRTF = [ ravenBasePath obj.fileHRTF(3:end) ]; end               
+
+                if (strcmp(obj.pathResults(1:2),'..')), obj.pathResults = fullfile(ravenBasePath, obj.pathResults(3:end)); end
+                if (strcmp(obj.pathDirectivities(1:2),'..')), obj.pathDirectivities = fullfile(ravenBasePath, obj.pathDirectivities(3:end)); end
+                if (strcmp(obj.pathMaterials(1:2),'..')), obj.pathMaterials = fullfile(ravenBasePath, obj.pathMaterials(3:end)); end
+                if (strcmp(obj.fileHRTF(1:2),'..')), obj.fileHRTF = fullfile(ravenBasePath, obj.fileHRTF(3:end)); end               
                 
 
             end
@@ -361,9 +366,13 @@ classdef itaRavenProject < handle
             obj.modelFileList       = obj.modelFileList{1}; % textscan implementation issue
             if numel(obj.modelFileList) == 1
                 obj.modelFileList = obj.modelFileList{1};   % de-cell if only 1 room given
-                
-                if obj.ravenExe(2) == ':' % convert to absolute path
-                    if (strcmp(obj.modelFileList(1:2),'..')), obj.modelFileList = [ ravenBasePath obj.modelFileList(3:end) ]; end   
+				
+				% change relative to absolute paths
+				% On Windows machines a absolute path will have a ':' as the second character,
+				% On UNIX machines an absolute path will either start with a '/' or '~/'
+				if ((~strcmp(obj.ravenExe(2),':') && ispc) || ...
+						((~strcmp(obj.ravenExe(1), filesep) || ~strcmp(obj.ravenExe(1), '~')) && isunix))
+                    if (strcmp(obj.modelFileList(1:2),'..')), obj.modelFileList = fullfile(ravenBasePath, obj.modelFileList(3:end)); end   
                 end
             end
             
@@ -4937,7 +4946,7 @@ classdef itaRavenProject < handle
                 
                 % check for combined results with ray tracing
                 if obj.generateRTVBAP
-                    ir_files_combined = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\VBAP_Combined', 'PrimarySource', 'Receiver'}, '.wav');
+                    ir_files_combined = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'VBAP_Combined', 'PrimarySource', 'Receiver'}, '.wav');
                     
                     % read the wave files back from disk
                     obj.vbapIR = obj.loadWaveFile(ir_files_combined);
@@ -4948,7 +4957,7 @@ classdef itaRavenProject < handle
                 obj.vbapIR_IS = [];
             end
             if obj.generateRTVBAP
-                ir_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\VBAP_RT', 'PrimarySource', 'Receiver'}, '.wav');
+                ir_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'VBAP_RT', 'PrimarySource', 'Receiver'}, '.wav');
                 
                 % read the wave files back from disk
                 obj.vbapIR_RT = obj.loadWaveFile(ir_files_RT);

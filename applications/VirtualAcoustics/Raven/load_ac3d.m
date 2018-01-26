@@ -454,9 +454,11 @@ classdef load_ac3d
         
         function materialNames = getMaterialNames(obj)
             
-            % check if path model has absolute or relative path (if ':" is
-            % in path, path is absolute)
-            if ((~strcmp(obj.modelFilename(2),':') && ispc) || (~strcmp(obj.modelFilename(1), filesep) && isunix))
+            % check if path model has absolute or relative path
+			% On Windows machines a absolute path will have a ':' as the second character,
+			% On UNIX machines an absolute path will either start with a '/' or '~/'
+            if ((~strcmp(obj.modelFilename(2),':') && ispc) || ...
+					((~strcmp(obj.modelFilename(1), filesep) && ~strcmp(obj.modelFilename(1), '~')) && isunix))
                 pathToModel = fullfile(pwd, obj.modelFilename);
             else
                 pathToModel = obj.modelFilename;
@@ -487,9 +489,11 @@ classdef load_ac3d
         end
                 
         function setMaterialNames(obj, materialNamesCell)
-            % check if path model has absolute or relative path (in windows, 
-            % if ':" is, in UNIX, if path starts with '/' , path is absolute)
-            if ((~strcmp(obj.modelFilename(2),':') && ispc) || (~strcmp(obj.modelFilename(1), filesep) && isunix))
+            % check if path model has absolute or relative path
+			% On Windows machines a absolute path will have a ':' as the second character,
+			% On UNIX machines an absolute path will either start with a '/' or '~/'
+            if ((~strcmp(obj.modelFilename(2),':') && ispc) || ...
+					((~strcmp(obj.modelFilename(1), filesep) && ~strcmp(obj.modelFilename(1), '~')) && isunix))
                 pathToModel = fullfile(pwd, obj.modelFilename);
             else
                 pathToModel = obj.modelFilename;
