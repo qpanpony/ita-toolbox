@@ -8,6 +8,7 @@ function lspSignals = filterCTC_LS234(binauralInput, ctcFilter, crossoverFreq)
 % Authors: Florian Pausch, Lukas Aspöck -- Email: {fpa, las}@akustik.rwth-aachen.de
 % 2014
 
+warning('this function is obsolete and will vanish in future realeases. Use ita_ctc_loudspeaker_signals.'); %MKO
 
 ctcFilter.samplingRate = binauralInput.ch(1).samplingRate;
 ctcDelay=ctcFilter(1,1).nSamples/2;

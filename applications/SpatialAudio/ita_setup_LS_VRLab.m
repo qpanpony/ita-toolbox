@@ -1,4 +1,4 @@
-function pos = VR_loudspeaker_position(varargin)
+function pos = ita_3da_LSSetup_VRLab(varargin)
 
 % Give back the position, in meters, of the 8 loudspeakers in the VR lab.
 % See options for more details

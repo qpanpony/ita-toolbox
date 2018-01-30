@@ -23,6 +23,8 @@ function result = filterCTC(binauralInput,CTCfilter,domain)
 verboseMode  = ita_preferences('verboseMode');  %#ok<NASGU>
 thisFuncStr  = [upper(mfilename) ':'];     %#ok<NASGU>
 
+warning('This function will move to ita_ctc_loudspeaker_signals in future releases.'); %MKO
+
 %% Initialization
 if nargin < 2
     error('CTC:InputArguments','This function requires two input arguments.')

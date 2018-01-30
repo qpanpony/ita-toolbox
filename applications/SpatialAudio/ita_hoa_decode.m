@@ -1,4 +1,4 @@
-function [ OutputSignals ] = ita_decodeAmbisonics( Bformat, LoudspeakerPos, varargin )
+function [ OutputSignals ] = ita_3da_decodeAmbisonics( Bformat, LoudspeakerPos, varargin )
 %ITA_DECODEAMBISONICS Summary of this function goes here
 %   Detailed explanation goes here
 
