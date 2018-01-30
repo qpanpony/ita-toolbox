@@ -15,8 +15,10 @@ function [ CS_L CS_R ] = ita_ctc_channelSeparation(HRTF_real, CTCFilter, varargi
 %   [LS3_left_CTCFilter LS3_right_CTCFilter]
 %   ...
 %
-
-opts.plot = true;
+opts.naturalCS      = true;
+opts.doubleSpectrum = true;
+opts.singleSpectrum = true;
+opts.plot           = true;
 
 opts=ita_parse_arguments(opts, varargin);
 
@@ -44,7 +46,30 @@ for k=1:size(CTCFilter,1)
 end
 CS_R = ita_merge(L,R);
 
+%% Bruno Diss p 83 (5-11)
+CS_L_singleSpectrum = ita_divide_spk(CS_L.ch(1),CS_L.ch(2));
+CS_R_singleSpectrum = ita_divide_spk(CS_R.ch(2),CS_R.ch(1));
+
+CS_L_value
+
+%% Natural channel separation
+if opts.naturalCS
+    for k=1:2:hrtf.nChannels
+        if hrtf.ch(k).rms>hrtf.ch(k+1).rms
+            naturalCS(ceil(k/2))=ita_divide_spk(hrtf.ch(k),hrtf.ch(k+1));
+        else
+            naturalCS(ceil(k/2))=ita_divide_spk(hrtf.ch(k+1),hrtf.ch(k));
+        end
+    end
+end
+
 %% Plot
 if opts.plot
-    CS_L.pf;  CS_R.pf;
+    if opts.singleSpectrum
+        CS_L.pf;  CS_R.pf;
+    end
+    if opts.doubleSpectrum
+        CS_L_singleSpectrum.pf;
+        CS_R_singleSpectrum.pf;
+    end
 end
