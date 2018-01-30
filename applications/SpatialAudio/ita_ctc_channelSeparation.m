@@ -17,7 +17,7 @@ function [ CS_L CS_R CS_L_singleSpectrum CS_R_singleSpectrum ] = ita_ctc_channel
 %
 % TODO: Frequency ranges
 
-opts.naturalCS      = true;
+opts.naturalCS      = false;
 opts.doubleSpectrum = true;
 opts.singleSpectrum = true;
 opts.plot           = true;
