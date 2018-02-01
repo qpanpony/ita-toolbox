@@ -10,37 +10,29 @@ va.connect( 'localhost' )
 va.reset()
 
 % Control output gain
-va.setOutputGain( .25 )
+va.set_output_gain( .25 )
 
 % Add the current absolute folder path to VA application
-va.addSearchPath( pwd ); 
+va.add_search_path( pwd );
 
 % Create a signal source and start playback
-ita_write_wav( ita_demosound, 'ita_demosound.wav', 'overwrite' );
-X = va.createAudiofileSignalSource( 'ita_demosound.wav' );
-va.setAudiofileSignalSourcePlaybackAction( X, 'play' )
-va.setAudiofileSignalSourceIsLooping( X, true );
+X = va.create_signal_source_buffer_from_file( '$(DemoSound)' );
+va.set_signal_source_buffer_playback_action( X, 'play' )
+va.set_signal_source_buffer_looping( X, true );
 
 % Create a virtual sound source and set a position
-S = va.createSoundSource( 'itaVA_Source' );
-va.setSoundSourcePosition( S, [0 1.7 -2] )
-
-% Connect the signal source to the virtual sound source
-va.setSoundSourceSignalSource( S, X )
+S = va.create_sound_source( 'itaVA_Source' );
+va.set_sound_source_position( S, [ 2 1.7 2 ] )
 
 % Create a listener with a HRTF and position him
-H = va.loadHRIRDataset( '$(DefaultHRIR)' );
-L = va.createListener( 'itaVA_Listener', 'default', H );
-va.setListenerPosition( L, [0 1.7 0] )
-va.setListenerOrientationYPR( L, [0 0 0] ) % Default view is to -Z (OpenGL)
+L = va.create_sound_receiver( 'itaVA_Listener' );
+va.set_sound_receiver_position( L, [ 0 1.7 0 ] )
 
-% Set the listener as the active one
-va.setActiveListener( L )
+H = va.create_directivity( '$(DefaultHRIR)' );
+va.set_sound_receiver_directivity( L, H );
 
-% Now close connection
-va.disconnect()
+% Connect the signal source to the virtual sound source
+va.set_sound_source_signal_source( S, X )
 
-% VA virtual scene is still active now ...
-
-% Explore itaVA class ...
-doc itaVA
+% More information
+disp( 'Type ''doc itaVA'' for more information.' )
