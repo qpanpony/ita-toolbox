@@ -717,23 +717,80 @@ classdef itaRavenProject < handle
             plot3(spos(:,3),spos(:,1),spos(:,2),'marker','o','markersize',9,'linestyle','none','linewidth',1.5)
             plot3(rpos(:,3),rpos(:,1),rpos(:,2),'marker','x','markersize',9,'linestyle','none','linewidth',1.5)
             
-            % plot view/up vectors (red/green) of receivers
+            % plot view vectors (red) of sources
             sview = obj.getSourceViewVectors;
-            sup = obj.getSourceUpVectors;
+            quiver3(spos(:,3),spos(:,1),spos(:,2),sview(:,3),sview(:,1),sview(:,2),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
-            quiver3(spos(:,3),spos(:,1),spos(:,2),0.5*sview(:,3),0.5*sview(:,1),0.5*sview(:,2),'color','r','maxheadsize',1.5,'linewidth',1.5);
-            quiver3(spos(:,3),spos(:,1),spos(:,2),0.5*sup(:,3),0.5*sup(:,1),0.5*sup(:,2),'color','g','maxheadsize',1.5,'linewidth',1.5);
+            % plot view/up vectors (red) of receivers
+            rview = obj.getReceiverViewVectors;    
+            quiver3(rpos(:,3),rpos(:,1),rpos(:,2),rview(:,3),rview(:,1),rview(:,2),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
-            % plot view/up vectors (red/green) of receivers
-            rview = obj.getReceiverViewVectors;
-            rup = obj.getReceiverUpVectors;
             
-            quiver3(rpos(:,3),rpos(:,1),rpos(:,2),0.5*rview(:,3),0.5*rview(:,1),0.5*rview(:,2),'color','r','maxheadsize',1.5,'linewidth',1.5);
-            quiver3(rpos(:,3),rpos(:,1),rpos(:,2),0.5*rup(:,3),0.5*rup(:,1),0.5*rup(:,2),'color','g','maxheadsize',1.5,'linewidth',1.5);
+            % plot up vectors (green) of sources and receivers (currently
+            % deactivated)
+%             sup = obj.getSourceUpVectors;
+%             quiver3(spos(:,3),spos(:,1),spos(:,2),0.5*sup(:,3),0.5*sup(:,1),0.5*sup(:,2),'color','g','maxheadsize',1.5,'linewidth',1.5);
+%             
+%             rup = obj.getReceiverUpVectors;
+%             quiver3(rpos(:,3),rpos(:,1),rpos(:,2),0.5*rup(:,3),0.5*rup(:,1),0.5*rup(:,2),'color','g','maxheadsize',1.5,'linewidth',1.5);
+            
             
             % plot names
             text(spos(:,3)+0.2,spos(:,1),spos(:,2),snames)
             text(rpos(:,3)+0.2,rpos(:,1),rpos(:,2),rnames)
+        end
+ 
+ %------------------------------------------------------------------
+        function plotModelRoom(obj, tgtAxes, comp2axesMapping, wireframe)
+            % identical to plotModel, without sound sources and receivers
+            if isempty(obj.modelFileList)
+                return;
+            end
+            
+            if nargin < 4
+                wireframe = 0;
+            else
+                if ischar(wireframe)
+                    wireframe = isequal(wireframe, 'wireframe');
+                end
+            end
+            if nargin < 3
+                comp2axesMapping = [3 1 2];
+            end
+            if nargin < 2
+                if (ishandle(obj.plotModelHandle))
+                    tgtAxes = obj.plotModelHandle;
+                else
+                    figure;
+                    tgtAxes = gca;
+                end
+                
+            end
+            
+            obj.plotModelHandle = tgtAxes;
+            
+            if isempty(obj.model)
+                if iscell(obj.modelFileList)
+                    for iRoom = 1 : numel(obj.modelFileList)
+                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom}.plotModel(tgtAxes, comp2axesMapping, wireframe);
+                        hold on;
+                    end
+                else
+                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model.plotModel(tgtAxes, comp2axesMapping, wireframe);
+                end
+            else
+                if iscell(obj.model)
+                    for iRoom = 1 : numel(obj.model)
+                        obj.model{iRoom}.plotModel(tgtAxes, comp2axesMapping, wireframe);
+                        hold on;
+                    end
+                else
+                    obj.model.plotModel(tgtAxes, comp2axesMapping, wireframe);
+                end
+            end
+
         end
         
         %------------------------------------------------------------------
