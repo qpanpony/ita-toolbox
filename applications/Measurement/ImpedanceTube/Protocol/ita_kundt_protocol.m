@@ -270,7 +270,11 @@ else  % mgu mode
     humidity = inStruct.luftfeuchtigkeit;
 end
 
-probeFileName   = [strrep(strrep(nameDerProbe, ' ','_'), '.', ''), '_mean(' num2str(nMeasurements) ')' ];
+if (~exist('Auswertung','dir'))
+    mkdir('Auswertung');
+end
+
+probeFileName   = [ 'Auswertung/' strrep(strrep(nameDerProbe, ' ','_'), '.', ''), '_mean(' num2str(nMeasurements) ')' ];
 texFileName     = [probeFileName '.tex'];
 grafikName      = [probeFileName '_grafik.png'];
 
@@ -366,7 +370,7 @@ if boolPlotImpedance == 1
         
         lgh = legend({nameDerProbe},'Interpreter','none', 'location', 'northwest');
         set(gca, 'TickDir', 'out', 'box', 'off')
-        probeFileName = [strrep(nameDerProbe, ' ','_'),  '_' nameCell{i} '_mean(' num2str(nMeasurements) ')' ];
+        probeFileName = [ 'Auswertung/' strrep(nameDerProbe, ' ','_'),  '_' nameCell{i} '_mean(' num2str(nMeasurements) ')' ];
         
         if i ==2
             ylim([-1 1]* 5000)
