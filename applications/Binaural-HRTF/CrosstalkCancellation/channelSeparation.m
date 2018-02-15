@@ -11,7 +11,7 @@ function  varargout = channelSeparation(HRTF,CTC,domain,frange)
 %  The output is a set of four plots showing the achivable channel
 %  separation.
 %
-%  Call:  channelSeparation(TF_left,TF_right,CTCfilter)
+%  Call:  channelSeparation(HRTF,CTCfilter)
 %
 % Author: Bruno Masiero -- Email: bma@akustik.rwth-aachen.de
 % Created:  29-Sep-2009 
