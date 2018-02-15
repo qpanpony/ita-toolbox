@@ -2,4 +2,4 @@
 va = itaVA( 'localhost' );
 
 %% Also add current dir to VA search path
-va.addSearchPath( pwd );
+va.add_search_path( pwd );
