@@ -298,7 +298,7 @@ classdef itaVA < handle
 		
         function set_tracked_real_world_sound_receiver_head_rigid_body_index( this, index )
             % Sets the index of the rigid body to be tracked for real-world sound receiver (default is 1)
-            VAMatlab( 'set_tracked_real_world_sound_receiver_rigid_body_index', this.handle, index )
+            VAMatlab( 'set_tracked_real_world_sound_receiver_head_rigid_body_index', this.handle, index )
         end
 		
         function set_tracked_real_world_sound_receiver_torso_rigid_body_index( this, index )
@@ -306,7 +306,7 @@ classdef itaVA < handle
             VAMatlab( 'set_tracked_real_world_sound_receiver_torso_rigid_body_index', this.handle, index )
         end
         
-        function set_tracked_real_world_sound_receiver_head_rigid_body_translation( this, translation )
+        function set_tracked_real_world_sound_receiver_head_rb_trans( this, translation )
             % Sets the pivot point translation for the tracked real-world sound receiver rigid body
 			%
 			% Parameters:
@@ -316,7 +316,7 @@ classdef itaVA < handle
             VAMatlab( 'set_tracked_real_world_sound_receiver_head_rigid_body_translation', this.handle, translation )
         end
         
-        function set_tracked_real_world_sound_receiver_head_rigid_body_rotation( this, rotation )
+        function set_tracked_real_world_sound_receiver_head_rb_rotation( this, rotation )
             % Sets the rotation of orientation for the tracked real-world sound receiver rigid body
 			%
 			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
@@ -340,22 +340,22 @@ classdef itaVA < handle
             VAMatlab( 'set_tracked_sound_source', this.handle, source_id );
         end
 		
-        function set_tracked_source_rigid_body_index( this, index )
+        function set_tracked_sound_source_rigid_body_index( this, index )
             % Sets the index of the rigid body to be tracked for source (default is 1)
-            VAMatlab( 'set_tracked_source_rigid_body_index', this.handle, index )
+            VAMatlab( 'set_tracked_sound_source_rigid_body_index', this.handle, index )
         end
         
-        function set_tracked_source_rigid_body_translation( this, translation )
+        function set_tracked_sound_source_rigid_body_translation( this, translation )
             % Sets the pivot point translation for the tracked source rigid body
 			%
 			% Parameters:
 			%
 			%	translation [double-3x1]	Translation in local coordinate system of rigid body [m]
 			%
-            VAMatlab( 'set_tracked_source_rigid_body_translation', this.handle, translation )
+            VAMatlab( 'set_tracked_sound_source_rigid_body_translation', this.handle, translation )
         end
         
-        function set_tracked_source_rigid_body_rotation( this, rotation )
+        function set_tracked_sound_source_rigid_body_rotation( this, rotation )
             % Sets the rotation of orientation for the tracked source rigid body
 			%
 			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
@@ -364,7 +364,13 @@ classdef itaVA < handle
 			%
 			%	rotation [quaternion]	Rotation of rigid body
 			%
-            VAMatlab( 'set_tracked_source_rigid_body_rotation', this.handle, rotation )
+            VAMatlab( 'set_tracked_sound_source_rigid_body_rotation', this.handle, rotation )
+        end
+		
+        function get_tracker_info( this )
+            % Returns the tracker configuration state
+			%
+            VAMatlab( 'get_tracker_info', this.handle )
         end
 		
         

@@ -238,8 +238,9 @@ if vaserver_found
     for i = 1:numel( vs )
         vss = vs{ 1, i };
         if numel( vss ) > 6
-            if strcmpi( vss( 1:6 ), 'VACore' )
-                set( handles.edit_vaserver_version, 'String', strcat( vs( i ) ) )
+            if strcmpi( vss( 3:10 ), 'VAServer' )
+                server_version = vss( 15:end );
+                set( handles.edit_vaserver_version, 'String', strcat( server_version ) )
             end
         end
     end
