@@ -19,11 +19,9 @@
 %% Step 1: Initializations
 % Select VA environment
 VAsel = 0;  % 0: start VAServer.exe (without GUI for visualization of virtual environment), 
-            % 1: start VAGUI.exe (with visualization of virtual environment)
-            % HINT: Press Ctrl+A in VAGUI window to show and arrange all VAGUI windows conveniently
-            
-% Select location of *.wav/*.daff/*.ini files (use absolute paths instead of relative paths)
-deployDir = uigetdir(pwd,'Select location of *.wav/*.daff/*.ini files.Root directory of VA deploy (with folders bin, conf, data)'); % 'D:\VA_deploy\VA.2016-03-23'; % root directory of VA deploy (with folders bin, conf, data)
+            % 1: start Redstart.exe (with graphical user interface)
+
+deployDir = uigetdir(pwd,'Select VA root directory (with folders bin, conf, data)');
 
 
 % Do you use Natural Point's Optitrack tracking system?
@@ -60,6 +58,10 @@ end
 % Reset VA and clear the scene
 a.reset()
 
+% Add the common data dir where to find relative file paths
+a.add_search_path( fullfile( deployDir, 'data' ) );
+% a.add_search_path( 'D:/my/data' ) % Add your data folder(s) accordingly,
+% avoid absolute paths in VA calls!
 
 %% Step 3: Set global output gain (optionally set reproduction module)
 % set global gain of VA output
@@ -88,7 +90,7 @@ a.set_output_gain(0.3); % value between 0 (-inf dB) and 1 (0 dB)
 %% Step 4: Create a listener and assign a HRIR set
 % load HRTF set stored in VADataDir\HRIR
 
-HRIRSet = a.create_directivity(fullfile(deployDir,'data\ITA_Artificial_Head_5x5_44kHz_128.v17.ir.daff'));
+HRIRSet = a.create_directivity( 'ITA_Artificial_Head_5x5_44kHz_128.v17.ir.daff' ); % $(DefaultHRIR) macro would work, too
 
 % HRIRSet = a.create_directivity('$(VADataDir)\HRIR\ITA-Kunstkopf_HRIR_AP11_Pressure_Equalized_3x3_256.daff'); 
 
@@ -110,7 +112,7 @@ LHeight = 1.2; % height of listener's interaural axis [m]
 % the listener's orientation in the virtual world by view-up vectors
 
 a.set_sound_receiver_position(L, [0 LHeight 0])
-a.set_sound_receiver_orientation(L, eul2quatb([0,0,0])) % the midpoint of the listener's interaural axis is now at a height of LHeight metres, no additional lateral offset
+a.set_sound_receiver_orientation(L, eul2quat([0,0,0])) % the midpoint of the listener's interaural axis is now at a height of LHeight metres, no additional lateral offset
 
 %                                                                the listener is facing into -z direction
 
@@ -141,7 +143,7 @@ LHeightTracked = LPosTracked(2);
 S1 = a.create_sound_source('Source 1');        % name of the sound source as string
 
 a.set_sound_source_position(S1,[-2 LHeightTracked 0])
-a.set_sound_source_orientation(S1,eul2quatb([0,0,-90])) % eul2quatb([0,0,-90])
+a.set_sound_source_orientation(S1,eul2quat([0,0,-90])) % eul2quat([0,0,-90])
 
                                              % the virtual sound source is now positioned 
                                              % on the left side of the listener, 
@@ -151,7 +153,7 @@ a.set_sound_source_orientation(S1,eul2quatb([0,0,-90])) % eul2quatb([0,0,-90])
 
 %                                            
 % Create an audiofile signal source for the sound source (based on a mono wave file)
-X1      = a.create_signal_source_buffer_from_file(fullfile(deployDir,'\data\WelcomeToVA.wav'));
+X1      = a.create_signal_source_buffer_from_file( 'WelcomeToVA.wav' ); % Macro $(DemoSound) would also work here
 % XX1     = a.loadSound(fullfile(deployDir,'\data\WelcomeToVA.wav')); % load wave file to get additional information (nsamples, duration, ...)
 % XX1Info = a.getSoundInfo(XX1); % get info about signal source, i.e. wave file
 
@@ -176,7 +178,7 @@ a.set_signal_source_buffer_playback_action( X1, 'stop' ) % stop playback
 S2  = a.create_sound_source('Source 2');    % name of the sound source as string
 
 % Create an audiofile signal source for the sound source (based on a mono wave file)
-X2  = a.create_signal_source_buffer_from_file(fullfile(deployDir,'\data\WelcomeToVA.wav'));
+X2  = a.create_signal_source_buffer_from_file( 'WelcomeToVA.wav' );
 % XX2 = a.loadSound(fullfile(deployDir,'\data\Audiofiles\lang_short.wav')); % load wave file to get additional information (nsamples, duration)
 % XX2Info = a.getSoundInfo(XX2); % get info about signal source, i.e. wave file
 
@@ -184,7 +186,7 @@ X2  = a.create_signal_source_buffer_from_file(fullfile(deployDir,'\data\WelcomeT
 a.set_sound_source_signal_source(S2,X2);
 
 % load a directivity file in *.daff file format (e.g. directivity of a trumpet)
-DirS2 = a.create_directivity(fullfile(deployDir,'\data\Singer.v17.ms.daff'));
+DirS2 = a.create_directivity( 'Singer.v17.ms.daff' );
 % set directivity of S2
 a.set_sound_source_directivity(S2,DirS2);
 
@@ -209,7 +211,7 @@ traj_cart(:,3) = LHeight + circleR*cos(theta);
 
 % set initial position of S2 (use first position of trajectory) and default orientation
 a.set_sound_source_position(S2, [traj_cart(1,1) traj_cart(1,2) traj_cart(1,3)]);
-a.set_sound_source_orientation(S2,eul2quatb([0,0,0]));
+a.set_sound_source_orientation(S2,eul2quat([0,0,0]));
 % a.setAudiofileSignalSourceIsLooping(X1,true) % looping yes/no?
 a.set_signal_source_buffer_looping( X2, true );         % looping yes/no?
 
