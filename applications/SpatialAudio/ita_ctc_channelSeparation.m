@@ -1,4 +1,4 @@
-function [ CS_L CS_R ] = ita_ctc_channelSeparation(HRTF_real, CTCFilter, varargin)
+function [ CS_L CS_R CS_L_singleSpectrum CS_R_singleSpectrum ] = ita_ctc_channelSeparation(HRTF_real, CTCFilter, varargin)
 %ITA_CTC_CHANNELSEPARATION Returns and plots channelseparation for ctc
 %systems
 %   HRTF_real represent the real HRTFs that will occure in the CTC system,
@@ -15,7 +15,9 @@ function [ CS_L CS_R ] = ita_ctc_channelSeparation(HRTF_real, CTCFilter, varargi
 %   [LS3_left_CTCFilter LS3_right_CTCFilter]
 %   ...
 %
-opts.naturalCS      = true;
+% TODO: Frequency ranges
+
+opts.naturalCS      = false;
 opts.doubleSpectrum = true;
 opts.singleSpectrum = true;
 opts.plot           = true;
@@ -23,14 +25,14 @@ opts.plot           = true;
 opts=ita_parse_arguments(opts, varargin);
 
 hrtf=ita_merge(HRTF_real(:));
-
+hrtf.signalType='energy';
 L=itaAudio;
 L.signalType='energy';
 helper=ita_convolve(hrtf.ch(1),CTCFilter(1));
 numSamples=helper.nSamples;
 
 %% Left channel input
-L.time=zeros(numSamples,hrtf.nChannels/2);
+L.time=zeros(numSamples,1);
 R=L;
 for k=1:size(CTCFilter,1)
     L=L+ita_convolve(hrtf.ch(2*k-1),CTCFilter(k,1));
@@ -39,7 +41,7 @@ end
 CS_L = ita_merge(L,R);
 
 %% Right channel input
-L.time=zeros(numSamples,hrtf.nChannels/2);
+L.time=zeros(numSamples,1);
 R=L;
 for k=1:size(CTCFilter,1)
     L=L+ita_convolve(hrtf.ch(2*k-1),CTCFilter(k,2));
@@ -48,29 +50,46 @@ end
 CS_R = ita_merge(L,R);
 
 %% Bruno Diss p 83 (5-11)
-CS_L_singleSpectrum = ita_divide_spk(CS_L.ch(1),CS_L.ch(2));
-CS_R_singleSpectrum = ita_divide_spk(CS_R.ch(2),CS_R.ch(1));
-
-CS_L_value;
+if opts.singleSpectrum
+    CS_L_singleSpectrum = ita_divide_spk(CS_L.ch(1),CS_L.ch(2));
+    CS_R_singleSpectrum = ita_divide_spk(CS_R.ch(2),CS_R.ch(1));
+end
 
 %% Natural channel separation
 if opts.naturalCS
-    for k=1:2:hrtf.nChannels
-        if hrtf.ch(k).rms>hrtf.ch(k+1).rms
-            naturalCS(ceil(k/2))=ita_divide_spk(hrtf.ch(k),hrtf.ch(k+1));
-        else
-            naturalCS(ceil(k/2))=ita_divide_spk(hrtf.ch(k+1),hrtf.ch(k));
-        end
-    end
+    [ natCS_L natCS_R ] =ita_ctc_channelSeparation_naturalOptimum(hrtf);
 end
 
 %% Plot
 if opts.plot
-    if opts.singleSpectrum
-        CS_L.pf;  CS_R.pf;
-    end
     if opts.doubleSpectrum
-        CS_L_singleSpectrum.pf;
-        CS_R_singleSpectrum.pf;
+        CS_L.pf; legend({'Left in, left ear' 'Left in, right ear'});
+        title('Channel separation - left ear');
+        set(gcf,'name','Channel separation - left ear');
+        CS_R.pf; legend({'Right in, left ear' 'Right in, right ear'});
+        title('Channel separation - right ear');
+        set(gcf,'name','Channel separation - right ear');
+    end
+    if opts.singleSpectrum && opts.naturalCS
+        merged_CS_L=ita_merge(natCS_L,CS_L_singleSpectrum);
+        merged_CS_R=ita_merge(natCS_R,CS_R_singleSpectrum);
+        merged_CS_L.pf; legend({'Optimal natural CS for left in' 'CTC CS for left in' });
+        title('Channel separation - left ear (natural vs CTC)');
+        set(gcf,'name','Channel separation - left ear');
+        merged_CS_R.pf; legend({'Optimal natural CS for right in' 'CTC CS for right in' });
+        title('Channel separation - right ear (natural vs CTC)');
+        set(gcf,'name','Channel separation - right ear');
+    elseif opts.singleSpectrum
+        merged_CS = ita_merge(CS_L_singleSpectrum, CS_R_singleSpectrum);
+        merged_CS.pf;
+        legend({'CS for left in' 'CS for right in' });
+        title('Channel separation');
+        set(gcf,'name','Channel separation');
+    elseif opts.naturalCS
+        merged_CS = ita_merge(natCS_L, natCS_R);
+        merged_CS.pf;
+        legend({'Optimal natural CS for left in' 'Optimal natural CS for right in'});
+        title('Channel separation');
+        set(gcf,'name','Channel separation');
     end
 end

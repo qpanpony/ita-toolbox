@@ -1,4 +1,4 @@
-function [ CTC ] = ita_3da_ctcFilter_regularized( varargin )
+function [ CTC ] = ita_ctcFilter_regularized( varargin )
 %ITA_3DA_CTCFILTER_REGULARIZED Generates a set of CTC Filter for a
 %loudspeaker system with an arbitrary number of loudspeaker.
 
