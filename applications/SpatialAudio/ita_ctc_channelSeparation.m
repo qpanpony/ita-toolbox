@@ -25,6 +25,7 @@ opts=ita_parse_arguments(opts, varargin);
 hrtf=ita_merge(HRTF_real(:));
 
 L=itaAudio;
+L.signalType='energy';
 helper=ita_convolve(hrtf.ch(1),CTCFilter(1));
 numSamples=helper.nSamples;
 
@@ -50,7 +51,7 @@ CS_R = ita_merge(L,R);
 CS_L_singleSpectrum = ita_divide_spk(CS_L.ch(1),CS_L.ch(2));
 CS_R_singleSpectrum = ita_divide_spk(CS_R.ch(2),CS_R.ch(1));
 
-CS_L_value
+CS_L_value;
 
 %% Natural channel separation
 if opts.naturalCS
