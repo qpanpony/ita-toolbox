@@ -7,6 +7,7 @@ function varargout = ita_beam_beamforming(varargin)
 %  The optional fourth argument specifies the algorithm:
 %
 %  types:
+%           (0) conventional with phase (for e.g. auralization)
 %           (1) conventional           -- default
 %           (2) Minimum-Variance Distortionless Response (MVDR)
 %           (3) MUSIC
@@ -87,7 +88,7 @@ idxVec = zeros(16,p.nBins);
 if ~sArgs.type
     typeStr = 'Delay-and-Sum w/o CSM';
     ita_verbose_info([thisFuncStr 'Computing beamforming using type ''' typeStr ''''],1);
-    B = squeeze(abs(sum(bsxfun(@times,conj(permute(steeringVector,[3 1 2])),P.'),2)).^2);
+    B = squeeze(sum(bsxfun(@times,conj(permute(steeringVector,[3 1 2])),P.'),2)).';
 else
     switch sArgs.type
     case 1
@@ -128,7 +129,10 @@ else
 end
 
 % correct to obtain source strengths
-B = sqrt(max(0,real(B))).*4*pi;
+if sArgs.type
+    B = sqrt(max(0,real(B)));
+end
+B = B.*4*pi;
 
 % create the audio object
 if isa(p,'itaAudio')

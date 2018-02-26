@@ -430,8 +430,15 @@ function [] = daffv17_write( varargin )
     % note: use round here to avoid errors if alphapoints are not exactly
     % integers but within epsilon
     x = cell( round( args.alphapoints ), round( args.betapoints ), args.channels );
-    args.userdata = args.userdata.buildsearchdatabase;
+    
+    % Speed up for itaHRTF class
+    if isa( args.userdata, 'itaHRTF' )
+        args.userdata = args.userdata.buildsearchdatabase;
+    end
+    
+    disp( 'Starting to gather data via callback function, this might take a while ...' )
     for b=1:args.betapoints
+        tic
         beta = betastart + (b-1)*args.betares;
         
         % Write just one record at the poles
@@ -790,7 +797,10 @@ function [] = daffv17_write( varargin )
             
             props.numRecords = props.numRecords + 1;
         end
+        
+        disp( [ 'Processed beta angle ' num2str( beta ) ', took ' num2str( toc ) ] )
     end
+    disp( '... and data has been assembled. Will write to file now.' )
         
     fprintf( 'Global peak: %+0.1f dB (%0.6f)\n', 20*log10(props.globalPeak), props.globalPeak );
   
