@@ -246,6 +246,9 @@ end
 
 % return last data at the end
 varargout = {itaResult(sqrt(runningFreqData),octFreqVec(2:end),'freq')*itaValue(1,'Pa')};
+if nargout > 1
+    varargout(2) = {itaAudio(currentBlock,samplingRate,'time')*itaValue(1,'Pa')};
+end
 ita_verbose_info('End',1)
 delete(h.f)
 end % function
