@@ -92,7 +92,6 @@ sArgs.distortionLimit = sArgs.distortionLimit / 100;
 upperTolVal = sArgs.distortionLimit * (1+sArgs.tolerance);
 lowerTolVal = sArgs.distortionLimit * (1-sArgs.tolerance);
 
-
 %% go through the excitation frequencies, process measurement
 ita_verbose_info('Measurement process',1);
 wb = itaWaitbar([numel(excitationFreq),numel(sArgs.distortionLimit)],'maxSPL',{'Frequencies','Limits'});
@@ -108,10 +107,15 @@ for freqIdx = 1:numel(excitationFreq)
 
     % distortion limit loop
     for distIdx = 1:numel(sArgs.distortionLimit)
+        currentPowerIncrement = sArgs.powerIncrement;
+        distIter = 0;
         wb.inc
         % Amplification and measurement
         while outputVoltage >= (outputVoltageRange(1)/10) && outputVoltage <= outputVoltageRange(2)
-
+            distIter = distIter + 1;
+            if distIter == 10 % too many iterations going back and forth
+                currentPowerIncrement = sArgs.powerIncrement/2;
+            end
             lastSignalReferenceValue = eval([sArgs.signalReference '(freqIdx,distIdx)']);
 
             try
@@ -133,7 +137,6 @@ for freqIdx = 1:numel(excitationFreq)
             % frequency
             signalReferenceValue = eval([sArgs.signalReference '(freqIdx,distIdx)']);
 
-
             % logical values for if conditions
             inTol = (signalReferenceValue >= lowerTolVal(distIdx)) & (signalReferenceValue <= upperTolVal(distIdx));
             aboveTol = signalReferenceValue > upperTolVal(distIdx);
@@ -141,11 +144,11 @@ for freqIdx = 1:numel(excitationFreq)
 
             if lastSignalReferenceValue == 0
                 % this may be the first measurement
-                gain = 10^(sArgs.powerIncrement/20);
+                gain = 10^(currentPowerIncrement/20);
             else
                 % use logarithm to attenuate high gain values
-                % gain = (log((abs(signalReferenceValue)/lastSignalReferenceValue + exp(1)))) * 10^(sArgs.powerIncrement/20);
-                gain = (log((abs(signalReferenceValue-sArgs.distortionLimit(distIdx))/signalReferenceValue + exp(1)))) * 10^(sArgs.powerIncrement/20);
+                % gain = (log((abs(signalReferenceValue)/lastSignalReferenceValue + exp(1)))) * 10^(currentPowerIncrement/20);
+                gain = log((abs(signalReferenceValue-sArgs.distortionLimit(distIdx))/signalReferenceValue + exp(1))) * 10^(currentPowerIncrement/20);
             end
             
             gainMatrix(freqIdx,distIdx) = gain;
@@ -166,13 +169,12 @@ for freqIdx = 1:numel(excitationFreq)
                 % went above limit -> decrement and show info
                 ita_verbose_info([num2str(sArgs.distortionLimit(distIdx)*100) '% ' sArgs.signalReference ' too high, exact value: ' num2str(signalReferenceValue*100,'%0.2f') '%'],0);
                 % factor to avoid getting stuck
-                outputVoltage = outputVoltage / (0.8*gain);
+                outputVoltage = outputVoltage / (ceil((10^(-currentPowerIncrement/20))/0.1)*0.1*gain);
             elseif belowTol
                 % keep increasing
                 outputVoltage = outputVoltage * gain;
                 ita_verbose_info([num2str(sArgs.distortionLimit(distIdx)*100) '% ' sArgs.signalReference ' not reached, exact value: ' num2str(signalReferenceValue*100,'%0.2f') '%'],0);
             end
-
             
             if outputVoltage > outputVoltageRange(2)
                 if ~lastMeasurement
@@ -194,7 +196,7 @@ for freqIdx = 1:numel(excitationFreq)
                     max_spl(freqIdx,distIdx:numel(sArgs.distortionLimit)) = abs(uSPL);
                     % divide by gain as the voltage has been increased 
                     % since the measuremen has been carried out
-                    max_voltage(freqIdx,distIdx:numel(sArgs.distortionLimit)) = outputVoltage/gain;
+                    max_voltage(freqIdx,distIdx:numel(sArgs.distortionLimit)) = outputVoltageRange(2);
                     
                     lastMeasurement = false;
                     
@@ -219,7 +221,6 @@ for freqIdx = 1:numel(excitationFreq)
 end
 wb.close;
 %% Post-processing and Results
-
 
 % Max SPL will be returned as an itaResult
 res_maxSPL = itaResult([max_spl,max_voltage],excitationFreq.','freq');
