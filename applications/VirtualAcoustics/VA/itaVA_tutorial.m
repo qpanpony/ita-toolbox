@@ -282,6 +282,9 @@ a.unlock_update;
 
 %% Step 8: Clean up (optionally), reset, and disconnect from VAServer
 
+% wait 1 second before clean up and reset
+java.util.concurrent.locks.LockSupport.parkNanos(1*10^9); 
+
 % delete sound sources
 a.delete_sound_source(S1);
 a.delete_sound_source(S2);
