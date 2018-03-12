@@ -71,9 +71,9 @@ end
 % Reset VA and clear the scene
 a.reset()
 
-% Optionally add important data directories (if not speciefied in the VA setup GUI which pops up the first time you use VA)
-% a.add_search_path( fullfile( deployDir, 'data' ) );
-% a.add_search_path( fullfile( deployDir, 'conf' ) );
+% Optionally add important data directories (if not specified in the VA setup GUI which pops up the first time you use VA)
+a.add_search_path( fullfile( deployDir, 'data' ) );
+a.add_search_path( fullfile( deployDir, 'conf' ) );
 
 %% Step 3: Set global output gain (optionally set reproduction module)
 % set global gain of VA output
