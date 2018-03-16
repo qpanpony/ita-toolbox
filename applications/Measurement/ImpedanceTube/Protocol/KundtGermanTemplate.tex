@@ -75,6 +75,13 @@
 %\newcommand{\terzWertT}{0.20}  % 8000
 
 
+
+
+
+
+
+
+
 \documentclass[11pt,a4paper, twoside, final]{scrartcl}
 \usepackage{graphicx}
 \usepackage[latin1]{inputenc}
@@ -102,24 +109,24 @@
  \includegraphics[width=1.0\textwidth]{\itaBriefkopfBild}
 
 \begin{center}
-		\huge
+		\LARGE
 		Messprotokoll zur Messung des Absorptionsgrades im Impedanzmessrohr nach ISO 10534 Teil 2
 \end{center}
 
 \begin{tabular}{|p{0.43\textwidth}p{0.51\textwidth}|}\hline
 	\multicolumn{2}{|p{0.99\textwidth}|}{
-	\underline{Beschreibung der Prüfeinrichtung:} \newline
+	\underline{Beschreibung der Pr{\"u}feinrichtung:} \newline
 	Impedanzmessrohr mit 2 Zoll Bohrung aus Aluminium. Probenhalter mit verstellbarem Rohrabschluss durch massiven, abgedichteten Aluminiumkolben. Messrohr mit vier Mikrofonbohrungen (Distanzen zur ersten Position: 17~mm, 110~mm, 510~mm). Sondenmikrofon zur Abnahme des Schallfelds im Rohrmittelpunkt. Auswertbarer Frequenzbereich ca.~100 Hz bis 8 kHz durch Ausblendung der ersten zwei Rohrmoden. Breitbandige Anregung mittels Sinus-Sweeps. Auswertung nach ISO 10534-2 mit Hilfe einer im ITA entwickelten FFT-Messtechnik.}\\ 
 	&\\
-		Prüfdatum: & \datumDerMessung \\
-		 Prüfer: & \nameDesPruefers\\ 
+		Pr{\"u}fdatum: & \datumDerMessung \\
+		 Pr{\"u}fer: & \nameDesPruefers\\ 
 	\multicolumn{2}{|l|}{
 		Meteorologische Bedingungen:   \hspace{2.5cm} Temperatur: \temperaturInGradC ~°C  \qquad  \qquad Luftfeuchtigkeit:  \luftfeuchtigkeit ~\% }\\ \hline 
 	
 	\multicolumn{2}{c}{ }\\ \hline
 
 
-	\multicolumn{2}{|p{0.99\textwidth}|}{	\underline{Beschreibung des zu untersuchenden Materials und der Prüfanordnung:}\newline
+	\multicolumn{2}{|p{0.99\textwidth}|}{	\underline{Beschreibung des zu untersuchenden Materials und der Pr{\"u}fanordnung:}\newline
 	\beschreibungDesMaterials }\\
 	 & \\
 	Bezeichnung der untersuchten Probe: & \nameDerProbe \\ 
@@ -131,7 +138,7 @@
 \begin{figure}[htbp]
 \centering
 		\includegraphics[width=1\textwidth]{\dateinameGrafik}
-	\caption{Verlauf des Mittelwerts der frequenzabhängigen Absorption berechnet über \anzahlDerMessungen \ \samplesOderWiederholungen \ (durchgezogene Kurve) und Standardabweichung der Messergebnisse (gestrichelte Kurven). Kurven gleitend gemittelt: Glättungsparameter \smoothParameter \ Oktave, Gauß-Fenster}
+	\caption{Verlauf des Mittelwerts der frequenzabh{\"a}ngigen Absorption berechnet {\"u}ber \anzahlDerMessungen \ \samplesOderWiederholungen \ (durchgezogene Kurve) und Standardabweichung der Messergebnisse (gestrichelte Kurven). Kurven gleitend gemittelt: Gl{\"a}ttungsparameter \smoothParameter \ Oktave, Gauß-Fenster}
 	\label{fig:ZweiProben_gemittelt}
 \end{figure}
 
@@ -156,10 +163,7 @@
 %
 %
 %\vspace{2cm}
-%
-%Institut für Technische Akustik
-%Neustraße 50
-%52066 Aachen
+
 
 
 \end{document}
