@@ -6,6 +6,8 @@ function varargout = ita_soundInsulationIndexAirborne(varargin)
 % You can find the license for this m-file in the application folder.
 % </ITA-Toolbox>
 
+% re-implementation: Markus Mueller-Trapet (markus.mueller-trapet@nrc.ca)
+% Date: June 2017
 
 %% input parsing
 sArgs = struct('pos1_data','anything','bandsperoctave',3,'freqVector',[],'createPlot',false,'type','ISO');
@@ -89,7 +91,7 @@ end
 %% output
 if sArgs.createPlot
     fgh = ita_plot_freq(data);
-    plotResult = itaResult([10.^((refCurve+soundReductionIndex)./20), [ones(sum(freq<=500),1)*10.^(soundReductionIndex./20); nan(sum(freq>500),1)]],freq,'freq');
+    plotResult = itaResult([[nan(sum(freqVector<min(freq)),1); 10.^((refCurve+soundReductionIndex)./20); nan(sum(freqVector>max(freq)),1)], [ones(sum(freqVector<=500),1)*10.^(soundReductionIndex./20); nan(sum(freqVector>500),1)]],freqVector,'freq');
     ita_plot_freq(plotResult,'figure_handle',fgh,'axes_handle',gca,'hold');
     bar(gca,deficiencies.freqVector,deficiencies.freq,'hist');
     [maxDef,maxIdx] = max(deficiencies.freq);
@@ -99,6 +101,7 @@ if sArgs.createPlot
         singleNumberString = [outputStr ' = ' num2str(soundReductionIndex) 'dB'];
     end
     legend({'Sound transmission loss','Shifted reference curve',singleNumberString,['Deficiencies (sum: ' num2str(sum(deficiencies.freq)) 'dB, max: ' num2str(maxDef) 'dB at ' num2str(deficiencies.freqVector(maxIdx)) 'Hz)']});
+    xlim([min(freq) max(freq)]);
     ylim([0 max(max(soundReduction),max(refCurve)+soundReductionIndex)+15]);
 end
 
