@@ -483,19 +483,25 @@ classdef itaRavenProject < handle
                 
                 prevPath = pwd;
                 cd(fileparts(obj.ravenExe));
-                dos(['"' obj.ravenExe '"' ' "' obj.ravenProjectFile '"'],'-echo');
+                % add the path here in " ... " in case file or folder names
+                % contain spaces.
+                status = system(['"' obj.ravenExe '"' ' "' obj.ravenProjectFile '"'],'-echo');
                 cd(prevPath);
                 
                 % restore the initial project name
                 obj.setProjectName(savedProjectName);
                 
-                % gather results
-                disp('[R] Simulation seems to be finished. Getting results...');
-                obj.gatherResults();
-                disp('[R] Done.');
-                
-                obj.simulationDone = true;
-                
+                if status == 0
+                    % gather results
+                    disp('[R] Simulation seems to be finished. Getting results...');
+                    obj.gatherResults();
+                    disp('[R] Done.');
+
+                    obj.simulationDone = true;
+                else
+                    disp('[R] Simulation could not be finished due to an error in RAVEN.')
+                    obj.simulationDone = false;
+                end
                 % delete results in raven folder structure -> they are copied now into this class
                 if (obj.keepOutputFiles == 0)
                     obj.deleteResultsInRavenFolder();
