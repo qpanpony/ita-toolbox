@@ -1124,6 +1124,8 @@ classdef  itaHRTF < itaAudio
                 
             end
             
+            
+            % JRI: isn't this the same as itaHRTF.interp? 
             function thisS = smooth_spatial(this, varargin)
                 % function this = smooth_spatial(varargin)
                 %
@@ -1232,6 +1234,26 @@ classdef  itaHRTF < itaAudio
                 fprintf(['[itaHRTF.smooth_spatial] Calculation finished after ',num2str(round(t2*100/60)/100),' min\n'])
                 
             end
+            
+            
+            % calculate diffuse field HRTF from data
+            % taken from 
+            % Equalization methods in binaural technology
+            % Veronique Larcher et al
+            function returnData = getDiffuseFieldHRTF(this)
+                coords = this.getEar('L').channelCoordinates;
+                [~,weights] = coords.spherical_voronoi;
+                returnData = itaAudio;
+                tmp(:,1) = sum(bsxfun(@times,abs(this.getEar('L').freqData).^2,weights.'),2)./(4*pi);
+                tmp(:,2) = sum(bsxfun(@times,abs(this.getEar('R').freqData).^2,weights.'),2)./(4*pi);
+                returnData.freqData = tmp;
+                
+                returnData.signalType = 'power';
+                returnData.channelNames = {'Left Ear','Right Ear'};
+                returnData.comment = 'Diffuse Field HRTF';
+            end
+           
+            
             
             %% Plot
             
