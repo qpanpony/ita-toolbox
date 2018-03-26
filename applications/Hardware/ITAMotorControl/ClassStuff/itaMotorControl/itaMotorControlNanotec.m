@@ -216,6 +216,9 @@ classdef itaMotorControlNanotec < itaMotorControl
                error('Only HRTFArc or Turntable supported'); 
             end
             
+            if ~isempty(this.preparedList)
+                error('Already prepared?');
+            end
             % get the preangle and the speed
             sArgs.preAngle = 0;
             sArgs.speed = 2;
