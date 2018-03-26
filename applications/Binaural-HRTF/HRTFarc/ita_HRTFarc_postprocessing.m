@@ -43,12 +43,12 @@ wb = itaWaitbar(numAzAngle, 'calculate HRTF', {'azimuth'});
 % reference
 % first determine how many channels the measurement has
 currentDataEnding = num2str(1);
-currentData       = ita_merge(ita_read([currentPath   filesep currentDataEnding '.ita']));
+currentData       = ita_merge(ita_read_ita([currentPath   filesep currentDataEnding '.ita']));
 
 numChannels = currentData.nChannels;
 
 %read the reference
-currentRefTmp        = ita_read([path_ref  filesep sArgs.ref_name '.ita']);
+currentRefTmp        = ita_read_ita([path_ref  filesep sArgs.ref_name '.ita']);
 currentRef = merge(currentRefTmp(1:1:length(currentRefTmp)));
 
 if currentRef.nChannels == 2
@@ -86,7 +86,7 @@ for iAz = 1:numAzAngle
     currentDataEnding = num2str(iAz);
     
     try
-        currentData       = ita_merge(ita_read([currentPath   filesep currentDataEnding '.ita']));
+        currentData       = ita_merge(ita_read_ita([currentPath   filesep currentDataEnding '.ita']));
         if sArgs.eimar
             phi  = mod(2*pi-currentData.channelCoordinates.phi+deg2rad(sArgs.phiAdd) ,2*pi);
         else  phi = mod(currentData.channelCoordinates.phi+deg2rad(sArgs.phiAdd) ,2*pi);
