@@ -1,32 +1,34 @@
-%% Short tutorial for itaVA (Virtual Acoustics (VA) Matlab client)
-% covers basic operations for setting up a simple example of a virtual scene
-% (binaural synthesis for 1 receiver, 1 static / 1 moving virtual sound source)
-% as well as synchronized playback of multiple virtual sound sources
+%% Short tutorial for itaVA, a Matlab interface for Virtual Acoustics (VA)
+% The tutorial covers basic operations for setting up a simple virtual scene
+% (1 receiver, 1 static / 1 moving virtual sound source), and explains how to
+% set up a synchronized playback of multiple virtual sound sources.
 %
-% NOTE: The user needs a running version of VAServer.exe / VAGUI.exe (+ dependencies)
-% ( please contact {jst, fpa}@akustik.rwth-aachen.de ).
-% Set up the (absolute) path of the VA deploy dir (see below).
-% Configuration settings are based on VACore.ini / VAGUI.ini files (located in conf directory).
-% Additionally, it is necessary to select the correct audio driver backend 
-% (e.g. Portaudio, ASIO4All)
+% It is recommended to run the tutorial in sections to understand the basic
+% concepts and controls!
 %
-% Explore itaVA by typing "doc itaVA" in Matlab command window
+% WARNING: Check the playback level of your sound card to avoid hearing damage!
+%
+% NOTE: The user needs a running version of VAServer.exe / Redstart.exe (+ dependencies)
+% which can be downloaded here: http://www.virtualacoustics.org/ (section Download)
+% For a more detailed introduction, the reader is referred to http://www.virtualacoustics.org/start.html
+%
+% Explore itaVA by typing "doc itaVA" in Matlab's command window.
 %
 % Author:  Florian Pausch, fpa@akustik.rwth-aachen.de
-% Version: 2018-03-12 (compatible with VA.v2018a_preview.win32-x64.vc12 (and probably higher))
+% Version: 2018-03-26 (compatible with VA.v2018a_preview.win32-x64.vc12 (and probably higher))
 % Revision: Ernesto Accolti 2018-02-20 (update for VA.2018a_preview)
 
 %% Step 0: Initializations
 % Select VA environment
-VAsel = 0;  % 0: start VAServer.exe (without GUI for visualization of virtual environment), 
+VAsel = 1;  % 0: start VAServer.exe (without GUI for visualization of virtual environment), 
             % 1: start Redstart.exe (with graphical user interface)
             
 % Set VA root directory containing bin, conf, data folders etc.
 if ~exist('deployDir','var')
-    deployDir = uigetdir(pwd);
+    deployDir = uigetdir(pwd, 'Set VA root directory...');
 end
 
-% Do you use Natural Point's Optitrack tracking system?
+% Do you use Natural Point's Optitrack motion tracking system?
 useTracker = false;
 
 if VAsel==0
@@ -46,6 +48,7 @@ else
     end
 end
  
+
 %% Step 1: 
 % VAsel = 0: VAServer.exe was started based on the configuration in VAini.exe and currently is running
 % VAsel = 1: Create a session under the menu item Redstart and press the start button in Redstart VA GUI
@@ -59,6 +62,7 @@ if VAsel == 1 && firstStart == true
     firstStart = false;
     pause 
 end
+
 
 %% Step 2: Create itaVA object and connect to VAServer
 a = itaVA;
@@ -75,31 +79,25 @@ a.reset()
 a.add_search_path( fullfile( deployDir, 'data' ) );
 a.add_search_path( fullfile( deployDir, 'conf' ) );
 
-%% Step 3: Set global output gain (optionally set reproduction module)
+
+%% Step 3: Set global output gain
 % set global gain of VA output
 a.set_output_gain(0.3); % value between 0 (-inf dB) and 1 (0 dB) 
 
 % % query available reproduction modules (cf. VACore.ini)
 % modules = a.get_modules;
 % 
-% Example 1: set reproduction module for binaural synthesis, e.g. 'hprep' for a
-% binaural synthesis played back over headphones and set HPEQ file
-% command_struct = struct();
-% command_struct.hpirinv = '$(VADataDir)/HPEQ/HD600_all_eq_128_stereo.wav';
-% command_struct.gain = 0.1;
-% a.call_module( 'Headphones:MyHD600', command_struct )
-
-% Example 2: receiver dumping for binaural freefield renderer
+% Example: receiver dumping for binaural free field renderer
 % command_struct = struct();
 % command_struct.command = 'STARTDUMPLISTENERS';
 % command_struct.gain = .1;
 % command_struct.FilenameFormat = 'ListenerFuerMeckingjay$(ListenerID).wav';
-% a.call_module( 'BinauralFreefield:MyBinauralFreefield', command_struct )
+% a.call_module( 'BinauralFreeField:MyBinauralRenderer', command_struct )
 % command_struct.command = 'STOPDUMPLISTENERS';
-% a.call_module( 'BinauralFreefield:MyBinauralFreefield', command_struct )
+% a.call_module( 'BinauralFreeField:MyBinauralRenderer', command_struct )
 
 
-%% Step 4: Create a receiver and assign a HRIR set
+%% Step 4: Create a receiver and assign an HRIR set
 % load HRTF set stored in VADataDir\HRIR
 
 HRIRSet = a.create_directivity( 'ITA_Artificial_Head_5x5_44kHz_128.v17.ir.daff' ); % $(DefaultHRIR) macro would work, too
@@ -158,40 +156,40 @@ LHeightTracked = LPosTracked(2);
 %   S1: static sound source at a defined position
 S1 = a.create_sound_source('Source 1');      % name of the sound source as string
 
-a.set_sound_source_position(S1,[-2 LHeightTracked 0])
-S1ori = ita_rpy2quat(0,0,-90); % calculate quaternion orientation based on roll/pitch/yaw input
+a.set_sound_source_position(S1,[2 LHeightTracked 0])
+S1ori = ita_rpy2quat(0,0,90); % calculate quaternion orientation based on roll/pitch/yaw input
 S1ori_quat = S1ori.e;  % access quaternion coefficients 
 a.set_sound_source_orientation(S1,S1ori_quat)
-% The virtual sound source is now positioned on the left side of the receiver, 
+% The virtual sound source is now positioned on the right side of the receiver, 
 % at a height of LHeightTracked metres, at a distance of 2 metres relative to 
 % the midpoint of the interaural axis and facing to +x direction
 
 % Create an audiofile signal source for the sound source (based on a mono wave file)
-X1      = a.create_signal_source_buffer_from_file( 'WelcomeToVA.wav' ); % Macro $(DemoSound) would also work here
+X1 = a.create_signal_source_buffer_from_file( 'WelcomeToVA.wav' ); % Macro $(DemoSound) would also work here
 
 % ...and link the signal source to the sound source
 a.set_sound_source_signal_source(S1,X1)
 
 % optionally set volume of sound source
-a.set_sound_source_sound_power(S1,0.05); % value between 0 (-inf dB) and 1 (0 dB) 
+a.set_sound_source_sound_power(S1,3e-2); % value between 0 (-inf dB) and 1 (0 dB) 
 
 % set playback state of audiofile signal source 
 a.set_signal_source_buffer_looping( X1, true );          % looping yes/no?
-a.set_signal_source_buffer_playback_action( X1, 'play' ) % e.g., plays the audiofile signal source
+a.set_signal_source_buffer_playback_action( X1, 'PLAY' ) % e.g., plays the audiofile signal source
 
 % listen to the virtual scene for 3 seconds
 pause(3)
 
-a.set_signal_source_buffer_playback_action( X1, 'stop' ) % stop playback
+a.set_signal_source_buffer_playback_action( X1, 'STOP' ) % stop playback
 
 
 %%  Step 6: Create a moving virtual sound source (with directivity):
 %   S2: moving virtual sound source (on a pre-defined trajectory)
 
-S2  = a.create_sound_source('Source 2');    % name of the sound source as string
+S2 = a.create_sound_source('Source 2');    % name of the sound source as string
 
 % Create an audiofile signal source for the sound source (based on a mono wave file)
-X2  = a.create_signal_source_buffer_from_file( 'WelcomeToVA.wav' );
+X2 = a.create_signal_source_buffer_from_file( 'WelcomeToVA.wav' );
 
 % ...and link the signal source to the sound source
 a.set_sound_source_signal_source(S2,X2);
@@ -202,14 +200,12 @@ S2dir = a.create_directivity( 'Singer.v17.ms.daff' );
 a.set_sound_source_directivity(S2,S2dir);
 
 % increase sound source power due to energy loss (directivity)
-a.set_sound_source_sound_power(S2,0.15)
+a.set_sound_source_sound_power(S2,0.1)
 
 % define a simple trajectory: the virtual sound source S2 shall move on a
 % circle on the horizontal plane with constant radius from pi/2 to -pi/2 (counter-clockwise rotation)
-% Note: for the definition of phi/theta, the local coordinate system of the
-%       receiver is used (view/up direction: -z/y axis), i.e. phi=0 is in look
-%       direction of the receiver and increases counterclockwise, and the
-%       zenith angle starts at north pole (0) and ends at south pole (pi)
+% Note: Please refer to itaOrientation to get more information about the used
+%       openGL coordinate system!
 
 circleR     = 2;        % radius of trajectory [m]
 nlegs       = 200;      % number of equidistant trajectory legs
@@ -218,33 +214,28 @@ phi_start   = pi/2;     % start azimuth angle in [rad]
 phi_end     = -pi/2;    % end azimuth angle in [rad]
 theta       = pi/2;     % zenith angle in [rad]
 
+% define the position trajectory
 phi = linspace(phi_start,phi_end,nlegs);
+S2pos_traj = ([circleR*sin(phi)', repmat(LHeight,nlegs,1), -circleR*cos(phi)']);
 
-traj_cart(:,1) = circleR*sin(phi); 
-traj_cart(:,2) = circleR*cos(phi);
-traj_cart(:,3) = LHeight + circleR*cos(theta);
-
-% set initial position of S2 (use first position of trajectory)
-a.set_sound_source_position(S2, [traj_cart(1,1) traj_cart(1,2) traj_cart(1,3)]);
-
-% ... and the initial orientation
-S2ori = ita_rpy2quat(0,0,0); % alternatively use ita_vu2quat
-a.set_sound_source_orientation(S2,S2ori.e); % access quaternion coefficients by .e
-a.set_signal_source_buffer_looping( X2, true );         % looping yes/no?
+% ... and the orientation trajectory
+S2ori_traj = ita_rpy2quat(zeros(nlegs,1),zeros(nlegs,1),linspace(90,-90,nlegs)'); % alternatively use ita_vu2quat
+a.set_signal_source_buffer_looping( X2, true ); % looping yes/no?
 
 % set period of high-precision timer [s] (for precise position updates in the following update loop)
 a.set_timer(Tvel/nlegs); 
 for idx = 1:nlegs
     if idx==1 % start playback during first loop cycle
-       a.set_signal_source_buffer_playback_action(X2, 'play')
+       a.set_signal_source_buffer_playback_action(X2, 'PLAY')
     end
     
     % wait for a signal of the high-precision timer
     a.wait_for_timer();
     
-    % update source position and view/up direction of S2 (virtual sound source always points at receiver)
-    a.set_sound_source_position(S2, [traj_cart(idx,1), traj_cart(idx,2), traj_cart(idx,3)]);
-   
+    % update source position and orientation of S2 (virtual sound source always points at receiver)
+    a.set_sound_source_position(S2, [S2pos_traj(idx,1), S2pos_traj(idx,2), S2pos_traj(idx,3)]);
+    a.set_sound_source_orientation(S2, S2ori_traj(idx).e); % access quaternion coefficients by .e
+
     if idx==nlegs % optionally: stop playback during last loop cycle
        a.set_signal_source_buffer_playback_action(X2, 'STOP') 
     end
@@ -256,13 +247,8 @@ end
 %  simultaneously (Note: no spatial separation if same signal source from buffer is used 
 %  for both sound sources) 
 
-% set initial position of S2 (use first position of trajectory)
-a.set_sound_source_position(S2, [traj_cart(1,1) traj_cart(1,2) traj_cart(1,3)]);
-% ... and the initial orientation
-a.set_sound_source_orientation(S2,S2ori.e); % access quaternion coefficients by .e
-
 % shift buffer playback position of signal source
-a.set_signal_source_buffer_playback_position(X1,0.5)
+a.set_signal_source_buffer_playback_position(X2,0.5)
 
 % everything between .lock_update and .unlock_update will be triggered in
 % one cycle to allow for synchronized scene events
@@ -271,7 +257,7 @@ a.set_signal_source_buffer_playback_action(X1, 'PLAY')
 a.set_signal_source_buffer_playback_action(X2, 'PLAY')
 a.unlock_update;
 
-% wait until longer signal source is played back completely
+% listen to the scene
 java.util.concurrent.locks.LockSupport.parkNanos(6.5*10^9); 
 
 a.lock_update;
@@ -282,15 +268,9 @@ a.unlock_update;
 
 %% Step 8: Clean up (optionally), reset, and disconnect from VAServer
 
-% wait 1 second before clean up and reset
-java.util.concurrent.locks.LockSupport.parkNanos(1*10^9); 
-
 % delete sound sources
 a.delete_sound_source(S1);
 a.delete_sound_source(S2);
-
-% delete receiver
-a.delete_sound_receiver(L);
 
 % reset VA and clear the scene
 a.reset()
