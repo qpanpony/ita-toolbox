@@ -271,6 +271,37 @@ classdef test_itaEimarMotorControl < itaMeasurementTasksScan
             end
         end
         
+        function rescueArcFromSwitch(this)
+            % this function is intended for the HRTFArc when it is stuck
+            % between the two switches.
+            % this can happen if "prepareForContinuousRotation" is called
+            % and the run function does not move the arc back over the
+            % reference switch
+            
+            % this function will disable the reference switch, move the arc
+            % over it and enable it again. 
+            
+            % only call this, if you know why you are doing it.
+            motor = this.mMotorControl.motorList{1};
+            name = motor.getMotorName;
+            if ~strcmp(name,'HRTFArc')
+                error('Only for HRTFArc');
+            end
+
+            prompt = 'Type "''RESCUE''" and press return ';
+            x = input(prompt);
+            if ~strcmp(x,'RESCUE')
+                error('Aborted due to wrong string');
+            end
+            
+            
+            this.mMotorControl.motorList{1}.disableReference(1);
+            this.moveTo('HRTFArc',70,'absolut',false);
+            this.mMotorControl.motorList{1}.disableReference(0);
+            this.reference;
+            
+        end
+        
         function motorControl = getMotorControl(this)
            motorControl = this.mMotorControl; 
         end
