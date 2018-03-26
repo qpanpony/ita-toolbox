@@ -1089,6 +1089,12 @@ end
 
 scaling_factor = sArgs.font_scale;
 
+% try to downscale
+% z_data = z_data([1 2:5:end],:);
+% x_data = x_data([1 2:5:end]);
+
+
+
 %% start to write axis and label settings
 % need this for colormaps
 fprintf(fid,'include "color.gle"\n');
@@ -1104,6 +1110,7 @@ if strcmpi(get(axh,'XScale'),'log') % workaround for logarithmic xaxis in contou
     x_tick = log2(x_tick);
     x_lim  = log2(x_lim);
     x_data = log2(flipud(x_data));
+    x_data(isinf(x_data)) = sign(x_data(isinf(x_data))).*10000;
     y_data = flipud(y_data);
     lim_a  = min(x_data(:));
     lim_b  = max(x_data(:));
@@ -1230,9 +1237,9 @@ fprintf(fid,'\tylabels dist axisLabelDist\n');
 
 palette = sArgs.palette;
 if ~strcmpi(palette,'gray')
-    fprintf(fid,'\tcolormap "%s" %s %s zmin %4.4f zmax %4.4f palette %s \n',zdata_FileName,'xres','yres',clim(1),clim(2),palette);
+    fprintf(fid,'\tcolormap "%s" %s %s zmin %4.4f zmax %4.4f palette %s \n',zdata_FileName,'200','200',clim(1),clim(2),palette);
 else
-    fprintf(fid,'\tcolormap "%s" %s %s zmin %4.4f zmax %4.4f \n',zdata_FileName,'xres','yres',clim(1),clim(2));
+    fprintf(fid,'\tcolormap "%s" %s %s zmin %4.4f zmax %4.4f \n',zdata_FileName,'200','200',clim(1),clim(2));
 end
 % terminate plot
 fprintf(fid,'end graph\n\n');
