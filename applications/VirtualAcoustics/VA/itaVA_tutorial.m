@@ -157,7 +157,7 @@ LHeightTracked = LPosTracked(2);
 S1 = a.create_sound_source('Source 1');      % name of the sound source as string
 
 a.set_sound_source_position(S1,[2 LHeightTracked 0])
-S1ori = ita_rpy2quat(0,0,90); % calculate quaternion orientation based on roll/pitch/yaw input
+S1ori = ita_rpy2quat(0,0,-pi/2); % calculate quaternion orientation based on roll/pitch/yaw input
 S1ori_quat = S1ori.e;  % access quaternion coefficients 
 a.set_sound_source_orientation(S1,S1ori_quat)
 % The virtual sound source is now positioned on the right side of the receiver, 
