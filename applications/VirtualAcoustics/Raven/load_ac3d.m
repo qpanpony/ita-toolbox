@@ -69,6 +69,7 @@ classdef load_ac3d
             
             mat_rows  = find(strcmp(ac3d,'MATERIAL')==1);  % Zeilenindizes der Materialien
             MatNames  = ac3d(mat_rows,2);                  % Cell der Material Namen
+            MatNames = strrep(MatNames,'"','');            % make sure that no quotation marks are in the material
             MatColors = str2double(ac3d(mat_rows,4:6));    % Matrix der RGB Material Farben
 
                         

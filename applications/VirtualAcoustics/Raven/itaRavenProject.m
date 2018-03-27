@@ -21,16 +21,19 @@ classdef itaRavenProject < handle
     %
     % Example:
     %   rpf = itaRavenProject();
-    %   rpf.SetModel('cave.ac')
-    %   rpf.run()
-    %   rpf.getReverbTime()
+    %   rpf.SetModel('cave.ac');
+    %   rpf.getEquationBasedReverbTime(); returns reverb time based on
+    %                                     sabine equation
+    %   rpf.run();                        run simulation
+    %   rpf.getT30();                     get T30 based on simulation
     %
     %
     % Author:         Soenke Pelzer (spe@akustik.rwth-aachen.de)
 	%				  Lukas Aspöck (las@akustik.rwth-aachen.de)
+    %
     % Version:        0.1
     % First release:  01.11.10
-    % Last revision:  12.09.16
+    % Last revision:  27.03.18
     % Copyright:      Institute of Technical Acoustics, RWTH Aachen University
     %
 
@@ -2810,8 +2813,8 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
-        function RT = getReverbTime(obj, eyring, roomID)
-            %RT = getReverbTime(eyring, roomID)
+        function RT = getEquationBasedReverbTime(obj, eyring, roomID)
+            %RT = getEquationBasedReverbTime(eyring, roomID)
             %
             %   returns the estimated reverberation time of the current room.
             %
@@ -2843,21 +2846,21 @@ classdef itaRavenProject < handle
             % get reverberation time
             if (eyring == 1)
                 airAbsorption = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
-                RT = roommodel.getReverbTime(obj.pathMaterials, 'eyring', airAbsorption);
+                RT = roommodel.getEquationBasedReverbTime(obj.pathMaterials, 'eyring', airAbsorption);
             else
                 airAbsorption = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
-                RT = roommodel.getReverbTime(obj.pathMaterials, 'sabine', airAbsorption);
+                RT = roommodel.getEquationBasedReverbTime(obj.pathMaterials, 'sabine', airAbsorption);
             end
         end
         
         %------------------------------------------------------------------
         function RT = getReverbTime_Sabine(obj)
-            RT = obj.getReverbTime(0);
+            RT = obj.getEquationBasedReverbTime(0);
         end
 
         %------------------------------------------------------------------
         function RT = getReverbTime_Eyring(obj)
-            RT = obj.getReverbTime(1);
+            RT = obj.getEquationBasedReverbTime(1);
         end
         
         %------------------------------------------------------------------
