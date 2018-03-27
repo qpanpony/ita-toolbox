@@ -14,16 +14,16 @@
 %
 % Explore itaVA by typing "doc itaVA" in Matlab's command window.
 %
-% Author:  Florian Pausch, fpa@akustik.rwth-aachen.de
-% Version: 2018-03-26 (compatible with VA.v2018a_preview.win32-x64.vc12 (and probably higher))
+% Author:   Florian Pausch, fpa@akustik.rwth-aachen.de
+% Version:  2018-03-27 (compatible with VA.v2018a_preview.win32-x64.vc12 (and probably higher))
 % Revision: Ernesto Accolti 2018-02-20 (update for VA.2018a_preview)
 
-%% Step 0: Initializations
+%% Step 1: Initializations
 % Select VA environment
-VAsel = 1;  % 0: start VAServer.exe (without GUI for visualization of virtual environment), 
-            % 1: start Redstart.exe (with graphical user interface)
+VAsel = 1;  % 0: start VAServer.exe (without graphical user interface (GUI) for visualization of virtual environment), 
+            % 1: start Redstart.exe (with GUI)
             
-% Set VA root directory containing bin, conf, data folders etc.
+% Set VA root directory containing bin, conf, data folders, etc.
 if ~exist('deployDir','var')
     deployDir = uigetdir(pwd, 'Set VA root directory...');
 end
@@ -43,26 +43,11 @@ else
     % start VAGUI.exe if not running already
     [~,searchresult]=system('tasklist /FI "imagename eq Redstart.exe" /fo table /nh');
     if ~strcmp(strtrim(searchresult(1:13)),'Redstart.exe')
-        system(fullfile(deployDir,'\bin\Redstart.exe &'));
+        system(fullfile(deployDir,'\bin\Redstart.exe -a &')); % -a for autostart (runs last activated session), -s to run in safe mode (overrides autostart flag)
         pause(1) % start-up may take some time on old PC's, pause() to avoid error
     end
 end
  
-
-%% Step 1: 
-% VAsel = 0: VAServer.exe was started based on the configuration in VAini.exe and currently is running
-% VAsel = 1: Create a session under the menu item Redstart and press the start button in Redstart VA GUI
-
-if ~exist('firstStart','var')
-    firstStart = true;
-end
-
-if VAsel == 1 && firstStart == true
-    fprintf('(1) Create a session under the menu item Redstart.\n(2) Press the start button in Redstart VA GUI.\n(3) Press any button in Matlab to continue.\n')
-    firstStart = false;
-    pause 
-end
-
 
 %% Step 2: Create itaVA object and connect to VAServer
 a = itaVA;
@@ -86,8 +71,11 @@ a.set_output_gain(0.3); % value between 0 (-inf dB) and 1 (0 dB)
 
 % % query available reproduction modules (cf. VACore.ini)
 % modules = a.get_modules;
+
+% Example 1: get help about parameters
+% va.call_module( 'module_id', struct('help',true) )
 % 
-% Example: receiver dumping for binaural free field renderer
+% Example 2: receiver dumping for binaural free field renderer
 % command_struct = struct();
 % command_struct.command = 'STARTDUMPLISTENERS';
 % command_struct.gain = .1;
@@ -157,7 +145,7 @@ LHeightTracked = LPosTracked(2);
 S1 = a.create_sound_source('Source 1');      % name of the sound source as string
 
 a.set_sound_source_position(S1,[2 LHeightTracked 0])
-S1ori = ita_rpy2quat(0,0,-pi/2); % calculate quaternion orientation based on roll/pitch/yaw input
+S1ori = ita_rpy2quat(0,0,-pi/2); % calculate quaternion orientation based on roll/pitch/yaw input [rad]
 S1ori_quat = S1ori.e;  % access quaternion coefficients 
 a.set_sound_source_orientation(S1,S1ori_quat)
 % The virtual sound source is now positioned on the right side of the receiver, 
@@ -186,7 +174,7 @@ a.set_signal_source_buffer_playback_action( X1, 'STOP' ) % stop playback
 %%  Step 6: Create a moving virtual sound source (with directivity):
 %   S2: moving virtual sound source (on a pre-defined trajectory)
 
-S2 = a.create_sound_source('Source 2');    % name of the sound source as string
+S2 = a.create_sound_source('Source 2'); % name of the sound source as string
 
 % Create an audiofile signal source for the sound source (based on a mono wave file)
 X2 = a.create_signal_source_buffer_from_file( 'WelcomeToVA.wav' );
