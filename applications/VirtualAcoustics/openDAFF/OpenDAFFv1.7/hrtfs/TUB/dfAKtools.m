@@ -11,12 +11,18 @@ hato_negative_range = config.hatorange( 1 ):config.hatores:-config.hatores;
 hato_positive_range = config.hatores:config.hatores:config.hatorange( 2 );
 hato = [ 0 hato_negative_range hato_positive_range ];
 
-[ l, r ] = AKhrirInterpolation( alpha, beta - 90, hato );
-l = l';
-r = r';
+data = zeros( config.numchannels, config.numsamples );
 
-% Interleave for DAFF (odd = left, even = right)
-data = reshape( [ l(:) r(:) ]', 2 * size( l, 1 ), [] );
+for n = 1:(config.numchannels/2)
+    
+    [ l, r ] = AKhrirInterpolation( alpha + hato( n ), beta - 90, hato( n ) );
+    
+    % Interleave for DAFF (odd = left, even = right)
+    data( 2*n-1, : ) = l';
+    data( 2*n, : ) = r';
+    
+end
+
 samplerate = config.samplerate;
 metadata = daffv17_add_metadata( [], 'AKhrirInterpolation_hato_parameter', 'STRING', num2str( hato ) );
 

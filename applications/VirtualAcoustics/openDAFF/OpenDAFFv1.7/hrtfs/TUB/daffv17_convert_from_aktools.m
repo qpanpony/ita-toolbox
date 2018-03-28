@@ -1,6 +1,7 @@
 function [] = daffv17_convert_from_aktools( target_file_path, export_properties, additional_metadata )
 
 export_properties.samplerate = 44100;
+export_properties.numsamples = 256;
 export_properties.numchannels = 2 * ceil( ( export_properties.hatorange( 2 ) - export_properties.hatorange( 1 ) ) / export_properties.hatores + 1 );
 
 combined_metadata = daffv17_add_metadata( additional_metadata, 'Converter script', 'String', 'daffv17_convert_from_aktools.m' );

@@ -11,7 +11,7 @@ export_properties.alpharange = [0 360];
 export_properties.betares = 5;
 export_properties.betarange = [0 180];
 export_properties.hatores = 5;
-export_properties.hatorange = [-40 40];
+export_properties.hatorange = [-50 50];
 
 %% Set up metadata
 additional_metadata = daffv17_add_metadata( [], 'hato', 'BOOL', true );
