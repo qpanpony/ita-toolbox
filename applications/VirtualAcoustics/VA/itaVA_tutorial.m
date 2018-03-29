@@ -145,7 +145,7 @@ LHeightTracked = LPosTracked(2);
 S1 = a.create_sound_source('Source 1');      % name of the sound source as string
 
 a.set_sound_source_position(S1,[2 LHeightTracked 0])
-S1ori = ita_rpy2quat(0,0,-pi/2); % calculate quaternion orientation based on roll/pitch/yaw input [rad]
+S1ori = ita_rpy2quat(0,0,pi/2); % calculate quaternion orientation based on roll/pitch/yaw input [rad]
 S1ori_quat = S1ori.e;  % access quaternion coefficients 
 a.set_sound_source_orientation(S1,S1ori_quat)
 % The virtual sound source is now positioned on the right side of the receiver, 
@@ -207,7 +207,7 @@ phi = linspace(phi_start,phi_end,nlegs);
 S2pos_traj = ([circleR*sin(phi)', repmat(LHeight,nlegs,1), -circleR*cos(phi)']);
 
 % ... and the orientation trajectory
-S2ori_traj = ita_rpy2quat(zeros(nlegs,1),zeros(nlegs,1),linspace(90,-90,nlegs)'); % alternatively use ita_vu2quat
+S2ori_traj = ita_rpy2quat(zeros(nlegs,1),zeros(nlegs,1),linspace(pi/2,-pi/2,nlegs)'); % alternatively use ita_vu2quat
 a.set_signal_source_buffer_looping( X2, true ); % looping yes/no?
 
 % set period of high-precision timer [s] (for precise position updates in the following update loop)
