@@ -12,7 +12,7 @@ va.set_signal_source_buffer_looping( X, true );
 
 % Create a virtual sound source and set a position
 S = va.create_sound_source( 'itaVA_Source' );
-va.set_sound_source_position( S, [ 0 1.7 -2 ] );
+va.set_sound_source_position( S, [ 0 1.7 -6 ] );
 va.set_sound_source_signal_source( S, X );
 
 % Create a sound receiver with HATO (actually OTAH) HRTF
@@ -30,11 +30,13 @@ va.set_tracked_sound_receiver_torso_rigid_body_index( 2 );
 
 % ... for reproduction modules
 va.set_tracked_real_world_sound_receiver( L );
-va.setset_tracked_real_world_sound_receiver_head_rigid_body_index( 2 );
+va.set_tracked_real_world_sound_receiver_head_rigid_body_index( 1 );
+va.set_tracked_real_world_sound_receiver_torso_rigid_body_index( 2 );
 
+va.get_tracker_info
 
 % Start!
-va.connect_tracker
+va.connect_tracker( '137.226.61.85', '137.226.61.107' )
 
 
 % pause( 12 )

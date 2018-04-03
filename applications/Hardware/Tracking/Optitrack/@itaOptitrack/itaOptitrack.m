@@ -500,7 +500,7 @@ classdef itaOptitrack < handle
             if Optitrack_obj.isConnected
             
             % parse input arguments
-            sArgs          = struct('recMethod',0,'recTime',1,'savePath',[],'saveName',[],'singleShot',0,'debugInfo',0,'autoSave',1);
+            sArgs          = struct('recMethod',0,'recTime',1,'savePath',[],'saveName',[],'singleShot',0,'debugInfo',0,'autoSave',0);
             sArgs          = ita_parse_arguments(sArgs,varargin,1);
             Optitrack_obj.recMethod      = sArgs.recMethod;  % recording method, 0: record data for recTime seconds
             %                                                                    1: manually abort logging by closing msgbox
@@ -713,6 +713,7 @@ classdef itaOptitrack < handle
                                                                                          Optitrack_obj.rigidBodyLogData.data(~isnan(Optitrack_obj.rigidBodyLogData.data(:,4,idx)),7:10,idx), ...
                                                                                           Optitrack_obj.data(idx).frameID, 'pchip') );
                                 catch e
+                                    %disp( e )
                                 end
 
                             else
