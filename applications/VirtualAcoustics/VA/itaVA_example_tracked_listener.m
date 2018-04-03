@@ -7,7 +7,7 @@ va = itaVA( 'localhost' );
 % Create a sound receiver
 L = va.create_sound_receiver( 'itaVA_Tracked_Listener' );
 
-% OptiTrack tracker conneection and sound receiver updates
+% OptiTrack tracker connection and sound receiver updates
 va.set_tracked_sound_receiver( L ) % For virtual scene / rendering
 va.set_tracked_real_world_sound_receiver( L ) % For CTC reproductions
 va.connect_tracker
