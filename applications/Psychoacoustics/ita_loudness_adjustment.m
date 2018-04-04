@@ -56,11 +56,6 @@ else
     [~,~,N2] = ita_loudness_timevariant(input2);    
 end
 
-N1.value=sum(N1.value);
-N2.value=sum(N2.value);
-
-    
-
 currentAmp = 0;
 
 % start with stepsize of 10 dB
@@ -77,6 +72,7 @@ whileCounter = 0;
 whileLimit = sArgs.whileLimit;
 
 while (abs(N1.value-N2.value) / N1.value > errorThreshold)
+    
     if lastStatus ~= ( N1.value > N2.value)    % if status change => decrease and invert stepsize
         ampStep = ampStep / -10;
         lastStatus = N1.value > N2.value;
@@ -89,9 +85,7 @@ while (abs(N1.value-N2.value) / N1.value > errorThreshold)
     else
         [~,~,N2] = ita_loudness_timevariant(ita_amplify(input2, currentAmp, 'dB'));
     end
-
-    N2.value=sum(N2.value);
-
+    
     ita_verbose_info( sprintf('CurrentAmp: %2.2f -- Error: %2.2f\n', currentAmp, abs(N1.value-N2.value) / N1.value),2);
     
     whileCounter = whileCounter +1;

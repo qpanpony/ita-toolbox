@@ -40,7 +40,7 @@ if (H.nChannels<4)
 end
 
 if ~strcmpi(H.signalType,'energy')
-    warning('HRTFs are not energy signals! Changing them to energy...');
+    warning('HRTFs are not energy signals! Changing them to energy');
     H.signalType='energy';
 end
 opts=ita_parse_arguments(opts,varargin(2:end));
