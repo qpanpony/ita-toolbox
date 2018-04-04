@@ -105,10 +105,10 @@ end
 % end
 
 %% start third party APIs
-if ~exist([ita_toolbox_path filesep 'external_packages' filesep 'sofa' filesep 'API_MO' filesep 'conventions' filesep 'GeneralFIR-a.mat' ],'file')
-    disp('Installing SOFA conventions (external module):');
-    SOFAstart('short');
-end
+% if ~exist([ita_toolbox_path filesep 'external_packages' filesep 'sofa' filesep 'API_MO' filesep 'conventions' filesep 'GeneralFIR-a.mat' ],'file')
+%     disp('Installing SOFA conventions (external module):');
+%     ;
+% end
 
 %% clean up old filters
 ita_delete_filter();
