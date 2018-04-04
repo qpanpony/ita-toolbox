@@ -1,20 +1,10 @@
 function varargout = ita_sofa_install(varargin)
-%ITA_SOFA_INSTALL - +++ Short Description here +++
-%  This function ++++ FILL IN INFO HERE +++
+%ITA_SOFA_INSTALL - +++ Download and install the SOFA API +++
+%  This functionwill download and install the SOFA API
 %
 %  Syntax:
-%   audioObjOut = ita_sofa_install(audioObjIn, options)
+%   ta_sofa_install
 %
-%   Options (default):
-%           'opt1' (defaultopt1) : description
-%           'opt2' (defaultopt1) : description
-%           'opt3' (defaultopt1) : description
-%
-%  Example:
-%   audioObjOut = ita_sofa_install(audioObjIn)
-%
-%  See also:
-%   ita_toolbox_gui, ita_read, ita_write, ita_generate
 %
 %   Reference page in Help browser
 %        <a href="matlab:doc ita_sofa_install">doc ita_sofa_install</a>
@@ -30,7 +20,7 @@ function varargout = ita_sofa_install(varargin)
 
 if ~exist(['SOFAstart.m'],'file')
     
-    % download NatNet version
+    % the sofa link from github
     url = 'https://codeload.github.com/sofacoustics/API_MO/zip/master';
     
     try
