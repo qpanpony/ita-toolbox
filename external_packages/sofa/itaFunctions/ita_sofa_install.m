@@ -18,7 +18,7 @@ function varargout = ita_sofa_install(varargin)
 % Author: Jan-Gerrit Richter -- Email: jri@akustik.rwth-aachen.de
 % Created:  04-Apr-2018
 
-if ~exist(['SOFAgetVersion.m'],'file')
+if ~exist(['SOFAstart.m'],'file')
     
     % the sofa link from github
     url = 'https://codeload.github.com/sofacoustics/API_MO/zip/master';
@@ -46,10 +46,7 @@ if ~exist(['SOFAgetVersion.m'],'file')
     % delete zip file
     fprintf('.\n')
     delete(fullfile(path,'sofa.zip'))
-    
-    % delete the dummy functions
-    fullpath = fileparts(which('SOFAstart.m'));
-    rmdir(fullpath,'s')
+   
     % add folder to path
     addpath(genpath([path(1:end-16) 'sofa/API_MO-master/API_MO']));
     ita_path_handling();
