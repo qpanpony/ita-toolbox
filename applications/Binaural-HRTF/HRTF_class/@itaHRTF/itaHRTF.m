@@ -1342,7 +1342,7 @@ classdef  itaHRTF < itaAudio
             
             function plot_freqSlice(varargin)
                 % init
-                sArgs       = struct('pos1_data','itaHRTF', 'earSide', 'L','plane','horizontal','axes_handle',gca);
+                sArgs       = struct('pos1_data','itaHRTF', 'earSide', 'L','plane','horizontal','axes_handle',gca,'plotData','magnitude');
                 [this,sArgs]= ita_parse_arguments(sArgs,varargin);
                 ah          = sArgs.axes_handle;
                 
@@ -1409,9 +1409,15 @@ classdef  itaHRTF < itaAudio
                 fMax = thisCs.freqVector(idxfMax);
 %                 [tick, lab] = ita_plottools_ticks('log');
                 
-                data_dB= thisCs.freqData_dB;
-                cMax = max(max(data_dB(2:idxfMax,:)));
-                cMin = min(min(data_dB(2:idxfMax,:)))*0.5;
+                if strcmp(sArgs.plotData,'magnitude')
+                    data_dB= thisCs.freqData_dB;
+                    cMax = max(max(data_dB(2:idxfMax,:)));
+                    cMin = min(min(data_dB(2:idxfMax,:)))*0.5;
+                else
+                    data_dB= unwrap(angle(thisCs.freqData));
+                    cMax = max(max(data_dB(2:idxfMax,:)));
+                    cMin = min(min(data_dB(2:idxfMax,:)))*0.5;     
+                end
                 
                 pcolor(ah, thisCs.freqVector,xData,data_dB(:,thisCs.EarSide == earSidePlot)');
                 [xticks, xlabels] = ita_plottools_ticks('log');
@@ -1425,6 +1431,10 @@ classdef  itaHRTF < itaAudio
                 title(strTitle)
                 
                 shading interp
+                if ~strcmp(sArgs.plotData,'magnitude')
+                    colormap(hsv)
+%                     caxis([0 2*pi]);
+                end
                 cb  = colorbar;
                 zlab = get(cb,'ylabel');
                 set(zlab,'String','Level in [dB]');
