@@ -1,6 +1,9 @@
 function s = ita_sph_sampling_hyperinterpolation(nmax)
 % This function creates a spherical sampling with the property that its
 % spherical harmonics function can be inverted.
+% 
+% The set of points is downloaded from Womersleys homepage:
+%  http://web.maths.unsw.edu.au/~rsw/Sphere/Extremal/New/index.html
 %
 % The SHT thus writes:  f_SH = inv(s.Y) * f;
 % and the ISHT:         f = s.Y * f_SH;
@@ -10,15 +13,15 @@ function s = ita_sph_sampling_hyperinterpolation(nmax)
 % You can find the license for this m-file in the application folder. 
 % </ITA-Toolbox>
 
-% can be a natural number 1..29
-if nmax > 29
+% can be a natural number 1..165
+if nmax > 165
     error('pre-calculated points only for hyperinterpolation up to order 29');
 end
 nSH = (nmax+1).^2;
 
-filename = ['/Womersley/md' num2str(nmax,'%02d') '.' num2str(nSH,'%04d')];
+filename = ['md' num2str(nmax,'%03d') '.' num2str(nSH,'%05d')];
 
-url = 'http://www.ita-toolbox.org/Griddata';
+url = 'http://web.maths.unsw.edu.au/~rsw/Sphere/Extremal/New/';
 hyper = str2num(urlread([url filename])); %#ok<ST2NM>
 
 s = itaSamplingSph(hyper(:,1:3),'cart');
