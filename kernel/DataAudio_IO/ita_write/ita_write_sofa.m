@@ -52,6 +52,14 @@ userDataFields = {'GLOBAL_Conventions','GLOBAL_Version','GLOBAL_SOFAConventions'
     ,'EmitterPosition','EmitterPosition_Type','EmitterPosition_Units','RoomCornerA','RoomCornerA_Type','RoomCornerA_Units' ...
     ,'RoomCornerB','RoomCornerB_Type','RoomCornerB_Units'};
 
+
+%% check if sofa is installed
+if ~exist('SOFAstart.m','file')
+    error('SOFA not installed. Run ita_sofa_install');
+end
+
+%%
+
 switch(sArgs.dataType)
    
     case 'HRTF'

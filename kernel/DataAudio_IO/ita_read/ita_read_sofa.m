@@ -26,6 +26,11 @@ else
 end
 
 
+%% check if sofa is installed
+if ~exist('SOFAstart.m','file')
+    error('SOFA not installed. Run ita_sofa_install');
+end
+
 
 %% Open the sofaFile
 

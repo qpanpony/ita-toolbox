@@ -520,6 +520,10 @@ classdef  itaHRTF < itaAudio
             
             
             function this = set.sofa2itaHRTF(this,pathFile)
+                %% check if sofa is installed
+                if ~exist('SOFAstart.m','file')
+                    error('SOFA not installed. Run ita_sofa_install');
+                end
                 if ~exist(pathFile,'file')
                     f=filesep;
                     pathFile=[SOFAdbPath f 'SOFA' f pathFile];
