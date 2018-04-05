@@ -28,7 +28,7 @@ function [r, p, y] = ita_vu2rpy(v, u)
 %
 % Authors: Florian Pausch, Jonas Stienen
 % e-Mail:  {fpa, jst}@akustik.rwth-aachen.de
-% Version: 2016-04-07
+% Version: 2018-04-05
 %
 % <ITA-Toolbox>
 % This file is part of the ITA-Toolbox. Some rights reserved.
@@ -69,8 +69,8 @@ if (colv == 1)
     v(~isnan(v(:,1)),:) = v(~isnan(v(:,1)),:) ./ abs(v(~isnan(v(:,1)),:));
     u(~isnan(u(:,1)),:) = u(~isnan(u(:,1)),:) ./ abs(u(~isnan(u(:,1)),:));
 else
-    v = sqrt( ones ./ (sum((v(~isnan(v(:,1)),:).*v(~isnan(v(:,1)),:))')) )' * ones(1,colv).*v(~isnan(v(:,1)),:);
-    u = sqrt( ones ./ (sum((u(~isnan(u(:,1)),:).*u(~isnan(u(:,1)),:))')) )' * ones(1,colu).*u(~isnan(u(:,1)),:);
+    v = sqrt( ones ./ (nansum((v.*v)')) )' * ones(1,colv).*v;
+    u = sqrt( ones ./ (nansum((u.*u)')) )' * ones(1,colu).*u;
 end
 
 % init.

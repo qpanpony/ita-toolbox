@@ -40,7 +40,7 @@ classdef itaOrientation
     %           ita_vu2quat, ita_vu2rpy, itaOptitrack
     %
     % Author:  Florian Pausch, fpa@akustik.rwth-aachen.de
-    % Version: 2016-05-09
+    % Version: 2018-05-04
     %
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.
@@ -205,7 +205,7 @@ classdef itaOrientation
             % set quat, nPoints x 4 [double]
             if ~isa(value,'quaternion')
                 assert( isequal(size(value,2),4),['Size of input must be ',num2str(this.nPoints),' x 4 [double].'])
-                if size(value,1)~=this.nPoints;
+                if size(value,1)~=this.nPoints
                     fprintf('[\b[itaOrientation]\tSize of input does not match %d x 4.]\b\n',this.nPoints)
                     fprintf('[\b\t\t\t\t\tSize of class object is changed.]\b\n')
                 end
