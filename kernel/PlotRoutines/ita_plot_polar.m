@@ -117,11 +117,11 @@ if ~isempty(thetaVal)
         else
             error([thisFuncStr 'no appropriate values found, could not create plot']);
         end
-        angles(angles > 180) = mod(angles(angles > 180),180) - 180;  %#ok<AGROW>
+        angles(angles > 180) = mod(angles(angles > 180),180) - 180;  
     end
 else
     for iPhi = 1:numel(phiVal)
-        idxPlotData = find(abs(phi - phiVal(iPhi)) <= phiRes*0.4); %#jtu: magic number 0.4?
+        idxPlotData = find(abs(phi - phiVal(iPhi)) <= phiRes*0.4); %jtu: magic number 0.4?
         if ~isempty(idxPlotData)
             [tmpAngles,idxAngles]  = sort(input.channelCoordinates.theta_deg(idxPlotData));
             angles                 = [angles; tmpAngles.*signVals(iPhi)]; %#ok<AGROW>
@@ -162,7 +162,7 @@ if strcmpi(sArgs.plotDomain,'freq')
             ita_verbose_info('values are complex => plotting absolute value',0)
             plotData = abs(plotData);
         end
-    else strcmpi(sArgs.plotType,'phase')
+    elseif strcmpi(sArgs.plotType,'phase')
         yTitle    = 'deg';
         plotData  = unwrap(angle(plotData)).*180/pi;
         if sArgs.normalize
