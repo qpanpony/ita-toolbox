@@ -1,15 +1,19 @@
 classdef itaMeshGroup < itaMeta
 
-% <ITA-Toolbox>
-% This file is part of the application Meshing for the ITA-Toolbox. All rights reserved. 
-% You can find the license for this m-file in the application folder. 
-% </ITA-Toolbox>
-
     
     % Class for mesh groups
-    % mmt, 04.1.10
     %
-    % This class allows to store node IDs for mesh groups
+    % This class groups a set of itaMeshNodes or itaMeshElements using
+    % their IDs. The group itself has an ID, a name and a type. The latter
+    % defines the data it contains (nodes, shell elements or volume elements)
+    
+    % <ITA-Toolbox>
+    % This file is part of the application Meshing for the ITA-Toolbox. All rights reserved. 
+    % You can find the license for this m-file in the application folder. 
+    % </ITA-Toolbox>
+    
+    %Author: mmt
+    %Created: 04.1.10
     
     properties(Access = private)
         mID = [];
@@ -19,16 +23,16 @@ classdef itaMeshGroup < itaMeta
     end
     
     properties(Constant)
-        VALID_GROUP_TYPES = {'nodes', 'shell elements','volume elements'};
+        VALID_GROUP_TYPES = {'nodes', 'shell elements','volume elements'}; %Valid strings for the type property
     end
     
     properties(Dependent)
-        ID
-        groupID;
-        groupName
-        type
-        nNodes
-        nElements
+        ID          %IDs of the nodes belonging to this group
+        groupID;    %ID of this group
+        groupName   %name of this group
+        type        %indicates what is stored in the group (nodes/shell elements/volume elements)
+        nNodes      %number of nodes
+        nElements   %number of elements
     end
     
     methods
@@ -66,6 +70,8 @@ classdef itaMeshGroup < itaMeta
         end
         
         function display(this)
+            %   DISPLAY(X) is called for the object X when the semicolon is not used
+            %   to terminate a statement. [overloaded function]
             IDs = this.mID(:);
             idStr = cellstr(num2str(IDs));
             nIDs = numel(IDs);
@@ -81,6 +87,10 @@ classdef itaMeshGroup < itaMeta
         
         % replaces subsref
         function result = n(this, index)
+            %Grants access to the node IDs of given index (internal indexing)
+            %
+            %Example:   obj.n([1 2 3]) returns an itaMeshGroup object
+            %           containing the first three node IDs
             result = this;
             result.mID = this.mID(index);
         end

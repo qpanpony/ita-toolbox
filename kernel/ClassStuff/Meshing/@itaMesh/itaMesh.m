@@ -1,12 +1,21 @@
 classdef itaMesh
 
-% <ITA-Toolbox>
-% This file is part of the application Meshing for the ITA-Toolbox. All rights reserved. 
-% You can find the license for this m-file in the application folder. 
-% </ITA-Toolbox>
-
-    %ITAMESH Summary of this class goes here
-    %   Detailed explanation goes here
+    %ITAMESH Represents a mesh used in simulations like FEM/BEM
+    %   A mesh consists of a list of nodes (see itaMeshNodes) which form
+    %   shell and/or volume elements (see itaMeshElements). Additionally,
+    %   the nodes can be grouped using itaMeshGroup.
+    %
+    %   Supported element shapes are tetraheadron/triangle (tetra) and
+    %   quadrilateral (quad) with linear or parabolic order.
+    %   For more information see itaMeshElements.
+    
+    % <ITA-Toolbox>
+    % This file is part of the application Meshing for the ITA-Toolbox. All rights reserved. 
+    % You can find the license for this m-file in the application folder. 
+    % </ITA-Toolbox>
+    
+    %Author: mmt
+    %Created: 2009?
     
     properties(Access = protected)
         mNodes = itaMeshNodes;
@@ -16,23 +25,32 @@ classdef itaMesh
     end
     
     properties(Dependent)
-        nodes;
-        shellElements;
-        volumeElements;
-        groups;
-        nNodes;
-        nElements;
-        nShellElements;
-        nVolumeElements;
-        nGroups;
+        nodes;              %The nodes of this mesh (see itaMeshNodes)
+        shellElements;      %Elements that define the shell of this mesh (see itaMeshElements)
+        volumeElements;     %Elements that define the volume of this mesh (see itaMeshElements)
+        groups;             %Cell-array of groups used in the mesh(see itaMeshGroup)
+        nNodes;             %Number of nodes in this mesh
+        nElements;          %Total number of elements in this mesh
+        nShellElements;     %Number of shell elements in this mesh
+        nVolumeElements;    %Number of volume elements in this mesh
+        nGroups;            %Number of groups in this mesh
     end
     
     methods
         function this = itaMesh(varargin)
+            %There are four ways of using the constructor.
+            %Valid inputs are:
+            %1) single itaMesh (copy constructor)
+            %2) a unv-filename
+            %3) a struct with input properties (nodes/shellElements/volumeElements/groups)
+            %4) itaMeshNodes, itaMeshElements, itaMeshGroup
+            %   (e.g. itaMesh(nodes, elements, group1, group2,...)
+            
             if nargin
                 if isa(varargin{1},'itaMesh') % copy consructor
                     this = varargin{1};
-                elseif ischar(varargin{1})
+                    
+                elseif ischar(varargin{1})  % unv import
                     foundStuff = 0;
                     try
                         try %#ok<TRYNC>
@@ -72,6 +90,7 @@ classdef itaMesh
                     catch %#ok<CTCH>
                         error('itaMesh:I cannot read the specified file');
                     end
+                    
                 elseif isstruct(varargin{1}) % Struct input/convert
                     fieldName = fieldnames(varargin{1});
                     for ind = 1:numel(fieldName)
@@ -112,6 +131,8 @@ classdef itaMesh
         end
         
         function display(this) %#ok<DISPLAY>
+            %   DISPLAY(X) is called for the object X when the semicolon is not used
+            %   to terminate a statement. [overloaded function]
             disp('==|itaMesh|============================================================');
             if this.nNodes > 0
                 disp('   Nodes');
@@ -202,6 +223,7 @@ classdef itaMesh
         
         %% node functions
         function nodes = nodeForID(this,ID)
+            %Returns the itaMeshNodes with the given IDs
             if ~all(ismember(ID,this.nodes.ID))
                 error('itaMesh.nodeForID:some (or all) of the IDs are not in the list');
             else
@@ -214,6 +236,7 @@ classdef itaMesh
         end
         
         function nodes = nodesForElement(this,element)
+            %Returns the itaMeshNodes of the given itaMeshElements
             if nargin < 2 || ~isa(element,'itaMeshElements')
                 error('itaMesh.nodesForElement:I need a meshElements object');
             end
@@ -227,6 +250,7 @@ classdef itaMesh
         end
         
         function nodes = nodesForGroup(this,group)
+            %Returns the itaMeshNodes of the given itaMeshGroup
             if nargin < 2 || ~isa(group,'itaMeshGroup')
                 error('itaMesh.nodesForGroup:I need a meshGroup object');
             end
@@ -248,6 +272,7 @@ classdef itaMesh
         
         %% element functions
         function elements = shellElementForID(this,ID)
+            %Returns the shell elements (itaMeshElements) of the given IDs
             shellElementID  = this.mShellElements.ID;
             tmpShellID  = ID(ismember(ID,shellElementID));
             
@@ -264,6 +289,7 @@ classdef itaMesh
         
         
         function elements = volumeElementForID(this,ID)
+            %Returns the volume elements (itaMeshElements) of the given IDs
             volumeElementID = this.mVolumeElements.ID;
             tmpVolumeID = ID(ismember(ID,volumeElementID));
             
@@ -280,6 +306,7 @@ classdef itaMesh
         
         
         function elements = elementsForGroup(this,group)
+            %Returns the itaMeshElements of the given itaMeshGroup
             if nargin < 2 || ~isa(group,'itaMeshGroup')
                 error('itaMesh.elementsForGroup:I need a meshGroup object');
             elseif strcmpi(group.type,'nodes')
@@ -302,6 +329,7 @@ classdef itaMesh
         
         %% group functions
         function value = getGroupIDs(this)
+            %Returns the IDs of the groups of this mesh
             value = [];
             if ~isempty(this.mGroups)
                 for i= 1:numel(this.mGroups)
@@ -312,6 +340,7 @@ classdef itaMesh
         
         %% plot
         function h = plot(this,varargin)
+            %See ita_plot_mesh
             if nargin < 2
                 h = ita_plot_mesh(this);
             else
@@ -349,6 +378,7 @@ classdef itaMesh
         end
         
         function result = propertiesSaved
+            %Returns the names of the properties that are saved
             result = {'nodes','shellElements','volumeElements','groups'};
         end
     end

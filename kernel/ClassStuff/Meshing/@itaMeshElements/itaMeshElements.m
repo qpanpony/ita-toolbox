@@ -1,13 +1,8 @@
 classdef itaMeshElements < itaMeta
     
-    % <ITA-Toolbox>
-    % This file is part of the application Meshing for the ITA-Toolbox. All rights reserved.
-    % You can find the license for this m-file in the application folder.
-    % </ITA-Toolbox>
     
     
     % Class for mesh elements
-    % mmt, 15.8.09
     %
     % This class allows to store the ID and referred nodes of mesh elements
     %
@@ -21,6 +16,14 @@ classdef itaMeshElements < itaMeta
     %   tetra: 4 nodes (linear), 10 nodes (parabolic)
     %   quad : 8 nodes (linear), 20 nodes (parabolic)
     
+    % <ITA-Toolbox>
+    % This file is part of the application Meshing for the ITA-Toolbox. All rights reserved.
+    % You can find the license for this m-file in the application folder.
+    % </ITA-Toolbox>
+    
+    %Author: mmt
+    %Created: 15.8.09
+    
     properties(Access = private)
         mID = [];
         mNodes = nan(0,3);
@@ -30,12 +33,12 @@ classdef itaMeshElements < itaMeta
     end
     
     properties(Dependent)
-        ID
-        nodes
-        shape
-        type
-        nElements
-        order
+        ID          %Unique IDs of the stored mesh elements
+        nodes       %Respective IDs of the nodes for each element
+        shape       %Shape of the stored elements (tetra/quad)
+        type        %Elementtype (shell/volume)
+        nElements   %Total number of elements
+        order       %Order of the shape function(linear/parabolic)
     end
     
     methods
@@ -166,6 +169,8 @@ classdef itaMeshElements < itaMeta
         end
         
         function display(this) %#ok<DISPLAY>
+            %   DISPLAY(X) is called for the object X when the semicolon is not used
+            %   to terminate a statement. [overloaded function]
             prefix = '(ID=';
             middlefix = ['[nodes (n=' num2str(size(this.mNodes,2)) ')] = ['];
             elements = this.mNodes;
@@ -177,11 +182,16 @@ classdef itaMeshElements < itaMeta
         
         % replaces subsref
         function result = n(this, index)
+            %Grants access to elements with given index (internal indexing)
+            %
+            %Example:   obj.n([1 2 3]) returns an itaMeshElements object
+            %           containing the first three mesh elements
             result = this;
             result.mID = this.mID(index);
             result.mNodes = this.mNodes(index,:);
         end
-        
+
+        %% Set / Get functions
         function this = set.ID(this, value)
             if numel(unique(value)) == numel(this.mNodes(:,1))
                 this.mID = value;
@@ -230,8 +240,14 @@ classdef itaMeshElements < itaMeta
         function value = get.order(this), value = this.mOrder; end
         function value = get.nElements(this), value = numel(this.mID); end
         
-        function value = isShell(this), value = strcmpi(this.mType,'shell'); end
-        function value = isVolume(this), value = strcmpi(this.mType,'volume'); end
+        
+        %% Boolean functions
+        function value = isShell(this)
+            %Returns true if the stored elements belong to a shell
+            value = strcmpi(this.mType,'shell'); end 
+        function value = isVolume(this)
+            %Returns true if the stored elements belong to a volume
+            value = strcmpi(this.mType,'volume'); end
         
         
         %% Overloaded functions
@@ -248,6 +264,7 @@ classdef itaMeshElements < itaMeta
         end
         
     end
+    
     
     methods(Static)
         function this = loadobj(sObj)
