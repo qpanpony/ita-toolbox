@@ -1,23 +1,25 @@
 classdef itaMeshNodes < itaMeta & itaCoordinates
 
-% <ITA-Toolbox>
-% This file is part of the application Meshing for the ITA-Toolbox. All rights reserved. 
-% You can find the license for this m-file in the application folder. 
-% </ITA-Toolbox>
-
     
     % Class for mesh nodes, represented by a unique ID and coordinates
     % inherited from itaCoordinates
-    % mmt, 15.8.09
     %
     % This class allows to store the ID and coordinates of a mesh node.
+    
+    % <ITA-Toolbox>
+    % This file is part of the application Meshing for the ITA-Toolbox. All rights reserved. 
+    % You can find the license for this m-file in the application folder. 
+    % </ITA-Toolbox>
+    
+    %Author: mmt
+    %Created: 15.8.09
     
     properties(Access = private)
         mID;
     end
     
     properties(Dependent)
-        ID;
+        ID; %Unique IDs of the stored nodes
     end
     
     methods
