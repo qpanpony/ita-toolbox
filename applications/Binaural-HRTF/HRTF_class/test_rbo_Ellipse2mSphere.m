@@ -153,6 +153,15 @@ try
     ellipsoidCoord(2:2:end) = rSphere_R(idxCoord);
 end
 
+
+if an.channelCoordinates.nPoints ~= numel(ellipsoidCoord)
+    % Problem when HRTF has only 2 Channels at poles and not nPhi channels
+    % in the  'same' location - 17.04.18 - hbr
+    idx = coord.findnearest(an.dirCoord);
+    chIdx = [2*idx-1, 2*idx].';
+    ellipsoidCoord = ellipsoidCoord(chIdx(:));
+end
+
 % coord.surf(coord.r, ellipsoidRi)
 % an.dirCoord.surf(an.dirCoord.r,ellipsoidCoord(1:2:end))     
 end
