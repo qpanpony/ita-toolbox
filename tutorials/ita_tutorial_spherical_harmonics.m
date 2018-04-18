@@ -78,7 +78,7 @@ title(['kr = ', num2str(k(idxPlot) * uniquetol(sampling.r))]);
 lookDirections = ita_sph_sampling_equiangular(30);
 
 % calculate the sh basis functions for all look directions
-Y_lookDirs = ita_sph_base(lookDirections, Nmax)';
+Y_lookDirs = ita_sph_base(lookDirections, Nmax, 'real', real)';
 
 % calculate the radial filter to compensate for the modal strength of the
 % sphere
