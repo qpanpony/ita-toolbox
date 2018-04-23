@@ -122,6 +122,9 @@ classdef itaAudioAnalyticRational < itaAudioAnalyticSuper
                     if ~isempty(this(idx,jdx).channelNames)
                         res.channelNames{count} = this(idx,jdx).channelNames{1};
                     end
+                    if ~isempty(this(idx,jdx).channelUnits)
+                        res.channelUnits{count} = this(idx,jdx).channelUnits{1};
+                    end
                 end
             end
         end
