@@ -69,7 +69,7 @@ delta = max(0,refCurve + soundReductionIndex - soundReduction);
 counter = 0; % stopping criterion
 % shift reference curve until limits are reached
 
-while sum(delta) < refSurf && all(delta <= deficiencyLimit) && counter < 1e3
+while sum(delta) <= refSurf && all(delta <= deficiencyLimit) && counter < 1e3
     soundReductionIndex = soundReductionIndex + dbStep;
     delta = max(0,refCurve + soundReductionIndex - soundReduction);
     counter = counter+1;
