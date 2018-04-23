@@ -26,33 +26,41 @@ if ~exist(['SOFAstart.m'],'file')
     try
         % check Internet connection and if url is existing
         urljava = java.net.URL(url);
-        openStream(urljava);
+        
+        fullpath = fileparts(which('ita_sofa_install.m'));
+        savePath = [fullpath filesep '..' filesep];
+        fprintf( 'Cannot find SOFA. Downloading...' );
+        
+        websave(fullfile(savePath,'sofa.zip'),url);
+
     catch
         % url is not existing or computer is not connected to Internet
         error(['No Internet connection or, ',url,' does not exist. SOFA cannot be downloaded. Please update download URL.'])
     end
     
+    try
+        % unzip
+        fprintf('.')
+        unzip(fullfile(savePath,'sofa.zip'),fullfile(savePath,'sofa'));
 
-    fullpath = fileparts(which('ita_sofa_install.m'));
-    path = [fullpath filesep '..' filesep];
-    fprintf( 'Cannot find SOFA. Downloading...' );
+        % delete zip file
+        fprintf('.\n')
+        delete(fullfile(savePath,'sofa.zip'))
+
+        % add folder to path
+        addpath(genpath([savePath(1:end-16) 'sofa/API_MO-master/API_MO']));
+        ita_path_handling();
+
+        % compile sofa
+        SOFAstart('short');
+    catch 
+        % some error during unzip maybe
+        error('Installation failed at some point. Try manually unzipping zip file.')
+ 
+    end
+
     
-    websave(fullfile(path,'sofa.zip'),url);
     
-    % unzip
-    fprintf('.')
-    unzip(fullfile(path,'sofa.zip'),fullfile(path,'sofa'));
-    
-    % delete zip file
-    fprintf('.\n')
-    delete(fullfile(path,'sofa.zip'))
-   
-    % add folder to path
-    addpath(genpath([path(1:end-16) 'sofa/API_MO-master/API_MO']));
-    ita_path_handling();
-    
-    % compile sofa
-    SOFAstart('short');
 end
 
 
