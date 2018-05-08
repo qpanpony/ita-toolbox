@@ -5,22 +5,28 @@ classdef DAFF < handle
    end
    methods
         function obj = DAFF( filepath )
-            %% Create DAFF class and load from file
+            %% Create DAFF class and loads content from file
             % filepath Path to DAFF file
             if( nargin > 0 )
                 obj.open( filepath )
             end
         end
         function open( obj, filepath )
+			%% Opens a DAFF file
              obj.daffhandle = DAFFv17( 'open', filepath );
         end
+        function close( obj )
+			%% Closes the DAFF file
+			DAFFv17( 'close', obj.daffhandle )
+        end
         function set_data_view( obj )
+			%% Switches to data view (alpha, beta)
              obj.view = 'data';
         end
         function set_object_view( obj )
+			%% Switches to object / user view (elevation, azimuth) [default]
              obj.view = 'object';
-        end
-        
+        end        
         function metadata = get_metadata(obj)
             %% Returns the metadata of an opened DAFF file
             metadata = DAFFv17('getMetadata', obj.daffhandle);
