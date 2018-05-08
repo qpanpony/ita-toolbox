@@ -711,14 +711,14 @@ classdef  itaHRTF < itaAudio
             end
             
             function thetaUni = theta_Unique(this,varargin)
-                thetaUni = uniquetol(this.dirCoord.theta,eps);
+                thetaUni = uniquetol(this.dirCoord.theta);
                 if nargin == 2
                     thetaUni = unique(this.dirCoord.theta,'stable');
                 end
             end
             
             function phiUni = phi_Unique(this,varargin)
-                phiUni = uniquetol(this.dirCoord.phi,eps);
+                phiUni = uniquetol(this.dirCoord.phi);
                 if nargin == 2
                     phiUni = unique(this.dirCoord.phi,'stable');
                 end
