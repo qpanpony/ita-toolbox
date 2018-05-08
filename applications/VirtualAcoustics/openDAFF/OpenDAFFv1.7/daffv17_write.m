@@ -798,7 +798,7 @@ function [] = daffv17_write( varargin )
             props.numRecords = props.numRecords + 1;
         end
         
-        disp( [ 'Processed beta angle ' num2str( beta ) ', took ' num2str( toc ) ] )
+        disp( [ 'Processed beta angle ' num2str( beta ) ', took ' num2str( toc, 3 ) 's' ] )
     end
     disp( '... and data has been assembled. Will write to file now.' )
         

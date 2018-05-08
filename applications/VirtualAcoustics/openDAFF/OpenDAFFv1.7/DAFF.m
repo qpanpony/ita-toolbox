@@ -1,5 +1,5 @@
 classdef DAFF < handle
-   properties
+   properties (Access = protected)
       daffhandle
       view = 'object'
    end
@@ -8,13 +8,11 @@ classdef DAFF < handle
             %% Create DAFF class and load from file
             % filepath Path to DAFF file
             if( nargin > 0 )
-                open( filepath )
+                obj.open( filepath )
             end
         end
         function open( obj, filepath )
              obj.daffhandle = DAFFv17( 'open', filepath );
-        end
-        function close( obj )
         end
         function set_data_view( obj )
              obj.view = 'data';
@@ -34,6 +32,7 @@ classdef DAFF < handle
         function props = get_properties( obj )
             %% Returns the properties of an opened DAFF file
             props = DAFFv17( 'getProperties', obj.daffhandle );
+        end
         function coords = get_record_coords( obj, index )
             %% Returns the coordinates of a grid point
             coords = DAFFv17( 'getRecordCoords', obj.daffhandle, obj.view, index );
@@ -58,12 +57,15 @@ classdef DAFF < handle
             %% Returns the data at the nearest neighbour grid point to the given direction
             idx = DAFFv17( 'getCell', obj.daffhandle, obj.view, azi_deg, ele_deg );
         end
-        function get_version( obj )
-            %% Returns the OpenDAFF version
-            DAFFv17('getVersion')
+   end
+    methods (Static)
+        function help()
+            %% Prints the help output of OpenDAFF
+            DAFFv17('help')
         end
-        function help( obj )
-            DAFFv17('help');
+        function v = get_version()
+            %% Returns the OpenDAFF version
+            v = DAFFv17('getVersion');
         end
    end
 end
