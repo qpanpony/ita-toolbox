@@ -10,6 +10,11 @@ function disp(this)
 if ita_preferences('nakedClasses')
     builtin('disp',this)
 else
+    if numel(this) > 1
+        disp(['size(' inputname(1) ') = [' num2str(size(this))  ']; (for full display, pick a single instance)']);
+        return;
+    end
+
     disp(['      domain        = ' this.domain '     (nBins = ' num2str(this.nBins) ', nSamples = ' num2str(this.nSamples) ', dimensions = ' num2str(this.dimensions) ') '])
     comment = this.comment;
     nMax = 36;

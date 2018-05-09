@@ -10,6 +10,10 @@ function disp(this)
 if ita_preferences('nakedClasses')
     builtin('disp',this)
 else
+    if numel(this) > 1
+        disp(['size(' inputname(1) ') = [' num2str(size(this))  ']; (for full display, pick a single instance)']);
+        return;
+    end
     disp@itaSuper(this)
     sr = [num2str(this.samplingRate,5) ' Hz'];
     sr = [sr repmat(' ',1,8-numel(sr))];
