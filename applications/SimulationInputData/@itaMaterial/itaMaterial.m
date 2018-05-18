@@ -1,6 +1,8 @@
 classdef itaMaterial < itaSimulationDbItem
-    %itaMaterial represents a material and its acoustic properties
-    %   Properties: Impedance, absorption, scatering    
+    %itaMaterial represents a material and its acoustic properties which are
+    %used for GA-based and wave-based simulations
+    %   Properties:
+    %   Impedance, absorption, scatering    
     
     
     properties(Access = private, Hidden = true)

@@ -1,6 +1,12 @@
 classdef itaSource < itaSimulationDbItem
-    %itaSource Summary of this class goes here
-    %   Detailed explanation goes here
+    %itaSource represents a source and its acoustic properties which are
+    %used for GA-based and wave-based simulations
+    %   Properties:
+    %   Pressure TF, velocity TF, directivity, position, orientation
+    %   
+    %   The velocity TF can either represent a point source, a piston or a
+    %   distribution over a surface. In the latter case, the distribution
+    %   on the surface must be represented by itaSuper.channelCoordinates.
     
     properties(Access = private, Hidden = true)
         mPressureTf;    %itaSuper
@@ -11,12 +17,13 @@ classdef itaSource < itaSimulationDbItem
     end
     
     properties(Dependent = true)
-        pressureTf;
-        velocityTf;
-        directivity;
-        position;
-        orientation;
-        velocityType;
+        pressureTf;     %pressure transfer function - itaSuper
+        velocityTf;     %Velocity transfer function - itaSuper
+        directivity;    %The directivity - itaSuper
+        position;       %Position of the source in 3D space - itaCoordinates
+        orientation;    %Orientation of the source in 3D space - itaOrientation
+        velocityType;   %What does the velocity represent? - PointSource, Piston, SurfaceDistribution
+        velocityDistribution; %Coordinates of the velocity surface distribution - get only
     end
     
     %% Constructor
@@ -44,29 +51,59 @@ classdef itaSource < itaSimulationDbItem
     %% Set functions
     methods
         function this = set.pressureTf(this, pressure)
+            if isnumeric(pressure) && isempty(pressure)
+                this.mPressureTf = [];
+                return;
+            end            
             this.checkDataTypeForFreqData(pressure)
             this.mPressureTf = pressure;
         end
         function this = set.velocityTf(this, velocity)
-            this.checkDataTypeForFreqData(velocity)
+            if isnumeric(velocity) && isempty(velocity)
+                this.mVelocityTf = [];
+                return;
+            end            
+            this.checkDataTypeForFreqData(velocity)            
+            %TODO: Check if velocity has coordinates in case of surface
+            %distribution            
             this.mVelocityTf = velocity;
         end
         function this = set.directivity(this, directivity)
+            if isnumeric(directivity) && isempty(directivity)
+                this.mDirectivity = [];
+                return;
+            end
             this.checkDataTypeForFreqData(directivity)
             this.mDirectivity = directivity;
         end
         
         function this = set.position(this, coord)
-            if ~isa(coord, 'itaCoordinates')
-                error('Input must be of type itaCoordinates');
+            if isnumeric(coord) && isempty(coord)
+                this.mPosition = [];
+                return;
+            end
+            
+            if ~isa(coord, 'itaCoordinates') || ~isscalar(coord)
+                error('Input must be a scalar of type itaCoordinates');
+            end
+            if coord.nPoints > 1
+                error('Input must be a single set or coordinates or empty.')
             end
             this.mPosition = coord;
         end
         function this = set.orientation(this, orientation)
-            if ~isa(orientation, 'itaOrientation')
-                error('Input must be of type itaOrientation');
+            if isnumeric(orientation) && isempty(orientation)
+                this.mOrientation = [];
+                return;
             end
-            this.mPosition = orientation;
+            
+            if ~isa(orientation, 'itaOrientation') || ~isscalar(orientation)
+                error('Input must be a scalar of type itaOrientation');
+            end
+            if orientation.nPoints == 1 %Better would be > 1. But there is a bug in itaOrientation for empty objects
+                error('Input must be a single orientation or empty.')
+            end
+            this.mOrientation = orientation;
         end
     end
     
@@ -94,6 +131,13 @@ classdef itaSource < itaSimulationDbItem
                 out = char(VelocityType.PointSource);
             end
         end
+        
+        function out = get.velocityDistribution(this)
+            out = [];
+            if this.HasVelocityTf && this.velocityType == VelocityType.SurfaceDistribution
+                out = this.mVelocityTf.channelCoordinates;
+            end
+        end
     end
 
     %% Booleans
@@ -107,8 +151,14 @@ classdef itaSource < itaSimulationDbItem
         function bool = HasDirectivity(this)
             bool = ~isempty(this.mDirectivity);
         end
+        function bool = HasPosition(this)
+            bool = ~isempty(this.mPosition) && this.mPosition.nPoints == 1;
+        end
+        function bool = HasOrientation(this)
+            bool = ~isempty(this.mOrientation) && this.mOrientation.nPoints == 1;
+        end
         function bool = HasSpatialInformation(this)
-            bool = ~isempty(this.mPosition) && ~isempty(this.mOrientation);
+            bool = this.HasPosition && this.HasOrientation;
         end
         
         function bool = HasGaData(this)
