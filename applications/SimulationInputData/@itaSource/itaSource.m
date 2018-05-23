@@ -100,7 +100,7 @@ classdef itaSource < itaSimulationDbItem
             if ~isa(orientation, 'itaOrientation') || ~isscalar(orientation)
                 error('Input must be a scalar of type itaOrientation');
             end
-            if orientation.nPoints == 1 %Better would be > 1. But there is a bug in itaOrientation for empty objects
+            if orientation.nPoints > 1
                 error('Input must be a single orientation or empty.')
             end
             this.mOrientation = orientation;
