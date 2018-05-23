@@ -124,6 +124,8 @@ classdef itaRavenProject < handle
         numParticles_Portal
         energyLoss_Sphere
         energyLoss_Portal
+        detectionSphereAziResolution
+        detectionSphereEleResolution
         filterLength
         timeSlotLength
         radiusSphere
@@ -133,6 +135,7 @@ classdef itaRavenProject < handle
         fixPoissonSequence
         poissonSequenceNumber
         filterResolution
+        maxReflectionDensity
         ambisonicsOrder
         numberSpreadedSources
         spreadingStdDeviation
@@ -1465,6 +1468,34 @@ classdef itaRavenProject < handle
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
         
+        %------------------------------------------------------------------
+        function setDetectionSphereResolutionAzimuth(obj, resAzi)
+            % setDetectionSphereResolutionAzimuth
+            % set detection sphere azimuth resolution in degree
+            % default value = 10
+            % samples sphere into grid, creating "directivity groups"
+            % see Phd thesis by Dirk Schröder for details
+            obj.detectionSphereAziResolution        = resAzi;
+            obj.rpf_ini.SetValues('RayTracing', 'resolutionAzimuth_DetectionSphere', resAzi);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        
+        %------------------------------------------------------------------
+        function setDetectionSphereResolutionElevation(obj, resEle)
+            % setDetectionSphereResolutionElevation
+            % set detection sphere elevation resolution in degree
+            % default value = 10
+            % samples sphere into grid, creating "directivity groups"
+            % see Phd thesis by Dirk Schröder for details
+            obj.detectionSphereEleResolution        = resEle;
+            obj.rpf_ini.SetValues('RayTracing', 'resolutionElevation_DetectionSphere', resEle);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+               
+        
+        
         % [Filter] %
         %------------------------------------------------------------------
         function setFilterLength(obj, filter_length)    % filter length parameter needed in [ms]
@@ -1543,6 +1574,21 @@ classdef itaRavenProject < handle
             obj.rpf_ini.SetValues('RayTracing', 'fixReflectionPattern', fixit);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
+        
+        %------------------------------------------------------------------
+        % setMaximumReflectionDensity
+        % sets the maxium reflection density for filter synthesis. Default
+        % value is 20000. Typical values between 10000 and 20000
+        % for details see Diss Dirk Schröder or, 
+        % Aspöck @ DAGA 2013 / DAGA 2017
+        function setMaximumReflectionDensity(obj, maxReflectionDensity)
+            obj.maxReflectionDensity = maxReflectionDensity;
+            obj.rpf_ini.SetValues('Filter', 'maximumReflectionDensity', maxReflectionDensity);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        
+        
         
         %------------------------------------------------------------------
         function setAmbisonicsOrder(obj, order)
