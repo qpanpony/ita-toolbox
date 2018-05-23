@@ -37,7 +37,7 @@ function varargout = ita_roomacoustics_parameters(varargin)
 
 %%
 
-defaultPar = struct( 'Reverberation_Times',      struct('EDT', true, 'T10', false, 'T15', false, 'T20', true, 'T30', true, 'T40', false, 'T50', false, 'T60', false, 'T_Huszty', false, 'T_Lundeby', false),...
+defaultPar = struct( 'Reverberation_Times',      struct('EDT', true, 'T10', false, 'T15', false, 'T20', true, 'T25', false, 'T30', true, 'T40', false, 'T50', false, 'T60', false, 'T_Huszty', false, 'T_Lundeby', false),...
     'Clarity_and_Definition',   struct('C50', false, 'C80',false,  'D50', false ,'D80', false, 'Center_Time', false ), ...
     'Others',                   struct( 'PSNR_Lundeby', false, 'PSPNR_Lundeby', false, 'Intersection_Time_Lundeby', false, 'EDC', false ));
 
@@ -58,15 +58,14 @@ elseif nargin >= 1 && strcmpi('getAvailableParameters',varargin{1} )
         if any(idxOfCat)
             categoryNames = categoryNames(idxOfCat);
         else
-            error('second parameter must specify category name. (possible: %sor %s)', sprintf('%s, ', categoryNames{1:end-1}), categoryNames{end}) %#ok<SPERR>
+            error('second parameter must specify category name. (possible: %sor %s)', sprintf('%s, ', categoryNames{1:end-1}), categoryNames{end}) 
         end
     end
     
-    varargout = [];
+    varargout = cell(1,1);
     for iCat = 1:numel(categoryNames)
-        varargout = [ varargout; fieldnames(defaultPar.(categoryNames{iCat})) ]; %#ok<AGROW>
+        varargout(1) = {[varargout{1}; fieldnames(defaultPar.(categoryNames{iCat}))]};  
     end
-    varargout = {varargout};    % output is one cell
     return
 else
     

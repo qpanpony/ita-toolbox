@@ -40,7 +40,7 @@ classdef itaOrientation
     %           ita_vu2quat, ita_vu2rpy, itaOptitrack
     %
     % Author:  Florian Pausch, fpa@akustik.rwth-aachen.de
-    % Version: 2018-05-04
+    % Version: 2018-05-14
     %
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.
@@ -196,7 +196,11 @@ classdef itaOrientation
         
         function value = get.nPoints(this)
             % get number of stored orientations [double]
-            value = size(this.mOrient,2);
+            if size(this.mOrient,1)==0
+                value = 0;
+            else
+                value = size(this.mOrient,2);
+            end
         end
         
         
@@ -360,10 +364,8 @@ classdef itaOrientation
         end
         
         function this = n(this,index)
-            % Replace by content of chosen index n
-            
             % error check: do nothing, if out of bound or nothing given
-            if nargin < 2 || isempty(this.mOrient), return; end;
+            if nargin < 2 || isempty(this.mOrient), return; end; 
             this.mOrient = this.mOrient(1,index);
         end
         

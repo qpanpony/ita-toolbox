@@ -399,7 +399,7 @@ classdef itaMSPlaybackRecord < itaMSRecord
                 ita_verbose_info('Leaving outputamplification unchanged',0);
             else
                 outSens = omc.sensitivity('loudspeaker');
-                this.outputamplification = 20*log10(abs(double(value/(this.raw_excitation.rms*outSens))));
+                this.outputamplification = 20*log10(abs(double(value/(max(this.raw_excitation.rms)*outSens))));
             end
         end
         

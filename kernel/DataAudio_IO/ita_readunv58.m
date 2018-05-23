@@ -64,12 +64,12 @@ switch ds.abscissaUnitsLabel
                 channelUnits(i) = {''};
             end
         end
-        if numel(unique(nodes)) == 1
-            resultArray = resultArray(:);
-            channelNames = channelNames(1);
-            channelUnits = channelUnits(1);
-            nodes = nodes(1);
-        end
+%         if numel(unique(nodes)) == 1
+%             resultArray = resultArray(:);
+%             channelNames = channelNames(1);
+%             channelUnits = channelUnits(1);
+%             nodes = nodes(1);
+%         end
         result = itaAudio(resultArray,SamplingRate,'time');
         result.channelNames = channelNames;
         result.channelUnits = channelUnits;

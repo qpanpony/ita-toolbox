@@ -100,7 +100,11 @@ classdef itaAnthroHRTF  < itaHRTF
                             this.(fn{iFn}) = var{iIn}.(fn{iFn});
                         end
                     end
-                    this.data = var{iIn}.timeData;
+                    
+                    if var{iIn}.domain == 'time'                        
+                        this.data = var{iIn}.timeData; 
+%                        -> error when input is freq domain
+                    end
                     break
                  end
             end

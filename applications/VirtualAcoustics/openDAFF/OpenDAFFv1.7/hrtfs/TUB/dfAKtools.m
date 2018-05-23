@@ -24,8 +24,8 @@ if isfield( config, 'reference' ) && strcmpi( config.reference, 'head' )
     for n = 1:(config.numchannels/2)
         [ l, r ] = AKhrirInterpolation( alpha + hato( n ), beta - 90, hato( n ) );
         % Interleave for DAFF (odd = left, even = right)
-        data( 2*n-1, : ) = l';
-        data( 2*n, : ) = r';
+        data( 2*n-1, : ) = l' / n;
+        data( 2*n, : ) = r' / n;
     end
     
 else 

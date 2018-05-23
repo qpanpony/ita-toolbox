@@ -13,6 +13,9 @@ function varargout = ita_plottools_colortable(varargin)
 %  Call: color_out = ita_plottools_colortable(N) gives the Nth color
 %  Call: colorTableMatrix = ita_plottools_colortable('ita') Sets a colororder defined in this file
 %  Call: colorTableMatrix = ita_plottools_colortable('winter(N)') If you have only N channels %
+%  Call: ita_plottools_colortable('custom') to retain previous settings
+%        best done by calling: ita_preferences('colortablename','custom');
+%        before the toolbox plot functions
 %   Then you can set it as default with set(0,'DefaultAxesColorOrder',colorTableMatrix)
 %
 %   See also ita_toolbox_setup.
@@ -92,6 +95,11 @@ if nargin == 1
             set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
             ita_verbose_info('ITA_PLOTTOOLS_COLORTABLE:Setting ITA Color Order.',2);
             result = [0 0 0];
+        elseif strcmpi(varargin{1},'custom')
+            colorTableName = 'custom';
+%             set(0,'DefaultAxesLineStyleOrder','-|-.|--|:')
+            ita_verbose_info('ITA_PLOTTOOLS_COLORTABLE:Setting Custom Color Order.',2);
+            result = get(0,'defaultAxesColorOrder');
         else
             colorTableName = varargin{1};
             hfig = figure;
@@ -121,7 +129,9 @@ ita_preferences('colortablename', colorTableName);
 % ita_verbose_info('ITA_PLOTTOOLS_COLORTABLE:Preferences Set.',1);
 
 %% Set it as default
-set(0,'DefaultAxesColorOrder',colorTable)
+if ~strcmp(colorTableName,'custom')
+    set(0,'DefaultAxesColorOrder',colorTable)
+end
 
 %% Find output parameters
 varargout(1) = {result};

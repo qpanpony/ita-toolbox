@@ -2,6 +2,8 @@
 % Resources
 % http://dx.doi.org/10.14279/depositonce-5718.2
 % http://www.ak.tu-berlin.de/menue/digitale_ressourcen/research_tools/aktools/
+addpath( genpath( 'AKtools' ) )
+addpath( genpath( 'FABIAN_HRTF_DATABASE_V2' ) )
 AKdependencies('FABIAN')
 
 %% Configure
@@ -26,9 +28,9 @@ additional_metadata = daffv17_add_metadata( additional_metadata, 'FABIAN_license
 
 %% Export untouched
 additional_metadata_untouched = daffv17_add_metadata( additional_metadata, 'reference', 'STRING', export_properties.reference );
-daffv17_convert_from_aktools( 'FABIAN_HATO_5x5x5_256_44100Hz.v17.ir.daff', export_properties, additional_metadata_untouched )
+daffv17_convert_from_aktools( 'FABIAN_HATO_5x5x5_256_44100Hz_debug.v17.ir.daff', export_properties, additional_metadata_untouched )
 
 %% Export for VA with head as reference frame
 export_properties.reference = 'head'; % the head-above-torso angle rotates torso not head (for Virtual Acoustics)
 additional_metadata_va = daffv17_add_metadata( additional_metadata, 'reference', 'STRING', export_properties.reference );
-daffv17_convert_from_aktools( 'FABIAN_OTAH_5x5x5_256_44100Hz.v17.ir.daff', export_properties, additional_metadata_va )
+daffv17_convert_from_aktools( 'FABIAN_OTAH_5x5x5_256_44100Hz_debug.v17.ir.daff', export_properties, additional_metadata_va )

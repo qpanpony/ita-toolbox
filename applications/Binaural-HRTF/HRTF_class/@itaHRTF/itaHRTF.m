@@ -278,9 +278,9 @@ classdef  itaHRTF < itaAudio
         %% ..............SET PRIVAT........................................
         
         function this = set.itaAudio2itaHRTF(this,HRTF)
-            if isa(HRTF,'itaAudio'),
+            if isa(HRTF,'itaAudio')
                 % Multi instance?
-                if numel(HRTF)>1,
+                if numel(HRTF)>1
                     if numel(HRTF)>1000 % takes a while
                         ita_verbose_info(' A lot of data ...please wait... don''t use itaAudio multi instances for the next time!', 0);
                     end
@@ -316,30 +316,38 @@ classdef  itaHRTF < itaAudio
                 
                 
                 counter = 1;
-                thetaPhi = round([coord.theta_deg coord.phi_deg]*10)/10;
-                deletedChannel = 0;
-                for i1 = 1:coord.nPoints
-                    coordCurrent = thetaPhi(i1,:);
-                    if isempty(find(pairs(:) == i1, 1)) % only if the corresponding channel is not found
+                thetaPhi = round([coord.theta_deg coord.phi_deg]*10)/10; %round to 0.1 deg
+                deletedChannel = 0; 
+                for iCoord = 1:coord.nPoints
+                    coordCurrent = thetaPhi(iCoord,:);
+%                     if isempty(find(pairs(:) == iCoord, 1)) % only if the corresponding channel is not found
+                    if ~any(pairs(:) == iCoord) % only if the corresponding channel is not found
                         % find corresponding channel
-                        coordComp = thetaPhi([1:i1-1 i1+1:coord.nPoints],:);
-                        diffCoord = bsxfun(@minus,coordCurrent,coordComp)== zeros(size(coordComp));
-                        idxCoord =  find(diffCoord(:,1).*diffCoord(:,2) ==1);
+%                         coordComp = thetaPhi([1:iCoord-1 iCoord+1:coord.nPoints],:);
+%                         diffCoord = bsxfun(@minus,coordCurrent,coordComp)== 0;
+%                         idxCoord =  find(diffCoord(:,1)==1 & diffCoord(:,2) ==1);
+                        diffCoord = bsxfun(@minus,coordCurrent,thetaPhi)== 0;
+                        idxCoord =  find(diffCoord(:,1)==1 & diffCoord(:,2) ==1);
+                        idxCoord =  idxCoord(idxCoord~=iCoord);
+                        
                         if length(idxCoord) > 1
                             %                             deletedChannel = deletedChannel + length(idxCoord) -1;
                             idxCoord = idxCoord(1);
                         end
+                        
                         % store the corresponding channel
-                        pairs(counter,1) = i1;
-                        if idxCoord <i1
-                            pairs(counter,2) = idxCoord;
-                        else
-                            pairs(counter,2) = idxCoord+1;
-                        end
+                        pairs(counter,1) = iCoord;
+%                         if idxCoord <iCoord
+%                             pairs(counter,2) = idxCoord;
+%                         else
+%                             pairs(counter,2) = idxCoord+1;
+%                         end
+                        pairs(counter,2) = idxCoord;
                         counter = counter+1;
                     end
                     % break if all corresponding channels are found
-                    if sum(pairs(:))== sum(1:coord.nPoints),break
+                    if all(pairs(:))
+                        break;
                     end
                 end
                 % ........................................................
@@ -348,25 +356,35 @@ classdef  itaHRTF < itaAudio
                 idxLeft = pairs(:,1); % odd number
                 idxRight = pairs(:,2);  % even number
                 numNewChannels = length(pairs)*2;
-                this.data = zeros(HRTFc.nSamples, numNewChannels);
-                this.data(:,1:2:numNewChannels) = HRTFc.timeData(:,idxLeft);
-                this.data(:,2:2:numNewChannels) = HRTFc.timeData(:,idxRight);
-                
-                this.domain = 'time';
-                pairsT = pairs';
-                
-                this.channelCoordinates = HRTFc.channelCoordinates.n(pairsT(:));
-                this.mEarSide = repmat(['L'; 'R'],numNewChannels/2, 1);
                 this.samplingRate = HRTFc.samplingRate;
                 
+                switch HRTFc.domain
+                    case 'time'
+                        this.domain = 'time';
+                        this.timeData = zeros(HRTFc.nSamples, numNewChannels);
+                        this.timeData(:,1:2:numNewChannels) = HRTFc.timeData(:,idxLeft);
+                        this.timeData(:,2:2:numNewChannels) = HRTFc.timeData(:,idxRight);
+                    case 'freq'
+                        this.domain = 'freq';
+                        this.freqData = zeros(HRTFc.nBins, numNewChannels);
+                        this.freqData(:,1:2:numNewChannels) = HRTFc.freqData(:,idxLeft);
+                        this.freqData(:,2:2:numNewChannels) = HRTFc.freqData(:,idxRight);
+                    otherwise
+                        error('Input data has unknown domain')
+                end
+                pairsT = pairs';
+                this.channelCoordinates = HRTFc.channelCoordinates.n(pairsT(:));
+                this.mEarSide = repmat(['L'; 'R'],numNewChannels/2, 1);
                 
                 % store coordinates
                 this.mDirCoord = this.channelCoordinates.n(1:2:numNewChannels);
                 this.signalType = 'energy';
+                
                 % channelnames coordinates
                 this.channelNames = ita_sprintf('%s ( %2.0f, %2.0f)',...
-                    this.mEarSide ,...
-                    this.channelCoordinates.theta_deg, this.channelCoordinates.phi_deg );
+                                          this.mEarSide ,...
+                                          this.channelCoordinates.theta_deg,...
+                                          this.channelCoordinates.phi_deg);
             end
         end
         
@@ -693,14 +711,14 @@ classdef  itaHRTF < itaAudio
             end
             
             function thetaUni = theta_Unique(this,varargin)
-                thetaUni = uniquetol(this.dirCoord.theta,eps);
+                thetaUni = uniquetol(this.dirCoord.theta);
                 if nargin == 2
                     thetaUni = unique(this.dirCoord.theta,'stable');
                 end
             end
             
             function phiUni = phi_Unique(this,varargin)
-                phiUni = uniquetol(this.dirCoord.phi,eps);
+                phiUni = uniquetol(this.dirCoord.phi);
                 if nargin == 2
                     phiUni = unique(this.dirCoord.phi,'stable');
                 end

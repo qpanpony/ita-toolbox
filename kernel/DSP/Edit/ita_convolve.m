@@ -72,10 +72,9 @@ if ~sArgs.overlap_add %signals have similar length, overlap-add makes no sense
 else % RSC - use overlap-add
     ita_verbose_info('ITA_CONVOLVE:Linear convolution using overlap-add.',2);
     source_signal.timeData = fftfilt(double(filter_dat.timeData),double(source_signal.timeData));
+    % deal with units
+    source_signal.channelUnits(:) = {ita_deal_units(filter_dat.channelUnits{1},source_signal.channelUnits{1},'*')};
 end
-
-%% deal with units
-source_signal.channelUnits(:) = {ita_deal_units(filter_dat.channelUnits{1},source_signal.channelUnits{1},'*')};
 
 %% Add history line
 source_signal = ita_metainfo_rm_historyline(source_signal,'all');

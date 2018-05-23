@@ -245,7 +245,7 @@ for iCh = 1:nChannels
     data.timeData = data.timeData(1:nInputSamples(iCh),:);
     
     % lundeby parameter
-    [RT_lundeby PSNR Intersection_Time_Lundeby NoiseLundeby PSPNR] = ita_roomacoustics_reverberation_time_lundeby(data ,'freqRange', freqRange, 'bandsPerOctave', bandsPerOctave, 'plot', sArgs.plotLundebyResults, 'broadbandAnalysis', sArgs.broadbandAnalysis);
+    [RT_lundeby, PSNR, Intersection_Time_Lundeby, NoiseLundeby, PSPNR] = ita_roomacoustics_reverberation_time_lundeby(data ,'freqRange', freqRange, 'bandsPerOctave', bandsPerOctave, 'plot', sArgs.plotLundebyResults, 'broadbandAnalysis', sArgs.broadbandAnalysis);
     
     % copy wanted data in output struct
     if sArgs.T_Lundeby

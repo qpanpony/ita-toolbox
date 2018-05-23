@@ -65,7 +65,7 @@ delta = max(0,NISPL - (refCurve + impactInsulationClass));
 counter = 0; % stopping criterion
 % shift reference curve until limits are reached
 
-while sum(delta) < refSurf && all(delta <= deficiencyLimit) && counter < 1e3
+while sum(delta) <= refSurf && all(delta <= deficiencyLimit) && counter < 1e3
     impactInsulationClass = impactInsulationClass - dbStep;
     delta = max(0,NISPL - (refCurve + impactInsulationClass));
     counter = counter+1;

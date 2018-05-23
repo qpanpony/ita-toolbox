@@ -262,6 +262,10 @@ classdef itaValue
                             res = '1pW';
                             val = 1e-12;
                             log_prefix = 10;
+                        case {'W/m^2','kg/s^3'}
+                            res = 'W/m^2';
+                            val = 1e-12;
+                            log_prefix = 10;
                         case 'm/s'
                             res = '1nm/s';
                             val = 1e-9;

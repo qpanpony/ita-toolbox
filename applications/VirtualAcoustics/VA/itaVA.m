@@ -1,14 +1,14 @@
 classdef itaVA < handle
     %ITAVA Remote network interface to VA (Virtual Acoustics), the real-time 
-    %auralization software made by ITA.
+    %auralization framework.
+	%
+	% Find the VA applications, documentation and examples here: http://www.virtualacoustics.org
     %
     %   This class realizes a remote connection to a VA real-time
     %   auralization server and implements the full VA core interface
     %   in Matlab. You can connect to to the server
     %   and control all of its features to perform real-time
-    %   auralization, including live tracking if available.
-    %   In order to get understand to the concepts behind VA
-    %   please refer to the VA documentation or have a look at the example scripts.
+    %   auralization, including integrated live tracking if an OptiTrack tracker is at hand.
     %
     %   See also: itaVA_example_simple, itaVA_example_tracked_sound_receiver,
     %   itaVA_example_generic_path_renderer, itaVA_example_random_numbers
@@ -21,13 +21,11 @@ classdef itaVA < handle
     %     va = itaVA;
     %     va.connect;
     %
-    %     If no error occurs, you can then use the interface to work with
-    %     the VA server.
-    %
-    %     Now, you can call other methods. For instance create a sound
-    %     source:
+    %     If the connection is established, you can start controlling VA via the interface.
+    %	  For instance create an move a sound source:
     %
     %     sourceID = va.create_sound_source( 'My Matlab virtual sound source' )
+	%	  va.set_sound_source_position( sourceID, [ 0 0 0 ] );
     %
     %     When everything is done, do not forget to close the connection.
     %     You can call disconnect on the instance or simply clear it:
@@ -373,6 +371,15 @@ classdef itaVA < handle
             VAMatlab( 'get_tracker_info', this.handle )
         end
 		
+		%% --= Deprecated methods =--
+		
+        function id = create_directivity( this, filepath )
+            % Creates a directivity from file [DEPRECATED]
+			
+			warning( 'This method is marked as deprecated and will be removed in a future version. Please use ''create_directivity_from_file'' instead.' )
+            id = this.create_directivity_from_file( filepath );
+        end
+		
         
         %% --= Functions =--
         
@@ -430,7 +437,7 @@ classdef itaVA < handle
 		[material_id] = VAMatlab('create_acoustic_material_from_file', this.handle, file_path,material_name);
 	end
 
-	function [directivityID] = create_directivity(this, filename,name)
+	function [directivityID] = create_directivity_from_file(this, filename,name)
 		% Loads a directivity from a file
 		%
 		% Parameters:
@@ -446,7 +453,26 @@ classdef itaVA < handle
 		if this.handle==0, error('Not connected.'); end;
 
 		if ~exist('name','var'), name = ''; end
-		[directivityID] = VAMatlab('create_directivity', this.handle, filename,name);
+		[directivityID] = VAMatlab('create_directivity_from_file', this.handle, filename,name);
+	end
+
+	function [directivityID] = create_directivity_from_parameters(this, directivity_args,name)
+		% Creates a directivity based on given parameters
+		%
+		% Parameters:
+		%
+		% 	directivity_args [struct] Directivity arguments
+		% 	name [string] Displayed name (optional, default: '')
+		%
+		% Return values:
+		%
+		% 	directivityID [integer-1x1] Directivity ID
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		if ~exist('name','var'), name = ''; end
+		[directivityID] = VAMatlab('create_directivity_from_parameters', this.handle, directivity_args,name);
 	end
 
 	function [geo_mesh_id] = create_geometry_mesh_from_file(this, file_path,geo_mesh_name)
@@ -597,6 +623,24 @@ classdef itaVA < handle
 
 		if ~exist('name','var'), name = ''; end
 		[id] = VAMatlab('create_sound_receiver', this.handle, name);
+	end
+
+	function [id] = create_sound_receiver_explicit_renderer(this, renderer,name)
+		% Creates a sound receiver explicitly for a certain renderer
+		%
+		% Parameters:
+		%
+		% 	renderer [string] Renderer identifier
+		% 	name [string] Name
+		%
+		% Return values:
+		%
+		% 	id [integer-1x1] Sound receiver ID
+		%
+
+		if this.handle==0, error('Not connected.'); end;
+
+		[id] = VAMatlab('create_sound_receiver_explicit_renderer', this.handle, renderer,name);
 	end
 
 	function [id] = create_sound_source(this, name)
@@ -1494,7 +1538,7 @@ classdef itaVA < handle
 		[params] = VAMatlab('get_sound_receiver_parameters', this.handle, ID,args);
 	end
 
-	function [pos,ypr] = get_sound_receiver_pose(this, soundreceiverID)
+	function [pos,quat] = get_sound_receiver_pose(this, soundreceiverID)
 		% Returns the position and orientation of a sound receiver
 		%
 		% Parameters:
@@ -1504,12 +1548,12 @@ classdef itaVA < handle
 		% Return values:
 		%
 		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
-		% 	ypr [double-4] Rotation quaternion [w,x,y,z]
+		% 	quat [double-4] Rotation quaternion [w,x,y,z]
 		%
 
 		if this.handle==0, error('Not connected.'); end;
 
-		[pos,ypr] = VAMatlab('get_sound_receiver_pose', this.handle, soundreceiverID);
+		[pos,quat] = VAMatlab('get_sound_receiver_pose', this.handle, soundreceiverID);
 	end
 
 	function [pos] = get_sound_receiver_position(this, soundreceiverID)
@@ -2459,14 +2503,14 @@ classdef itaVA < handle
 		VAMatlab('set_sound_receiver_parameters', this.handle, ID,params);
 	end
 
-	function [] = set_sound_receiver_pose(this, soundreceiverID,pos,ypr)
+	function [] = set_sound_receiver_pose(this, soundreceiverID,pos,quat)
 		% Sets the position and orientation (in yaw-pitch-roll angles) of a sound receiver
 		%
 		% Parameters:
 		%
 		% 	soundreceiverID [integer-1x1] Sound receiver ID
 		% 	pos [double-3] Position vector [x, y, z] (unit: meters)
-		% 	ypr [double-4] Rotation angles [w,x,y,z]
+		% 	quat [double-4] Rotation angles [w,x,y,z]
 		%
 		% Return values:
 		%
@@ -2475,7 +2519,7 @@ classdef itaVA < handle
 
 		if this.handle==0, error('Not connected.'); end;
 
-		VAMatlab('set_sound_receiver_pose', this.handle, soundreceiverID,pos,ypr);
+		VAMatlab('set_sound_receiver_pose', this.handle, soundreceiverID,pos,quat);
 	end
 
 	function [] = set_sound_receiver_position(this, soundreceiverID,pos)
