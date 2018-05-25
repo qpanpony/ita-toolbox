@@ -11,6 +11,10 @@ function [] = daffv17_convert_from_daffv15( daffv15_input_file_path, daffv17_out
     
     props = DAFFv15( 'getProperties', h );
     
+    if isempty( props.quantization )
+        props.quantization = 'float32';
+    end
+    
     metadata_v17 = [];
     if nargin >= 3
         metadata_v17 = additional_metadata_v17;
