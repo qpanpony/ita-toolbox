@@ -46,12 +46,17 @@ if ~signalfound
 end
 
 %% Get root of RWTH-ITA-Toolbox
-fullpath = which('ita_toolbox_setup.m');
-fullpath = fileparts(fullpath);
-addpath(fullpath); %add standard path here
+tb_setup_path = which( 'ita_toolbox_setup.m' );
+tb_base_path = fileparts( tb_setup_path );
+
+% Switch to user pathdef instead of system-wide pathdef 
+% (which might open admin permissions dialog and corrupt Matlab for other users)
+pathdef_user_path = fullfile( userpath(), 'pathdef.m' );
+savepath( pathdef_user_path ) 
+addpath( tb_base_path ); % ... now adds toolbox path to user pathdef.m
 
 %% Add path to kernel, so basic functions are available
-addpath([fullpath filesep 'kernel']);
+addpath([tb_base_path filesep 'kernel']);
 
 %% Add userpath, here might be our pathdef.m
 addpath(userpath);
