@@ -278,6 +278,18 @@ classdef itaRavenProject < handle
             obj.deleteResultsInRavenFolder();
         end
         
+        
+        %------------------------------------------------------------------
+        function copyProjectToNewRPFFile(obj, newPath)      
+            if (exist(fileparts(newPath),'dir'))
+                obj.ravenProjectFile = newPath;
+                obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+            else
+                error('itaRavenProject/copyProjectToNewRPFFile: invalid path');
+            end
+        end
+        
+        
         %------------------------------------------------------------------
         function setRavenExe(obj, newRavenExe)
             
