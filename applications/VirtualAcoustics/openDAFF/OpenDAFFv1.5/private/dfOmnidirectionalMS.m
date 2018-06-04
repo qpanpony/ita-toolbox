@@ -14,7 +14,7 @@ function [ freqs, mags, metadata ] = dfOmnidirectionalMS( alpha, beta, basepath 
     
     channels = 1;
     mags = zeros(channels, length(freqs));
-    metadata = [];
+    metadata.desc = 'Omnidirectional magnitude spectrum weighted by frequency';
     
     for c=1:channels
         for f=1:length(freqs)
