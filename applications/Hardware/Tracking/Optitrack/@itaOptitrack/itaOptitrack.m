@@ -325,7 +325,7 @@ classdef itaOptitrack < handle
                 delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10\NatNetSDK\Samples\Matlab\quaternion.m'))
                 delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10\NatNetSDK\Samples\Matlab\quaternion-license.txt'))
                 
-                fprintf( '[itaOptitrack] NatNet SDK has been successfully downloaded.\n' );
+                fprintf( '[itaOptitrack] NatNet SDK 2.10 has been successfully downloaded.\n' );
 
             end
             
