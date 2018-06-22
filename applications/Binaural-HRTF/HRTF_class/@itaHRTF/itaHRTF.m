@@ -752,7 +752,7 @@ classdef  itaHRTF < itaAudio
                     earCoords = this.getEar('L').channelCoordinates;
                     switch dirID
                         case {'phi_deg', 'p'}
-                            phiValues = uniquetol(earCoords.phi_deg);
+                            phiValues = uniquetol(earCoords.phi_deg,0.0001);
                             [~,index] = min(abs(phiValues - dir_deg));
                             exactPhiValue = phiValues(index);
                             tmp = earCoords.n(earCoords.phi_deg == exactPhiValue);
@@ -760,13 +760,15 @@ classdef  itaHRTF < itaAudio
                             
                             slice = this.findnearestHRTF(thetaU,dir_deg);
                         case {'theta_deg', 't'}
-                            thetaValues = uniquetol(earCoords.theta_deg);
+                            thetaValues = uniquetol(earCoords.theta_deg,0.0001);
                             [~,index] = min(abs(thetaValues - dir_deg));
                             exactThetaValue = thetaValues(index);
-                            tmp = earCoords.n(earCoords.theta_deg == exactThetaValue);
-                            phiU = tmp.phi_deg;
                             
-                            slice = this.findnearestHRTF(dir_deg,phiU);
+                            slice = this.direction(find(earCoords.theta_deg == exactThetaValue));
+%                             tmp = earCoords.n(earCoords.theta_deg == exactThetaValue);
+%                             phiU = tmp.phi_deg;
+%                             
+%                             slice = this.findnearestHRTF(dir_deg,phiU);
                     end
                 end
 
