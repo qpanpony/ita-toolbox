@@ -9,17 +9,19 @@ classdef itaSource < itaSimulationDbItem
     %   on the surface must be represented by itaSuper.channelCoordinates.
     
     properties(Access = private, Hidden = true)
-        mPressureTf;    %itaSuper
-        mVelocityTf;    %itaSuper
-        mDirectivity;   %itaSuper
-        mPosition;      %itaCoordinates
-        mOrientation;   %itaOrientation
+        mPressureTf;        %itaSuper
+        mVelocityTf;        %itaSuper
+        mDirectivity;       %itaSuper
+        mPosition;          %itaCoordinates
+        mOrientation;       %itaOrientation
+        mDirectivityFile;   %Char vector
     end
     
     properties(Dependent = true)
         pressureTf;     %pressure transfer function - itaSuper
         velocityTf;     %Velocity transfer function - itaSuper
-        directivity;    %The directivity - itaSuper
+        directivity;    %The directivity loaded from the .daff file - itaSuper
+        directivityFile;%Name of directivity .daff file
         position;       %Position of the source in 3D space - itaCoordinates
         orientation;    %Orientation of the source in 3D space - itaOrientation
         velocityType;   %What does the velocity represent? - PointSource, Piston, SurfaceDistribution
@@ -42,6 +44,7 @@ classdef itaSource < itaSimulationDbItem
                 obj.mPressureTf = copyObj.mPressureTf;
                 obj.mVelocityTf = copyObj.mVelocityTf;
                 obj.mDirectivity = copyObj.mDirectivity;
+                obj.mDirectivityFile = copyObj.mDirectivityFile;
                 obj.mPosition = copyObj.mPosition;
                 obj.mOrientation = copyObj.mOrientation;
             end
@@ -68,13 +71,16 @@ classdef itaSource < itaSimulationDbItem
             %distribution            
             this.mVelocityTf = velocity;
         end
-        function this = set.directivity(this, directivity)
-            if isnumeric(directivity) && isempty(directivity)
-                this.mDirectivity = [];
-                return;
+        function this = set.directivityFile(this, filename)
+            if ~ischar(filename) || ~isrow(filename) || ~contains(filename, '.daff')
+                error('directivityFile must be a filename pointing to a .daff file')
             end
-            this.checkDataTypeForFreqData(directivity)
-            this.mDirectivity = directivity;
+            if ~exist(filename, 'file')
+                error('File does not exist')
+            end
+            
+            this.mDirectivityFile = filename;
+            this.mDirectivity = [];
         end
         
         function this = set.position(this, coord)
@@ -115,8 +121,8 @@ classdef itaSource < itaSimulationDbItem
         function out = get.velocityTf(this)
             out = this.mVelocityTf;
         end
-        function out = get.directivity(this)
-            out = this.mDirectivity;
+        function out = get.directivityFile(this)
+            out = this.mDirectivityFile;
         end
         function out = get.position(this)
             out = this.mPosition;
@@ -138,6 +144,23 @@ classdef itaSource < itaSimulationDbItem
                 out = this.mVelocityTf.channelCoordinates;
             end
         end
+        
+        function out = get.directivity(this)
+            %TODO: Remove this once implemented
+            warning('Reading daff files is not yet incoorporated')
+            
+            if isempty(this.mDirectivity)
+                if ~isempty(this.mDirectivityFile) || ~exist(this.mDirectivityFile, 'file')
+                    warning('Daff file not specified or not existing')
+                    out = [];
+                    return;
+                end
+                %TODO: Read daff file
+                %this.mDirectivity = ...
+            end            
+                
+            out = this.mDirectivity;
+        end
     end
 
     %% Booleans
@@ -149,7 +172,7 @@ classdef itaSource < itaSimulationDbItem
             bool = ~isempty(this.mVelocityTf);
         end
         function bool = HasDirectivity(this)
-            bool = ~isempty(this.mDirectivity);
+            bool = ~isempty(this.mDirectivityFile);
         end
         function bool = HasPosition(this)
             bool = ~isempty(this.mPosition) && this.mPosition.nPoints == 1;
@@ -176,7 +199,7 @@ classdef itaSource < itaSimulationDbItem
             %Returns true if none of the frequency dependent data is set
             bool =  isempty(this.mPressureTf) &&...
                     isempty(this.mVelocityTf) &&...
-                    isempty(this.mDirectivity);
+                    isempty(this.mDirectivityFile);
         end
     end
     

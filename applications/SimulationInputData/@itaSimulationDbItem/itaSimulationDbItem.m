@@ -2,6 +2,7 @@ classdef (Abstract) itaSimulationDbItem
     %itaSimulationDbItem An abstract item that is used in a database for
     %acoustic simulations (wave-based and GA-based)
     
+    
     %% Abstract - Overload these in derived class
     methods(Abstract)
         bool = HasGaData(this);   %Returns true if all data which is used for Geometrical Acoustics (GA) is available
@@ -14,10 +15,19 @@ classdef (Abstract) itaSimulationDbItem
         out = DataTypeForFreqData();    %Define the valid data type for frequency data in derived class
     end
     
-    %% Public
+    %% Properties
     properties(Hidden = true)
         checkUnits = false;     %If this is set to true, units in itaSuper are tested when setting frequency dependent properties
+    end  
+    properties(Dependent = true)
+        name;                   %String with a user given name for the item
     end
+        
+    properties(Access = protected)
+        mName = '';
+    end   
+    
+    %% Set / Get
     
     methods
         function this = set.checkUnits(this, bool)
@@ -26,9 +36,19 @@ classdef (Abstract) itaSimulationDbItem
             end
             this.checkUnits = bool;
         end
+        
+        function this = set.name(this, strName)
+            if ~ischar(strName) || ~isrow(strName)
+                error('')
+            end
+            this.mName = strName;
+        end
+        function out = get.name(this)
+            out = this.mName;
+        end
     end
     
-    %% Protected
+    %% Protected    
     
     methods(Access = protected, Hidden = true)
         function checkDataTypeForFreqData(this, dataObj)
