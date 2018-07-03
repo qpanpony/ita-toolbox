@@ -1,17 +1,25 @@
-function [ data, sampleRate, isSymetric, metadata ] = dfUnityDFT( ~, ~, ~ )
+function [ data, samplerate, is_symetric, metadata ] = dfUnityDFT( ~, ~, unity_dft_config )
 % Omnidirectional discrete Fourier transform
     
-    channels = 1;
-    bins = 128;
+    if ~isempty( fieldnames( unity_dft_config ) )
+        channels = unity_dft_config.channels;
+        bins = unity_dft_config.length;
+        is_symetric = unity_dft_config.is_symmetric;
+        samplerate = unity_dft_config.samplerate;
+        complex_value = unity_dft_config.complex_value;
+    else
+        channels = 1;
+        bins = 128;
+        is_symetric = false;
+        samplerate = 44100;
+        complex_value = 1 + 1i * 0;
+    end
     
-    data = zeros( channels, bins );
     metadata = [];
-    isSymetric = false;
-    sampleRate = 44100;
-    
+    data = zeros( channels, bins );
     for c = 1:channels
         for n = 1:bins
-            data( c, n ) = 1.0 + 1i*0.0;
+            data( c, n ) = complex_value;
         end
     end   
 end

@@ -1,8 +1,15 @@
-function [ data, samplerate, metadata ] = dfDiracIR( ~, ~, ~ )
+function [ data, samplerate, metadata ] = dfDiracIR( ~, ~, dirac_ir_config )
 
-    channels = 1;
-    filter_length = 4;
-    samplerate = 48000.0;
+    if ~isempty( dirac_ir_config )
+        channels = dirac_ir_config.channels;
+        filter_length = dirac_ir_config.numsamples;
+        samplerate = dirac_ir_config.samplerate;
+    else
+        % use default values
+        channels = 1;
+        filter_length = 128;
+        samplerate = 44100;
+    end
     
     metadata = [];
     
