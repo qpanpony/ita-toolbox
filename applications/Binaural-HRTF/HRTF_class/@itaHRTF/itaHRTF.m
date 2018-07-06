@@ -1285,7 +1285,7 @@ classdef  itaHRTF < itaAudio
                 % init
                 sArgs  = struct('pos1_data','itaHRTF', 'method', 'phase_delay', 'filter' , [200 2000] ,...
                     'thresh','10dB','energy',true,'centroid',false,'reshape',true,...
-                    'theta_deg',[],'plot_type','color');
+                    'theta_deg',[],'plot_type','color','axes_handle',[]);
                 [this,sArgs]   = ita_parse_arguments(sArgs,varargin);
                 
                 % calculate ITD
@@ -1315,8 +1315,13 @@ classdef  itaHRTF < itaAudio
                 %..............................................................
                 % create figure
                 position = get(0,'ScreenSize');
-                figure
-                set(gcf,'Position',[10 50 position(3:4)*0.85]);
+                if isempty(sArgs.axes_handle) 
+                    figure
+                    set(gcf,'Position',[10 50 position(3:4)*0.85]);
+                else
+                    axes(sArgs.axes_handle);
+                    hold on;
+                end
                 if strcmp(sArgs.method,'phase_delay') && ischar(sArgs.filter) % frequency dependent ITD
                     pcolor(phiC_deg,this.freqVector,ITD)
                     title(strcat('\phi = ', num2str(round(thetaC_deg)), '�'))
