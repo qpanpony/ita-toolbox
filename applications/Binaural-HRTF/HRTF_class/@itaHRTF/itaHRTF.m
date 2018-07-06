@@ -684,11 +684,7 @@ classdef  itaHRTF < itaAudio
                 end
                 
                 %HRTFout = this.direction(idxCoord);
-            end
-            
-            function this = buildsearchdatabase(this)
-               this.dirCoord = this.dirCoord.build_search_database; 
-            end
+            end     
             
             function obj = direction(this, idxCoord)
                 %return the HRTF (L&R) for a/multiple given direction indices
