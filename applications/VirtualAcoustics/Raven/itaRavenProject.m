@@ -759,7 +759,7 @@ classdef itaRavenProject < handle
         end
  
  %------------------------------------------------------------------
-        function plotModelRoom(obj, tgtAxes, comp2axesMapping, wireframe)
+        function tgtAxes = plotModelRoom(obj, tgtAxes, comp2axesMapping, wireframe)
             % identical to plotModel, without sound sources and receivers
             if isempty(obj.modelFileList)
                 return;
@@ -2904,10 +2904,10 @@ classdef itaRavenProject < handle
             % get reverberation time
             if (eyring == 1)
                 airAbsorption = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
-                RT = roommodel.getEquationBasedReverbTime(obj.pathMaterials, 'eyring', airAbsorption);
+                RT = roommodel.getReverbTime(obj.pathMaterials, 'eyring', airAbsorption);
             else
                 airAbsorption = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
-                RT = roommodel.getEquationBasedReverbTime(obj.pathMaterials, 'sabine', airAbsorption);
+                RT = roommodel.getReverbTime(obj.pathMaterials, 'sabine', airAbsorption);
             end
         end
         
