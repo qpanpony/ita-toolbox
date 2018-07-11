@@ -48,6 +48,13 @@ classdef (Abstract) itaSimulationDbItem
         end
     end
     
+    %% Bool
+    methods        
+        function bool = HasName(this)
+            bool = ~isempty(this.name);
+        end
+    end
+    
     %% Protected    
     
     methods(Access = protected, Hidden = true)
