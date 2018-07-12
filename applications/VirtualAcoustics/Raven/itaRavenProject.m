@@ -845,12 +845,17 @@ classdef itaRavenProject < handle
             currentMaterial.allowDBPlot = false;
             ita_plot_freq(currentMaterial,'LineWidth',2);
             
+            myAxes = gca;
+            for iMat=1:numberMaterials
+                myAxes.Children(iMat+2).Marker = 's';
+            end
+            
             % change format of plot
             title('');
             ylabel('Absorption coefficient');
             xlabel('Frequency in Hz');
-            set(gca,'XLim',[63 20000]);
-            set(gca,'YLim',[0 1]);
+            set(myAxes,'XLim',[20 20000]);
+            set(myAxes,'YLim',[0 1.05]);
             leg = findobj(gcf,'Tag','legend');
             set(leg,'Location','NorthWest');
             set(leg,'FontSize',12);
@@ -858,8 +863,7 @@ classdef itaRavenProject < handle
             % remove [1] in legend entry
             for iMat=1:numberMaterials
                 leg.String{iMat} = leg.String{iMat}(1:end-4);
-            end
-            
+            end           
             
             % export plot to raven output
             if (exportPlot)
@@ -867,7 +871,9 @@ classdef itaRavenProject < handle
                 dateTimeStr = datestr(now,30);
                 dateTimeStr = strrep(dateTimeStr,'T','_');
                 fileName = [ obj.pathResults '\Absorption_' name '_' dateTimeStr '.png'];
-                saveas(gcf,fileName);
+                set(gcf,'units','normalized','outerposition',[0 0 1 1]);
+                set(gcf,'PaperUnits','inches','PaperPosition',1.34*[0 0 8 5]);
+                print('-dpng','-r200', fileName);
             end
         end
         
@@ -902,17 +908,23 @@ classdef itaRavenProject < handle
             
             currentMaterial.channelNames = allMaterials;
             currentMaterial.allowDBPlot = false;
-            currentMaterial.pf;
+            ita_plot_freq(currentMaterial,'LineWidth',2);
+            
+            myAxes = gca;
+            for iMat=1:numberMaterials
+                myAxes.Children(iMat+2).Marker = 's';
+            end
+            
             
             % change format of plot
             title('');
             ylabel('Scattering coefficient');
             xlabel('Frequency in Hz');
-            set(gca,'XLim',[63 20000]);
-            set(gca,'YLim',[0 1]);
+            set(myAxes,'XLim',[20 20000]);
+            set(myAxes,'YLim',[0 1.05]);
             leg = findobj(gcf,'Tag','legend');
             set(leg,'Location','NorthWest');
-            set(leg,'FontSize',9);
+            set(leg,'FontSize',12);
             
             % remove [1] in legend entry
             for iMat=1:numberMaterials
@@ -925,7 +937,9 @@ classdef itaRavenProject < handle
                 dateTimeStr = datestr(now,30);
                 dateTimeStr = strrep(dateTimeStr,'T','_');
                 fileName = [ obj.pathResults '\Scattering_' name '_' dateTimeStr '.png'];
-                saveas(gcf,fileName);
+                set(gcf,'units','normalized','outerposition',[0 0 1 1]);
+                set(gcf,'PaperUnits','inches','PaperPosition',1.34*[0 0 8 5]);
+                print('-dpng','-r200', fileName);
             end
         end
         
@@ -1478,9 +1492,9 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
-        function setTimeSlotLength(obj, slotlength)   
+        function setTimeSlotLength(obj, slotlength)
             % setTimeSlotLength
-            % set timeslot lengt in ms 
+            % set timeslot lengt in ms
             % (histogram resolution, for raytracing algorithm)
             obj.timeSlotLength = slotlength;
             obj.rpf_ini.SetValues('RayTracing', 'timeResolution_DetectionSphere', slotlength);
@@ -2927,23 +2941,33 @@ classdef itaRavenProject < handle
                 end
             end
             
+            % determine factor (default: 0.161) and air absorption
+            factor = 24*log(10) / calculateSoundSpeed(obj.getTemperature, obj.getHumidity,obj.getPressure);
+            airAbsorption = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
+            
             % get reverberation time
             if (eyring == 1)
-                airAbsorption = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
-                RT = roommodel.getReverbTime(obj.pathMaterials, 'eyring', airAbsorption);
+                RT = roommodel.getReverbTime(obj.pathMaterials, 'eyring', factor, airAbsorption);
             else
-                airAbsorption = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
-                RT = roommodel.getReverbTime(obj.pathMaterials, 'sabine', airAbsorption);
+                RT = roommodel.getReverbTime(obj.pathMaterials, 'sabine', factor, airAbsorption);
             end
         end
         
         %------------------------------------------------------------------
         function RT = getReverbTime_Sabine(obj)
+            % getReverbTime_Sabine
+            %   returns the _calculated_ reverberation time based on the
+            %   volume, surface area and the absorption coefficients of the room
+            %   according to Sabine equation
             RT = obj.getEquationBasedReverbTime(0);
         end
         
         %------------------------------------------------------------------
         function RT = getReverbTime_Eyring(obj)
+            % getReverbTime_Eyring
+            %   returns the _calculated_ reverberation time based on the
+            %   volume, surface area and the absorption coefficients of the room
+            %   according to Eyring equation
             RT = obj.getEquationBasedReverbTime(1);
         end
         
