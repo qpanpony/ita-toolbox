@@ -28,8 +28,8 @@ classdef itaRavenProject < handle
     %   rpf.getT30();                     get T30 based on simulation
     %   rpf.plotMaterialsAbsorption();    plots absorption coefficients
     %
-    % Author:         Soenke Pelzer (spe@akustik.rwth-aachen.de)
-    %				  Lukas Aspöck (las@akustik.rwth-aachen.de)
+    % Author:           Soenke Pelzer (spe@akustik.rwth-aachen.de)
+    %                   Lukas Aspöck (las@akustik.rwth-aachen.de)
     %
     % Version:        0.2
     % First release:  01.11.10
@@ -559,6 +559,21 @@ classdef itaRavenProject < handle
             end
             
         end
+        
+        %------------------------------------------------------------------
+        function keepImpulseResponseFiles(obj, keepFiles)
+            % keepImpulseResponseFiles
+            %
+            %   By default, RAVEN Impulse Responses are deleted from the hard disk 
+            %   after simulation and are only available in your rpf project
+            %
+            %   By setting keepOutFiles to 1 / true, results are kept in
+            %   the Output-Folder (obj.pathResults)
+            
+            obj.keepOutputFiles     = keepFiles;
+            obj.rpf_ini.SetValues('Global', 'keepOutputFiles', keepFiles);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end        
         
         %------------------------------------------------------------------
         function openOutputFolder(obj)
@@ -1653,6 +1668,27 @@ classdef itaRavenProject < handle
             obj.fftDegreeForWallFilterInterpolation = fft_degree;
             obj.rpf_ini.SetValues('Filter', 'fftDegreeForWallFilterInterpolation', fft_degree);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        %------------------------------------------------------------------
+        function setOutputPath(obj, path)
+            %
+            %   setOutputPath(path)
+            %
+            %      Set the RAVEN output path. If you keep the output files
+            %      (cf. keepOutputFiles variable / method keepOutputFiles), 
+            %      Impulse Responses as wave files are stored here :
+            
+            %           <projectName>/<date>/<time>/<IRtype>)
+            %       
+            %      Absorption and scattering plots are also saved here.
+            %
+            %      Use method openOutputFolder to open result folder.
+            % 
+            obj.pathResults = path;
+            obj.rpf_ini.SetValues('Global', 'ProjectPath_Output', path);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+            
         end
         
         %------------------------------------------------------------------
