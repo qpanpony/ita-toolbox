@@ -827,10 +827,14 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
-        function plotMaterialsAbsorption(obj, exportPlot)
+        function plotMaterialsAbsorption(obj, exportPlot, fileType)
             
             if nargin < 2
                 exportPlot = false;
+            end
+            
+            if nargin < 3
+                fileType='png';
             end
             
             freqVector = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 500 630 800 1000 1250 1600 2000 2500 3150 4000 5000 6300 8000 10000 12500 16000 20000];
@@ -858,7 +862,7 @@ classdef itaRavenProject < handle
             
             currentMaterial.channelNames = allMaterials;
             currentMaterial.allowDBPlot = false;
-            ita_plot_freq(currentMaterial,'LineWidth',2);
+            currentPlot = ita_plot_freq(currentMaterial,'LineWidth',2);
             
             myAxes = gca;
             for iMat=1:numberMaterials
@@ -885,18 +889,33 @@ classdef itaRavenProject < handle
                 [pathstr,name,ext] = fileparts(obj.ravenProjectFile);
                 dateTimeStr = datestr(now,30);
                 dateTimeStr = strrep(dateTimeStr,'T','_');
-                fileName = [ obj.pathResults '\Absorption_' name '_' dateTimeStr '.png'];
+                fileNamePNG = [ obj.pathResults '\Absorption_' name '_' dateTimeStr '.png'];
+                fileNamePDF = [ obj.pathResults '\Absorption_' name '_' dateTimeStr '.pdf'];
                 set(gcf,'units','normalized','outerposition',[0 0 1 1]);
                 set(gcf,'PaperUnits','inches','PaperPosition',1.34*[0 0 8 5]);
-                print('-dpng','-r200', fileName);
+                
+                if strcmpi(fileType,'pdf')
+                    set(gcf,'PaperUnits','centimeters','PaperSize',[25.7, 16.5]);              
+                    print('-dpdf','-r200', fileNamePDF);
+                    close(currentPlot);
+                else
+                    if ~strcmpi(fileType,'png')
+                        warning('plotMaterialsAbsorption: Specified fileType not supported. Using PNG.');
+                    end
+                    print('-dpng','-r200', fileNamePNG);
+                end
             end
         end
         
         %------------------------------------------------------------------
-        function plotMaterialsScattering(obj, exportPlot)
+        function plotMaterialsScattering(obj, exportPlot, fileType)
             
             if nargin < 2
                 exportPlot = false;
+            end
+            
+            if nargin < 3
+                fileType='png';
             end
             
             freqVector = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 500 630 800 1000 1250 1600 2000 2500 3150 4000 5000 6300 8000 10000 12500 16000 20000];
@@ -923,7 +942,7 @@ classdef itaRavenProject < handle
             
             currentMaterial.channelNames = allMaterials;
             currentMaterial.allowDBPlot = false;
-            ita_plot_freq(currentMaterial,'LineWidth',2);
+            currentPlot=ita_plot_freq(currentMaterial,'LineWidth',2);
             
             myAxes = gca;
             for iMat=1:numberMaterials
@@ -951,10 +970,22 @@ classdef itaRavenProject < handle
                 [pathstr,name,ext] = fileparts(obj.ravenProjectFile);
                 dateTimeStr = datestr(now,30);
                 dateTimeStr = strrep(dateTimeStr,'T','_');
-                fileName = [ obj.pathResults '\Scattering_' name '_' dateTimeStr '.png'];
+                fileNamePNG = [ obj.pathResults '\Scattering_' name '_' dateTimeStr '.png'];
+                fileNamePDF = [ obj.pathResults '\Scattering_' name '_' dateTimeStr '.pdf'];
                 set(gcf,'units','normalized','outerposition',[0 0 1 1]);
                 set(gcf,'PaperUnits','inches','PaperPosition',1.34*[0 0 8 5]);
-                print('-dpng','-r200', fileName);
+                
+                if strcmpi(fileType,'pdf')
+                    set(gcf,'PaperUnits','centimeters','PaperSize',[25.7, 16.5]);              
+                    print('-dpdf','-r200', fileNamePDF);
+                    close(currentPlot);
+                else
+                    if ~strcmpi(fileType,'png')
+                        warning('plotMaterialsScattering: Specified fileType not supported. Using PNG.');
+                    end
+                    print('-dpng','-r200', fileNamePNG);
+                end
+                
             end
         end
         
