@@ -1,15 +1,16 @@
-%% Lambda Resonator Demo Function (see input arguments)
 function [ frames ] = ita_demo_lambdaResonator( varargin )
-
+%ita_demo_LAMBDARESONATOR - +++ Short Description here +++
 %  This function ++++ FILL IN INFO HERE +++
 %
 %  Syntax:
 %   audioObjOut = ita_demo_lambdaResonator(options)
 %
 %   Options (default):
-%           'frequency'         (88)    : the wave frequency
+%           'frequency'         (100)    : the wave frequency
 %           'numReflections'    (3)     : number of reflections
 %           'R'                 (0.9)   : R
+%           'resonatorType'     (2)     : 2 lambda/2 4 lambda/4
+%           'maxXFactor'        (4)     : length of the plot
 %           'plotSum'           (true)  : plot the sum of the waves
 %           'plotWavelength'    (3)     : length of animation
 %           'makeMovie'         (false) : return frames
@@ -33,14 +34,16 @@ function [ frames ] = ita_demo_lambdaResonator( varargin )
 % Author: Jan Gerrit Richter -- Email: jan.richter@rwth-aachen.de
 % Created:  09-Apr-2015 
 
-    sInit.frequency = 88;
+    sInit.frequency = 100;
     sInit.numReflections = 3;
     sInit.R = 0.9;
     sInit.makeMovie = 'false';
     sInit.frameRate = 10;
     sInit.plotSum = 'true';
     sInit.plotWavelength = 3;
-    sArgs        = struct('frequency',sInit.frequency,'numReflections',sInit.numReflections,'R',sInit.R,'makeMovie',sInit.makeMovie,'frameRate',sInit.frameRate,'plotSum',sInit.plotSum,'plotWavelength',sInit.plotWavelength);
+    sInit.resonatorType = 4;
+    sInit.maxXFactor = 4;
+    sArgs        = struct('frequency',sInit.frequency,'numReflections',sInit.numReflections,'R',sInit.R,'makeMovie',sInit.makeMovie,'frameRate',sInit.frameRate,'plotSum',sInit.plotSum,'plotWavelength',sInit.plotWavelength,'resonatorType',sInit.resonatorType,'maxXFactor',sInit.maxXFactor);
     [sArgs] = ita_parse_arguments(sArgs,varargin);
 
     p_hat = 1;
@@ -59,7 +62,15 @@ function [ frames ] = ita_demo_lambdaResonator( varargin )
     lambda100 = c/100;
 
     % x axis from 0 to 2 lambda of 100 Hz
-    x = 0:0.01:2*lambda100;
+    if sArgs.resonatorType == 4
+        maxX = lambda100/4;
+        maxX = maxX*sArgs.maxXFactor;
+    else
+        maxX = lambda100/2; 
+        maxX = maxX*sArgs.maxXFactor;
+    end
+    
+    x = 0:0.01:maxX;
 
     % the time axis from 0 in resonable steps up to set wavelength numbers
     maxTime = sArgs.plotWavelength*lambda/c;
@@ -79,10 +90,25 @@ function [ frames ] = ita_demo_lambdaResonator( varargin )
 %     pressure = p_hat*(spaceTerm).*(timeTerm);
     
     % add the original wave
-    data.pressure{1} = addWave(optionsStruct,timeTerm,1);
+    optionsStruct.R = 1;
+    data.pressure{1} = addWave(optionsStruct,timeTerm,1,0);
+    
+    R = sArgs.R;
+
+    optionsStruct = createOptions(p_hat,c,f,omega,k,x,t,R,lambda,lambda100,sArgs);
+    
     % add all the reflection waves
     for index = 1:sArgs.numReflections
-        data.pressure{end+1} = addWave(optionsStruct,timeTerm,index+1);
+        if sArgs.resonatorType == 4
+            if mod(index,3) ~= 0
+                phaseShift = 180;
+            else
+                phaseShift = 0;
+            end
+        else
+           phaseShift = 0; 
+        end
+        data.pressure{end+1} = addWave(optionsStruct,timeTerm,index+1,phaseShift);
     end
       
     % if we have reflections and want to see the sum, calculate it
@@ -156,7 +182,7 @@ function handles = makePlot(data,handles,oS,plotLegend)
     
     % set some limits
     ylim([-3.5*oS.p_hat 3.5*oS.p_hat])
-    xlim([-0.1 2.1])
+    xlim([-0.1 max(x)/lambda+0.1])
     
     % some legend as well
     switch(oS.sArgs.numReflections)
@@ -168,6 +194,12 @@ function handles = makePlot(data,handles,oS,plotLegend)
             else
                 legend({'Original Wave','1. Reflection'})
             end
+        case 2
+            if (sArgs.plotSum)
+                legend({'Original Wave','1. Reflection','2. Reflection','Sum'})
+            else
+                legend({'Original Wave','1. Reflection','2. Reflection'})
+            end
         otherwise
             if (sArgs.plotSum)
                 legend({'Original Wave','1. Reflection','2. Reflection','3. Reflection','Sum'})
@@ -176,26 +208,57 @@ function handles = makePlot(data,handles,oS,plotLegend)
             end
     end
 
-    % create the vertical boundaries
-    switch(oS.sArgs.numReflections)
-        case 0
-            xg = [];
-        case 1
-            xg = [max(x/lambda)];
-        otherwise
-            xg = [0 max(x/lambda)];      
-    end
+    if length(handles) <= length(data.pressure)
+        if sArgs.resonatorType == 2
+            % create the vertical boundaries
+            switch(oS.sArgs.numReflections)
+                case 0
+                    xg = [];
+                case 1
+                    xg = [max(x/lambda)];
+                otherwise
+                    xg = [0 max(x/lambda)];      
+            end
 
-    ylim([-3.5*oS.p_hat 3.5*oS.p_hat])
-    xlim([-0.1 2.1])
-    
-    yg = get(gca,'YLim');
-    xx = reshape([xg;xg;NaN(1,length(xg))],1,length(xg)*3);
-    yy = repmat([yg NaN],1,length(xg));
-    h_minorgrid = plot(xx,yy,'k','LineWidth',3);
-    
-    hold all
-    
+            ylim([-3.5*oS.p_hat 3.5*oS.p_hat])
+            xlim([-0.1 2.1])
+
+            yg = get(gca,'YLim');
+            xx = reshape([xg;xg;NaN(1,length(xg))],1,length(xg)*3);
+            yy = repmat([yg NaN],1,length(xg));
+            handles(index+1) = plot(xx,yy,'k','LineWidth',3);
+        else
+            ylim([-3.5*oS.p_hat 3.5*oS.p_hat])
+            xlim([-0.1 2.1])
+
+            % create the vertical boundaries
+            switch(oS.sArgs.numReflections)
+                case 0
+                    xg = [];
+                case 1
+                    xg = [max(x/lambda)];
+                    
+                    yg = get(gca,'YLim');
+                    xx = reshape([xg;xg;NaN(1,length(xg))],1,length(xg)*3);
+                    yy = repmat([yg NaN],1,length(xg));
+                    handles(index+1) = plot(xx,yy,'k--','LineWidth',3); 
+                otherwise
+                    xg = [0];
+                    yg = get(gca,'YLim');
+                    xx = reshape([xg;xg;NaN(1,length(xg))],1,length(xg)*3);
+                    yy = repmat([yg NaN],1,length(xg));
+                    handles(index+1) = plot(xx,yy,'k','LineWidth',3);  
+                    
+                    xg = [max(x/lambda)];
+                    yg = get(gca,'YLim');
+                    xx = reshape([xg;xg;NaN(1,length(xg))],1,length(xg)*3);
+                    yy = repmat([yg NaN],1,length(xg));
+                    handles(index+1) = plot(xx,yy,'k--','LineWidth',3); 
+            end
+        end
+
+%     hold all
+    end
     % change the font size and put in some titles
     set(gca,'FontSize',20,'fontWeight','bold')
     title(sprintf('%d Hz',oS.f));
@@ -219,7 +282,7 @@ function optionsStruct = createOptions(p_hat,c,f,omega,k,x,t,R,lambda,lambda100,
 
 end
 
-function pressureRef = addWave(oS,timeTerm,number)
+function pressureRef = addWave(oS,timeTerm,number,rPhase)
     
     % depending on the reflection number, the wave has to move forward or
     % backward
@@ -227,7 +290,7 @@ function pressureRef = addWave(oS,timeTerm,number)
     reflectionTerm = repmat(expTerm,length(oS.t),1);    
     
     % add the reflection factor and amplitude 
-    wave = (oS.R)^number*oS.p_hat.*reflectionTerm;
+    wave = (oS.R)^(number-1)*oS.p_hat.*reflectionTerm*exp(1i*deg2rad(rPhase));
     
     % the starting phase (at x = 0) is dependend on the number of
     % reflections (the distance the wave has traveled so far)
