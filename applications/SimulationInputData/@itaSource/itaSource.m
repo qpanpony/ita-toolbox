@@ -20,7 +20,7 @@ classdef itaSource < itaSimulationDbItem
     properties(Dependent = true)
         pressureTf;     %pressure transfer function - itaSuper
         velocityTf;     %Velocity transfer function - itaSuper
-        directivity;    %The directivity loaded from the .daff file - itaSuper
+%         directivity;    %The directivity loaded from the .daff file - itaSuper
         directivityFile;%Name of directivity .daff file
         position;       %Position of the source in 3D space - itaCoordinates
         orientation;    %Orientation of the source in 3D space - itaOrientation
@@ -143,11 +143,16 @@ classdef itaSource < itaSimulationDbItem
             if this.HasVelocityTf && this.velocityType == VelocityType.SurfaceDistribution
                 out = this.mVelocityTf.channelCoordinates;
             end
-        end
-        
-        function out = get.directivity(this)
+        end        
+    end
+    
+    methods
+        function out = directivity(this)
+            %Loads the directivity from the specified file and returns it.
+            %This is just a placeholder and not yet implemented...
+            
             %TODO: Remove this once implemented
-            warning('Reading daff files is not yet incoorporated')
+            warning('Reading daff files is not yet incoorporated'); return;
             
             if isempty(this.mDirectivity)
                 if ~isempty(this.mDirectivityFile) || ~exist(this.mDirectivityFile, 'file')
@@ -157,7 +162,7 @@ classdef itaSource < itaSimulationDbItem
                 end
                 %TODO: Read daff file
                 %this.mDirectivity = ...
-            end            
+            end
                 
             out = this.mDirectivity;
         end
