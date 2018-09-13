@@ -14,7 +14,7 @@ function [ freqs, mags, metadata ] = dfDipoleMS( alpha, beta, basepath )
     
     channels = 1;
     mags = zeros(channels, length(freqs));
-    metadata = [];
+    metadata.desc = 'Quadrupole magnitude spectrum weighted by frequency';
     
     for c=1:channels
         for f=1:length(freqs)

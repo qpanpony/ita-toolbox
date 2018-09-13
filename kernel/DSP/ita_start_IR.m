@@ -121,6 +121,10 @@ for iChannel = 1:input.nChannels
     y = imag(Y(ind-n:ind+n));
     p = polyfit((-n:n)',y,N);
     r = roots(p);
-    r = r(abs(r) == min(abs(r)));
-    sampleStart(iChannel) = ind + r - input.nSamples;
+    if all(isreal(r))
+        r = r(abs(r) == min(abs(r)));
+        sampleStart(iChannel) = ind + r - input.nSamples;
+    else
+        sampleStart(iChannel) = 0;
+    end
 end

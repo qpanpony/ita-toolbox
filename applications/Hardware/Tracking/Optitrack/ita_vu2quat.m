@@ -63,7 +63,7 @@ else
 end
 
 % calculate side vector
-s = cross(v, u);
+s = cross(v', u')'; %NOTE PSC: Matlab thinks in column vectors, so this would fail in case of two 3x3 matrices when not transposing v and u.
 
 % build rotation matrix
 vec_ent = size(v,1);

@@ -18,7 +18,7 @@ function [ freqs, mags, metadata ] = dfBulbMS( alpha, beta, basepath )
     
     channels = 1;
     mags = zeros(channels, length(freqs));
-    metadata = [];
+    metadata.desc = 'magnitude spectrum of bulb shape for higher frequencies';
     
     for c=1:channels
         for f=1:length(freqs)

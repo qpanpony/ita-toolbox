@@ -684,11 +684,7 @@ classdef  itaHRTF < itaAudio
                 end
                 
                 %HRTFout = this.direction(idxCoord);
-            end
-            
-            function this = buildsearchdatabase(this)
-               this.dirCoord = this.dirCoord.build_search_database; 
-            end
+            end     
             
             function obj = direction(this, idxCoord)
                 %return the HRTF (L&R) for a/multiple given direction indices
@@ -752,7 +748,7 @@ classdef  itaHRTF < itaAudio
                     earCoords = this.getEar('L').channelCoordinates;
                     switch dirID
                         case {'phi_deg', 'p'}
-                            phiValues = uniquetol(earCoords.phi_deg);
+                            phiValues = uniquetol(earCoords.phi_deg,0.0001);
                             [~,index] = min(abs(phiValues - dir_deg));
                             exactPhiValue = phiValues(index);
                             tmp = earCoords.n(earCoords.phi_deg == exactPhiValue);
@@ -760,13 +756,15 @@ classdef  itaHRTF < itaAudio
                             
                             slice = this.findnearestHRTF(thetaU,dir_deg);
                         case {'theta_deg', 't'}
-                            thetaValues = uniquetol(earCoords.theta_deg);
+                            thetaValues = uniquetol(earCoords.theta_deg,0.0001);
                             [~,index] = min(abs(thetaValues - dir_deg));
                             exactThetaValue = thetaValues(index);
-                            tmp = earCoords.n(earCoords.theta_deg == exactThetaValue);
-                            phiU = tmp.phi_deg;
                             
-                            slice = this.findnearestHRTF(dir_deg,phiU);
+                            slice = this.direction(find(earCoords.theta_deg == exactThetaValue));
+%                             tmp = earCoords.n(earCoords.theta_deg == exactThetaValue);
+%                             phiU = tmp.phi_deg;
+%                             
+%                             slice = this.findnearestHRTF(dir_deg,phiU);
                     end
                 end
 
@@ -1283,7 +1281,7 @@ classdef  itaHRTF < itaAudio
                 % init
                 sArgs  = struct('pos1_data','itaHRTF', 'method', 'phase_delay', 'filter' , [200 2000] ,...
                     'thresh','10dB','energy',true,'centroid',false,'reshape',true,...
-                    'theta_deg',[],'plot_type','color');
+                    'theta_deg',[],'plot_type','color','axes_handle',[]);
                 [this,sArgs]   = ita_parse_arguments(sArgs,varargin);
                 
                 % calculate ITD
@@ -1313,8 +1311,13 @@ classdef  itaHRTF < itaAudio
                 %..............................................................
                 % create figure
                 position = get(0,'ScreenSize');
-                figure
-                set(gcf,'Position',[10 50 position(3:4)*0.85]);
+                if isempty(sArgs.axes_handle) 
+                    figure
+                    set(gcf,'Position',[10 50 position(3:4)*0.85]);
+                else
+                    axes(sArgs.axes_handle);
+                    hold on;
+                end
                 if strcmp(sArgs.method,'phase_delay') && ischar(sArgs.filter) % frequency dependent ITD
                     pcolor(phiC_deg,this.freqVector,ITD)
                     title(strcat('\phi = ', num2str(round(thetaC_deg)), '�'))

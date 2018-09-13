@@ -14,7 +14,7 @@ function [ freqs, mags, metadata ] = dfStarMS( alpha, beta, basepath )
     
     channels = 1;
     mags = zeros(channels, length(freqs));
-    metadata = [];
+    metadata.desc = 'Example magnitude spectrum in star shape weighted by frequency';
     
     for c=1:channels
         for f=1:length(freqs)

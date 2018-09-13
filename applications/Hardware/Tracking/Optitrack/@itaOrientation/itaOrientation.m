@@ -399,4 +399,12 @@ classdef itaOrientation
         
     end
     
+    methods(Static = true)
+        function obj = FromViewUp(view, up)
+            assert( size(view, 2) == 3 && size(up, 2) == 3,'Size of both inputs must be N x 3 [double].' )
+            assert( isequal(size(view),size(up)),'Number of view and up vectors must be the same.' )
+            obj = itaOrientation(ita_vu2quat(view, up));
+        end
+    end
+    
 end
