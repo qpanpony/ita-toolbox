@@ -259,16 +259,20 @@ classdef itaOrientation
             % set view vector, nPoints x 3, mtx(vx vy vz) [double]
             assert( isequal(size(value),size(this.view)),['Size of input must be ',num2str(this.nPoints),' x 3, mtx(vx vy vz) [double].'])
             
+            %NOTE PSC:
+            %-normalization of up and view already done in ita_vu2quat()
+            %-specify the dimension to row vectors when using cross()
+            
             % calculate side vector and new up vector
             if isequal(value,this.up) % case new view vector is old up vector
-                s = cross(this.view,this.up);
-                u = normr(cross(s,this.up));
+                s = cross(this.view,this.up, 2);
+                u = cross(s,this.up, 2);
             elseif isequal(value,-this.up) % case new view vector is negative old up vector
-                s = cross(this.view,-this.up);
-                u = normr(cross(s,this.up));
+                s = cross(this.view,-this.up,2);
+                u = cross(s,this.up, 2);
             else
-                s = cross(value,this.up);
-                u = normr(cross(s,value));
+                s = cross(value,this.up, 2);
+                u = cross(s,value, 2);
             end
             this.mOrient = ita_vu2quat(value,u);
         end
@@ -277,16 +281,20 @@ classdef itaOrientation
             % set up vector, nPoints x 3, mtx(ux uy uz) [double]
             assert( isequal(size(value),size(this.up)),['Size of input must be ',num2str(this.nPoints),' x 3, mtx(ux uy uz) [double].'])
             
+            %NOTE PSC:
+            %-normalization of up and view already done in ita_vu2quat()
+            %-specify the dimension to row vectors when using cross()
+            
             % calculate side vector and new view vector
             if isequal(value,this.view) % case new up vector is old view vector
-                s = cross(this.view,this.up);
-                v = normr(cross(this.view,s));
+                s = cross(this.view,this.up, 2);
+                v = cross(this.view,s, 2);
             elseif isequal(value,-this.view) % case new up vector is negative old view vector
-                s = cross(this.view,-this.up);
-                v = normr(cross(this.view,s));
+                s = cross(this.view,-this.up, 2);
+                v = cross(this.view,s, 2);
             else
-                s = cross(this.view,value);
-                v = normr(cross(value,s));
+                s = cross(this.view,value, 2);
+                v = cross(value,s, 2);
             end
             this.mOrient = ita_vu2quat(v,value);
         end
@@ -399,6 +407,7 @@ classdef itaOrientation
         
     end
     
+    %% Create functions
     methods(Static = true)
         function obj = FromViewUp(view, up)
             assert( size(view, 2) == 3 && size(up, 2) == 3,'Size of both inputs must be N x 3 [double].' )
@@ -406,5 +415,5 @@ classdef itaOrientation
             obj = itaOrientation(ita_vu2quat(view, up));
         end
     end
-    
+
 end
