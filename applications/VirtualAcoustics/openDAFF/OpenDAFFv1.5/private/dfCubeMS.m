@@ -14,7 +14,7 @@ function [ freqs, mags, metadata ] = dfDiscMS( alpha, beta, basepath )
     
     channels = 1;
     mags = zeros(channels, length(freqs));
-    metadata = [];
+    metadata.desc = 'magnitude spectrum in cube shape weighted by frequency (for fun!)';
     
     for c=1:channels
         for f=1:length(freqs)

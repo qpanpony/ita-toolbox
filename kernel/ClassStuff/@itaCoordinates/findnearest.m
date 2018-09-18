@@ -27,9 +27,6 @@ if exist('KNNSearch','file') == 3 && ~isempty(this.mPtrtree) % Only if external 
     [ind,dist] = KNNSearch(this.cart,coords.cart,this.mPtrtree,num);
 else
     %% Old one, using Matlab code
-    if ita_preferences('verboseMode') && size(this.cart,1) > 10
-        disp('findnearest@itaCoordinates: You can speed this up by calling ''build_search_database'' prior to the search')
-    end
     for idinput = 1:size(coords.cart,1)
         dists = sqrt(sum((this.cart-repmat(coords.cart(idinput,:),size(this.cart,1),1)).^2,2));
         for idx = 1:num

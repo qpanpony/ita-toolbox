@@ -47,23 +47,17 @@ if ~isempty(outpathList)
 end
 
 %% Save the path list if possible
-ita_verbose_info('ita_path_handling::Saving Path List...',1);
-save_state = savepath;
-if save_state == 1
-    disp('Oh Lord. I cannot save the path list for you. Saving pathdef to your home folder');
-    if isempty( evalin('base','userpath'))
-        userpath('reset');
-    end
-    userfolder =  evalin('base','userpath');
-    if strcmp(userfolder(end),pathsep)
-        userfolder = userfolder(1:end-1);
-    end
-    savepath(fullfile(userfolder,'pathdef.m'));
-    try
-        copyfile(fullfile(fullpath,'kernel','StandardRoutines','ita_startup.m'), fullfile(userfolder,'startup.m'))
-    catch theError
-        ita_verbose_info('ita_path_handling:writing pathdef unsuccessful, because:',0);
-        disp(theError.message);
+ita_verbose_info('ita_path_handling::Saving path list to your users pathdef.m...',1);
+upath = userpath();
+if isempty(upath)
+    userpath('reset');
+end
+if isempty(userpath())
+    ita_verbose_info('Oh Lord! I cannot set your userpath. Please check if the default directory exists or manually try saving your path variable.', 0);
+else
+    save_state = savepath(fullfile(upath, 'pathdef.m'));
+    if save_state == 1
+        ita_verbose_info('Oh Lord! I could not write to your users pathdef.m', 0);
     end
 end
 

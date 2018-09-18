@@ -272,7 +272,7 @@ classdef load_ac3d
                     line( obj.nodes([polyNodes; polyNodes(1)],component2axesMapping(1)) * invertAxes(1), ...
                         obj.nodes([polyNodes; polyNodes(1)],component2axesMapping(2)) * invertAxes(2), ...
                         obj.nodes([polyNodes; polyNodes(1)],component2axesMapping(3)) * invertAxes(3), ...
-                        'Color', [.1 .1 .1]);
+                        'Color', [.6 .6 .6]);
                 end
             else
                 % display GA model
@@ -405,9 +405,13 @@ classdef load_ac3d
             [A, S] = obj.getEquivalentAbsorptionArea_sabine();
         end
         
-        function RT = getReverbTime(obj, material_path, sabine_or_eyring, airAbsorption, portal_surface_materials)
-            if nargin < 3
+        function RT = getReverbTime(obj, material_path, sabine_or_eyring, factor, airAbsorption, portal_surface_materials)
+             if nargin < 4
                 airAbsorption = zeros(1,31);
+            end
+            
+            if nargin < 3
+                factor = 0.161;
             end
             if nargin < 3
                 sabine_or_eyring = 'eyring';
@@ -416,7 +420,7 @@ classdef load_ac3d
                 material_path = '..\RavenDatabase\MaterialDatabase';
             end
                
-            if nargin > 4
+            if nargin > 5
                 if strcmp(sabine_or_eyring, 'eyring')
                     [A, S] = obj.getEquivalentAbsorptionArea_eyring(material_path, portal_surface_materials);
                 else
@@ -438,7 +442,7 @@ classdef load_ac3d
             
             %RT = 0.163 .* obj.totalVolume ./ A;
            % RT = (2.76 / sqrt(273.15 + room_temperature)) .* (obj.totalVolume ./ A);
-            RT = 0.163 .* obj.totalVolume ./ (A + 4*airAbsorption*obj.totalVolume);
+            RT = 0.161 .* obj.totalVolume ./ (A + 4*airAbsorption*obj.totalVolume);
         end
         
         % get surface area of given material

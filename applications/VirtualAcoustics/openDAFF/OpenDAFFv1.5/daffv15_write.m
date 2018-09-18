@@ -439,7 +439,7 @@ else
     % Create an empty helper dataset, which contains all directions
     % (angular pairs). Then we can just iterate over all records,
     % making iteration over directions a lot less complicated
-    props.dataset = daff_create_dataset('channels', props.channels, ...
+    props.dataset = daffv15_create_dataset('channels', props.channels, ...
         'alpharange', props.alpharange, ...
         'alphapoints', props.alphapoints, ...
         'betarange', props.betarange, ...
@@ -542,7 +542,9 @@ if strcmpi(props.content, 'MS')
     
     % Frequencies must be provided
     if ~isfield(props.dataset, 'freqs')
-        error('When writing magnitude spectrum content, you must specify ''freqs''');
+        warning('When writing magnitude spectrum content, you should specify ''freqs''');
+        warning('Frequency vector set to ANSI center frequencies (20 Hz - 20 kHz)');
+        props.dataset.freqs = ita_ANSI_center_frequencies;
     end
     props.numfreqs = length(props.dataset.freqs);
     
