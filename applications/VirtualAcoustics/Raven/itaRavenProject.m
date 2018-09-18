@@ -705,7 +705,7 @@ classdef itaRavenProject < handle
                 end
             end
             if nargin < 3
-                comp2axesMapping = [3 1 2];
+                comp2axesMapping = [1 -3 2];
             end
             if nargin < 2
                 if (ishandle(obj.plotModelHandle))
@@ -740,23 +740,32 @@ classdef itaRavenProject < handle
                     obj.model.plotModel(tgtAxes, comp2axesMapping, wireframe);
                 end
             end
-            % plot source and receivers
+            
+            % get and transform source and receiver data
+            invertAxes = sign(comp2axesMapping);
+            comp2axesMapping = abs(comp2axesMapping);
+            
             spos = obj.getSourcePosition;
+            spos = spos(:, comp2axesMapping).*invertAxes;
+            sview = obj.getSourceViewVectors;
+            sview = sview(:, comp2axesMapping).*invertAxes;
             snames = obj.getSourceNames;
             
             rpos = obj.getReceiverPosition;
+            rpos = rpos(:, comp2axesMapping).*invertAxes;
+            rview = obj.getReceiverViewVectors;
+            rview = rview(:, comp2axesMapping).*invertAxes;
             rnames = obj.getReceiverNames;
             
-            plot3(spos(:,3),spos(:,1),spos(:,2),'marker','o','markersize',9,'linestyle','none','linewidth',1.5)
-            plot3(rpos(:,3),rpos(:,1),rpos(:,2),'marker','x','markersize',9,'linestyle','none','linewidth',1.5)
+            % plot source and receivers
+            plot3(spos(:,1),spos(:,2),spos(:,3),'marker','o','markersize',9,'linestyle','none','linewidth',1.5)
+            plot3(rpos(:,1),rpos(:,2),rpos(:,3),'marker','x','markersize',9,'linestyle','none','linewidth',1.5)
             
             % plot view vectors (red) of sources
-            sview = obj.getSourceViewVectors;
-            quiver3(spos(:,3),spos(:,1),spos(:,2),sview(:,3),sview(:,1),sview(:,2),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
+            quiver3(spos(:,1),spos(:,2),spos(:,3),sview(:,1),sview(:,2),sview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
             % plot view/up vectors (red) of receivers
-            rview = obj.getReceiverViewVectors;
-            quiver3(rpos(:,3),rpos(:,1),rpos(:,2),rview(:,3),rview(:,1),rview(:,2),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
+            quiver3(rpos(:,1),rpos(:,2),rpos(:,3),rview(:,1),rview(:,2),rview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
             
             % plot up vectors (green) of sources and receivers (currently
@@ -769,8 +778,8 @@ classdef itaRavenProject < handle
             
             
             % plot names
-            text(spos(:,3)+0.2,spos(:,1),spos(:,2),snames)
-            text(rpos(:,3)+0.2,rpos(:,1),rpos(:,2),rnames)
+            text(spos(:,1)+0.2,spos(:,2),spos(:,3),snames)
+            text(rpos(:,1)+0.2,rpos(:,2),rpos(:,3),rnames)
         end
         
         %------------------------------------------------------------------

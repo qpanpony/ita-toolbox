@@ -243,7 +243,7 @@ classdef load_ac3d
             end
             
             if nargin < 3
-                component2axesMapping = [3 1 2];    % x y z -> z x y  (openGL has Y pointing upwards while matlab has Z pointing upwards
+                component2axesMapping = [1 -3 2];    % x y z -> x -z y  (openGL -> Matlab)
             end
             
             invertAxes = sign(component2axesMapping);
