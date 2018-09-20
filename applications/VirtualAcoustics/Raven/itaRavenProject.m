@@ -1533,6 +1533,37 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
+        function setFixReflectionPattern(obj, fixit)
+            obj.fixReflectionPattern = fixit;
+            obj.rpf_ini.SetValues('RayTracing', 'fixReflectionPattern', fixit);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        %------------------------------------------------------------------
+        function setScatterModel(obj, diffuseOrHit)
+            %setFilterResolution(obj, diffuseOrHit)
+            % 0 = Diffuse Rain (or 'diffuse'), 1 = Hit Oriented (or 'hit')
+            if ~isnumeric(diffuseOrHit)
+                diffuseOrHit = double(strcmp(diffuseOrHit, 'hit'));
+            end
+            %obj.scatterModel = diffuseOrHit;
+            obj.rpf_ini.SetValues('RayTracing', 'scatterModel_DetectionSphere', diffuseOrHit);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        %------------------------------------------------------------------
+        function setScatterModel_Portal(obj, diffuseOrHit)
+            %setFilterResolution(obj, diffuseOrHit)
+            % 0 = Diffuse Rain (or 'diffuse'), 1 = Hit Oriented (or 'hit')
+            if ~isnumeric(diffuseOrHit)
+                diffuseOrHit = double(strcmp(diffuseOrHit, 'hit'));
+            end
+            %obj.scatterModel_Portal = diffuseOrHit;
+            obj.rpf_ini.SetValues('RayTracing', 'scatterModel_Portal', diffuseOrHit);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        %------------------------------------------------------------------
         function setEnergyLoss(obj, energyloss)
             % setEnergyLoss
             % Define maximum energy loss for ray tracing (in dB)
@@ -1594,11 +1625,7 @@ classdef itaRavenProject < handle
             obj.rpf_ini.SetValues('RayTracing', 'resolutionElevation_DetectionSphere', resEle);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
-        
-        
-        
-        
-        % [Filter] %
+
         %------------------------------------------------------------------
         function setFilterLength(obj, filter_length)    % filter length parameter needed in [ms]
             if filter_length < 3
@@ -1641,6 +1668,15 @@ classdef itaRavenProject < handle
             obj.setFilterLength(filter_length);
         end
         
+        
+        % [Filter] %
+        %------------------------------------------------------------------
+        function setSamplingFrequency(obj, samplingRate)
+            obj.sampleRate = samplingRate;
+            obj.rpf_ini.SetValues('Filter', 'samplingFrequency', samplingRate);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
         %------------------------------------------------------------------
         function setFixPoissonSequence(obj, fixit)
             obj.fixPoissonSequence = fixit;
@@ -1670,12 +1706,6 @@ classdef itaRavenProject < handle
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
         
-        %------------------------------------------------------------------
-        function setFixReflectionPattern(obj, fixit)
-            obj.fixReflectionPattern = fixit;
-            obj.rpf_ini.SetValues('RayTracing', 'fixReflectionPattern', fixit);
-            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
-        end
         
         %------------------------------------------------------------------
         function setMaximumReflectionDensity(obj, maxReflectionDensity)
