@@ -2,18 +2,22 @@ classdef itaMaterial < itaSimulationDbItem
     %itaMaterial represents a material and its acoustic properties which are
     %used for GA-based and wave-based simulations
     %   Properties:
-    %   Impedance, absorption, scatering    
+    %   Impedance, absorption, scattering
     
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     properties(Access = private, Hidden = true)
-       mImpedance;
-       mAbsorption;
-       mScattering;
+        mImpedance;
+        mAbsorption;
+        mScattering;
     end
     
-    properties       
-       rho0Air = [];    %The density of air which occured while measuring the data
-       cAir = [];       %The speed of sound in air which was present while measuring the data
+    properties
+        rho0Air = [];    %The density of air which occured while measuring the data
+        cAir = [];       %The speed of sound in air which was present while measuring the data
     end
     
     properties(Dependent = true)
@@ -98,23 +102,21 @@ classdef itaMaterial < itaSimulationDbItem
             end
             this.cAir = c;
         end
-    end  
+    end
     
     %% Get functions
     methods
-        function alpha = get.absorption(this)            
-            alpha = this.mAbsorption;          
+        function alpha = get.absorption(this)
+            alpha = this.mAbsorption;
         end
         
         function alpha = get.absorptionFromImpedance(this)
             %Tries to convert the impedance to an absorption. Throws an
             %error if impedance is not defined or impedance of air is not
             %specified.
-            
             if ~this.HasImpedance
                 error('No impedance data defined yet')
             end
-            
             if ~this.mediumImpedanceDefined
                 error('Cannot convert without knowledge density and speed of sound of air. Set rho0Air and cAir first.');
             end
@@ -126,40 +128,49 @@ classdef itaMaterial < itaSimulationDbItem
             scattering = this.mScattering;
         end
         
-        function Z = get.impedance(this)            
+        function Z = get.impedance(this)
             Z = this.mImpedance;
         end
-    end  
+    end
     
     %% Booleans
     
     methods
         function bool = HasAbsorption(this)
-            bool = ~isempty(this.mAbsorption);
+            bool = false(size(this));
+            for idxMat = 1:numel(this)
+                bool(idxMat) = ~isempty(this(idxMat).mAbsorption);
+            end
         end
         function bool = HasScattering(this)
-            bool = ~isempty(this.mScattering);
+            bool = false(size(this));
+            for idxMat = 1:numel(this)
+                bool(idxMat) = ~isempty(this(idxMat).mScattering);
+            end
         end
         function bool = HasImpedance(this)
-            bool = ~isempty(this.mImpedance);
+            bool = false(size(this));
+            for idxMat = 1:numel(this)
+                bool(idxMat) = ~isempty(this(idxMat).mImpedance);
+            end
         end
         
         function bool = HasGaData(this)
             %Returns true if all data which is used for Geometrical
             %Acoustics (GA) is available
-            bool = this.HasAbsorption && this.HasScattering;
+            bool = this.HasAbsorption() & this.HasScattering();
         end
         function bool = HasWaveData(this)
             %Returns true if all data which is used for Wave-based
             %Acoustics is available
-            bool = this.HasImpedance;
+            bool = this.HasImpedance();
         end
         
         function bool = isempty(this)
             %Returns true if none of the frequency dependent data is set
             bool =  isempty(this.mImpedance) &&...
-                    isempty(this.mAbsorption) &&...
-                    isempty(this.mScattering);
+                isempty(this.mAbsorption) &&...
+                isempty(this.mScattering);
         end
     end
     
@@ -205,7 +216,7 @@ classdef itaMaterial < itaSimulationDbItem
             %Converts the impedance of this object to an absorption
             %coefficient
             %
-            %Still needs implementation...            
+            %Still needs implementation...
             
             alpha = [];
             
@@ -215,7 +226,7 @@ classdef itaMaterial < itaSimulationDbItem
             end
             
             Z0 = this.rho0Air * this.cAir;
-            Z = this.impedance.freqData;            
+            Z = this.impedance.freqData;
             abs_R = abs( (Z-Z0)./(Z+Z0) );
             
             alphaFreqData = 1 - abs_R.^2;
@@ -232,6 +243,34 @@ classdef itaMaterial < itaSimulationDbItem
         function out = DataTypeForFreqData()
             %Returns the allowed data type for frequency data as string
             out = 'itaSuper';
+        end
+    end
+    
+    %% Plot interface
+    methods
+        function varargout = plotImpedance(this, varargin)
+            matVis = itaMaterialVisualizer(this);
+            [fgh, ax] = matVis.plotImpedance(varargin{:});
+            if nargout
+                varargout{1} = fgh;
+                varargout{2} = ax;
+            end
+        end
+        function varargout = plotAbsorption(this, varargin)
+            matVis = itaMaterialVisualizer(this);
+            [fgh, ax] = matVis.plotAbsorption(varargin{:});
+            if nargout
+                varargout{1} = fgh;
+                varargout{2} = ax;
+            end
+        end
+        function varargout = plotScattering(this, varargin)
+            matVis = itaMaterialVisualizer(this);
+            [fgh, ax] = matVis.plotScattering(varargin{:});
+            if nargout
+                varargout{1} = fgh;
+                varargout{2} = ax;
+            end
         end
     end
     
