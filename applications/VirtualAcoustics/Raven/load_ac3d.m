@@ -8,20 +8,24 @@ classdef load_ac3d
 
     
     properties (GetAccess = 'public', SetAccess = 'public')
-        nodes = [];              % numeric array with x,y,z coords of nodes with size(n,3)
+        nodes = [];     % numeric array with x,y,z coords of nodes with size(n,3)
+    end
+    
+    properties (GetAccess = 'public', SetAccess = 'private')
+        bcGroups = {};  % of class type: gaGroup()
+        polygons = {};  % cell-array, each cell specifies all nodes of one polygon in a numeric array
     end
     
     properties (GetAccess = 'private', SetAccess = 'private')
         modelFilename = '';
-        polygons = {};           % cell-array, each cell specifies all
-        % nodes of one polygon in a numeric array
-        bcGroups = {};           % of class type: gaGroup()
+
         totalVolume = -1;
         totalSurface = -1;
         
         transparency = 0.1;
     end
     
+    %%
     methods
         
         % CONSTRUCTOR
