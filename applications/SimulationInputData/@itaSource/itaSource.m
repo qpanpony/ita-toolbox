@@ -14,12 +14,12 @@ classdef itaSource < itaSimulationDbItem
     % </ITA-Toolbox>
     
     properties(Access = private, Hidden = true)
-        mPressureTf;        %itaSuper
-        mVelocityTf;        %itaSuper
-        mDirectivity;       %itaSuper
-        mPosition;          %itaCoordinates
-        mOrientation;       %itaOrientation
-        mDirectivityFile;   %Char vector
+        mPressureTf;                                                %itaSuper
+        mVelocityTf;                                                %itaSuper
+        mDirectivity;                                               %itaSuper
+        mPosition = itaCoordinates([0 0 0]);                        %itaCoordinates
+        mOrientation = itaOrientation.FromViewUp([1 0 0], [0 1 0]); %itaOrientation
+        mDirectivityFile;                                           %Char vector
     end
     
     properties(Dependent = true)
@@ -191,13 +191,13 @@ classdef itaSource < itaSimulationDbItem
             bool = ~isempty(this.mOrientation) && this.mOrientation.nPoints == 1;
         end
         function bool = HasSpatialInformation(this)
-            bool = this.HasPosition && this.HasOrientation;
+            bool = this.HasPosition & this.HasOrientation;
         end
         
         function bool = HasGaData(this)
             %Returns true if all data which is used for Geometrical
             %Acoustics (GA) is available
-            bool = this.HasDirectivity && this.HasPressureTf;
+            bool = this.HasDirectivity & this.HasPressureTf;
         end
         function bool = HasWaveData(this)
             %Returns true if all data which is used for Wave-based
