@@ -1,5 +1,5 @@
-classdef (Abstract) itaSimulationDbItem
-    %itaSimulationDbItem An abstract item that is used in a database for
+classdef (Abstract) itaSimulationInputItem
+    %itaSimulationInputItem An abstract item that is used in a database for
     %acoustic simulations (wave-based and GA-based)
     
     

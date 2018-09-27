@@ -1,4 +1,4 @@
-classdef itaMaterial < itaSimulationDbItem
+classdef itaMaterial < itaSimulationInputItem
     %itaMaterial represents a material and its acoustic properties which are
     %used for GA-based and wave-based simulations
     %   Properties:

@@ -1,4 +1,4 @@
-classdef itaSource < itaSimulationDbItem
+classdef itaSource < itaSimulationInputItem
     %itaSource represents a source and its acoustic properties which are
     %used for GA-based and wave-based simulations
     %   Properties:
