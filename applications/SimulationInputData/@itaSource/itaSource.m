@@ -1,4 +1,4 @@
-classdef itaSource < itaSimulationInputItem
+classdef itaSource < itaSpatialSimulationInputItem
     %itaSource represents a source and its acoustic properties which are
     %used for GA-based and wave-based simulations
     %   Properties:
@@ -17,8 +17,6 @@ classdef itaSource < itaSimulationInputItem
         mPressureTf;                                                %itaSuper
         mVelocityTf;                                                %itaSuper
         mDirectivity;                                               %itaSuper
-        mPosition = itaCoordinates([0 0 0]);                        %itaCoordinates
-        mOrientation = itaOrientation.FromViewUp([1 0 0], [0 1 0]); %itaOrientation
         mDirectivityFile;                                           %Char vector
     end
     
@@ -27,8 +25,6 @@ classdef itaSource < itaSimulationInputItem
         velocityTf;     %Velocity transfer function - itaSuper
 %         directivity;    %The directivity loaded from the .daff file - itaSuper
         directivityFile;%Name of directivity .daff file
-        position;       %Position of the source in 3D space - itaCoordinates
-        orientation;    %Orientation of the source in 3D space - itaOrientation
         velocityType;   %What does the velocity represent? - PointSource, Piston, SurfaceDistribution
         velocityDistribution; %Coordinates of the velocity surface distribution - get only
     end
@@ -87,35 +83,6 @@ classdef itaSource < itaSimulationInputItem
             this.mDirectivityFile = filename;
             this.mDirectivity = [];
         end
-        
-        function this = set.position(this, coord)
-            if isnumeric(coord) && isempty(coord)
-                this.mPosition = [];
-                return;
-            end
-            
-            if ~isa(coord, 'itaCoordinates') || ~isscalar(coord)
-                error('Input must be a scalar of type itaCoordinates');
-            end
-            if coord.nPoints > 1
-                error('Input must be a single set or coordinates or empty.')
-            end
-            this.mPosition = coord;
-        end
-        function this = set.orientation(this, orientation)
-            if isnumeric(orientation) && isempty(orientation)
-                this.mOrientation = [];
-                return;
-            end
-            
-            if ~isa(orientation, 'itaOrientation') || ~isscalar(orientation)
-                error('Input must be a scalar of type itaOrientation');
-            end
-            if orientation.nPoints > 1
-                error('Input must be a single orientation or empty.')
-            end
-            this.mOrientation = orientation;
-        end
     end
     
     %% Get functions
@@ -128,12 +95,6 @@ classdef itaSource < itaSimulationInputItem
         end
         function out = get.directivityFile(this)
             out = this.mDirectivityFile;
-        end
-        function out = get.position(this)
-            out = this.mPosition;
-        end
-        function out = get.orientation(this)
-            out = this.mOrientation;
         end
         
         function out = get.velocityType(this)
@@ -184,25 +145,16 @@ classdef itaSource < itaSimulationInputItem
         function bool = HasDirectivity(this)
             bool = ~isempty(this.mDirectivityFile);
         end
-        function bool = HasPosition(this)
-            bool = ~isempty(this.mPosition) && this.mPosition.nPoints == 1;
-        end
-        function bool = HasOrientation(this)
-            bool = ~isempty(this.mOrientation) && this.mOrientation.nPoints == 1;
-        end
-        function bool = HasSpatialInformation(this)
-            bool = this.HasPosition & this.HasOrientation;
-        end
         
         function bool = HasGaData(this)
             %Returns true if all data which is used for Geometrical
             %Acoustics (GA) is available
-            bool = this.HasDirectivity & this.HasPressureTf;
+            bool = this.HasDirectivity() & this.HasPressureTf() & this.HasSpatialInformation();
         end
         function bool = HasWaveData(this)
             %Returns true if all data which is used for Wave-based
             %Acoustics is available
-            bool = this.HasVelocityTf;
+            bool = this.HasVelocityTf() & this.HasSpatialInformation();
         end
         
         function bool = isempty(this)
