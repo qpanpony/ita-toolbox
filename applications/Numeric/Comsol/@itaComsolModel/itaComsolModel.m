@@ -15,23 +15,6 @@ classdef itaComsolModel < handle
         end
     end
     
-    %% General Helpers
-    methods(Access = private)
-        function nodes = getRootElementChildren(obj, rootName)
-            tags = obj.GetNodeTags(obj.mModel.(rootName));
-            nodes = cell(1, numel(tags));
-            for idxNode = 1:numel(tags)
-                nodes{idxNode} = obj.mModel.(rootName)(tags(idxNode));
-            end
-        end
-        function node = getFirstRootElementChild(obj, rootName)
-            node = [];
-            tags = obj.GetNodeTags(obj.mModel.(rootName));
-            if isempty(tags); return; end
-            node = obj.mModel.(rootName)(tags(1));
-        end
-    end
-    
     %% Geometry
     methods
         function geom = Geometry(obj)
@@ -44,27 +27,27 @@ classdef itaComsolModel < handle
         end
     end
     
-    %% Selections
+    %% Selections == Groups
     methods
         function select = Selection(obj)
-            %Returns all selection nodes as cell array           
+            %Returns all selection nodes as cell array
             select = obj.getRootElementChildren('selection');
         end
         function boundaryGroups = BoundaryGroups(obj)
-            %Returns all boundary groups (selections) as cell array
+            %Returns all boundary groups (2D selections) as cell array
             boundaryGroups = obj.groupsOfDimension(2);
         end
         function volumeGroups = VolumeGroups(obj)
-            %Returns all volume groups (selections) as cell array
+            %Returns all volume groups (3D selections) as cell array
             volumeGroups = obj.groupsOfDimension(3);
         end
         
         function boundaryGroupNames = BoundaryGroupNames(obj)
-            %Returns the names of all boundary groups as cell array
+            %Returns the names of all boundary groups (2D selections) as cell array
             boundaryGroupNames = obj.groupNames(obj.BoundaryGroups());
         end
         function boundaryGroupNames = VolumeGroupNames(obj)
-            %Returns the names of all boundary groups as cell array
+            %Returns the names of all volume groups (3D selections) as cell array
             boundaryGroupNames = obj.groupNames(obj.VolumeGroups());
         end
     end
@@ -92,6 +75,9 @@ classdef itaComsolModel < handle
     
     %% Materials
     methods
+        function materials = Material(obj)
+            materials = obj.getRootElementChildren('material');
+        end
     end
     
     %% Physics
@@ -103,19 +89,19 @@ classdef itaComsolModel < handle
             physics = obj.getFirstRootElementChild('physics');
         end
         
-%         function impedance = CreateImpedance(obj, physics, boundaryGroupName)
-%             assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'First input must be a Comsol Physics node')
-%             assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'Second input must be a char row vector')
-%             
-%             idxBoundaryGrp = strcmp(obj.BoundaryGroupNames(), boundaryGroupName);
-%             if sum(idxBoundaryGrp) ~= 1
-%                 error('There must be exactly one matching boundary group for the given name')
-%             end
-%             selectionTag = obj.BoundaryGroups{idxBoundaryGrp}.tag;
-%             
-%             impedance = phyics.create('imp1', 'Impedance', 2);
-%             physics.feature('imp1').selection.named(selectionTag);
-%         end
+        %function impedance = CreateImpedance(obj, physics, boundaryGroupName)
+        %    assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'First input must be a Comsol Physics node')
+        %    assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'Second input must be a char row vector')
+        %    
+        %    idxBoundaryGrp = strcmp(obj.BoundaryGroupNames(), boundaryGroupName);
+        %    if sum(idxBoundaryGrp) ~= 1
+        %        error('There must be exactly one matching boundary group for the given name')
+        %    end
+        %    selectionTag = obj.BoundaryGroups{idxBoundaryGrp}.tag;
+        %    
+        %    impedance = phyics.create('imp1', 'Impedance', 2);
+        %    physics.feature('imp1').selection.named(selectionTag);
+        %end
         
         function impedanceNodes = ImpedanceNodes(obj, physics)
             assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'Input must be a Comsol Physics node')
@@ -142,57 +128,68 @@ classdef itaComsolModel < handle
         end
     end
     
-    %% Static function for model nodes
-    methods(Static = true)
-        function out = GetNodeTags(comsolNode)
-            
-            if ~contains(class(comsolNode), 'com.comsol') || ~contains(class(comsolNode), '.impl.')
-                error('Input must be a Comsol Node');
-            end
-            
-            if isa(comsolNode, 'com.comsol.clientapi.impl.ModelClient')
-                error('Input must not be an Comsol model but one of its child nodes')
-            end
-            
-            if ismethod( comsolNode, 'tags' )
-                out = comsolNode.tags();
-            elseif ismethod( comsolNode, 'objectNames' )
-                out = comsolNode.objectNames();
-            elseif ismethod( comsolNode, 'feature' )
-                out = itaComsolModel.GetNodeTags( comsolNode.feature() );
-            else
-                error(['Comsol Node of type "' class(comsolNode) '" does not seem to have a function to return children'])
-            end
+    %% Study
+    methods
+        function studies = Study(obj)
+            studies = obj.getRootElementChildren('study');
+        end
+        function study = FirstStudy(obj)
+            study = obj.getFirstRootElementChild('study');
         end
         
-        function out = GetNodeType(comsolNode)
-            
-            if ~contains(class(comsolNode), 'com.comsol') || ~contains(class(comsolNode), '.impl.')
-                error('Input must be a Comsol Node');
-            end
-            
-            if isa(comsolNode, 'com.comsol.clientapi.impl.ModelClient')
-                error('Input must not be an Comsol model but one of its child nodes')
-            end
-            
-            if strcmp(comsolNode.scope(), 'root')
-                warning('Root objects do not have a type. Returning name instead.')
-                out = comsolNode.name();
-            elseif ismethod( comsolNode, 'feature' )
-                out = itaComsolModel.GetNodeType( comsolNode.feature() );
-            elseif ismethod( comsolNode, 'getType' )
-                out = comsolNode.getType();
+        function SetFrequencyVector(obj, freqVector, study)
+            assert(isnumeric(freqVector) && isrow(freqVector), 'First input must be a numeric row vector')
+            if nargin == 1
+                study = obj.FirstStudy();
+                errorStr = 'No default study could be found';
             else
-                error(['Comsol Node of type "' class(comsolNode) '" does not seem to have a function to return a type'])
+                errorStr = 'Second input must be a Comsol Study node';
+            end
+            assert(isa(study, 'com.comsol.clientapi.impl.StudyClient'), errorStr)
+            
+            [freqNodeDefined, freqNode] = obj.hasFeatureNode( study, 'freq' );
+            if ~freqNodeDefined; error('Given Comsol study is no frequency study'); end
+            
+            freqNode.set('plist', num2str(freqVector))
+        end
+    end
+    
+    %% General Helpers
+    methods(Access = private)
+        function nodes = getRootElementChildren(obj, rootName)
+            tags = obj.getChildNodeTags(obj.mModel.(rootName));
+            nodes = cell(1, numel(tags));
+            for idxNode = 1:numel(tags)
+                nodes{idxNode} = obj.mModel.(rootName)(tags(idxNode));
             end
         end
-        
+        function node = getFirstRootElementChild(obj, rootName)
+            node = [];
+            tags = obj.getChildNodeTags(obj.mModel.(rootName));
+            if isempty(tags); return; end
+            node = obj.mModel.(rootName)(tags(1));
+        end
+    end
+    
+    %% Static functions for model nodes
+    methods(Access = private, Static = true)
+        function childNodes = getChildNodes(comsolNode)
+            tags = itaComsolModel.getChildNodeTags(comsolNode);
+            childNodes = cell(1, numel(tags));
+            for idxNode = 1:numel(tags)
+                if ismethod(comsolNode, 'feature')
+                    childNodes{idxNode} = comsolNode.feature(tags(idxTag));
+                else
+                    childNodes{idxNode} = comsolNode(tags(idxTag));
+                end
+            end
+        end
         function childNodes = getChildNodesByType(comsolNode, type)
-            tags = itaComsolModel.GetNodeTags(comsolNode);
+            tags = itaComsolModel.getChildNodeTags(comsolNode);
             childNodes = {};
             for idxTag = 1:numel(tags)
                 if ismethod(comsolNode, 'feature')
-                	node = comsolNode.feature(tags(idxTag));
+                    node = comsolNode.feature(tags(idxTag));
                 else
                     node = comsolNode(tags(idxTag));
                 end
@@ -202,15 +199,56 @@ classdef itaComsolModel < handle
             end
         end
         
-        function SetNodeProperties(comsolNode, propertyStruct)
+        function out = getChildNodeTags(comsolNode)
             
-            if ~contains(class(comsolNode), 'com.comsol') || ~contains(class(comsolNode), '.impl.')
-                error('Input must be a Comsol Node');
-            end
+            itaComsolModel.checkInputForComsolNode(comsolNode);
             
-            if isa(comsolNode, 'com.comsol.clientapi.impl.ModelClient')
-                error('Input must not be an Comsol model but one of its child nodes')
+            if ismethod( comsolNode, 'tags' )
+                out = comsolNode.tags();
+            elseif ismethod( comsolNode, 'objectNames' )
+                out = comsolNode.objectNames();
+            elseif ismethod( comsolNode, 'feature' )
+                out = itaComsolModel.getChildNodeTags( comsolNode.feature() );
+            else
+                error(['Comsol Node of type "' class(comsolNode) '" does not seem to have a function to return children'])
             end
+        end
+        
+        function out = getNodeType(comsolNode)
+            
+            itaComsolModel.checkInputForComsolNode(comsolNode);
+            
+            if strcmp(comsolNode.scope(), 'root')
+                warning('Root objects do not have a type. Returning name instead.')
+                out = comsolNode.name();
+            elseif ismethod( comsolNode, 'feature' )
+                out = itaComsolModel.getNodeType( comsolNode.feature() );
+            elseif ismethod( comsolNode, 'getType' )
+                out = comsolNode.getType();
+            else
+                error(['Comsol Node of type "' class(comsolNode) '" does not seem to have a function to return a type'])
+            end
+        end
+        
+        function [bool, childNode] = hasFeatureNode(comsolNode, featureTag)
+            itaComsolModel.checkInputForComsolNode(comsolNode);
+            
+            childNode = [];
+            bool = false;            
+            if ~ismethod(comsolNode, 'feature'); return; end
+            if ~ismethod(comsolNode.feature, 'tags'); return; end
+            
+            tags = comsolNode.feature.tags;
+            idxTag = strcmp(tags, featureTag);
+            if sum(idxTag) ~=1; return; end
+            
+            childNode = comsolNode.feature( tags(idxTag) );
+            bool = true;
+        end
+        
+        function setNodeProperties(comsolNode, propertyStruct)
+            
+            itaComsolModel.checkInputForComsolNode(comsolNode);
             
             propertyNames = fieldnames(propertyStruct);
             for idxProperty = 1:numel(propertyNames)
@@ -219,5 +257,17 @@ classdef itaComsolModel < handle
             end
         end
     end
-end
     
+    %% Check input
+    methods(Access = private, Static = true)
+        function checkInputForComsolNode(input)
+            if ~contains(class(input), 'com.comsol') || ~contains(class(input), '.impl.')
+                error('Input must be a Comsol Node');
+            end
+            if isa(input, 'com.comsol.clientapi.impl.ModelClient')
+                error('Input must not be an Comsol model but one of its child nodes')
+            end
+        end
+    end
+end
+
