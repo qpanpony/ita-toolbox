@@ -1,8 +1,5 @@
-function ita_HRTFarc_measurementScript(varargin)
-%ita_HRTFarc_measurementScript - +++ example of continuous measurement with the new HRTFarc +++
-%
-% This is an example of a step-wise measurement. Only use this with the
-% turntable and subject rotation
+function ita_HRTFarc_measurementScript_continuous(varargin)
+%ita_HRTFarc_measurementScript_continuous - +++ example of continuous measurement with the new HRTFarc +++
 %
 %   Reference page in Help browser 
 %        <a href="matlab:doc test">doc test</a>
@@ -48,18 +45,30 @@ ms.freqRange = [500 22050];
 ms.optimize
 ms.twait = 0.03;
 
-coords = ita_generateSampling_equiangular(5,5);
-coords_cut = coords.n(coords.theta_deg == 90);
+% the number of repetitions defines the rotation speed
+% 64 is ~ 3 minutes
+numRepetitions = 64;
 
-iMS.measurementPositions = coords_cut;
+ms.repetitions = numRepetitions;
+
+iMS.measurementSetup = ms;
+
+
+% this prepares the full measurement. 
+% it does a reference move, and moves back the arc by 45 degrees
+iMS.prepareContinuousMeasurement;
+
+
+[res,raw] = iMS.runContinuousMeasurement;
 
 saveName = 'test';
-iMS.dataPath = saveName;
-iMS.reference;
+ita_write(res,sprintf('%s_%d',saveName,numRepetitions))
+ita_write(raw,sprintf('%s_%d_raw',saveName,numRepetitions))
 
-iMS.run;
+% this moves the arc back faster
+iMS.moveTo('HRTFArc',20, 'absolut', true, 'speed', 5, 'wait', true);
 
-% always leave the turntable in reference position
+%always leave the arc in reference position
 iMS.reference
 
 end
