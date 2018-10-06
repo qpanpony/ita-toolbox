@@ -111,29 +111,25 @@ if nargin >= 2
         start_idx = strfind(token,'[');
         end_idx   = strfind(token,']');
         if ~isempty(start_idx) && ~isempty(end_idx)
-            token     = token(start_idx+1:end_idx-1); %get the name
+            name = token(start_idx+1:end_idx-1); %get the name
+        else
+            name = token;
         end
-        name = token;
         for idx = 1:size(device,1)
-            if strcmpi(token,device{idx,1})
+            if strcmpi(name,device{idx,1})
                 res = itaValue(device{idx,2});
                 break
             end
         end
-%         % etwas schoener
-%         idxDevice = find(strcmpi(device(:,1), token));
-%         if ~isempty(idxDevice)
-%             res = itaValue(device{idxDevice,2});
-%         end
-        
-        start_idx = strfind(token,'(');
-        end_idx   = strfind(token,')');
-        if ~isempty(start_idx) && ~isempty(end_idx)
-            res = itaValue(token(start_idx+1:end_idx-1));
-        end
         if isempty(res)
-            res = itaValue(-1);
             disp(['element not in list: ' token '.'])
+            start_idx = strfind(token,'(');
+            end_idx   = strfind(token,')');  
+            if ~isempty(start_idx) && ~isempty(end_idx)
+                res = itaValue(token(start_idx+1:end_idx-1));
+            else
+                res = itaValue(-1);
+            end
         end
     end
 end
