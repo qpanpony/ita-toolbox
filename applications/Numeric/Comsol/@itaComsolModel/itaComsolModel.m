@@ -4,14 +4,42 @@ classdef itaComsolModel < handle
     
     properties(Access = private)
         mModel;
+        
+        mCurrentGeometry;
+        mCurrentPhysics;
+        mCurrentStudy;
     end
     
+    properties(Dependent = true)
+        currentGeometry;%Currently used geometry node. Geometry based operations are processed on this node if not specified differently.
+        currentPhysics; %Currently used physics node. Physics based operations are processed on this node if not specified differently.
+        currentStudy;   %Currently used study node. Study based operations are processed on this node if not specified differently.
+    end
+    
+    methods
+        function out = get.currentGeometry(obj)
+            out = obj.mCurrentGeometry;
+        end
+        function out = get.currentPhysics(obj)
+            out = obj.mCurrentPhysics;
+        end
+        function out = get.currentStudy(obj)
+            out = obj.mCurrentStudy;
+        end
+    end
+    
+    
+    %% Constructor
     methods
         function obj = itaComsolModel(comsolModel)
             if ~isa(comsolModel, 'com.comsol.clientapi.impl.ModelClient')
                 error('Input must be a comsol model (com.comsol.clientapi.impl.ModelClient)')
             end
             obj.mModel = comsolModel;
+            
+            obj.mCurrentGeometry = obj.FirstGeometry();
+            obj.mCurrentPhysics = obj.FirstPressureAcoustics();
+            obj.mCurrentStudy = obj.FirstStudy();
         end
     end
     
@@ -93,6 +121,28 @@ classdef itaComsolModel < handle
         function geom = FirstGeometry(obj)
             %Returns the first geometry node if atleast one geometry exists
             geom = obj.getFirstRootElementChild('geom');
+        end
+    end
+    methods(Static = true)
+        function setPoint(geomNode, pointName, coords)
+            assert(isa(geomNode, 'com.comsol.clientapi.impl.GeomSequenceClient'), 'First input must be a Comsol geometry node')
+            assert( (isnumeric(coords) && isvector(coords) && numel(coords)==3) ||...
+                (isa(coords, 'itaCoordinates') && coords.nPoints==1), 'Third input must be a cartesian vector or a single itaCoordinates');
+            
+            if ~itaComsolModel.hasFeatureNode(geomNode, pointName)
+                geomNode.create(pointName, 'Point');
+                geomNode.feature(pointName).label(pointName);
+            end
+            
+            if isa(coords, 'itaCoordinates'); coords = coords.cart; end
+            if isrow(coords); coords = coords.'; end
+            
+            geomNode.feature(pointName).set('p', coords);
+            geomNode.run();
+        end
+        
+        function pointNode = getPointNodeByTag(geomNode, pointTag)
+            [~, pointNode] = itaComsolModel.hasFeatureNode(geomNode, pointTag);
         end
     end
     
@@ -179,8 +229,9 @@ classdef itaComsolModel < handle
                 pressureAcoustics = pressureAcoustics{1};
             end
         end
-        
-        %-----Impedance-----
+    end
+    %------Impedance-------------------------------------------------------
+    methods
         function impedanceNodes = ImpedanceNodes(obj, physics)
             %Returns the impedance nodes for the given physics node. If the
             %physics node is left empty or not passed the default one will
@@ -254,6 +305,24 @@ classdef itaComsolModel < handle
             %real and one for the imaginary impedance data and returns the
             %two interpolation nodes.
             [realInterpolationNode, imagInterpolationNode] = obj.setComplexInterpolation(interpolationBaseName, freqVector, complexDataVector, 'Pa / m * s');
+        end
+    end
+    %------Sources---------------------------------------------------------
+    methods
+        function CreatePointSource(obj, physics, source)
+            
+            pointTag = [source.name '_position'];
+            sourceTag = [source.name '_source'];
+            obj.setPoint(obj.mCurrentGeometry, pointName, source.position)
+            
+            if ~itaComsolModel.hasFeature(physics, sourceTag)
+                physics.create(sourceTag, 'FrequencyMonopolePointSource', 0);
+            end
+            sourceNode = physics.feature(sourceTag);
+            
+            sourceNode.selection.set(pointTag, 1);
+            sourceNode.set('Type', 'UserDefined');
+            sourceNode.set('S', 1);
         end
     end
     
