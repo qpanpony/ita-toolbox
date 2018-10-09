@@ -1,5 +1,5 @@
 classdef itaComsolModel < handle
-    %UNTITLED3 Summary of this class goes here
+    %itaComsolModel Summary of this class goes here
     %   Detailed explanation goes here
     
     properties(Access = private)
@@ -12,6 +12,75 @@ classdef itaComsolModel < handle
                 error('Input must be a comsol model (com.comsol.clientapi.impl.ModelClient)')
             end
             obj.mModel = comsolModel;
+        end
+    end
+    
+    %% Global Definitions
+    methods
+        function interpolationNode = CreateInterpolation(obj, functionName, propertyStruct)
+            %Create an Interpolation with the given function name.
+            %Optionally, the function properties can be set using a
+            %property struct.
+            %   The function name must be a valid Matlab variable name (no
+            %   whitespace, not starting with a number and so on...).
+            %   The property struct has the property names as field names
+            %   and the respective property values as the field values
+            assert(ischar(functionName) && isrow(functionName), 'First input must be a char row vector')
+            assert(isvarname(functionName), 'First input must be a valid variable name')
+            if nargin > 2; assert(isstruct(propertyStruct), 'Second input must be a struct with function properties'); end
+            
+            obj.mModel.func.create(functionName, 'Interpolation')
+            obj.mModel.func(functionName).label(functionName);
+            
+            interpolationNode = obj.mModel.func(functionName);
+            
+            if nargin == 2; return; end
+            obj.setNodeProperties( interpolationNode, propertyStruct )
+        end
+    end
+    methods(Access = private)
+        function [realInterpolationNode, imagInterpolationNode] = setComplexInterpolation(obj, interpolationBaseName, freqVector, complexDataVector, functionUnits)
+            %Creates or adjusts two Comsol Interpolation nodes, one for the
+            %real and one for the imaginary data and returns the two
+            %interpolation nodes.
+            %   The interpolation tags are interpolationBaseName_real and
+            %   interpolationBaseName_imag. The argument units are set to
+            %   Hz whereas the function units are specified by the user.
+            %   Default methods are "piecewise cubic" interpolation and
+            %   "linear" extrapolation.
+            interpolationNameReal = [interpolationBaseName '_real'];
+            interpolationNameImag = [interpolationBaseName '_imag'];
+
+            if ~obj.hasChildNode(obj.mModel.func, interpolationNameReal)
+                obj.CreateInterpolation(interpolationNameReal);
+            end
+            if ~obj.hasChildNode(obj.mModel.func, interpolationNameImag)
+                obj.CreateInterpolation(interpolationNameImag);
+            end
+            realInterpolationNode = obj.mModel.func(interpolationNameReal);
+            imagInterpolationNode = obj.mModel.func(interpolationNameImag);
+            
+            propertyStruct.source = 'table';
+            propertyStruct.argunit = 'Hz';
+            propertyStruct.fununit = functionUnits;
+            propertyStruct.extrap = 'linear';
+            propertyStruct.interp = 'piecewisecubic';
+            
+            obj.setNodeProperties(realInterpolationNode, propertyStruct);
+            obj.setNodeProperties(imagInterpolationNode, propertyStruct);
+            
+            obj.setInterpolationTableData(realInterpolationNode, freqVector, real(complexDataVector));
+            obj.setInterpolationTableData(imagInterpolationNode, freqVector, imag(complexDataVector));
+        end
+    end
+    methods(Access = private, Static = true)
+        function setInterpolationTableData(interpolationNode, argumentVector, functionVector)
+            if isrow(argumentVector); argumentVector = argumentVector.'; end
+            if isrow(functionVector); functionVector = functionVector.'; end
+            
+            %Note: Comsol expects a Nx2 cell string array for the table data
+            comsolTableData = [ cellstr( num2str(argumentVector) ) cellstr( num2str(functionVector) )];
+            interpolationNode.set('table', comsolTableData);
         end
     end
     
@@ -35,40 +104,40 @@ classdef itaComsolModel < handle
         end
         function boundaryGroups = BoundaryGroups(obj)
             %Returns all boundary groups (2D selections) as cell array
-            boundaryGroups = obj.groupsOfDimension(2);
+            boundaryGroups = obj.selectionsOfDimension(2);
         end
         function volumeGroups = VolumeGroups(obj)
             %Returns all volume groups (3D selections) as cell array
-            volumeGroups = obj.groupsOfDimension(3);
+            volumeGroups = obj.selectionsOfDimension(3);
         end
         
         function boundaryGroupNames = BoundaryGroupNames(obj)
             %Returns the names of all boundary groups (2D selections) as cell array
-            boundaryGroupNames = obj.groupNames(obj.BoundaryGroups());
+            boundaryGroupNames = obj.selectionNames(obj.BoundaryGroups());
         end
         function boundaryGroupNames = VolumeGroupNames(obj)
             %Returns the names of all volume groups (3D selections) as cell array
-            boundaryGroupNames = obj.groupNames(obj.VolumeGroups());
+            boundaryGroupNames = obj.selectionNames(obj.VolumeGroups());
         end
     end
     
     methods(Access = private)
-        function groups = groupsOfDimension(obj, dimension)
-            groups = obj.Selection();
-            if isempty(groups); return; end
+        function selections = selectionsOfDimension(obj, dimension)
+            selections = obj.Selection();
+            if isempty(selections); return; end
             
-            removeSelections = false(size(groups));
-            for idxSelection = 1:numel(groups)
-                if ~isequal(groups{idxSelection}.dimension, dimension)
+            removeSelections = false(size(selections));
+            for idxSelection = 1:numel(selections)
+                if ~isequal(selections{idxSelection}.dimension, dimension)
                     removeSelections(idxSelection) = true;
                 end
             end
-            groups(removeSelections) = [];
+            selections(removeSelections) = [];
         end
-        function groupNames = groupNames(~, groups)
-            groupNames = cell(size(groups));
-            for idxGroup = 1:numel(BoundaryGroups)
-                groupNames{idxGroup} = groups{idxGroup}.name;
+        function selNames = selectionNames(~, selections)
+            selNames = cell(size(selections));
+            for idxSelection = 1:numel(selections)
+                selNames{idxSelection} = char( selections{idxSelection}.name );
             end
         end
     end
@@ -76,6 +145,7 @@ classdef itaComsolModel < handle
     %% Materials
     methods
         function materials = Material(obj)
+            %Returns all material nodes as cell array
             materials = obj.getRootElementChildren('material');
         end
     end
@@ -83,37 +153,77 @@ classdef itaComsolModel < handle
     %% Physics
     methods
         function physics = Physics(obj)
+            %Returns all physics nodes as cell array
             physics = obj.getRootElementChildren('physics');
         end
         function physics = FirstPhysics(obj)
+            %Returns the first physics node
             physics = obj.getFirstRootElementChild('physics');
         end
+        function pressureAcoustics = PressureAcoustics(obj)
+            %Returns all physics nodes of type Pressure Acoustics
+            physics = obj.getRootElementChildren('physics');
+            idxPressureAcoustics = false(size(physics));
+            for idxPhysics = 1:numel(physics)
+                idxPressureAcoustics(idxPhysics) =...
+                    contains(physics{idxPhysics}.getType, 'PressureAcoustics');
+            end
+            pressureAcoustics = physics(idxPressureAcoustics);
+        end
+        function pressureAcoustics = FirstPressureAcoustics(obj)
+            %Returns the first physics node of type Pressure Acoustics
+            pressureAcoustics = obj.PressureAcoustics();
+            if isempty(pressureAcoustics)
+                pressureAcoustics = [];
+            else
+                pressureAcoustics = pressureAcoustics{1};
+            end
+        end
         
-        %function impedance = CreateImpedance(obj, physics, boundaryGroupName)
-        %    assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'First input must be a Comsol Physics node')
-        %    assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'Second input must be a char row vector')
-        %    
-        %    idxBoundaryGrp = strcmp(obj.BoundaryGroupNames(), boundaryGroupName);
-        %    if sum(idxBoundaryGrp) ~= 1
-        %        error('There must be exactly one matching boundary group for the given name')
-        %    end
-        %    selectionTag = obj.BoundaryGroups{idxBoundaryGrp}.tag;
-        %    
-        %    impedance = phyics.create('imp1', 'Impedance', 2);
-        %    physics.feature('imp1').selection.named(selectionTag);
-        %end
-        
+        %-----Impedance-----
         function impedanceNodes = ImpedanceNodes(obj, physics)
-            assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'Input must be a Comsol Physics node')
+            %Returns the impedance nodes for the given physics node. If the
+            %physics node is left empty or not passed the default one will
+            %be used
+            if nargin == 1 || isempty(physics)
+                physics = obj.FirstPhysics();
+                assert(isempty(physics), 'No default physics node found')
+            else
+                assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'Input must be a Comsol Physics node')
+            end
             impedanceNodes = obj.getChildNodesByType(physics, 'Impedance');
         end
         
-        function impedanceOfBoundary = GetImpedanceByBoundaryGroupName(obj, physics, boundaryGroupName)
+        function SetBoundaryGroupImpedance(obj, physics, boundaryGroupName, data)
+            %Sets the data impedance node for the given boundary group name
+            %(=label of a 2D selection in Comsol). The data can either be
+            %passed using an itaMaterial or an itaResult/itaAudio.
             assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'First input must be a Comsol Physics node')
             assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'Second input must be a char row vector')
-            impedanceOfBoundary = [];
+            if isa(data, 'itaMaterial'); data = data.impedance; end
+            assert(isa(data, 'itaSuper') && numel(data) == 1 && data.nChannels == 1,...
+                'Third input must either be an itaMaterial with a valid impedance or a single itaSuper')
             
-            idxBoundary = strcmp(obj.BoundaryGroupNames, boundaryGroupName);
+            freqVector = data.freqVector;
+            freqData = data.freqData;
+            
+            impedanceNodeOfBoundary = obj.impedanceNodeByBoundaryGroupName(physics, boundaryGroupName);
+            if isempty(impedanceNodeOfBoundary); error('A Comsol impedance node for the given boundary group does not exist'); end
+            
+            interpolationBaseName = [strrep(boundaryGroupName, ' ', '_') '_impedance'];
+            obj.setImpedanceViaInterpolation(impedanceNodeOfBoundary, interpolationBaseName, freqVector, freqData);
+        end
+    end
+    methods(Access = private)
+        function impedanceNodeOfBoundary = impedanceNodeByBoundaryGroupName(obj, physics, boundaryGroupName)
+            %Returns the impedance node of the given physics node that is
+            %connected to given boundary group (= Comsol selection). Returns
+            %an empty object if no impedance is connected to the given selection.
+            %   The physics node can be left empty to use the default one
+            assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'Second input must be a char row vector')
+            impedanceNodeOfBoundary = [];
+            
+            idxBoundary = strcmp(obj.BoundaryGroupNames(), boundaryGroupName);
             if sum(idxBoundary) ~= 1; return; end
             boundaryGroup = obj.BoundaryGroups{idxBoundary};
             
@@ -121,40 +231,81 @@ classdef itaComsolModel < handle
             for idxImpedance = 1:numel(impedanceNodes)
                 selectionTag = impedanceNodes{idxImpedance}.selection.named;
                 if strcmp(selectionTag, boundaryGroup.tag)
-                    impedanceOfBoundary = impedanceNodes{idxImpedance};
+                    impedanceNodeOfBoundary = impedanceNodes{idxImpedance};
                     return
                 end
             end
+        end
+        function setImpedanceViaInterpolation(obj, impedanceNode, interpolationBaseName, freqVector, complexDataVector)
+            %assert( isnumeric(argumentVector)&& isvector(argumentVector) &&...
+            %    isnumeric(functionVector) && isvector(functionVector), 'Data vectors must be numeric')
+            %assert( numel(argumentVector) == numel(functionVector), 'Both data vectors must be of same length')
+            
+            [realInterpolationNode, imagInterpolationNode] = obj.setImpedanceInterpolation(...
+                interpolationBaseName, freqVector, complexDataVector);
+            
+            realFuncName = char(realInterpolationNode.tag);
+            imagFuncName = char(imagInterpolationNode.tag);
+            impedanceExpression = [realFuncName '(freq) + i*' imagFuncName '(freq)'];
+            impedanceNode.set('Zi', impedanceExpression);
+        end
+        function [realInterpolationNode, imagInterpolationNode] = setImpedanceInterpolation(obj, interpolationBaseName, freqVector, complexDataVector)
+            %Creates or adjusts two Comsol Interpolation nodes, one for the
+            %real and one for the imaginary impedance data and returns the
+            %two interpolation nodes.
+            [realInterpolationNode, imagInterpolationNode] = obj.setComplexInterpolation(interpolationBaseName, freqVector, complexDataVector, 'Pa / m * s');
         end
     end
     
     %% Study
     methods
         function studies = Study(obj)
+            %Returns all study nodes as cell array
             studies = obj.getRootElementChildren('study');
         end
         function study = FirstStudy(obj)
+            %Returns the first study node
             study = obj.getFirstRootElementChild('study');
         end
         
-        function SetFrequencyVector(obj, freqVector, study)
-            assert(isnumeric(freqVector) && isrow(freqVector), 'First input must be a numeric row vector')
-            if nargin == 1
-                study = obj.FirstStudy();
-                errorStr = 'No default study could be found';
-            else
-                errorStr = 'Second input must be a Comsol Study node';
-            end
-            assert(isa(study, 'com.comsol.clientapi.impl.StudyClient'), errorStr)
+        function SetAllFrequencyVectors(obj, freqVector)
+            %Sets the frequency vector for all frequency domain studies.
+            assert(isnumeric(freqVector) && isrow(freqVector), 'Input must be a numeric row vector')
             
-            [freqNodeDefined, freqNode] = obj.hasFeatureNode( study, 'freq' );
+            studies = obj.Study();
+            idxFreqStudies = false(size(studies));
+            for idxStudy = 1:numel(studies)
+                idxFreqStudies(idxStudy) = obj.isFreqStudy(studies{idxStudy});
+            end
+            
+            freqStudies = studies(idxFreqStudies);
+            if isempty(freqStudies); warning([class(obj) ': No frequency domain study found']); end
+            for idxFreqStudy = 1:numel(freqStudies)
+                obj.SetFrequencyVector(freqStudies{idxFreqStudy}, freqVector)
+            end
+        end
+    end
+    methods(Static = true)
+        function SetFrequencyVector(study, freqVector)
+            %Sets the frequency vector for the given study. Throws an error
+            %if this is not a frequency domain study.
+            assert(isa(study, 'com.comsol.clientapi.impl.StudyClient'), 'First input must be a Comsol Study node')
+            assert(isnumeric(freqVector) && isrow(freqVector), 'Second input must be a numeric row vector')
+            
+            [freqNodeDefined, freqNode] = itaComsolModel.hasFeatureNode( study, 'freq' );
             if ~freqNodeDefined; error('Given Comsol study is no frequency study'); end
             
             freqNode.set('plist', num2str(freqVector))
         end
     end
-    
-    %% General Helpers
+    methods(Static = true, Access = private)
+        function bool = isFreqStudy(study)
+            [bool, ~] = itaComsolModel.hasFeatureNode( study, 'freq' );
+        end
+    end
+
+    %% -----------Helper Function Section------------------------------- %%
+    %% Root node functions
     methods(Access = private)
         function nodes = getRootElementChildren(obj, rootName)
             tags = obj.getChildNodeTags(obj.mModel.(rootName));
@@ -171,7 +322,7 @@ classdef itaComsolModel < handle
         end
     end
     
-    %% Static functions for model nodes
+    %% Functions applying directly to model nodes
     methods(Access = private, Static = true)
         function childNodes = getChildNodes(comsolNode)
             tags = itaComsolModel.getChildNodeTags(comsolNode);
@@ -230,19 +381,32 @@ classdef itaComsolModel < handle
             end
         end
         
-        function [bool, childNode] = hasFeatureNode(comsolNode, featureTag)
+        function [bool, featureNode] = hasFeatureNode(comsolNode, featureTag)
             itaComsolModel.checkInputForComsolNode(comsolNode);
             
-            childNode = [];
+            featureNode = [];
             bool = false;            
             if ~ismethod(comsolNode, 'feature'); return; end
             if ~ismethod(comsolNode.feature, 'tags'); return; end
             
-            tags = comsolNode.feature.tags;
+            tags = cell(comsolNode.feature.tags);
             idxTag = strcmp(tags, featureTag);
             if sum(idxTag) ~=1; return; end
             
-            childNode = comsolNode.feature( tags(idxTag) );
+            featureNode = comsolNode.feature( tags(idxTag) );
+            bool = true;
+        end
+        
+        function [bool] = hasChildNode(comsolNode, childTag)
+            itaComsolModel.checkInputForComsolNode(comsolNode);
+            
+            bool = false;
+            if ~ismethod(comsolNode, 'tags'); return; end
+            
+            tags = cell(comsolNode.tags);
+            idxTag = strcmp(tags, childTag);
+            if sum(idxTag) ~=1; return; end
+            
             bool = true;
         end
         
