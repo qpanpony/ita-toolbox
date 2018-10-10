@@ -14,10 +14,11 @@ classdef itaSource < itaSpatialSimulationInputItem
     % </ITA-Toolbox>
     
     properties(Access = private, Hidden = true)
-        mPressureTf;                                                %itaSuper
-        mVelocityTf;                                                %itaSuper
-        mDirectivity;                                               %itaSuper
-        mDirectivityFile;                                           %Char vector
+        mPressureTf;                                %itaSuper
+        mVelocityTf;                                %itaSuper
+        mDirectivity;                               %itaSuper
+        mDirectivityFile;                           %Char vector
+        mVelocityType = VelocityType.PointSource;   %VelocityType
     end
     
     properties(Dependent = true)
@@ -82,6 +83,12 @@ classdef itaSource < itaSpatialSimulationInputItem
             
             this.mDirectivityFile = filename;
             this.mDirectivity = [];
+        end
+        function this = set.velocityType(this, type)
+            if ~isa(type, 'VelocityType') || ~isscalar(type)
+                error('Input must be a single instance of VelocityType')
+            end
+            this.mVelocityType = type;
         end
     end
     
