@@ -311,7 +311,7 @@ end
 if ~playRecHandle('isInitialised')
     return;
 elseif playRecHandle('getRecMaxChannel') < max(channelList)
-    disp('Selected device does not support %d output channels\n', max(channelList));
+    fprintf('Selected device does not support %d output channels\n', max(channelList));
     return;
 end
 
