@@ -92,10 +92,10 @@ classdef itaComsolModel < handle
             obj.mCurrentMesh = obj.FirstMesh();
             obj.mCurrentStudy = obj.FirstStudy();
             
-            assert(isempty(obj.mCurrentGeometry), 'No Comsol geometry node found')
-            assert(isempty(obj.mCurrentPhysics), 'No Comsol physics node found')
-            assert(isempty(obj.mCurrentMesh), 'No Comsol mesh node found')
-            assert(isempty(obj.mCurrentStudy), 'No Comsol study node found')
+            assert(~isempty(obj.mCurrentGeometry), 'No Comsol geometry node found')
+            assert(~isempty(obj.mCurrentPhysics), 'No Comsol physics node found')
+            assert(~isempty(obj.mCurrentMesh), 'No Comsol mesh node found')
+            assert(~isempty(obj.mCurrentStudy), 'No Comsol study node found')
         end
     end
     
@@ -163,6 +163,12 @@ classdef itaComsolModel < handle
             comsolTableData = [ cellstr( num2str(argumentVector) ) cellstr( num2str(functionVector) )];
             interpolationNode.set('table', comsolTableData);
         end
+        function setParameterViaComplexInterpolation(nodeWithParameter, parameterTag, realInterpolationNode, imagInterpolationNode)
+            realFuncName = char(realInterpolationNode.tag);
+            imagFuncName = char(imagInterpolationNode.tag);
+            expression = [realFuncName '(freq) + i*' imagFuncName '(freq)'];
+            nodeWithParameter.set(parameterTag, expression);
+        end
     end
     
     %% Geometry
@@ -178,7 +184,8 @@ classdef itaComsolModel < handle
     end
     methods(Static = true)
         function [pointNode, selectionTag] = createPointWithSelection(geomNode, pointTag, coords)
-            pointNode = itaComsolModel.createPoint(geomNode, pointTag, coords);            
+            pointNode = itaComsolModel.createPoint(geomNode, pointTag, coords);
+            %TODO: Change workPlaneNode.label so that the selection can be filtered out later on
             pointNode.set('selresult', true);
             pointNode.set('selresultshow', 'pnt');
             
@@ -201,9 +208,43 @@ classdef itaComsolModel < handle
             pointNode.set('p', coords);
             geomNode.run();
         end
-        
-        function pointNode = getPointNodeByTag(geomNode, pointTag)
-            [~, pointNode] = itaComsolModel.hasFeatureNode(geomNode, pointTag);
+        function [circleNode, selectionTag] = createPistonGeometry(geometryNode, pistonGeometryBaseTag, source)
+            center = source.position.cart;
+            p1 = center + source.orientation.up;
+            p2 = center + cross(source.orientation.up, source.orientation.view);
+            radius = 1.337; %TODO: Use the source for this later on
+            [circleNode, selectionTag] = itaComsolModel.createCircleOnPlane(geometryNode, pistonGeometryBaseTag, radius, center, p1, p2);
+        end
+        function [circleNode, selectionTag] = createCircleOnPlane(geomNode, baseTag, radius, center, p1, p2)
+            
+            workPlaneTag = [baseTag '_workPlane'];
+            circleTag = [baseTag '_circle'];
+            [workPlaneNode, selectionTag] = itaComsolModel.createWorkPlaneWithSelection(geomNode, workPlaneTag, center, p1, p2);
+            
+            if ~itaComsolModel.hasFeatureNode(workPlaneNode.geom, circleTag)
+                workPlaneNode.geom.create(circleTag, 'Circle');
+            end
+            circleNode = workPlaneNode.geom.feature(circleTag);
+            circleNode.set('r', radius);
+            %circleNode.set('pos', [-0.75 0.25]); %To move circle off center with dx dy
+            geomNode.run();
+        end
+        function [workPlaneNode, selectionTag] = createWorkPlaneWithSelection(geomNode, workPlaneTag, p0, p1, p2)
+            workPlaneNode = itaComsolModel.createWorkPlane(geomNode, workPlaneTag, p0, p1, p2);
+            
+            %TODO: Change workPlaneNode.label so that the selection can be filtered out later on
+            workPlaneNode.set('selresult', true);
+            workPlaneNode.set('selresultshow', 'bnd');
+            selectionTag = [char(geomNode.tag) '_' char(workPlaneNode.tag) '_bnd'];
+        end
+        function workPlaneNode = createWorkPlane(geomNode, workPlaneTag, p0, p1, p2)
+            if ~itaComsolModel.hasFeatureNode(geomNode, workPlaneTag)
+                geomNode.create(workPlaneTag, 'WorkPlane');
+            end
+            workPlaneNode = geomNode.feature(workPlaneTag);
+            workPlaneNode.set('planetype', 'coordinates');
+            workPlaneNode.set('genpoints', [p0; p1; p2]);
+            workPlaneNode.set('unite', true);
         end
     end
     
@@ -250,6 +291,11 @@ classdef itaComsolModel < handle
             for idxSelection = 1:numel(selections)
                 selNames{idxSelection} = char( selections{idxSelection}.name );
             end
+        end
+    end
+    methods(Access = private, Static = true)
+        function id = selectionEntities(selectionNode)
+            id = selectionNode.inputEntities();
         end
     end
     
@@ -362,18 +408,11 @@ classdef itaComsolModel < handle
             end
         end
         function setImpedanceViaInterpolation(obj, impedanceNode, interpolationBaseName, freqVector, complexDataVector)
-            %assert( isnumeric(argumentVector)&& isvector(argumentVector) &&...
-            %    isnumeric(functionVector) && isvector(functionVector), 'Data vectors must be numeric')
-            %assert( numel(argumentVector) == numel(functionVector), 'Both data vectors must be of same length')
-            
             [realInterpolationNode, imagInterpolationNode] = obj.createImpedanceInterpolation(...
                 interpolationBaseName, freqVector, complexDataVector);
             
-            realFuncName = char(realInterpolationNode.tag);
-            imagFuncName = char(imagInterpolationNode.tag);
-            impedanceExpression = [realFuncName '(freq) + i*' imagFuncName '(freq)'];
             impedanceNode.set('ImpedanceModel', 'UserDefined');
-            impedanceNode.set('Zi', impedanceExpression);
+            obj.setParameterViaComplexInterpolation(impedanceNode, 'Zi', realInterpolationNode, imagInterpolationNode);
         end
         function [realInterpolationNode, imagInterpolationNode] = createImpedanceInterpolation(obj, interpolationBaseName, freqVector, complexDataVector)
             %Creates or adjusts two Comsol Interpolation nodes, one for the
@@ -384,6 +423,37 @@ classdef itaComsolModel < handle
     end
     %------Sources---------------------------------------------------------
     methods
+        function CreatePistonSource(obj, source, physics)
+            %Creates a piston source for the physics node given an itaSource
+            %   Optionally, a physics node can be passed, if you do not
+            %   want to work on currentPhysics
+            %   In Comsol internally, a workplane with a circle in its center
+            %   is created using the source position and the view and up
+            %   vectors. Then this circle is linked to a normal velocity
+            %   that is created for the physics node.
+            if nargin == 2
+                physics = obj.mCurrentPhysics;
+                assert(~isempty(physics), 'No default physics node specified');
+            else
+                assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'Second input must be a Comsol Physics node')
+            end
+            assert(isa(source, 'itaSource') && isscalar(source), 'Input must be a single itaSource object')
+            assert(source.HasWaveData(), 'Data for wave based simulation not defined for itaSource')
+            
+            sourceGeometryBaseTag = [source.name '_pistonSourceGeometry'];
+            sourceTag = [source.name '_pistonSource'];
+            interpolationBaseTag = [source.name '_pistonSourceVelocity'];
+            
+            geometryNode = obj.mModel.geom(physics.geom);
+            [~, selectionTag] = obj.createPistonGeometry(geometryNode, sourceGeometryBaseTag, source);
+            
+            if ~itaComsolModel.hasFeatureNode(physics, sourceTag)
+                physics.create(sourceTag, 'NormalVelocity', 2);
+            end
+            sourceNode = physics.feature(sourceTag);
+            sourceNode.selection.named(selectionTag);
+            obj.setNormalVelocityViaInterpolation(sourceNode, interpolationBaseTag, source.velocityTf.freqVector, source.velocityTf.freqData)
+        end
         function CreatePointSource(obj, source, physics)
             %Creates a point source in physics given an itaSource
             %   Optionally, a physics node can be passed, if you do not
@@ -419,7 +489,19 @@ classdef itaComsolModel < handle
             sourceNode.set('Qs', 1);
         end
     end
-    methods(Access = private, Static = true)
+    methods(Access = private)
+        function setNormalVelocityViaInterpolation(obj, normalVelocityNode, interpolationBaseName, freqVector, complexDataVector)
+            [realInterpolationNode, imagInterpolationNode] = obj.createVelocityInterpolation(...
+                interpolationBaseName, freqVector, complexDataVector);
+            
+            obj.setParameterViaComplexInterpolation(normalVelocityNode, 'nvel', realInterpolationNode, imagInterpolationNode);
+        end
+        function [realInterpolationNode, imagInterpolationNode] = createVelocityInterpolation(obj, interpolationBaseName, freqVector, complexDataVector)
+            %Creates or adjusts two Comsol Interpolation nodes, one for the
+            %real and one for the imaginary velocity data and returns the
+            %two interpolation nodes.
+            [realInterpolationNode, imagInterpolationNode] = obj.createComplexInterpolation(interpolationBaseName, freqVector, complexDataVector, 'm / s');
+        end
     end
     
     %% Mesh
