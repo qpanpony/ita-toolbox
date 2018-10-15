@@ -39,6 +39,9 @@ classdef itaComsolModel < handle
         mCurrentMesh;
         mCurrentStudy;
     end
+    properties(Dependent = true, SetAccess = private)
+        modelNode;      %The comsol model node
+    end
     
     properties(Dependent = true)
         currentGeometry;%Currently used geometry node. Geometry based operations are processed on this node if not specified differently.
@@ -48,6 +51,10 @@ classdef itaComsolModel < handle
     end
     
     methods
+        function out = get.modelNode(obj)
+            out = obj.mModel;
+        end
+        
         function out = get.currentGeometry(obj)
             out = obj.mCurrentGeometry;
         end
@@ -272,6 +279,23 @@ classdef itaComsolModel < handle
             boundaryGroupNames = obj.selectionNames(obj.VolumeGroups());
         end
     end
+    %NOTE:
+    %The following functions are hidden because they return the coords of
+    %geometry entities, without giving information about their shape.
+    %For example a circle has 4 points in Comsol. Plotting these in Matlab
+    %via Patch creates a rectangle
+    methods(Hidden = true)
+        function boundaryGroupCoords = BoundaryGroupCoords(obj)
+            %Returns the coordinates of all boundary groups (2D selections)
+            %as cell array ( cell{idxGroup}{idxPolygon} )
+            boundaryGroupCoords = obj.selectionsCoords(obj.BoundaryGroups());
+        end
+        function volumeGroupCoords = VolumeGroupCoords(obj)
+            %Returns the coordinates of all volume groups (3D selections)
+            %as cell array ( cell{idxGroup}{idxPolygon} )
+            volumeGroupCoords = obj.selectionsCoords(obj.VolumeGroups());
+        end
+    end
     
     methods(Access = private)
         function selections = selectionsOfDimension(obj, dimension)
@@ -290,6 +314,31 @@ classdef itaComsolModel < handle
             selNames = cell(size(selections));
             for idxSelection = 1:numel(selections)
                 selNames{idxSelection} = char( selections{idxSelection}.name );
+            end
+        end
+        function coords = selectionsCoords(obj, selections)
+            coords = cell(size(selections));
+            for idxSelection = 1:numel(selections)
+                coords{idxSelection} = obj.selectionCoords(selections{idxSelection});
+            end
+        end
+        function coords = selectionCoords(obj, selectionNode)
+            entityIDs = selectionNode.inputEntities();
+            coords = cell(size(entityIDs));
+            switch (selectionNode.dimension)
+                case 0
+                    entityType = 'point';
+                case 1
+                    entityType = 'edge';
+                case 2
+                    entityType = 'boundary';
+                case 3
+                    entityType = 'domain';
+                otherwise
+                    return;
+            end
+            for idxEntity = 1:numel(entityIDs)
+                coords{idxEntity} = mphgetcoords(obj.mModel, selectionNode.geom, entityType, entityIDs(idxEntity));
             end
         end
     end
