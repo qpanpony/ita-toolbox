@@ -3,7 +3,8 @@ function [ binOut ] = ita_3da_binauralMixdown( lsSignals, varargin )
 %loudspeaker signal(s) and coordinates (given as optional coordinates or
 %better: encoded in the itaAudio channel coordinates
 %   Detailed explanation goes here
-opts.HRTF='D:\DATA\sciebo\MKOScripts\HRTFs\2015_ITA-Kunstkopf_HRIR_2ch_D186_1x1_256_v17.daff';
+% opts.HRTF='D:\DATA\sciebo\MKOScripts\HRTFs\2015_ITA-Kunstkopf_HRIR_2ch_D186_1x1_256_v17.daff';
+opts.HRTF = 'Y:\matlab\ITAKunstkopfAcademicFreeFieldEqualized.v17.ir.daff';
 opts.LSPos=itaCoordinates;
 
 if nargin>1
