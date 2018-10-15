@@ -6,21 +6,18 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
     %   autoRefresh is set to true).
     
     properties(Access = protected)
-        mModel;                 %Stores the AC3D model
+        mModel;                 %Stores the model which is to be visualized
         
         mAxes;                  %Handle to axes for plotting
         mBoundaryPlotHandles;   %Handles to patches of boundary surfaces ( mBoundaryPlotHandles{idxBoundaryGroup}(idxPolygon) )
-        mWireframePlotHandles;  %Handles to line plots for the wireframe ( mWireframePlotHandles(idxPolygon) )
+        mEdgePlotHandles;       %Handles to line plots for the edges ( mEdgePlotHandles(idxPolygon) )
         
-        mShowWireframe = true;
+        mShowEdges = true;
         mShowBoundarySurfaces = true;
         
         mBoundaryGroupVisibility;
         mTransparency = 0.3;
-        mWireframeColor = [.6 .6 .6];
-    end
-    properties(Hidden = true)
-        axesMapping = [1 1 1];  %Maps data from .ac3d file to fit to the plot (default is OpenGL to Matlab)
+        mEdgeColor = [0 0 0];
     end
     
     properties
@@ -28,16 +25,19 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
     end
     properties(Dependent = true)
         showBoundarySurfaces;   %Visibility for all boundary surfaces
-        showWireframe;          %Visibility for wireframe
+        showEdges;              %Visibility for edges
         
         boundaryGroupVisibility;%Visibility for distinct boundary groups (logical vector)
         transparency;           %Transparency of boundary surfaces (0 <= t <= 1)
-        wireframeColor;         %Color for wireframe ([r g b], 0 <= r <= 1)
+        edgeColor;              %Color for edges ([r g b], 0 <= r <= 1)
     end
     
-    %% Loading model
+    %% Model related
     methods(Abstract = true)
         SetModel(obj, input);
+    end
+    methods(Abstract = true, Access = protected)
+        out = numberOfBoundaryGroups(this);
     end
     
     %% Axes / Plot Items
@@ -64,8 +64,8 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
         function out = get.showBoundarySurfaces(this)
             out = this.mShowBoundarySurfaces;
         end
-        function out = get.showWireframe(this)
-            out = this.mShowWireframe;
+        function out = get.showEdges(this)
+            out = this.mShowEdges;
         end
         
         function out = get.boundaryGroupVisibility(this)
@@ -74,8 +74,8 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
         function out = get.transparency(this)
             out = this.mTransparency;
         end
-        function out = get.wireframeColor(this)
-            out = this.mWireframeColor;
+        function out = get.edgeColor(this)
+            out = this.mEdgeColor;
         end
     end
     
@@ -94,19 +94,19 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
                 this.applyBoundaryGroupVisibility();
             end
         end
-        function set.showWireframe(this, bool)
-            assert( islogical(bool) && isscalar(bool), 'showWireframe must be a single boolean')
-            if this.mShowWireframe == bool; return; end
+        function set.showEdges(this, bool)
+            assert( islogical(bool) && isscalar(bool), 'showEdges must be a single boolean')
+            if this.mShowEdges == bool; return; end
             
-            this.mShowWireframe = bool;
+            this.mShowEdges = bool;
             if this.autoRefresh
-                this.applyWireframeVisibility();
+                this.applyEdgeVisibility();
             end
         end
         
         function set.boundaryGroupVisibility(this, visible)
             if isnumeric(visible); visible = logical(visible); end
-            assert( islogical(visible) && numel(visible) == numel(this.mModel.bcGroups), 'boundaryGroupVisibility must be a logical vector with one entry per boundary' )
+            assert( islogical(visible) && numel(visible) == this.numberOfBoundaryGroups(), 'boundaryGroupVisibility must be a logical vector with one entry per boundary' )
             if isequal(visible, this.mBoundaryGroupVisibility); return; end
             
             this.mBoundaryGroupVisibility = visible;
@@ -123,13 +123,13 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
                 this.applyPlotTransparency()
             end
         end
-        function set.wireframeColor(this, color)
-            assert( isnumeric(color) && isequal(size(color), [1 3]) && all(color >= 0) && all(color <= 1), 'wireframeColor must be a color vector')
-            if isequal(this.mWireframeColor, color); return; end
+        function set.edgeColor(this, color)
+            assert( isnumeric(color) && isequal(size(color), [1 3]) && all(color >= 0) && all(color <= 1), 'edgeColor must be a color vector')
+            if isequal(this.mEdgeColor, color); return; end
             
-            this.mWireframeColor = color;
+            this.mEdgeColor = color;
             if this.autoRefresh
-                this.applyWireframeColor();
+                this.applyEdgeColor();
             end
         end
     end
@@ -162,11 +162,12 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
             if nargin == 1; forceReplot = false; end
             if forceReplot; this.clearPlotItems(); end
             
-            if isempty(this.mBoundaryPlotHandles)
-                this.plotWireframe();
-            end
+            hold(this.mAxes, 'on')
             if isempty(this.mBoundaryPlotHandles)
                 this.plotBoundaryGroups();
+            end
+            if isempty(this.mEdgePlotHandles)
+                this.plotEdges();
             end
             
             this.applyAllSettings();
@@ -181,7 +182,7 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
         %-----------Create-------------------------------------------------
         
         plotBoundaryGroups(this)
-        plotWireframe(this)
+        plotEdges(this)
     end
     methods(Access = protected)
         %-----------Remove-------------------------------------------------
@@ -189,7 +190,7 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
         function resetPlotHandles(this)
             %Resets all handles to plot items
             this.mBoundaryPlotHandles = [];
-            this.mWireframePlotHandles = [];
+            this.mEdgePlotHandles = [];
         end
         function clearPlotItems(this)
             %Clears all plot items and resets the variables which stored
@@ -201,9 +202,9 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
                     end
                 end
             end
-            for idxLine = 1:numel(this.mWireframePlotHandles)
-                if isvalid( this.mWireframePlotHandles(idxLine) )
-                    delete( this.mWireframePlotHandles(idxLine) );
+            for idxLine = 1:numel(this.mEdgePlotHandles)
+                if isvalid( this.mEdgePlotHandles(idxLine) )
+                    delete( this.mEdgePlotHandles(idxLine) );
                 end
             end
             this.resetPlotHandles();
@@ -215,8 +216,8 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
         function applyAllSettings(this)
             this.applyBoundaryGroupVisibility();
             this.applyPlotTransparency();
-            this.applyWireframeVisibility();
-            this.applyWireframeColor();
+            this.applyEdgeVisibility();
+            this.applyEdgeColor();
         end
         
         %-------Boundary Surfaces------------------------------------------
@@ -246,18 +247,22 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
             end
         end
         
-        %-------Wireframe--------------------------------------------------
-        function applyWireframeVisibility(this)
-            for idxLine = 1:numel(this.mWireframePlotHandles)
-                if isvalid( this.mWireframePlotHandles(idxLine) )
-                    set(this.mWireframePlotHandles(idxLine),'Visible', this.mShowWireframe);
+        %-------Edges------------------------------------------------------
+        function applyEdgeVisibility(this)
+            for idxLine = 1:numel(this.mEdgePlotHandles)
+                if isvalid( this.mEdgePlotHandles(idxLine) )
+                    set(this.mEdgePlotHandles(idxLine),'Visible', this.mShowEdges);
                 end
             end
         end
-        function applyWireframeColor(this)
-            for idxLine = 1:numel(this.mWireframePlotHandles)
-                if isvalid( this.mWireframePlotHandles(idxLine) )
-                    set(this.mWireframePlotHandles(idxLine),'Color', this.mWireframeColor);
+        function applyEdgeColor(this)
+            for idxLine = 1:numel(this.mEdgePlotHandles)
+                if isvalid( this.mEdgePlotHandles(idxLine) )
+                    if isprop( this.mEdgePlotHandles(idxLine), 'EdgeColor')
+                        set(this.mEdgePlotHandles(idxLine),'EdgeColor', this.mEdgeColor);
+                    elseif isprop( this.mEdgePlotHandles(idxLine), 'Color')
+                        set(this.mEdgePlotHandles(idxLine),'Color', this.mEdgeColor);
+                    end
                 end
             end
         end

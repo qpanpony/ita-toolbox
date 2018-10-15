@@ -1,30 +1,17 @@
-classdef itaComsolModelVisualizer < handle
+classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
     %itaComsolModelVisualizer Summary of this class goes here
     %   Detailed explanation goes here
     
     properties(Access = private)
-        mModel;         %Stores the itaComsolModel
+        mMeshPlotHandles;
         
-        mBoundaryPlotHandles;   %Handles to patches of boundary surfaces ( mBoundaryPlotHandles{idxBoundaryGroup}(idxPolygon) )
-        mWireframePlotHandles;  %Handles to line plots for the wireframe ( mWireframePlotHandles(idxPolygon) )
-        
-        mShowWireframe = true;
-        mShowBoundarySurfaces = true;
         mShowMesh = false;
-        
-        mBoundaryGroupVisibility;
-        mTransparency = 0.3;
-        mWireframeColor = [.6 .6 .6];
+        mMeshColor = [0 0 0];
     end
     
     properties(Dependent = true)
-        showBoundarySurfaces;   %Visibility for all geometry boundary surfaces
-        showWireframe;          %Visibility for wireframe
         showMesh;               %Visibility for mesh
-        
-        boundaryGroupVisibility;%Visibility for distinct boundary groups (logical vector)
-        transparency;           %Transparency of boundary surfaces (0 <= t <= 1)
-        wireframeColor;         %Color for wireframe ([r g b], 0 <= r <= 1)
+        meshColor;              %Color of the mesh lines
     end
     
     %% Constructing / Loading model
@@ -36,84 +23,153 @@ classdef itaComsolModelVisualizer < handle
         function SetModel(obj, comsolModel)
             %Sets the itaComsolModel object for the plot
             assert(isa(comsolModel, 'itaComsolModel'), 'Input must be a single itaComsolModel object')
+            obj.mModel = comsolModel;
             
             obj.clearPlotItems();
-            obj.mBoundaryGroupVisibility = true(1, numel(obj.mModel.bcGroups));
+            obj.mBoundaryGroupVisibility = true( 1, this.numberOfBoundaryGroups() );
             
             if obj.autoRefresh && obj.axesSpecified()
                 obj.RefreshPlot();
             end
         end
     end
+    methods(Access = protected)
+        function out = numberOfBoundaryGroups(this)
+            out = numel(this.mModel.BoundaryGroups());
+        end
+    end
     
     %% Plot Settings
     %----------Get---------------------------------------------------------
     methods
-        function out = get.showBoundarySurfaces(this)
-            out = this.mShowBoundarySurfaces;
+        function out = get.showMesh(this)
+            out = this.mShowMesh;
         end
-        function out = get.showWireframe(this)
-            out = this.mShowWireframe;
-        end
-        
-        function out = get.boundaryGroupVisibility(this)
-            out = this.mBoundaryGroupVisibility;
-        end
-        function out = get.transparency(this)
-            out = this.mTransparency;
-        end
-        function out = get.wireframeColor(this)
-            out = this.mWireframeColor;
+        function out = get.meshColor(this)
+            out = this.mMeshColor;
         end
     end
     
     %----------Set---------------------------------------------------------
     methods
-        function set.showBoundarySurfaces(this, bool)
-            assert( islogical(bool) && isscalar(bool), 'showBoundarySurfaces must be a single boolean')
-            if this.mShowBoundarySurfaces == bool; return; end
+        function set.showMesh(this, bool)
+            assert( islogical(bool) && isscalar(bool), 'showMesh must be a single boolean')
+            if this.mShowMesh == bool; return; end
             
-            this.mShowBoundarySurfaces = bool;
+            this.mShowMesh = bool;
             if this.autoRefresh
-                this.applyBoundaryGroupVisibility();
+                this.applyMeshVisibility();
             end
         end
-        function set.showWireframe(this, bool)
-            assert( islogical(bool) && isscalar(bool), 'showWireframe must be a single boolean')
-            if this.mShowWireframe == bool; return; end
+        function set.meshColor(this, color)
+            assert( isnumeric(color) && isequal(size(color), [1 3]) && all(color >= 0) && all(color <= 1), 'meshColor must be a color vector')
+            if isequal(this.meshColor, color); return; end
             
-            this.mShowWireframe = bool;
+            this.mMeshColor = color;
             if this.autoRefresh
-                this.applyWireframeVisibility();
+                this.applyMeshColor();
             end
+        end
+    end
+    
+      %% Plotting
+    %-----------Public Access----------------------------------------------
+    methods    
+        function RefreshPlot(this, forceReplot)
+            %Re-applies all plot settings. Replots everything if necessary.
+            %   Optionally, replotting can be forced by handing a boolean
+            %   that is set to true to this function.
+            
+            if ~this.axesSpecified()
+                error('No valid axes are specified yet')
+            end
+            
+            if nargin == 1; forceReplot = false; end
+            if forceReplot; this.clearPlotItems(); end
+            
+            hold(this.mAxes, 'on')
+            if isempty(this.mBoundaryPlotHandles)
+                this.plotBoundaryGroups();
+            end
+            if isempty(this.mMeshPlotHandles)
+                this.plotMesh();
+            end
+            if isempty(this.mEdgePlotHandles)
+                this.plotEdges();
+            end
+            
+            this.applyAllSettings();
+            axis(this.mAxes, 'off');
+            axis(this.mAxes, 'equal');
+        end
+    end
+    
+    %% Plot Items
+    methods(Access = protected)
+        %-----------Create-------------------------------------------------
+        
+        function plotBoundaryGroups(this)
+            
+            boundaryGroups = this.mModel.BoundaryGroups();
+            this.mBoundaryPlotHandles = cell(1, numel(boundaryGroups));
+            colors = get(groot,'DefaultAxesColorOrder');
+            for groupID = 1:numel(boundaryGroups)
+                mphviewselection(this.mModel.modelNode, char(boundaryGroups{groupID}.tag),...
+                    'Parent', this.mAxes, 'geommode', 'off', ...
+                    'facecolorselected', colors(mod(groupID-1, numel(colors))+1, :))
+                
+                this.mBoundaryPlotHandles{groupID} = this.mAxes.Children(1);
+            end
+            title(this.mAxes, '')
+        end
+        function plotEdges(this)
+            mphgeom(this.mModel.modelNode, this.mModel.currentGeometry.tag, 'Parent', this.mAxes, 'facemode', 'off')
+            this.mEdgePlotHandles = this.mAxes.Children(1);
+            title(this.mAxes, '')
         end
         
-        function set.boundaryGroupVisibility(this, visible)
-            if isnumeric(visible); visible = logical(visible); end
-            assert( islogical(visible) && numel(visible) == numel(this.mModel.bcGroups), 'boundaryGroupVisibility must be a logical vector with one entry per boundary' )
-            if isequal(visible, this.mBoundaryGroupVisibility); return; end
-            
-            this.mBoundaryGroupVisibility = visible;
-            if this.autoRefresh
-                this.applyBoundaryGroupVisibility();
+        function plotMesh(this)
+            mphmesh(this.mModel.modelNode, this.mModel.currentMesh.tag, 'Parent', this.mAxes, 'edgemode', 'off')
+            this.mMeshPlotHandles = this.mAxes.Children(1);
+            delete(this.mAxes.Children(2));
+            title(this.mAxes, '')
+        end
+
+        %-----------Remove-------------------------------------------------
+        
+        function resetPlotHandles(this)
+            %Resets all handles to plot items
+            resetPlotHandles@Abstract3DModelVisualizer(this);
+            this.mMeshPlotHandles = [];
+        end
+        function clearPlotItems(this)
+            %Clears all plot items and resets the variables which stored
+            %them
+            if ~isempty(this.mMeshPlotHandles) && isvalid(this.mMeshPlotHandles)
+                delete(this.mMeshPlotHandles)
+            end
+            clearPlotItems@Abstract3DModelVisualizer(this);
+        end
+    end
+    
+    %% Applying Plot Settings
+    methods(Access = protected)
+        function applyAllSettings(this)
+            applyAllSettings@Abstract3DModelVisualizer(this);
+            this.applyMeshVisibility();
+            this.applyMeshColor();
+        end
+    end
+    
+    methods(Access = private)
+        function applyMeshVisibility(this)
+            if ~isempty(this.mMeshPlotHandles) && isvalid(this.mMeshPlotHandles)
+                this.mMeshPlotHandles.Visible = this.mShowMesh;
             end
         end
-        function set.transparency(this, transparency)
-            assert( isnumeric(transparency) && isscalar(transparency) && transparency >= 0 && transparency <= 1, 'transparency must be a single numeric value between 0 and 1')
-            if this.transparency == transparency; return; end
-            
-            this.mTransparency = transparency;
-            if this.autoRefresh
-                this.applyPlotTransparency()
-            end
-        end
-        function set.wireframeColor(this, color)
-            assert( isnumeric(color) && isequal(size(color), [1 3]) && all(color >= 0) && all(color <= 1), 'wireframeColor must be a color vector')
-            if isequal(this.mWireframeColor, color); return; end
-            
-            this.mWireframeColor = color;
-            if this.autoRefresh
-                this.applyWireframeColor();
+        function applyMeshColor(this)
+            if ~isempty(this.mMeshPlotHandles) && isvalid(this.mMeshPlotHandles)
+                this.mMeshPlotHandles.EdgeColor = this.mMeshColor;
             end
         end
     end

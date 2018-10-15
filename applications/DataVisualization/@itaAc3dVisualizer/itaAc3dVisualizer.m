@@ -4,6 +4,9 @@ classdef itaAc3dVisualizer < Abstract3DModelVisualizer
     %   Adjusting these leads to a real-time update the plot (if
     %   autoRefresh is set to true).
     
+    properties(Hidden = true)
+        axesMapping = [1 -3 2];  %Maps data from .ac3d file to fit to the plot (default is no transform)
+    end
     
     %% Constructing / Loading model
     methods
@@ -12,7 +15,6 @@ classdef itaAc3dVisualizer < Abstract3DModelVisualizer
             %1) A .ac filename, pointing to a valid AC3D file
             %2) An AC3D object (see load_ac3d)
             obj.SetModel(input);
-            obj.axesMapping = [1 -3 2];
         end
         
         function SetModel(obj, input)
@@ -31,44 +33,21 @@ classdef itaAc3dVisualizer < Abstract3DModelVisualizer
             end
             
             obj.clearPlotItems();
-            obj.mBoundaryGroupVisibility = true(1, numel(obj.mModel.bcGroups));
+            obj.mBoundaryGroupVisibility = true( 1, this.numberOfBoundaryGroups() );
             
             if obj.autoRefresh && obj.axesSpecified()
                 obj.RefreshPlot();
             end
         end
     end
-    
-    %% Plotting
-    %-----------Public Access----------------------------------------------
-    methods    
-        function RefreshPlot(this, forceReplot)
-            %Re-applies all plot settings. Replots everything if necessary.
-            %   Optionally, replotting can be forced by handing a boolean
-            %   that is set to true to this function.
-            if ~this.axesSpecified()
-                error('No valid axes are specified yet')
-            end
-            
-            if nargin == 1; forceReplot = false; end
-            if forceReplot; this.clearPlotItems(); end
-            
-            if isempty(this.mBoundaryPlotHandles)
-                this.plotWireframe();
-            end
-            if isempty(this.mBoundaryPlotHandles)
-                this.plotBoundaryGroups();
-            end
-            
-            this.applyAllSettings();
-            axis(this.mAxes, 'off');
-            axis(this.mAxes, 'equal');
+    methods(Access = protected)
+        function out = numberOfBoundaryGroups(this)
+            out = numel(this.mModel.bcGroups);
         end
     end
     
-    
     %% Plot Items
-    methods(Access = private)
+    methods(Access = protected)
         %-----------Create-------------------------------------------------
         
         function plotBoundaryGroups(this)
@@ -90,16 +69,16 @@ classdef itaAc3dVisualizer < Abstract3DModelVisualizer
                 end
             end
         end
-        function plotWireframe(this)
+        function plotEdges(this)
             invertAxes = sign(this.axesMapping);
             swapAxes = abs(this.axesMapping);
             
             polygons = this.mModel.polygons;
             modelNodes = this.mModel.nodes;
-            this.mWireframePlotHandles = gobjects(size(polygons));
+            this.mEdgePlotHandles = gobjects(size(polygons));
             for polyID = 1:numel(polygons)
                 polyNodes = polygons{polyID}(:,1);
-                this.mWireframePlotHandles(polyID) = line(this.mAxes,...
+                this.mEdgePlotHandles(polyID) = line(this.mAxes,...
                     modelNodes([polyNodes; polyNodes(1)],swapAxes(1)) * invertAxes(1), ...
                     modelNodes([polyNodes; polyNodes(1)],swapAxes(2)) * invertAxes(2), ...
                     modelNodes([polyNodes; polyNodes(1)],swapAxes(3)) * invertAxes(3));
@@ -108,12 +87,9 @@ classdef itaAc3dVisualizer < Abstract3DModelVisualizer
     end
     
     %% Applying Plot Settings
-    methods(Access = private)
+    methods(Access = protected)
         function applyAllSettings(this)
-            this.applyBoundaryGroupVisibility();
-            this.applyPlotTransparency();
-            this.applyWireframeVisibility();
-            this.applyWireframeColor();
+            applyAllSettings@Abstract3DModelVisualizer(this);
         end
     end
 end
