@@ -8,7 +8,7 @@ classdef itaAc3dVisualizer < Abstract3DModelVisualizer
         axesMapping = [1 -3 2];  %Maps data from .ac3d file to fit to the plot (default is no transform)
     end
     
-    %% Constructing / Loading model
+    %% Constructing / Model related
     methods
         function obj = itaAc3dVisualizer(input)
             %Expects a single input of one of the following options:
@@ -19,7 +19,7 @@ classdef itaAc3dVisualizer < Abstract3DModelVisualizer
         
         function SetModel(obj, input)
             %Model can be set using either:
-            %1) A .ac filename, pointing to a valid AC3D file
+            %1) An .ac filename, pointing to a valid AC3D file
             %2) An AC3D object (see load_ac3d)
             if ischar(input) && isrow(input)
                 if ~contains(input, '.ac')
@@ -29,11 +29,11 @@ classdef itaAc3dVisualizer < Abstract3DModelVisualizer
             elseif isa(input, 'load_ac3d') && isscalar(input)
                 obj.mModel = input;
             else
-                error('Input must be either a valid .ac filename, a AC3D object (load_ac3d) or a Waga Project.')
+                error('Input must be either a valid .ac filename or a AC3D object (load_ac3d).')
             end
             
             obj.clearPlotItems();
-            obj.mBoundaryGroupVisibility = true( 1, this.numberOfBoundaryGroups() );
+            obj.mBoundaryGroupVisibility = true( 1, obj.numberOfBoundaryGroups() );
             
             if obj.autoRefresh && obj.axesSpecified()
                 obj.RefreshPlot();

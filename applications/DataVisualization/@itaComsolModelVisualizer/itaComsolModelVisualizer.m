@@ -14,19 +14,31 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
         meshColor;              %Color of the mesh lines
     end
     
-    %% Constructing / Loading model
+    %% Constructing / Model related
     methods
         function obj = itaComsolModelVisualizer(comsolModel)
-            %Expects a single input of type itaComsolModel
+            %Expects a single input of one of the following options:
+            %1) An .mph filename, pointing to a valid Comsol file
+            %2) An itaComsolModel object
             obj.SetModel(comsolModel);
         end
-        function SetModel(obj, comsolModel)
-            %Sets the itaComsolModel object for the plot
-            assert(isa(comsolModel, 'itaComsolModel'), 'Input must be a single itaComsolModel object')
-            obj.mModel = comsolModel;
+        function SetModel(obj, input)
+            %Sets the itaComsolModel object for the plot using either:
+            %1) An .mph filename, pointing to a valid Comsol file
+            %2) An itaComsolModel object
+            if ischar(input) && isrow(input)
+                if ~contains(input, '.mph')
+                    error('Given filename does not point to a Comsol (.mph) file')
+                end
+                obj.mModel = itaComsolModel( mphload(input) );
+            elseif isa(input, 'itaComsolModel') && isscalar(input)
+                obj.mModel = input;
+            else
+                error('Input must be either a valid .mph filename or an itaComsolModel object.')
+            end
             
             obj.clearPlotItems();
-            obj.mBoundaryGroupVisibility = true( 1, this.numberOfBoundaryGroups() );
+            obj.mBoundaryGroupVisibility = true( 1, obj.numberOfBoundaryGroups() );
             
             if obj.autoRefresh && obj.axesSpecified()
                 obj.RefreshPlot();
