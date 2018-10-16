@@ -1,5 +1,5 @@
-classdef VelocityType
-    %VelocityMode Summary of this class goes here
+classdef SourceType
+    %SourceType Summary of this class goes here
     %   Detailed explanation goes here
     
     enumeration 

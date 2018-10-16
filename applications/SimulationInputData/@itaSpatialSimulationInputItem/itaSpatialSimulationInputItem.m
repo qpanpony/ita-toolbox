@@ -2,6 +2,10 @@ classdef (Abstract) itaSpatialSimulationInputItem < itaSimulationInputItem
     %itaSpatialSimulationInputItem Summary of this class goes here
     %   Detailed explanation goes here
     
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     properties(Access = protected, Hidden = true)
         mPosition = itaCoordinates([0 0 0]);                        %itaCoordinates
         mOrientation = itaOrientation.FromViewUp([1 0 0], [0 1 0]); %itaOrientation
