@@ -71,12 +71,4 @@ classdef itaReceiver < itaSpatialSimulationInputItem
             obj = this;
         end
     end
-    
-    %% Static    
-    methods(Static = true, Hidden = true)
-        function out = DataTypeForFreqData()
-            %The receiver has no frequency dependent data
-            out = '';
-        end
-    end
 end

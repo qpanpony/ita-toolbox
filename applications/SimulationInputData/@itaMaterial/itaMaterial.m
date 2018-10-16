@@ -237,15 +237,6 @@ classdef itaMaterial < itaSimulationInputItem
         
     end
     
-    %% Static
-    
-    methods(Static = true, Hidden = true)
-        function out = DataTypeForFreqData()
-            %Returns the allowed data type for frequency data as string
-            out = 'itaSuper';
-        end
-    end
-    
     %% Plot interface
     methods
         function varargout = plotImpedance(this, varargin)

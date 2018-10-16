@@ -2,6 +2,10 @@ classdef (Abstract) itaSimulationInputItem
     %itaSimulationInputItem An abstract item that is used in a database for
     %acoustic simulations (wave-based and GA-based)
     
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     %% Abstract - Overload these in derived class
     methods(Abstract)
@@ -9,10 +13,6 @@ classdef (Abstract) itaSimulationInputItem
         bool = HasWaveData(this); %Returns true if all data which is used for Wave-based Acoustics is available
         bool = isempty(this);     %Returns true if none of the frequency dependent data is set
         obj = CrossfadeWaveAndGaData(this, crossfadeFreq);
-    end    
-    
-    methods(Abstract = true, Static = true, Hidden = true)
-        out = DataTypeForFreqData();    %Define the valid data type for frequency data in derived class
     end
     
     %% Properties
@@ -55,23 +55,14 @@ classdef (Abstract) itaSimulationInputItem
         end
     end
     
-    %% Protected    
-    
-    methods(Access = protected, Hidden = true)
-        function checkDataTypeForFreqData(this, dataObj)
+    %% Check Data
+    methods(Static = true, Access = protected, Hidden = true)
+        function checkDataTypeForFreqData(dataObj)
             %Throws an error if the given object does not match the allowed
             %data types for acoustic properties
-            if ~isa(dataObj, this.DataTypeForFreqData())
-               error(['Can only assign object of type ' this.DataTypeForFreqData()]) ;
-            end
-            
-            if ~isscalar(dataObj)
-                error('Input must be a single object')
-            end
+            assert(isa(dataObj, 'itaSuper') && isscalar(dataObj), 'Can only assign a single object of type itaSuper');
         end
-    end
-    
-    methods(Static = true, Access = protected, Hidden = true)
+        
         function checkInputForValidFrequency(freq, fMin, fMax)
             %Throws and error if the given input is not a frequency in a
             %specified range. If using a single input the default frequency
@@ -88,7 +79,6 @@ classdef (Abstract) itaSimulationInputItem
         end
     end
     
-    %% Private
     methods(Static = true, Access = private, Hidden = true)
         function bool = isSingleFrequency(freq, fMin, fMax)
             %Returns true if the given input is a frequency in a specified
