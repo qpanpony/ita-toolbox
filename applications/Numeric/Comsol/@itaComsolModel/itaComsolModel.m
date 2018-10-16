@@ -4,7 +4,7 @@ classdef itaComsolModel < handle
     %   to adjust certain parameters such as boundary conditions
     %   (impedances) and sources. Also provides the function to run a
     %   simulation and gather results in ita-formats.
-    %   
+    %
     %   Note, that it is crucial to define the basis of the comsol model in
     %   Comsol itself. This includes:
     %   -Geometry
@@ -477,6 +477,25 @@ classdef itaComsolModel < handle
     end
     %------Sources---------------------------------------------------------
     methods
+        function CreateSource(obj, varargin)
+            %Creates an acoustic source for the physics node given an itaSource.
+            %Geometry and physics of the source depends on the SourceType.
+            %   Inputs (*=optional, []=default):
+            %   1)  single itaSource
+            %   2*) Comsol physics node [this.currentPhysics]
+            %
+            %   Supported source types: PointSource, Piston
+            obj.checkCreateSourceInput(varargin{:});
+            source = varargin{1};
+            switch source.type
+                case SourceType.PointSource
+                    obj.CreatePointSource(varargin{:});
+                case SourceType.Piston
+                    obj.CreatePistonSource(varargin{:});
+                otherwise
+                    error('Unknown source type. No source was created')
+            end
+        end
         function CreatePistonSource(obj, source, physics)
             %Creates a piston source for the physics node given an itaSource
             %   Optionally, a physics node can be passed, if you do not
@@ -485,14 +504,9 @@ classdef itaComsolModel < handle
             %   is created using the source position and the view and up
             %   vectors. Then this circle is linked to a normal velocity
             %   that is created for the physics node.
-            if nargin == 2
-                physics = obj.mCurrentPhysics;
-                assert(~isempty(physics), 'No default physics node specified');
-            else
-                assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'Second input must be a Comsol Physics node')
-            end
-            assert(isa(source, 'itaSource') && isscalar(source), 'Input must be a single itaSource object')
-            assert(source.HasWaveData(), 'Data for wave based simulation not defined for itaSource')
+            if nargin == 2; physics = obj.checkCreateSourceInput(source);
+            else; obj.checkCreateSourceInput(source, physics); end
+            assert(source.type == SourceType.Piston,'SourceType of given source must be Piston')
             
             sourceGeometryBaseTag = [source.name '_pistonSourceGeometry'];
             sourceTag = [source.name '_pistonSource'];
@@ -515,14 +529,10 @@ classdef itaComsolModel < handle
             %   In Comsol internally, a point is created for the physics
             %   geometry and then linked to the point source that is
             %   created for the physics
-            if nargin == 2
-                physics = obj.mCurrentPhysics;
-                assert(~isempty(physics), 'No default physics node specified');
-            else
-                assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'Second input must be a Comsol Physics node')
-            end
+            if nargin == 2; physics = obj.checkCreateSourceInput(source);
+            else; obj.checkCreateSourceInput(source, physics); end
             assert( ~obj.IsBoundaryMethod(physics), 'Point sources are not allowed for physics with boundary methods')
-            assert(isa(source, 'itaSource') && isscalar(source), 'Input must be a single itaSource object')
+            assert(source.type == SourceType.PointSource,'SourceType of given source must be PointSource')
             
             geometryNode = obj.mModel.geom(physics.geom);
             pointTag = [source.name '_pointSourcePosition'];
@@ -555,6 +565,17 @@ classdef itaComsolModel < handle
             %real and one for the imaginary velocity data and returns the
             %two interpolation nodes.
             [realInterpolationNode, imagInterpolationNode] = obj.createComplexInterpolation(interpolationBaseName, freqVector, complexDataVector, 'm / s');
+        end
+        
+        function physics = checkCreateSourceInput(obj, source, physics)
+            if nargin == 2
+                physics = obj.mCurrentPhysics;
+                assert(~isempty(physics), 'No default physics node specified');
+            else
+                assert(isa(physics, 'com.comsol.clientapi.physics.impl.PhysicsClient'), 'Second input must be a Comsol Physics node')
+            end
+            assert(isa(source, 'itaSource') && isscalar(source),'First input must be a single itaSource object')
+            assert(source.HasWaveData(), 'Data for wave based simulation not defined for itaSource')
         end
     end
     
@@ -616,7 +637,7 @@ classdef itaComsolModel < handle
             [bool, ~] = itaComsolModel.hasFeatureNode( study, 'freq' );
         end
     end
-
+    
     %% -----------Helper Function Section------------------------------- %%
     %% Root node functions
     methods(Access = private)
@@ -698,7 +719,7 @@ classdef itaComsolModel < handle
             itaComsolModel.checkInputForComsolNode(comsolNode);
             
             featureNode = [];
-            bool = false;            
+            bool = false;
             if ~ismethod(comsolNode, 'feature'); return; end
             if ~ismethod(comsolNode.feature, 'tags'); return; end
             
