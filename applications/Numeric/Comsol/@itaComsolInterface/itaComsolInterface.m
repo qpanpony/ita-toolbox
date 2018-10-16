@@ -1,6 +1,11 @@
 classdef itaComsolInterface < handle
-    %UNTITLED2 Summary of this class goes here
-    %   Detailed explanation goes here
+    %itaComsolInterface Interface to start/stop and connect/disconnect
+    %Comsol Server via Matlab LiveLink
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     properties(Access = private)
         iniFile;
