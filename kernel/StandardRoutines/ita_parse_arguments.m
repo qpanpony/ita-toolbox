@@ -5,6 +5,8 @@ function varargout = ita_parse_arguments(varargin)
 %
 %  Syntax: sOut = ita_parse_arguments(sIn, argumentcell)
 %  Syntax: sOut = ita_parse_arguments(sIn, varargin)
+%  Syntax: [sOut,notFound] = ita_parse_arguments(sIn, varargin)
+%           Returns arguments that are not found in the struct
 %  Syntax: sOut = ita_parse_arguments(sIn, varargin, startidx) - start at
 %                   this index to parse varargin
 %  Syntax: sOut = ita_parse_arguments(sIn) - Only checking default settings
@@ -301,7 +303,7 @@ end
 
 if notFoundArguments == 1
     if nargout < 2
-        ita_verbose_info([thisFuncStr callFuncStr 'Some arguments could not be found in the struct. They are returned separately.'],0);
+        error([thisFuncStr callFuncStr 'Some arguments could not be found in the struct.'],0);
     end
 end
 

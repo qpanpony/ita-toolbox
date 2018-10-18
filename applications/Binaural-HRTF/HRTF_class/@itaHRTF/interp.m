@@ -43,12 +43,10 @@ function cThis = interp(this,varargin)
 %     Acta Acustica united with Acustica, Volume 100, Number 4, July/August 2014,
 %     pp. 667-675(9)
 %
-%
-%
 % Author:  Florian Pausch <fpa@akustik.rwth-aachen.de>
 % Version: 2016-02-05
 
-sArgs           = struct('order',50,'eps',1e-5,'shiftToEar',false,'shiftAxis','y','shiftOffset',[-0.0725 0.0725]);
+sArgs           = struct('order',50,'epsilon',1e-8,'shiftToEar',false,'shiftAxis','y','shiftOffset',[-0.0725 0.0725]);
 sArgs           = ita_parse_arguments(sArgs,varargin,2);
 if isempty(varargin) || ~isa(varargin{1},'itaCoordinates')
     error('itaHRTF:interp', ' An itaCoordinate object is needed!')
@@ -65,18 +63,22 @@ field.phi_deg   = tempfield(:,1);
 field.theta_deg = tempfield(:,2);
 
 N               = sArgs.order;
-epsilon         = sArgs.eps;                                   % regularization parameter
+epsilon         = sArgs.epsilon;                                   % regularization parameter
 k               = this.wavenumber;                             % wave number
 k(1)            = eps;
 % add eps to avoid NaN's
 
 Nmax            = floor(sqrt(this.nDirections/4)-1);
+if N>Nmax
+   N=Nmax;
+   warning(['Order of SH reconstruction matrix was set to N = Nmax = ',num2str(Nmax),'.'])
+end
 
 % construct vector of length (N+1)^2 regularization weights and,
 % if needed, spherical hankel functions of second kind (for r0 and r1)
 if ~isequal(this.dirCoord.r(1),field.r(1))
-    kr0 = k*this.dirCoord.r(1);                         % measurement radius
-    kr1 = k*field.r(1);                                 % extrapolation radius
+    kr0 = k*this.dirCoord.r(1);                % measurement radius [m]
+    kr1 = k*field.r(1);                        % extrapolation radius [m]
     
     hankel_r0 = ita_sph_besselh(ita_sph_linear2degreeorder(1:Nmax),2,kr0);
     hankel_r1 = ita_sph_besselh(ita_sph_linear2degreeorder(1:Nmax),2,kr1);
@@ -102,10 +104,9 @@ end
 %% Weights
 [~,w]= this.dirCoord.spherical_voronoi;         % calculate weighting coefficients (Voronoi surfaces <-> measurement points)
 
-
 W = sparse(diag(w));                                      % diagonal matrix containing weights
-D = I .* diag(1 + n.*(n+1));                                % decomposition order-dependent Tikhonov regularization
-Y = ita_sph_base(this.dirCoord,Nmax,'orthonormal',true);   % calculate real-valued SHs using the measurement grid
+D = I .* diag(1 + n.*(n+1));                              % decomposition order-dependent Tikhonov regularization
+Y = ita_sph_base(this.dirCoord,Nmax,'orthonormal',true);  % calculate real-valued SHs using the measurement grid
 
 %% Calculate HRTF data for field points
 if Nmax > 25
@@ -116,7 +117,7 @@ end
 hrtf_arbi = zeros(this.nBins,2*field.nPoints); % columns: LRLRLR...
 for ear=1:2
     
-    % sh transformation
+    % SH transformation
     freqData_temp   = copyData.freqData(:,ear:2:end);
     a0              = (Y.'*W*Y + epsilon*D) \ Y.'*W * freqData_temp.';
 
@@ -128,7 +129,6 @@ for ear=1:2
 %     figure
 %     surf(s,freqData_temp(10,:))
     
-    
     % range extrapolation
     if ~isequal(this.dirCoord.r(1),field.r(1))
         % calculate range-extrapolated HRTFs
@@ -139,11 +139,11 @@ for ear=1:2
         
         % reconstruction to spatial data
         Yest = ita_sph_base(field,N,'orthonormal',true);  % use real-valued SH's
-        hrtf_arbi(:,ear:2:end) = (Yest*a1).';           % interpolated + range-extrapolated HRTFs
+        hrtf_arbi(:,ear:2:end) = (Yest*a1(1:(N+1)^2,:)).';             % interpolated + range-extrapolated HRTFs
     else
         % reconstruction to spatial data
-        Yest = ita_sph_base(field,Nmax,'orthonormal',true);  % use real-valued SH's
-        hrtf_arbi(:,ear:2:end) = (Yest*a0).';           % interpolated HRTFs
+        Yest = ita_sph_base(field,N,'orthonormal',true);  % use real-valued SH's
+        hrtf_arbi(:,ear:2:end) = (Yest*a0(1:(N+1)^2,:)).';             % interpolated HRTFs
     end
 end
 
@@ -158,6 +158,11 @@ cThis                       = this;
 cThis.freqData = hrtf_arbi;
 cThis.channelCoordinates.sph= sph;
 
+% channelnames coordinates
+cThis.channelNames = ita_sprintf('%s (\\theta=%2.0f, \\phi=%2.0f)',...
+    repmat(['L'; 'R'],cThis.dirCoord.nPoints, 1),...
+    cThis.channelCoordinates.theta_deg,...
+    cThis.channelCoordinates.phi_deg);
 
 %% move back to head center
 if sArgs.shiftToEar

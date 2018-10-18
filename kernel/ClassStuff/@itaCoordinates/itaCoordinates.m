@@ -420,8 +420,8 @@ classdef itaCoordinates
 
                     % phi = 0..2*pi
                     % theta = 0..pi
-                    beta = mod(phiMod, 2*pi); %#ok<PROP>
-                    alpha = thetaMod; %#ok<PROP>
+                    alpha = mod(phiMod, 2*pi); %#ok<PROP>
+                    beta = thetaMod; %#ok<PROP>
                     this.mCoord = [r alpha beta]; %#ok<PROP>
                     this.mCoordSystem = 'pol';
                 case 'sph'

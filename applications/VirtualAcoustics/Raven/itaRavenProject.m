@@ -236,7 +236,9 @@ classdef itaRavenProject < handle
                 obj.raven_ini = IniConfig();
                 obj.raven_ini.ReadFile(obj.ravenIniFile);
                 obj.ravenExe         = obj.raven_ini.GetValues('Global', 'PathRavenExe', obj.ravenExe);
-                obj.raven_ini.WriteFile(obj.ravenIniFile);
+                if (exist(obj.ravenExe,'file'))
+                    obj.raven_ini.WriteFile(obj.ravenIniFile);
+                end
             end
             
             if (~exist(obj.ravenExe,'file'))
@@ -246,23 +248,46 @@ classdef itaRavenProject < handle
                 % RavenConsole
                 locatedRavenExe = which(obj.ravenExe(10:end));
                 
+                % try default raven exe path after instalation
                 if isempty(locatedRavenExe)
-                    disp('[itaRaven]: No raven binary was found! Please select path to RavenConsole.exe!');
+                    if strcmp(computer('arch'), 'win32')
+                        defaultInstallationPathRavenExe = 'C:\ITASoftware\Raven\bin32\RavenConsole.exe';
+                    elseif strcmp(computer('arch'), 'win64')
+                        defaultInstallationPathRavenExe = 'C:\ITASoftware\Raven\bin64\RavenConsole64.exe';
+                    else
+                        error('Only Windows OS are supported.');
+                    end
+                    
+                    if exist(defaultInstallationPathRavenExe,'file')
+                        locatedRavenExe = defaultInstallationPathRavenExe;
+                    end
+                end
+                
+                if isempty(locatedRavenExe)
+                    
+                    disp('[itaRaven]:');
+                    disp('No RAVEN binary was found! Please select path to the RAVEN console application (RavenConsole.exe/RavenConsole64.exe)!');
+                    disp('To run RAVEN simulations, an installation of the RAVEN software is required. ');
+                    disp('Individual licenses for academic purposes are available on request.');
+                    disp('Please contact: las@akustik.rwth-aachen.de');
+                    
                     [ selectedRavenExe, selectedRavenPath] = uigetfile('*.exe',' No raven binary was found! Please select path to RavenConsole.exe');
                     obj.ravenExe = [ selectedRavenPath selectedRavenExe];
                 else
                     obj.ravenExe = locatedRavenExe;
+
                 end
                 
                 if (~ravenIniExists)
                     obj.raven_ini = IniConfig();
-                    %                         obj.raven_ini.ReadFile(obj.ravenIniFile);
                     obj.raven_ini.AddSections({'Global'});
                     obj.raven_ini.AddKeys('Global', {'PathRavenExe'}, {obj.ravenExe});
+                    obj.raven_ini.WriteFile(obj.ravenIniFile);
+                    
                 else
                     obj.raven_ini.SetValues('Global', {'PathRavenExe'}, {obj.ravenExe});
+                    obj.raven_ini.WriteFile(obj.ravenIniFile);
                 end
-                obj.raven_ini.WriteFile(obj.ravenIniFile);
                 
             end
             
@@ -705,7 +730,7 @@ classdef itaRavenProject < handle
                 end
             end
             if nargin < 3
-                comp2axesMapping = [3 1 2];
+                comp2axesMapping = [1 -3 2];
             end
             if nargin < 2
                 if (ishandle(obj.plotModelHandle))
@@ -740,23 +765,32 @@ classdef itaRavenProject < handle
                     obj.model.plotModel(tgtAxes, comp2axesMapping, wireframe);
                 end
             end
-            % plot source and receivers
+            
+            % get and transform source and receiver data
+            invertAxes = sign(comp2axesMapping);
+            comp2axesMapping = abs(comp2axesMapping);
+            
             spos = obj.getSourcePosition;
+            spos = spos(:, comp2axesMapping).*invertAxes;
+            sview = obj.getSourceViewVectors;
+            sview = sview(:, comp2axesMapping).*invertAxes;
             snames = obj.getSourceNames;
             
             rpos = obj.getReceiverPosition;
+            rpos = rpos(:, comp2axesMapping).*invertAxes;
+            rview = obj.getReceiverViewVectors;
+            rview = rview(:, comp2axesMapping).*invertAxes;
             rnames = obj.getReceiverNames;
             
-            plot3(spos(:,3),spos(:,1),spos(:,2),'marker','o','markersize',9,'linestyle','none','linewidth',1.5)
-            plot3(rpos(:,3),rpos(:,1),rpos(:,2),'marker','x','markersize',9,'linestyle','none','linewidth',1.5)
+            % plot source and receivers
+            plot3(spos(:,1),spos(:,2),spos(:,3),'marker','o','markersize',9,'linestyle','none','linewidth',1.5)
+            plot3(rpos(:,1),rpos(:,2),rpos(:,3),'marker','x','markersize',9,'linestyle','none','linewidth',1.5)
             
             % plot view vectors (red) of sources
-            sview = obj.getSourceViewVectors;
-            quiver3(spos(:,3),spos(:,1),spos(:,2),sview(:,3),sview(:,1),sview(:,2),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
+            quiver3(spos(:,1),spos(:,2),spos(:,3),sview(:,1),sview(:,2),sview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
             % plot view/up vectors (red) of receivers
-            rview = obj.getReceiverViewVectors;
-            quiver3(rpos(:,3),rpos(:,1),rpos(:,2),rview(:,3),rview(:,1),rview(:,2),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
+            quiver3(rpos(:,1),rpos(:,2),rpos(:,3),rview(:,1),rview(:,2),rview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
             
             % plot up vectors (green) of sources and receivers (currently
@@ -769,8 +803,8 @@ classdef itaRavenProject < handle
             
             
             % plot names
-            text(spos(:,3)+0.2,spos(:,1),spos(:,2),snames)
-            text(rpos(:,3)+0.2,rpos(:,1),rpos(:,2),rnames)
+            text(spos(:,1)+0.2,spos(:,2),spos(:,3),snames)
+            text(rpos(:,1)+0.2,rpos(:,2),rpos(:,3),rnames)
         end
         
         %------------------------------------------------------------------
@@ -1518,6 +1552,37 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
+        function setFixReflectionPattern(obj, fixit)
+            obj.fixReflectionPattern = fixit;
+            obj.rpf_ini.SetValues('RayTracing', 'fixReflectionPattern', fixit);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        %------------------------------------------------------------------
+        function setScatterModel(obj, diffuseOrHit)
+            %setFilterResolution(obj, diffuseOrHit)
+            % 0 = Diffuse Rain (or 'diffuse'), 1 = Hit Oriented (or 'hit')
+            if ~isnumeric(diffuseOrHit)
+                diffuseOrHit = double(strcmp(diffuseOrHit, 'hit'));
+            end
+            %obj.scatterModel = diffuseOrHit;
+            obj.rpf_ini.SetValues('RayTracing', 'scatterModel_DetectionSphere', diffuseOrHit);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        %------------------------------------------------------------------
+        function setScatterModel_Portal(obj, diffuseOrHit)
+            %setFilterResolution(obj, diffuseOrHit)
+            % 0 = Diffuse Rain (or 'diffuse'), 1 = Hit Oriented (or 'hit')
+            if ~isnumeric(diffuseOrHit)
+                diffuseOrHit = double(strcmp(diffuseOrHit, 'hit'));
+            end
+            %obj.scatterModel_Portal = diffuseOrHit;
+            obj.rpf_ini.SetValues('RayTracing', 'scatterModel_Portal', diffuseOrHit);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        %------------------------------------------------------------------
         function setEnergyLoss(obj, energyloss)
             % setEnergyLoss
             % Define maximum energy loss for ray tracing (in dB)
@@ -1579,11 +1644,7 @@ classdef itaRavenProject < handle
             obj.rpf_ini.SetValues('RayTracing', 'resolutionElevation_DetectionSphere', resEle);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
-        
-        
-        
-        
-        % [Filter] %
+
         %------------------------------------------------------------------
         function setFilterLength(obj, filter_length)    % filter length parameter needed in [ms]
             if filter_length < 3
@@ -1626,6 +1687,15 @@ classdef itaRavenProject < handle
             obj.setFilterLength(filter_length);
         end
         
+        
+        % [Filter] %
+        %------------------------------------------------------------------
+        function setSamplingFrequency(obj, samplingRate)
+            obj.sampleRate = samplingRate;
+            obj.rpf_ini.SetValues('Filter', 'samplingFrequency', samplingRate);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
         %------------------------------------------------------------------
         function setFixPoissonSequence(obj, fixit)
             obj.fixPoissonSequence = fixit;
@@ -1655,12 +1725,6 @@ classdef itaRavenProject < handle
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
         
-        %------------------------------------------------------------------
-        function setFixReflectionPattern(obj, fixit)
-            obj.fixReflectionPattern = fixit;
-            obj.rpf_ini.SetValues('RayTracing', 'fixReflectionPattern', fixit);
-            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
-        end
         
         %------------------------------------------------------------------
         function setMaximumReflectionDensity(obj, maxReflectionDensity)
