@@ -638,6 +638,48 @@ classdef itaComsolModel < handle
         end
     end
     
+    %% Results
+    methods
+        function p = GetPressure(obj)
+            p = obj.GetResult('p');
+        end
+        function p = GetPressureAtCoords(obj, itaCoords)
+            p = obj.getResultAtCoords('p', itaCoords);
+        end
+        function res = GetResult(obj, expression)
+            res = obj.getResultAtMeshNodes(expression);
+        end
+    end
+    methods(Access = private)
+        function res = getResultAtMeshNodes(obj, expression, dim, selection)
+            if nargin == 2
+                data = mpheval(obj.mModel, expression);
+            elseif nargin > 2
+                if nargin == 3; selection = 'all'; end
+                data = mpheval(obj.mModel, expression, 'edim', dim, 'selection', selection);
+            end
+            itaCoords = itaCoordinates(data.p.');
+            freqData = data.d1;
+            
+            res = obj.createItaResult(freqData, itaCoords);
+        end
+        function res = getResultAtCoords(obj, expression, itaCoords, dim, selection)
+            if nargin == 3
+                freqData = mphinterp(obj.mModel, expression, 'coord', itaCoords.cart.');
+            elseif nargin > 3
+                if nargin == 4; selection = 'all'; end
+                freqData = mphinterp(obj.mModel, expression, 'coord', itaCoords.cart.', 'edim', dim, 'selection', selection);
+            end
+            res = obj.createItaResult(freqData, itaCoords);
+        end
+        function res = createItaResult(obj, freqData, itaCoords)
+            info = mphsolinfo(obj.mModel);
+            freqVector = info.solvals;
+            res = itaResult(freqData, freqVector, 'freq');
+            res.channelCoordinates = itaCoords;
+        end
+    end
+    
     %% -----------Helper Function Section------------------------------- %%
     %% Root node functions
     methods(Access = private)
