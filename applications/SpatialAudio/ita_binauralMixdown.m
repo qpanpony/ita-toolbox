@@ -1,4 +1,4 @@
-function [ binOut ] = ita_3da_binauralMixdown( lsSignals, varargin )
+function [ binOut ] = ita_binauralMixdown( lsSignals, varargin )
 %ITA_3DA_BINAURALMIXDOWN Produces a 2-Channel binaural stream out of
 %loudspeaker signal(s) and coordinates (given as optional coordinates or
 %better: encoded in the itaAudio channel coordinates
