@@ -230,7 +230,7 @@ if sizeinput > option_idx
                         i = i+1;
                     else
                         specs.zerophase = true;
-                    end;
+                    end
                     
                 case {'minimumphase','minimum-phase','minimum phase'} %set filter to have no phase at all
                     if ~specs.frequencyfiltering
@@ -338,6 +338,10 @@ if specs.frequencyfiltering && ~isfield(Filter,'impulseResponse')
     % Make impulse. Use fft_degree 15 and resize afterwards for performance
     % reasons.
     FFT_DEGREE_FILTER = 15;
+    % when filters are too short for low frequencies
+    if min(specs.octavefreqrange) < 20
+        FFT_DEGREE_FILTER = 18;
+    end
     impulse = ita_generate('impulse',1,specs.samplingRate,FFT_DEGREE_FILTER);
     impulse = ita_metainfo_rm_channelsettings(impulse);
     
@@ -361,7 +365,7 @@ function Filter = mpb_generate_filter(specs)
 
 switch specs.filter_mask
     case 'a-weight'
-        warning off %#ok<WNOFF>
+        warning off
         f1 = 20.598997;
         f2 = 107.65265;
         f3 = 737.86223;
@@ -375,7 +379,7 @@ switch specs.filter_mask
         Filter.Hd = convert(Hd,'df2sos');
         
     case 'c-weight'                            % C weightning
-        warning off %#ok<WNOFF>
+        warning off 
         f1 = 20.598997;
         f4 = 12194.217;
         C1000 = 0.0619;
@@ -392,7 +396,7 @@ switch specs.filter_mask
         h  = fdesign.bandpass('N,F3dB1,F3dB2',specs.filterorder,fc*2^(-1/b/2)/sr, fc*2^(1/b/2)/sr);
 
         % pdi new round according to ANSI
-        [freqvecAnsi freqvecExact] = ita_ANSI_center_frequencies(specs.octavefreqrange([1 end]),b,sr);
+        [freqvecAnsi, freqvecExact] = ita_ANSI_center_frequencies(specs.octavefreqrange([1 end]),b,sr);
         
         for cdx = 1:length(freqvecExact) %go thru all filters
             fc      = freqvecExact(cdx);  % exact center frequency
