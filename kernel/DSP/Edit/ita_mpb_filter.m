@@ -339,7 +339,7 @@ if specs.frequencyfiltering && ~isfield(Filter,'impulseResponse')
     % reasons.
     FFT_DEGREE_FILTER = 15;
     % when filters are too short for low frequencies
-    if min(specs.octavefreqrange) < 20
+    if isfield(specs,'octavefreqrange') && min(specs.octavefreqrange) < 20
         FFT_DEGREE_FILTER = 18;
     end
     impulse = ita_generate('impulse',1,specs.samplingRate,FFT_DEGREE_FILTER);
