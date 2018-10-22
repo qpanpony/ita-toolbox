@@ -1,11 +1,11 @@
-classdef itaComsolGeometry < itaComsolModelTreeElement
+classdef itaComsolGeometry < itaComsolNode
     %itaComsolGeometry Interface to the geom (=geometry) nodes of an itaComsolModel
     %   ...
     
     %% Constructor
     methods
         function obj = itaComsolGeometry(comsolModel)
-            obj@itaComsolModelTreeElement(comsolModel, 'geom', 'com.comsol.clientapi.impl.GeomSequenceClient')
+            obj@itaComsolNode(comsolModel, 'geom', 'com.comsol.clientapi.impl.GeomSequenceClient')
         end
     end
     

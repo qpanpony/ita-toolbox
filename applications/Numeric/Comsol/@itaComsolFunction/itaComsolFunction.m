@@ -1,11 +1,11 @@
-classdef itaComsolFunction < itaComsolModelTreeElement
+classdef itaComsolFunction < itaComsolNode
     %itaComsolFunction Interface to the func (=function) nodes of an itaComsolModel
     %   ...
     
     %% Constructor
     methods
         function obj = itaComsolFunction(comsolModel)
-            obj@itaComsolModelTreeElement(comsolModel, 'func', 'com.comsol.clientapi.impl.FunctionFeatureClient')
+            obj@itaComsolNode(comsolModel, 'func', 'com.comsol.clientapi.impl.FunctionFeatureClient')
         end
     end
     

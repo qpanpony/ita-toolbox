@@ -1,11 +1,11 @@
-classdef itaComsolStudy < itaComsolModelTreeElement
+classdef itaComsolStudy < itaComsolNode
     %itaComsolStudy Interface to the study nodes of an itaComsolModel
     %   ...
     
     %% Constructor
     methods
         function obj = itaComsolStudy(comsolModel)
-            obj@itaComsolModelTreeElement(comsolModel, 'study', 'com.comsol.clientapi.impl.StudyClient')
+            obj@itaComsolNode(comsolModel, 'study', 'com.comsol.clientapi.impl.StudyClient')
         end
     end
     

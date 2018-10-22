@@ -1,11 +1,11 @@
-classdef itaComsolSelection < itaComsolModelTreeElement
+classdef itaComsolSelection < itaComsolNode
     %itaComsolSelection Interface to the selection nodes of an itaComsolModel
     %   ...
     
     %% Constructor
     methods
         function obj = itaComsolSelection(comsolModel)
-            obj@itaComsolModelTreeElement(comsolModel, 'selection', 'com.comsol.clientapi.impl.SelectionFeatureClient')
+            obj@itaComsolNode(comsolModel, 'selection', 'com.comsol.clientapi.impl.SelectionFeatureClient')
         end
     end
     

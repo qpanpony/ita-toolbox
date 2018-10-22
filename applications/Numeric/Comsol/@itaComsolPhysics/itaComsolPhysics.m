@@ -1,11 +1,11 @@
-classdef itaComsolPhysics < itaComsolModelTreeElement
+classdef itaComsolPhysics < itaComsolNode
     %itaComsolPhysics Interface to the physics node of an itaComsolModel
     %   ...
     
     %% Constructor
     methods
         function obj = itaComsolPhysics(comsolModel)
-            obj@itaComsolModelTreeElement(comsolModel, 'physics', 'com.comsol.clientapi.physics.impl.PhysicsClient')
+            obj@itaComsolNode(comsolModel, 'physics', 'com.comsol.clientapi.physics.impl.PhysicsClient')
         end
     end
     
