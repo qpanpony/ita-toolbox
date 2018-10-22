@@ -37,15 +37,29 @@ classdef itaComsolModel < handle
     % </ITA-Toolbox>
     
     properties(Access = private)
-        mModel;         %Comsol model (com.comsol.clientapi.impl.ModelClient)
+        mModel;         %Comsol model node (com.comsol.clientapi.impl.ModelClient)
         
         mCurrentGeometry;
         mCurrentPhysics;
         mCurrentMesh;
         mCurrentStudy;
+        
+        mResultNode;
+        mSelectionNode;
+        mFunctionNode;
+        mGeometryNode;
+        mPhysicsNode;
+        mStudyNode;
     end
     properties(Dependent = true, SetAccess = private)
         modelNode;      %The comsol model node
+        
+        result;         %Interface to evaluate results (itaComsolResult)
+        selection;      %Interface to access Comsol selections (itaComsolSelection)
+        func;           %Interface to access Comsol functions (itaComsolFunction)
+        geometry;       %Interface to access Comsol geometry sequences (itaComsolGeometry)
+        physics;        %Interface to access Comsol physics sequences (itaComsolPhysics)
+        study;          %Interface to access Comsol study clients (itaComsolStudy)
     end
     
     properties(Dependent = true)
@@ -58,6 +72,24 @@ classdef itaComsolModel < handle
     methods
         function out = get.modelNode(obj)
             out = obj.mModel;
+        end
+        function out = get.result(obj)
+            out = obj.mResultNode;
+        end
+        function out = get.selection(obj)
+            out = obj.mSelectionNode;
+        end
+        function out = get.func(obj)
+            out = obj.mFunctionNode;
+        end
+        function out = get.geometry(obj)
+            out = obj.mGeometryNode;
+        end
+        function out = get.physics(obj)
+            out = obj.mPhysicsNode;
+        end
+        function out = get.study(obj)
+            out = obj.mStudyNode;
         end
         
         function out = get.currentGeometry(obj)
@@ -98,16 +130,22 @@ classdef itaComsolModel < handle
                 error('Input must be a comsol model (com.comsol.clientapi.impl.ModelClient)')
             end
             obj.mModel = comsolModel;
+            obj.mResultNode = itaComsolResult(obj);
+            obj.mSelectionNode = itaComsolSelection(obj);
+            obj.mFunctionNode = itaComsolFunction(obj);
+            obj.mGeometryNode = itaComsolGeometry(obj);
+            obj.mPhysicsNode = itaComsolPhysics(obj);
+            obj.mStudyNode = itaComsolStudy(obj);
             
             obj.mCurrentGeometry = obj.FirstGeometry();
             obj.mCurrentPhysics = obj.FirstPressureAcoustics();
             obj.mCurrentMesh = obj.FirstMesh();
             obj.mCurrentStudy = obj.FirstStudy();
             
-            assert(~isempty(obj.mCurrentGeometry), 'No Comsol geometry node found')
-            assert(~isempty(obj.mCurrentPhysics), 'No Comsol physics node found')
-            assert(~isempty(obj.mCurrentMesh), 'No Comsol mesh node found')
-            assert(~isempty(obj.mCurrentStudy), 'No Comsol study node found')
+            assert(~isempty(obj.mGeometryNode.activeNode), 'No Comsol geometry node found')
+            assert(~isempty(obj.mPhysicsNode.activeNode), 'No Comsol physics node found')
+            assert(~isempty(obj.mModel.mesh.tags), 'No Comsol mesh node found')
+            assert(~isempty(obj.mStudyNode.activeNode), 'No Comsol study node found')
         end
     end
     
@@ -373,13 +411,13 @@ classdef itaComsolModel < handle
         end
         function pressureAcoustics = PressureAcoustics(obj)
             %Returns all physics nodes of type Pressure Acoustics
-            physics = obj.getRootElementChildren('physics');
-            idxPressureAcoustics = false(size(physics));
-            for idxPhysics = 1:numel(physics)
+            physicsNodes = obj.getRootElementChildren('physics');
+            idxPressureAcoustics = false(size(physicsNodes));
+            for idxPhysics = 1:numel(physicsNodes)
                 idxPressureAcoustics(idxPhysics) =...
-                    contains(char( physics{idxPhysics}.getType ), 'PressureAcoustics');
+                    contains(char( physicsNodes{idxPhysics}.getType ), 'PressureAcoustics');
             end
-            pressureAcoustics = physics(idxPressureAcoustics);
+            pressureAcoustics = physicsNodes(idxPressureAcoustics);
         end
         function pressureAcoustics = FirstPressureAcoustics(obj)
             %Returns the first physics node of type Pressure Acoustics

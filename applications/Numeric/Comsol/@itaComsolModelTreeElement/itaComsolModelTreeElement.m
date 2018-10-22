@@ -1,6 +1,6 @@
 classdef (Abstract)itaComsolModelTreeElement < handle
     %itaComsolRootNode Abstract class that represents a first level
-    %element of a Comsol model tree. These elements again can hold
+    %node of a Comsol model tree. These elements again can hold
     %multiple Comsol nodes.
     %   Also provides basic methods to work on Comsol nodes
     %
@@ -16,26 +16,25 @@ classdef (Abstract)itaComsolModelTreeElement < handle
     %   Use mphnavigator() on a comsol model for more information
     
     properties(Access = protected)
-        mModel;             %Comsol model node
+        mModel;             %itaComsolModel object
         mActiveNode;        %Active comsol node
     end
     properties(Access = private)
         mListNodeTag;
         mNodeClassName;
     end
-    properties(Dependent = true)
-        activeNode;
+    properties(Dependent = true, Access = protected)
+        modelNode;          %Comsol model node (=mModel.modelNode)
     end
-    properties(Dependent = true, SetAccess = private)
-        firstNode;
-        nodes;
+    properties(Dependent = true)
+        activeNode;         %The active child node
     end
     
     %% Constructor
     methods
         function obj = itaComsolModelTreeElement(comsolModel, listTag, nodeClassName)
-            assert(isa(comsolModel, 'com.comsol.clientapi.impl.ModelClient'),...
-                'First input must be a comsol model (com.comsol.clientapi.impl.ModelClient)')
+            assert(isa(comsolModel, 'itaComsolModel'),...
+                'First input must be an itaComsolModel')
             assert(ischar(listTag) && isrow(listTag), 'Second input must be a char row vector')
             assert(ischar(nodeClassName) && isrow(nodeClassName), 'Third input must be a char row vector')
             
@@ -43,24 +42,30 @@ classdef (Abstract)itaComsolModelTreeElement < handle
             obj.mListNodeTag = listTag;
             obj.mNodeClassName = nodeClassName;
             
-            obj.mActiveNode = obj.firstNode;
+            obj.mActiveNode = obj.First();
         end
     end
     
     %% Accessing comsol nodes
     methods
+        function modelNode = get.modelNode(obj)
+            modelNode = obj.mModel.modelNode;
+        end
+        
         function comsolNode = get.activeNode(obj)
             comsolNode = obj.mActiveNode;
         end
         function set.activeNode(obj, comsolNode)
             assert(isa(comsolNode, obj.mNodeClassName), ['Can only assign a Comsol node of type ' obj.mNodeClassName])
-            obj.activeNode = comsolNode;
+            obj.mActiveNode = comsolNode;
         end
         
-        function comsolNode = get.firstNode(obj)
+        function comsolNode = First(obj)
+            %Returns the first child node
             comsolNode = obj.getFirstRootElementChild(obj.mListNodeTag);
         end
-        function comsolNodeCellArray = get.nodes(obj)
+        function comsolNodeCellArray = All(obj)
+            %Returns all child nodes as cell array
             comsolNodeCellArray = obj.getRootElementChildren(obj.mListNodeTag);
         end
     end
@@ -69,24 +74,24 @@ classdef (Abstract)itaComsolModelTreeElement < handle
     %% Root node functions
     methods(Access = private)
         function nodes = getRootElementChildren(obj, rootName)
-            tags = obj.getChildNodeTags(obj.mModel.(rootName));
+            tags = obj.getChildNodeTags(obj.modelNode.(rootName));
             nodes = cell(1, numel(tags));
             for idxNode = 1:numel(tags)
-                nodes{idxNode} = obj.mModel.(rootName)(tags(idxNode));
+                nodes{idxNode} = obj.modelNode.(rootName)(tags(idxNode));
             end
         end
         function node = getFirstRootElementChild(obj, rootName)
             node = [];
-            tags = obj.getChildNodeTags(obj.mModel.(rootName));
+            tags = obj.getChildNodeTags(obj.modelNode.(rootName));
             if isempty(tags); return; end
-            node = obj.mModel.(rootName)(tags(1));
+            node = obj.modelNode.(rootName)(tags(1));
         end
     end
     
     %% Functions applying directly to model nodes
     methods(Access = protected, Static = true)
         function childNodes = getChildNodes(comsolNode)
-            tags = itaComsolModel.getChildNodeTags(comsolNode);
+            tags = itaComsolModelTreeElement.getChildNodeTags(comsolNode);
             childNodes = cell(1, numel(tags));
             for idxNode = 1:numel(tags)
                 if ismethod(comsolNode, 'feature')
@@ -97,7 +102,7 @@ classdef (Abstract)itaComsolModelTreeElement < handle
             end
         end
         function childNodes = getChildNodesByType(comsolNode, type)
-            tags = itaComsolModel.getChildNodeTags(comsolNode);
+            tags = itaComsolModelTreeElement.getChildNodeTags(comsolNode);
             childNodes = {};
             for idxTag = 1:numel(tags)
                 if ismethod(comsolNode, 'feature')
@@ -113,14 +118,14 @@ classdef (Abstract)itaComsolModelTreeElement < handle
         
         function out = getChildNodeTags(comsolNode)
             
-            itaComsolModel.checkInputForComsolNode(comsolNode);
+            itaComsolModelTreeElement.checkInputForComsolNode(comsolNode);
             
             if ismethod( comsolNode, 'tags' )
                 out = comsolNode.tags();
             elseif ismethod( comsolNode, 'objectNames' )
                 out = comsolNode.objectNames();
             elseif ismethod( comsolNode, 'feature' )
-                out = itaComsolModel.getChildNodeTags( comsolNode.feature() );
+                out = itaComsolModelTreeElement.getChildNodeTags( comsolNode.feature() );
             else
                 error(['Comsol Node of type "' class(comsolNode) '" does not seem to have a function to return children'])
             end
@@ -128,13 +133,13 @@ classdef (Abstract)itaComsolModelTreeElement < handle
         
         function out = getNodeType(comsolNode)
             
-            itaComsolModel.checkInputForComsolNode(comsolNode);
+            itaComsolModelTreeElement.checkInputForComsolNode(comsolNode);
             
             if strcmp(comsolNode.scope(), 'root')
                 warning('Root objects do not have a type. Returning name instead.')
                 out = comsolNode.name();
             elseif ismethod( comsolNode, 'feature' )
-                out = itaComsolModel.getNodeType( comsolNode.feature() );
+                out = itaComsolModelTreeElement.getNodeType( comsolNode.feature() );
             elseif ismethod( comsolNode, 'getType' )
                 out = comsolNode.getType();
             else
@@ -143,7 +148,7 @@ classdef (Abstract)itaComsolModelTreeElement < handle
         end
         
         function [bool, featureNode] = hasFeatureNode(comsolNode, featureTag)
-            itaComsolModel.checkInputForComsolNode(comsolNode);
+            itaComsolModelTreeElement.checkInputForComsolNode(comsolNode);
             
             featureNode = [];
             bool = false;
@@ -159,7 +164,7 @@ classdef (Abstract)itaComsolModelTreeElement < handle
         end
         
         function [bool] = hasChildNode(comsolNode, childTag)
-            itaComsolModel.checkInputForComsolNode(comsolNode);
+            itaComsolModelTreeElement.checkInputForComsolNode(comsolNode);
             
             bool = false;
             if ~ismethod(comsolNode, 'tags'); return; end
@@ -173,7 +178,7 @@ classdef (Abstract)itaComsolModelTreeElement < handle
         
         function setNodeProperties(comsolNode, propertyStruct)
             
-            itaComsolModel.checkInputForComsolNode(comsolNode);
+            itaComsolModelTreeElement.checkInputForComsolNode(comsolNode);
             
             propertyNames = fieldnames(propertyStruct);
             for idxProperty = 1:numel(propertyNames)
