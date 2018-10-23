@@ -9,7 +9,22 @@ classdef itaComsolStudy < itaComsolNode
         end
     end
     
-    %% Study
+    %% Run Simulation
+    methods
+        function Run(obj, showProgress)
+            %Runs the active Study. Optionally a bool can be passed that
+            %to activate a progress window
+            if nargin == 1; showProgress = false; end
+            
+            study = obj.activeNode;
+            assert(~isempty(study), 'No active study is set yet')
+            
+            com.comsol.model.util.ModelUtil.showProgress(showProgress);
+            study.run();
+        end
+    end
+    
+    %% Frequency Vector
     methods
         function SetAllFrequencyVectors(obj, freqVector)
             %Sets the frequency vector for all frequency domain studies.
