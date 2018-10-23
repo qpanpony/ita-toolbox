@@ -65,7 +65,7 @@ classdef itaComsolGeometry < itaComsolNode
             center = source.position.cart;
             p1 = center + source.orientation.up;
             p2 = center + cross(source.orientation.up, source.orientation.view);
-            radius = 1.337; %TODO: Use the source for this later on
+            radius = source.pistonRadius;
             [circleNode, selectionTag] = obj.createCircleOnPlane(pistonGeometryBaseTag, radius, center, p1, p2);
         end
     end

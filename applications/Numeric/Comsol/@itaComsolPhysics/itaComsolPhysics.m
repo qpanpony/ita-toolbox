@@ -128,6 +128,7 @@ classdef itaComsolPhysics < itaComsolNode
             
             pointTag = [source.name '_pointSourcePosition'];
             sourceTag = [source.name '_pointSource'];
+            interpolationBaseTag = [source.name '_pointSourceVolumeFlow'];
             
             geometry = itaComsolGeometry(obj.mModel);
             geometry.activeNode = obj.modelNode.geom(physics.geom);
@@ -143,7 +144,7 @@ classdef itaComsolPhysics < itaComsolNode
             %sourceNode.set('Type', 'Power');
             %sourceNode.set('P_rms', 3);
             sourceNode.set('Type', 'Flow');
-            sourceNode.set('Qs', 1); %TODO: Use a complex interpolation here
+            obj.setVolumeFlowViaInterpolation(sourceNode, interpolationBaseTag, source.volumeFlowTf.freqVector, source.volumeFlowTf.freqData);
         end
     end
     methods(Access = private)
@@ -154,10 +155,16 @@ classdef itaComsolPhysics < itaComsolNode
             normalVelocityNode.set('nvel', funcExpression);
         end
         function [realInterpolationNode, imagInterpolationNode, funcExpression] = createVelocityInterpolation(obj, interpolationBaseName, freqVector, complexDataVector)
-            %Creates or adjusts two Comsol Interpolation nodes, one for the
-            %real and one for the imaginary velocity data and returns the
-            %two interpolation nodes.
             [realInterpolationNode, imagInterpolationNode, funcExpression] = obj.mModel.func.CreateComplexInterpolation(interpolationBaseName, freqVector, complexDataVector, 'm / s');
+        end
+        function setVolumeFlowViaInterpolation(obj, pointSourceNode, interpolationBaseName, freqVector, complexDataVector)
+            [~, ~, funcExpression] = obj.createVolumeFlowInterpolation(...
+                interpolationBaseName, freqVector, complexDataVector);
+            
+            pointSourceNode.set('Qs', funcExpression);
+        end
+        function [realInterpolationNode, imagInterpolationNode, funcExpression] = createVolumeFlowInterpolation(obj, interpolationBaseName, freqVector, complexDataVector)
+            [realInterpolationNode, imagInterpolationNode, funcExpression] = obj.mModel.func.CreateComplexInterpolation(interpolationBaseName, freqVector, complexDataVector, 'm^3 / s');
         end
     end
     methods(Access = private, Static = true)

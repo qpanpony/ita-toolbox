@@ -19,6 +19,7 @@ classdef itaSource < itaSpatialSimulationInputItem
         mDirectivity;                               %itaSuper
         mDirectivityFile;                           %Char vector
         mType = SourceType.PointSource;             %SourceType
+        mPistonRadius;                              %Double scalar
     end
     
     properties(Dependent = true, SetAccess = private)
@@ -35,6 +36,8 @@ classdef itaSource < itaSpatialSimulationInputItem
         pressureTf;     %pressure transfer function - itaSuper
 %         directivity;    %The directivity loaded from the .daff file - itaSuper
         directivityFile;%Name of directivity .daff file
+        
+        pistonRadius;   %Radius used for sources of type Piston
     end
     
     %% Source Type
@@ -170,6 +173,18 @@ classdef itaSource < itaSpatialSimulationInputItem
         end
     end
     
+    %------Surface Sources-------------------------------------------------
+    methods
+        function this = set.pistonRadius(this, radius)
+            assert(( isscalar(radius) || isempty(radius) ) && isnumeric(radius) && isreal(radius),...
+                'Piston radius must be a real-valued numeric scalar')
+            this.mPistonRadius = radius;
+        end
+        function out = get.pistonRadius(this)
+            out = this.mPistonRadius;
+        end
+    end
+    
     %------Velocity Surface Distribution-----------------------------------
     methods
         function out = get.velocityCoordinates(this)
@@ -184,6 +199,16 @@ classdef itaSource < itaSpatialSimulationInputItem
     %% Booleans
     %------General---------------------------------------------------------
     methods
+        function bool = HasPistonRadius(this)
+            bool = ~isempty(this.mPistonRadius);
+        end
+        function bool = HasSpatialInformation(this)
+            bool = HasSpatialInformation@itaSpatialSimulationInputItem(this);
+            if this.mType == SourceType.Piston
+                bool = bool & this.HasPistonRadius();
+            end
+        end
+        
         function bool = HasPressureTf(this)
             bool = ~isempty(this.mPressureTf);
         end
