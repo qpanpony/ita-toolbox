@@ -23,6 +23,7 @@ classdef itaComsolPhysics < itaComsolNode
             %passed using an itaMaterial or an itaResult/itaAudio.
             
             assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'First input must be a char row vector')
+            assert(isvarname(strrep(boundaryGroupName, ' ', '_')), 'Given boundary group name must be valid variable name (whitespace allowed)')
             if isa(data, 'itaMaterial'); data = data.impedance; end
             assert(isa(data, 'itaSuper') && numel(data) == 1 && data.nChannels == 1,...
                 'Second input must either be an itaMaterial with a valid impedance or a single itaSuper')
@@ -102,9 +103,10 @@ classdef itaComsolPhysics < itaComsolNode
             obj.checkInputForValidItaSource(source);
             assert(source.type == SourceType.Piston,'SourceType of given source must be Piston')
             
-            sourceGeometryBaseTag = [source.name '_pistonSourceGeometry'];
-            sourceTag = [source.name '_pistonSource'];
-            interpolationBaseTag = [source.name '_pistonSourceVelocity'];
+            baseTag = strrep(source.name, ' ', '_');
+            sourceGeometryBaseTag = [baseTag '_pistonSourceGeometry'];
+            sourceTag = [baseTag '_pistonSource'];
+            interpolationBaseTag = [baseTag '_pistonSourceVelocity'];
             
             geometry = itaComsolGeometry(obj.mModel);
             geometry.activeNode = obj.modelNode.geom(physics.geom);
@@ -127,9 +129,10 @@ classdef itaComsolPhysics < itaComsolNode
             assert( ~obj.IsBoundaryMethod(), 'Point sources are not allowed for physics with boundary methods')
             assert(source.type == SourceType.PointSource,'SourceType of given source must be PointSource')
             
-            pointTag = [source.name '_pointSourcePosition'];
-            sourceTag = [source.name '_pointSource'];
-            interpolationBaseTag = [source.name '_pointSourceVolumeFlow'];
+            baseTag = strrep(source.name, ' ', '_');
+            pointTag = [baseTag '_pointSourcePosition'];
+            sourceTag = [baseTag '_pointSource'];
+            interpolationBaseTag = [baseTag '_pointSourceVolumeFlow'];
             
             geometry = itaComsolGeometry(obj.mModel);
             geometry.activeNode = obj.modelNode.geom(physics.geom);
@@ -172,6 +175,8 @@ classdef itaComsolPhysics < itaComsolNode
         function checkInputForValidItaSource(source)
             assert(isa(source, 'itaSource') && isscalar(source),'Input must be a single itaSource object')
             assert(source.HasWaveData(), 'Data for wave based simulation not defined for itaSource')
+            assert(isvarname( strrep(source.name, ' ', '_') ),...
+                'Name of given source must be valid variable name (whitespace allowed)')
         end
     end
     

@@ -84,7 +84,7 @@ classdef itaComsolFunction < itaComsolNode
             if isrow(functionVector); functionVector = functionVector.'; end
             
             %Note: Comsol expects a Nx2 cell string array for the table data
-            comsolTableData = [ cellstr( num2str(argumentVector) ) cellstr( num2str(functionVector) )];
+            comsolTableData = [ cellstr( num2str(argumentVector) ) cellstr( num2str(functionVector) )]; %TODO: This is super slow for huge data sets
             interpolationNode.set('table', comsolTableData);
         end
     end

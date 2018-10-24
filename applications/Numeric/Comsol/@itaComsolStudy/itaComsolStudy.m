@@ -60,7 +60,7 @@ classdef itaComsolStudy < itaComsolNode
             [freqNodeDefined, freqNode] = itaComsolStudy.hasFeatureNode( study, 'freq' );
             if ~freqNodeDefined; error('Given Comsol study is no frequency study'); end
             
-            freqNode.set('plist', num2str(freqVector))
+            freqNode.set('plist', num2str(freqVector));
         end
     end
     
