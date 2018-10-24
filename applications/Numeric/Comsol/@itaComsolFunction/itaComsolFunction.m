@@ -5,6 +5,7 @@ classdef itaComsolFunction < itaComsolNode
     %% Constructor
     methods
         function obj = itaComsolFunction(comsolModel)
+            %Expects an itaComsolModel as input
             obj@itaComsolNode(comsolModel, 'func', 'com.comsol.clientapi.impl.FunctionFeatureClient')
         end
     end

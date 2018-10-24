@@ -33,7 +33,7 @@ classdef (Abstract)itaComsolNode < handle
     %% Constructor
     methods
         function obj = itaComsolNode(comsolModel, listTag, nodeClassName)
-            assert(isa(comsolModel, 'itaComsolModel'),...
+            assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel),...
                 'First input must be an itaComsolModel')
             assert(ischar(listTag) && isrow(listTag), 'Second input must be a char row vector')
             assert(ischar(nodeClassName) && isrow(nodeClassName), 'Third input must be a char row vector')

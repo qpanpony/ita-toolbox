@@ -5,6 +5,7 @@ classdef itaComsolPhysics < itaComsolNode
     %% Constructor
     methods
         function obj = itaComsolPhysics(comsolModel)
+            %Expects an itaComsolModel as input
             obj@itaComsolNode(comsolModel, 'physics', 'com.comsol.clientapi.physics.impl.PhysicsClient')
         end
     end

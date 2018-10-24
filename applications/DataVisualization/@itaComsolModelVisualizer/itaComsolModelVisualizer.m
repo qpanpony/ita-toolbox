@@ -47,7 +47,7 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
     end
     methods(Access = protected)
         function out = numberOfBoundaryGroups(this)
-            out = numel(this.mModel.BoundaryGroups());
+            out = numel(this.mModel.selection.BoundaryGroups());
         end
     end
     
@@ -122,7 +122,7 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
         
         function plotBoundaryGroups(this)
             
-            boundaryGroups = this.mModel.BoundaryGroups();
+            boundaryGroups = this.mModel.selection.BoundaryGroups();
             this.mBoundaryPlotHandles = cell(1, numel(boundaryGroups));
             colors = get(groot,'DefaultAxesColorOrder');
             for groupID = 1:numel(boundaryGroups)
@@ -135,13 +135,13 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
             title(this.mAxes, '')
         end
         function plotEdges(this)
-            mphgeom(this.mModel.modelNode, this.mModel.currentGeometry.tag, 'Parent', this.mAxes, 'facemode', 'off')
+            mphgeom(this.mModel.modelNode, this.mModel.geometry.activeNode.tag, 'Parent', this.mAxes, 'facemode', 'off')
             this.mEdgePlotHandles = this.mAxes.Children(1);
             title(this.mAxes, '')
         end
         
         function plotMesh(this)
-            mphmesh(this.mModel.modelNode, this.mModel.currentMesh.tag, 'Parent', this.mAxes, 'edgemode', 'off')
+            mphmesh(this.mModel.modelNode, this.mModel.mesh.activeNode.tag, 'Parent', this.mAxes, 'edgemode', 'off')
             this.mMeshPlotHandles = this.mAxes.Children(1);
             delete(this.mAxes.Children(2));
             title(this.mAxes, '')

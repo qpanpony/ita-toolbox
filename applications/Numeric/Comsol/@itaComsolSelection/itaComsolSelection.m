@@ -5,6 +5,7 @@ classdef itaComsolSelection < itaComsolNode
     %% Constructor
     methods
         function obj = itaComsolSelection(comsolModel)
+            %Expects an itaComsolModel as input
             obj@itaComsolNode(comsolModel, 'selection', 'com.comsol.clientapi.impl.SelectionFeatureClient')
         end
     end

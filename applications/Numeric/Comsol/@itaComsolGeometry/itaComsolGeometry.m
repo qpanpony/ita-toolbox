@@ -5,6 +5,7 @@ classdef itaComsolGeometry < itaComsolNode
     %% Constructor
     methods
         function obj = itaComsolGeometry(comsolModel)
+            %Expects an itaComsolModel as input
             obj@itaComsolNode(comsolModel, 'geom', 'com.comsol.clientapi.impl.GeomSequenceClient')
         end
     end

@@ -10,7 +10,8 @@ classdef itaComsolResult < handle
     
     methods
         function obj = itaComsolResult(comsolModel)
-            assert(isa(comsolModel, 'itaComsolModel'),...
+            %Expects an itaComsolModel as input
+            assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel),...
                 'Input must be an itaComsolModel')
             obj.mModel = comsolModel;
         end
