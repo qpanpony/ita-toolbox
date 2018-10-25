@@ -147,5 +147,19 @@ classdef itaComsolInterface < handle
             end
         end
     end
+    
+    %% Remove Models from Server
+    methods
+        function RemoveModelFromServer(obj, model)
+            %Removes the given comsol model from the server
+            assert(isa(model, 'com.comsol.clientapi.impl.ModelClient'), 'Input must be a comsol model node')
+            if ~obj.isConnected; return; end
+            if ispc() && ~obj.comsolServerIsRunning()
+                warning('No Comsol Server is active')
+                return;
+            end
+            com.comsol.model.util.ModelUtil.remove(char(model.tag));
+        end
+    end
 end
 
