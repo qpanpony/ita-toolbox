@@ -23,9 +23,19 @@ classdef itaComsolInterface < handle
     end
     
     %% Constructor
-    methods
+    methods(Access = private)
         function obj = itaComsolInterface()
             obj.init();
+        end
+    end
+    methods(Static = true)
+        function obj = Instance()
+            %Returns the unique instance of this class
+            persistent uniqueInstance;
+            if isempty(uniqueInstance)
+                uniqueInstance = itaComsolInterface();
+            end
+            obj = uniqueInstance;
         end
     end
     
