@@ -34,7 +34,7 @@ classdef itaComsolServer < handle
             %Returns the unique instance of this class
             persistent uniqueInstance;
             if isempty(uniqueInstance)
-                uniqueInstance = itaComsolInterface();
+                uniqueInstance = itaComsolServer();
             end
             obj = uniqueInstance;
         end
