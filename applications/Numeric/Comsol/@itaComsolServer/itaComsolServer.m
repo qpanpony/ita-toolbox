@@ -1,6 +1,7 @@
-classdef itaComsolInterface < handle
-    %itaComsolInterface Interface to start/stop and connect/disconnect
+classdef itaComsolServer < handle
+    %itaComsolServer Interface to start/stop and connect/disconnect
     %Comsol Server via Matlab LiveLink
+    %   Also allows to remove comsol models from the server
     
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.
@@ -24,7 +25,7 @@ classdef itaComsolInterface < handle
     
     %% Constructor
     methods(Access = private)
-        function obj = itaComsolInterface()
+        function obj = itaComsolServer()
             obj.init();
         end
     end
@@ -160,7 +161,7 @@ classdef itaComsolInterface < handle
     
     %% Remove Models from Server
     methods
-        function RemoveModelFromServer(obj, model)
+        function RemoveModel(obj, model)
             %Removes the given comsol model from the server
             assert(isa(model, 'com.comsol.clientapi.impl.ModelClient'), 'Input must be a comsol model node')
             if ~obj.isConnected; return; end
