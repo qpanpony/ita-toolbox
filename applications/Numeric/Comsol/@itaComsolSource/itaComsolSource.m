@@ -17,8 +17,13 @@ classdef itaComsolSource < handle
     %% Constructor
     methods
         function obj = itaComsolSource(comsolModel, sourceGeometryNode, sourcePhysicsNode, realInterpolationNode, imagInterpolationNode)
-            %Constuctor should not be used manually. Use static Create
-            %functions instead!
+            %Constructor should only be used to create empty object (no
+            %input). To create a non-empty object, use static Create functions!
+            
+            %To create empty object
+            if nargin == 0
+                return;
+            end
             assert(isa(comsolModel, 'itaComsolModel'), 'First input must be a single itaComsolModel')
             assert(isa(sourceGeometryNode, 'com.comsol.clientapi.impl.GeomFeatureClient'), 'Second input must be a comsol geometry feature node')
             assert(isa(sourcePhysicsNode, 'com.comsol.clientapi.physics.impl.PhysicsFeatureClient'), 'Third input must be a comsol physics feature node')
