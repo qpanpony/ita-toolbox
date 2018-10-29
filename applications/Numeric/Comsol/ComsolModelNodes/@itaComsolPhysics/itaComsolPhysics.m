@@ -74,109 +74,51 @@ classdef itaComsolPhysics < itaComsolNode
         end
     end
     
-    %% Sources
+    %% Source related
     methods
-        function CreateSource(obj, source)
-            %Creates an acoustic source for the active physics node given
-            %an itaSource. Geometry and physics of the source depends on
-            %the SourceType.
-            %   Input: Single itaSource
-            %
-            %   Supported source types: PointSource, Piston
-            obj.checkInputForValidItaSource(source);
-            switch source.type
-                case SourceType.PointSource
-                    obj.CreatePointSource(source);
-                case SourceType.Piston
-                    obj.CreatePistonSource(source);
-                otherwise
-                    error('Unknown source type. No source was created')
-            end
-        end
-        function CreatePistonSource(obj, source)
-            %Creates a piston source for the active physics node given an itaSource
-            %   In Comsol internally, a workplane with a circle in its center
-            %   is created using the source position and the view and up
-            %   vectors. Then this circle is linked to a normal velocity
-            %   that is created for the physics node.
+        function normalVelocityNode = CreateNormalVelocity(obj, sourceTag, selectionTag, normalVelocityExpression)
+            %Creates a normal velocity node for the active physics node
+            %   Inputs:
+            %   sourceTag                   Tag for source node [char row vector]
+            %   selectionTag                Tag of the selection the point source is linked to [char row vector]
+            %   normalVelocityExpression    Expression for normal velocity [char row vector || double scalar]
+            assert(ischar(sourceTag) && isrow(sourceTag), 'First input must be a char row vector')
+            assert(ischar(selectionTag) && isrow(selectionTag), 'Second input must be a char row vector')
+            assert( (ischar(normalVelocityExpression) && isrow(normalVelocityExpression)) ||...
+                (isnumeric(normalVelocityExpression) && isscalar(normalVelocityExpression)),...
+                'Third input must be a char row vector or a double scalar')
+            
             physics = obj.activeNode;
-            obj.checkInputForValidItaSource(source);
-            assert(source.type == SourceType.Piston,'SourceType of given source must be Piston')
-            
-            baseTag = strrep(source.name, ' ', '_');
-            sourceGeometryBaseTag = [baseTag '_pistonSourceGeometry'];
-            sourceTag = [baseTag '_pistonSource'];
-            interpolationBaseTag = [baseTag '_pistonSourceVelocity'];
-            
-            geometry = itaComsolGeometry(obj.mModel);
-            geometry.activeNode = obj.modelNode.geom(physics.geom);
-            [~, selectionTag] = geometry.CreatePistonGeometry(sourceGeometryBaseTag, source);
-            
             if ~obj.hasFeatureNode(physics, sourceTag)
                 physics.create(sourceTag, 'NormalVelocity', 2);
             end
-            sourceNode = physics.feature(sourceTag);
-            sourceNode.selection.named(selectionTag);
-            obj.setNormalVelocityViaInterpolation(sourceNode, interpolationBaseTag, source.velocityTf.freqVector, source.velocityTf.freqData)
+            normalVelocityNode = physics.feature(sourceTag);
+            normalVelocityNode.selection.named(selectionTag);
+            
+            normalVelocityNode.set('nvel', normalVelocityExpression);
         end
-        function CreatePointSource(obj, source)
-            %Creates a point source in active physics given an itaSource
-            %   In Comsol internally, a point is created for the physics
-            %   geometry and then linked to the point source that is
-            %   created for the physics
+        
+        function pointSourceNode = CreateMonopolePointSource(obj, sourceTag, selectionTag, volumeFlowExpression)
+            %Creates a monopole point source node for the active physics
+            %node
+            %   Inputs:
+            %   sourceTag               Tag for source node [char row vector]
+            %   selectionTag            Tag of the selection the point source is linked to [char row vector]
+            %   volumeFlowExpression    Expression for volume flow of point source [char row vector || double scalar]
+            assert(ischar(sourceTag) && isrow(sourceTag), 'First input must be a char row vector')
+            assert(ischar(selectionTag) && isrow(selectionTag), 'Second input must be a char row vector')
+            assert( (ischar(volumeFlowExpression) && isrow(volumeFlowExpression)) ||...
+                (isnumeric(volumeFlowExpression) && isscalar(volumeFlowExpression)),...
+                'Third input must be a char row vector or a double scalar')
+            
             physics = obj.activeNode;
-            obj.checkInputForValidItaSource(source);
-            assert( ~obj.IsBoundaryMethod(), 'Point sources are not allowed for physics with boundary methods')
-            assert(source.type == SourceType.PointSource,'SourceType of given source must be PointSource')
-            
-            baseTag = strrep(source.name, ' ', '_');
-            pointTag = [baseTag '_pointSourcePosition'];
-            sourceTag = [baseTag '_pointSource'];
-            interpolationBaseTag = [baseTag '_pointSourceVolumeFlow'];
-            
-            geometry = itaComsolGeometry(obj.mModel);
-            geometry.activeNode = obj.modelNode.geom(physics.geom);
-            [~, selectionTag] = geometry.CreatePointWithSelection(pointTag, source.position);
-            
             if ~obj.hasFeatureNode(physics, sourceTag)
                 physics.create(sourceTag, 'FrequencyMonopolePointSource', 0);
             end
-            sourceNode = physics.feature(sourceTag);
-            sourceNode.selection.named(selectionTag);
-            %sourceNode.set('Type', 'UserDefined');
-            %sourceNode.set('S', 1);
-            %sourceNode.set('Type', 'Power');
-            %sourceNode.set('P_rms', 3);
-            sourceNode.set('Type', 'Flow');
-            obj.setVolumeFlowViaInterpolation(sourceNode, interpolationBaseTag, source.volumeFlowTf.freqVector, source.volumeFlowTf.freqData);
-        end
-    end
-    methods(Access = private)
-        function setNormalVelocityViaInterpolation(obj, normalVelocityNode, interpolationBaseName, freqVector, complexDataVector)
-            [~, ~, funcExpression] = obj.createVelocityInterpolation(...
-                interpolationBaseName, freqVector, complexDataVector);
-            
-            normalVelocityNode.set('nvel', funcExpression);
-        end
-        function [realInterpolationNode, imagInterpolationNode, funcExpression] = createVelocityInterpolation(obj, interpolationBaseName, freqVector, complexDataVector)
-            [realInterpolationNode, imagInterpolationNode, funcExpression] = obj.mModel.func.CreateComplexInterpolation(interpolationBaseName, freqVector, complexDataVector, 'm / s');
-        end
-        function setVolumeFlowViaInterpolation(obj, pointSourceNode, interpolationBaseName, freqVector, complexDataVector)
-            [~, ~, funcExpression] = obj.createVolumeFlowInterpolation(...
-                interpolationBaseName, freqVector, complexDataVector);
-            
-            pointSourceNode.set('Qs', funcExpression);
-        end
-        function [realInterpolationNode, imagInterpolationNode, funcExpression] = createVolumeFlowInterpolation(obj, interpolationBaseName, freqVector, complexDataVector)
-            [realInterpolationNode, imagInterpolationNode, funcExpression] = obj.mModel.func.CreateComplexInterpolation(interpolationBaseName, freqVector, complexDataVector, 'm^3 / s');
-        end
-    end
-    methods(Access = private, Static = true)
-        function checkInputForValidItaSource(source)
-            assert(isa(source, 'itaSource') && isscalar(source),'Input must be a single itaSource object')
-            assert(source.HasWaveData(), 'Data for wave based simulation not defined for itaSource')
-            assert(isvarname( strrep(source.name, ' ', '_') ),...
-                'Name of given source must be valid variable name (whitespace allowed)')
+            pointSourceNode = physics.feature(sourceTag);
+            pointSourceNode.selection.named(selectionTag);
+            pointSourceNode.set('Type', 'Flow');
+            pointSourceNode.set('Qs', volumeFlowExpression);
         end
     end
     
