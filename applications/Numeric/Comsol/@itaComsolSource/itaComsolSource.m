@@ -1,4 +1,10 @@
 classdef itaComsolSource < handle
+    %itaComsolSource Represents an itaSource in an itaComsolModel
+    %   Provides static create functions that generate an itaComsolSource
+    %   for a given itaComsolModel using an itaSource. Therefore depending
+    %   on the source type, suitable physics, geometry and interpolation
+    %   nodes are created and linked apropriately. All comsol nodes
+    %   representing this source are stored for later modification.
     
     properties(Access = private)
         mModel;
@@ -11,17 +17,19 @@ classdef itaComsolSource < handle
     %% Constructor
     methods
         function obj = itaComsolSource(comsolModel, sourceGeometryNode, sourcePhysicsNode, realInterpolationNode, imagInterpolationNode)
+            %Constuctor should not be used manually. Use static Create
+            %functions instead!
             assert(isa(comsolModel, 'itaComsolModel'), 'First input must be a single itaComsolModel')
             assert(isa(sourceGeometryNode, 'com.comsol.clientapi.impl.GeomFeatureClient'), 'Second input must be a comsol geometry feature node')
-            assert(isa(sourcePhysicsNode, 'com.comsol.clientapi.physics.impl.PhysicsFeatureClient'), 'Second input must be a comsol physics feature node')
-            assert(isa(realInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Second input must be a comsol function feature node')
-            assert(isa(imagInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Second input must be a comsol function feature node')
+            assert(isa(sourcePhysicsNode, 'com.comsol.clientapi.physics.impl.PhysicsFeatureClient'), 'Third input must be a comsol physics feature node')
+            assert(isa(realInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fourth input must be a comsol function feature node')
+            assert(isa(imagInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fifth input must be a comsol function feature node')
             
             obj.mModel = comsolModel;
             obj.mSourceGeometryNode = sourceGeometryNode;
             obj.mSourcePhysicsNode = sourcePhysicsNode;
             obj.mSourceRealDataNode = realInterpolationNode;
-            obj.mSourceRealDataNode = imagInterpolationNode;
+            obj.mSourceImagDataNode = imagInterpolationNode;
         end
     end
     
@@ -105,16 +113,19 @@ classdef itaComsolSource < handle
         end
     end
     
-    
     %% Enable / Disable
     methods
         function Disable(obj)
             obj.mSourceGeometryNode.active(false);
             obj.mSourcePhysicsNode.active(false);
+            obj.mSourceRealDataNode.active(false);
+            obj.mSourceImagDataNode.active(false);
         end
         function Enable(obj)
             obj.mSourceGeometryNode.active(true);
             obj.mSourcePhysicsNode.active(true);
+            obj.mSourceRealDataNode.active(true);
+            obj.mSourceImagDataNode.active(true);
         end
     end
     
