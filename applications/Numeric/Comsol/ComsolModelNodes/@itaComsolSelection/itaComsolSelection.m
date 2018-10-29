@@ -21,6 +21,19 @@ classdef itaComsolSelection < itaComsolNode
             volumeGroups = obj.selectionsOfDimension(3);
         end
         
+        function boundaryGroup = BoundaryGroup(obj, boundaryGroupName)
+            %Returns a boundary group (2D selection) given its name.
+            %Returns [] if group is not found.
+            assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'Input must be a char row vector')
+            boundaryGroup = obj.selectionOfDimensionByName(boundaryGroupName, 2);
+        end
+        function volumeGroup = VolumeGroup(obj, volumeGroupName)
+            %Returns a volume group (3D selection) given its name.
+            %Returns [] if group is not found.
+            assert(ischar(volumeGroupName) && isrow(volumeGroupName), 'Input must be a char row vector')
+            volumeGroup = obj.selectionOfDimensionByName(volumeGroupName, 3);
+        end
+        
         function boundaryGroupNames = BoundaryGroupNames(obj)
             %Returns the names of all boundary groups (2D selections) as cell array
             boundaryGroupNames = obj.selectionNames(obj.BoundaryGroups());
@@ -42,6 +55,16 @@ classdef itaComsolSelection < itaComsolNode
                 end
             end
             selections(removeSelections) = [];
+        end
+        function out = selectionOfDimensionByName(obj, name, dimension)
+            selections = obj.selectionsOfDimension(dimension);
+            selectionNames = obj.selectionNames(selections);
+            idxSel = strcmp(selectionNames, name);
+            if sum(idxSel) ~= 1
+                out = [];
+            else
+                out = selections{idxSel};
+            end
         end
         function selNames = selectionNames(~, selections)
             selNames = cell(size(selections));
