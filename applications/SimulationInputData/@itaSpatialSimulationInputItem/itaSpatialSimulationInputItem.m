@@ -7,12 +7,20 @@ classdef (Abstract) itaSpatialSimulationInputItem < itaSimulationInputItem
     % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
     % </ITA-Toolbox>
     properties(Access = protected, Hidden = true)
-        mPosition = itaCoordinates([0 0 0]);                        %itaCoordinates
-        mOrientation = itaOrientation.FromViewUp([1 0 0], [0 1 0]); %itaOrientation
+        mPosition;                              %itaCoordinates
+        mOrientation;                           %itaOrientation
     end
     properties(Dependent = true)
         position;       %Position of the item in 3D space - itaCoordinates
         orientation;    %Orientation of the item in 3D space - itaOrientation
+    end
+    
+    %% Constructor
+    methods
+        function obj = itaSpatialSimulationInputItem()
+            obj.mPosition = itaCoordinates([0 0 0]); 
+            obj.mOrientation = itaOrientation.FromViewUp([1 0 0], [0 1 0]);
+        end
     end
     
     %% Set / Get
