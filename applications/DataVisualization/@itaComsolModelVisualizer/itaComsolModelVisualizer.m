@@ -30,6 +30,7 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
                 if ~contains(input, '.mph')
                     error('Given filename does not point to a Comsol (.mph) file')
                 end
+                itaComsolServer.Instance().Connect();
                 obj.mModel = itaComsolModel( mphload(input) );
             elseif isa(input, 'itaComsolModel') && isscalar(input)
                 obj.mModel = input;
