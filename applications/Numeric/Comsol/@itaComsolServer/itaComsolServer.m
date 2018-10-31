@@ -115,7 +115,9 @@ classdef itaComsolServer < handle
                 mphstart(2036);
             catch err
                 cd(currentFolder);
-                rethrow(err);
+                if ~strcmp(err.message, 'Already connected to a server')
+                    rethrow(err);
+                end
             end
             cd(currentFolder);
             obj.isConnected = true;
