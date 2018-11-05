@@ -95,9 +95,9 @@ classdef (Abstract)itaComsolNode < handle
             childNodes = cell(1, numel(tags));
             for idxNode = 1:numel(tags)
                 if ismethod(comsolNode, 'feature')
-                    childNodes{idxNode} = comsolNode.feature(tags(idxTag));
+                    childNodes{idxNode} = comsolNode.feature(tags(idxNode));
                 else
-                    childNodes{idxNode} = comsolNode(tags(idxTag));
+                    childNodes{idxNode} = comsolNode(tags(idxNode));
                 end
             end
         end

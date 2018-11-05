@@ -10,6 +10,43 @@ classdef itaComsolPhysics < itaComsolNode
         end
     end
     
+    %% Acoustic model
+    methods
+        function SetAmbientTemperature(obj, temperature)
+            %Sets the ambient temperature for the acoustic simulation.
+            %Expects a single numeric value in °C
+            assert(isnumeric(temperature) && isscalar(temperature) && temperature >= -273.15,...
+                'Input must be a numeric scalar >= -273.15')
+            acousticModelNode = obj.getAcousticModelNode();
+            assert(~isempty(acousticModelNode), 'No Comsol node for acoustic model found')
+            
+            acousticModelNode.set('minput_temperature', temperature + 273.15);
+        end
+        function SetHydrostaticPressure(obj, pressure)
+            %Sets the hydrostatic pressure for the acoustic simulation.
+            %Expects a single numeric value in Pa
+            assert(isnumeric(pressure) && isscalar(pressure) && pressure >= 0,...
+                'Input must be a numeric scalar >= 0')
+            acousticModelNode = obj.getAcousticModelNode();
+            assert(~isempty(acousticModelNode), 'No Comsol node for acoustic model found')
+            
+            acousticModelNode.set('minput_pressure', pressure);
+        end
+    end
+    methods(Access = private)
+        function acousticModelNode = getAcousticModelNode(obj)
+            %Note: This assumes that the first child of the physics node is
+            %always the acoustic model node
+            physics = obj.activeNode;
+            physicsFeatures = obj.getChildNodes(physics);
+            
+            acousticModelNode = [];
+            if ~isempty(physicsFeatures)
+                acousticModelNode = physicsFeatures{1};
+            end
+        end
+    end
+    
     %% Impedance
     methods
         function impedanceNodes = ImpedanceNodes(obj)
