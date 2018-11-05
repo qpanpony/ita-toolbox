@@ -34,6 +34,15 @@ classdef itaComsolImpedance < handle
     %----------Static Creators------------
     methods(Static = true)
         function obj = Create(comsolModel, boundaryGroupName, data)
+            %Creates an impedance boundary condition for the given comsol
+            %model using either an itaResult or itaMaterial. The impedance
+            %is applied to the boundary group (2D Comsol selection) with
+            %the specified name.
+            %   Inputs:
+            %   comsolModel         Comsol model, the impedance is created for [itaComsolModel]
+            %   boundaryGroupName   Name of the boundary group the impedance is created for [char row vector]
+            %   data                Object with impedance data [itaResult / itaMaterial]
+            
             assert(isa(comsolModel, 'itaComsolModel'), 'First input must be a single itaComsolModel')
             assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'Second input must be a char row vector')
             assert(isvarname(strrep(boundaryGroupName, ' ', '_')), 'Given boundary group name must be valid variable name (whitespace allowed)')
@@ -75,8 +84,8 @@ classdef itaComsolImpedance < handle
     
     %% Helpers
     methods(Access = private, Static = true)
-        function [realInterpolationNode, imagInterpolationNode, funcExpression] = createImpedanceInterpolation(comsolModel, interpolationBaseName, freqVector, complexDataVector)
-            [realInterpolationNode, imagInterpolationNode, funcExpression] = comsolModel.func.CreateComplexInterpolation(interpolationBaseName, freqVector, complexDataVector, 'Pa / m * s');
+        function [realInterpolationNode, imagInterpolationNode, funcExpression] = createImpedanceInterpolation(comsolModel, interpolationBaseTag, freqVector, complexDataVector)
+            [realInterpolationNode, imagInterpolationNode, funcExpression] = comsolModel.func.CreateComplexInterpolation(interpolationBaseTag, freqVector, complexDataVector, 'Pa / m * s');
         end
     end
 end

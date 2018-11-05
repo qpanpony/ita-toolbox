@@ -41,10 +41,12 @@ classdef itaComsolSource < handle
     %----------Static Creators------------
     methods(Static = true)
         function obj = Create(comsolModel, source)
-            %Creates an acoustic source for the active physics node given
+            %Creates an acoustic source for the given comsol model using
             %an itaSource. Geometry and physics of the source depends on
             %the SourceType.
-            %   Input: Single itaSource
+            %   Inputs:
+            %   comsolModel     Comsol model, the source is created for [itaComsolModel]
+            %   source          Object with source data [single itaSource]
             %
             %   Supported source types: PointSource, Piston
             assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel), 'First input must be a single itaComsolModel')
