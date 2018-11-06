@@ -24,3 +24,5 @@ Thumbs.db
 svnaccess
 *.lib
 *.exp
+itaRaven.ini
+*.daff
