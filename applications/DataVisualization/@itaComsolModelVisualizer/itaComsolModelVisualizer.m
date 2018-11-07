@@ -142,6 +142,7 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
         end
         
         function plotMesh(this)
+            %TODO: Make sure that the mesh is built
             mphmesh(this.mModel.modelNode, this.mModel.mesh.activeNode.tag, 'Parent', this.mAxes, 'edgemode', 'off')
             this.mMeshPlotHandles = this.mAxes.Children(1);
             delete(this.mAxes.Children(2));
@@ -169,15 +170,19 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
     methods(Access = protected)
         function applyAllSettings(this)
             applyAllSettings@Abstract3DModelVisualizer(this);
-            this.applyMeshVisibility();
             this.applyMeshColor();
+        end
+        
+        function applyVisibility(this)
+            applyVisibility@Abstract3DModelVisualizer(this);
+            this.applyMeshVisibility();
         end
     end
     
     methods(Access = private)
         function applyMeshVisibility(this)
             if ~isempty(this.mMeshPlotHandles) && isvalid(this.mMeshPlotHandles)
-                this.mMeshPlotHandles.Visible = this.mShowMesh;
+                this.mMeshPlotHandles.Visible = this.mVisible & this.mShowMesh;
             end
         end
         function applyMeshColor(this)

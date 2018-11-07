@@ -12,6 +12,7 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
         mBoundaryPlotHandles;   %Handles to patches of boundary surfaces ( mBoundaryPlotHandles{idxBoundaryGroup}(idxPolygon) )
         mEdgePlotHandles;       %Handles to line plots for the edges ( mEdgePlotHandles(idxPolygon) )
         
+        mVisible = true;
         mShowEdges = true;
         mShowBoundarySurfaces = true;
         
@@ -24,6 +25,7 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
         autoRefresh = true;     %If set to true, the Plot will refresh automatically when changing plot settings
     end
     properties(Dependent = true)
+        visible;                %Visibility of the whole model
         showBoundarySurfaces;   %Visibility for all boundary surfaces
         showEdges;              %Visibility for edges
         
@@ -61,6 +63,9 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
     %% Plot Settings
     %----------Get---------------------------------------------------------
     methods
+        function out = get.visible(this)
+            out = this.mVisible;
+        end
         function out = get.showBoundarySurfaces(this)
             out = this.mShowBoundarySurfaces;
         end
@@ -84,6 +89,16 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
         function set.autoRefresh(this, bool)
             assert( islogical(bool) && isscalar(bool), 'autoRefresh must be a single boolean')
             this.autoRefresh = bool;
+        end
+        function set.visible(this, bool)
+            if isnumeric(bool); bool = logical(bool); end
+            assert(islogical(bool) && isscalar(bool), 'visible must be a logical scalar')
+            if this.mVisible == bool; return; end
+            
+            this.mVisible = bool;
+            if this.autoRefresh
+                this.applyVisibility();
+            end
         end
         function set.showBoundarySurfaces(this, bool)
             assert( islogical(bool) && isscalar(bool), 'showBoundarySurfaces must be a single boolean')
@@ -214,10 +229,14 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
     %% Applying Plot Settings
     methods(Access = protected)
         function applyAllSettings(this)
-            this.applyBoundaryGroupVisibility();
+            this.applyVisibility();
             this.applyPlotTransparency();
-            this.applyEdgeVisibility();
             this.applyEdgeColor();
+        end
+        
+        function applyVisibility(this)
+            this.applyBoundaryGroupVisibility();
+            this.applyEdgeVisibility();
         end
         
         %-------Boundary Surfaces------------------------------------------
@@ -231,7 +250,7 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
                 for idxPolygon = 1:numel(this.mBoundaryPlotHandles{idxBoundary})
                     if isvalid(this.mBoundaryPlotHandles{idxBoundary}(idxPolygon))
                         set(this.mBoundaryPlotHandles{idxBoundary}(idxPolygon), 'Visible',...
-                            this.mBoundaryGroupVisibility(idxBoundary) & this.mShowBoundarySurfaces)
+                            this.mVisible & this.mShowBoundarySurfaces & this.mBoundaryGroupVisibility(idxBoundary))
                     end
                 end
             end
@@ -251,7 +270,7 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
         function applyEdgeVisibility(this)
             for idxLine = 1:numel(this.mEdgePlotHandles)
                 if isvalid( this.mEdgePlotHandles(idxLine) )
-                    set(this.mEdgePlotHandles(idxLine),'Visible', this.mShowEdges);
+                    set(this.mEdgePlotHandles(idxLine),'Visible', this.mVisible & this.mShowEdges);
                 end
             end
         end
