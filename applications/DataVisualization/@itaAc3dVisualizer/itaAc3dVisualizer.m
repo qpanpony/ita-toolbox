@@ -1,4 +1,4 @@
-classdef itaAc3dVisualizer < Abstract3DModelVisualizer
+classdef itaAc3dVisualizer < itaAbstract3DModelVisualizer
     %itaAc3dVisualizer This class is used to visualize an AC3D model.
     %   Parameters for the plot are defined using class properties.
     %   Adjusting these leads to a real-time update the plot (if
@@ -89,7 +89,7 @@ classdef itaAc3dVisualizer < Abstract3DModelVisualizer
     %% Applying Plot Settings
     methods(Access = protected)
         function applyAllSettings(this)
-            applyAllSettings@Abstract3DModelVisualizer(this);
+            applyAllSettings@itaAbstract3DModelVisualizer(this);
         end
     end
 end

@@ -1,4 +1,4 @@
-classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
+classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
     %itaComsolModelVisualizer Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -153,7 +153,7 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
         
         function resetPlotHandles(this)
             %Resets all handles to plot items
-            resetPlotHandles@Abstract3DModelVisualizer(this);
+            resetPlotHandles@itaAbstract3DModelVisualizer(this);
             this.mMeshPlotHandles = [];
         end
         function clearPlotItems(this)
@@ -162,19 +162,19 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
             if ~isempty(this.mMeshPlotHandles) && isvalid(this.mMeshPlotHandles)
                 delete(this.mMeshPlotHandles)
             end
-            clearPlotItems@Abstract3DModelVisualizer(this);
+            clearPlotItems@itaAbstract3DModelVisualizer(this);
         end
     end
     
     %% Applying Plot Settings
     methods(Access = protected)
         function applyAllSettings(this)
-            applyAllSettings@Abstract3DModelVisualizer(this);
+            applyAllSettings@itaAbstract3DModelVisualizer(this);
             this.applyMeshColor();
         end
         
         function applyVisibility(this)
-            applyVisibility@Abstract3DModelVisualizer(this);
+            applyVisibility@itaAbstract3DModelVisualizer(this);
             this.applyMeshVisibility();
         end
     end

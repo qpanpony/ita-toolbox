@@ -1,5 +1,5 @@
-classdef (Abstract)Abstract3DModelVisualizer < handle
-    %Abstract3DModelVisualizer A base class for 3D visualization tools for
+classdef (Abstract)itaAbstract3DModelVisualizer < handle
+    %itaAbstract3DModelVisualizer A base class for 3D visualization tools for
     %3D data
     %   Parameters for the plot are defined using class properties.
     %   Adjusting these leads to a real-time update the plot (if
