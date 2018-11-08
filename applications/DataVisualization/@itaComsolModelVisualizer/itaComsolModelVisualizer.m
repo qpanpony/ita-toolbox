@@ -128,7 +128,7 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
             colors = get(groot,'DefaultAxesColorOrder');
             for groupID = 1:numel(boundaryGroups)
                 mphviewselection(this.mModel.modelNode, char(boundaryGroups{groupID}.tag),...
-                    'Parent', this.mAxes, 'geommode', 'off', ...
+                    'Parent', this.mAxes, 'geommode', 'off', 'edgemode', 'off',...
                     'facecolorselected', colors(mod(groupID-1, numel(colors))+1, :))
                 
                 this.mBoundaryPlotHandles{groupID} = this.mAxes.Children(1);
@@ -181,13 +181,14 @@ classdef itaComsolModelVisualizer < Abstract3DModelVisualizer
     
     methods(Access = private)
         function applyMeshVisibility(this)
+            visibleStr = this.getOnOffSwitchString(this.mVisible && this.mShowMesh);
             if ~isempty(this.mMeshPlotHandles) && isvalid(this.mMeshPlotHandles)
-                this.mMeshPlotHandles.Visible = this.mVisible & this.mShowMesh;
+                set(this.mMeshPlotHandles, 'Visible', visibleStr);
             end
         end
         function applyMeshColor(this)
             if ~isempty(this.mMeshPlotHandles) && isvalid(this.mMeshPlotHandles)
-                this.mMeshPlotHandles.EdgeColor = this.mMeshColor;
+                set(this.mMeshPlotHandles, 'EdgeColor', this.mMeshColor);
             end
         end
     end

@@ -247,10 +247,12 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
                 return
             end
             for idxBoundary = 1:numel(this.mBoundaryPlotHandles)
+                visibleStr = this.getOnOffSwitchString(...
+                    this.mVisible && this.mShowBoundarySurfaces &&...
+                    this.mBoundaryGroupVisibility(idxBoundary));
                 for idxPolygon = 1:numel(this.mBoundaryPlotHandles{idxBoundary})
                     if isvalid(this.mBoundaryPlotHandles{idxBoundary}(idxPolygon))
-                        set(this.mBoundaryPlotHandles{idxBoundary}(idxPolygon), 'Visible',...
-                            this.mVisible & this.mShowBoundarySurfaces & this.mBoundaryGroupVisibility(idxBoundary))
+                        set(this.mBoundaryPlotHandles{idxBoundary}(idxPolygon), 'Visible',visibleStr)
                     end
                 end
             end
@@ -268,9 +270,10 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
         
         %-------Edges------------------------------------------------------
         function applyEdgeVisibility(this)
+            visibleStr = this.getOnOffSwitchString(this.mVisible && this.mShowEdges);
             for idxLine = 1:numel(this.mEdgePlotHandles)
                 if isvalid( this.mEdgePlotHandles(idxLine) )
-                    set(this.mEdgePlotHandles(idxLine),'Visible', this.mVisible & this.mShowEdges);
+                    set(this.mEdgePlotHandles(idxLine),'Visible', visibleStr);
                 end
             end
         end
@@ -283,6 +286,17 @@ classdef (Abstract)Abstract3DModelVisualizer < handle
                         set(this.mEdgePlotHandles(idxLine),'Color', this.mEdgeColor);
                     end
                 end
+            end
+        end
+    end
+    
+    %% Helper
+    methods(Access = protected, Static = true)
+        function switchStr = getOnOffSwitchString(boolean)
+            if boolean
+                switchStr = 'on';
+            else
+                switchStr = 'off';
             end
         end
     end
