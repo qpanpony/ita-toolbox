@@ -410,11 +410,11 @@ classdef load_ac3d
         end
         
         function RT = getReverbTime(obj, material_path, sabine_or_eyring, factor, airAbsorption, portal_surface_materials)
-             if nargin < 4
+            if nargin < 5
                 airAbsorption = zeros(1,31);
             end
             
-            if nargin < 3
+            if nargin < 4
                 factor = 0.161;
             end
             if nargin < 3
@@ -444,9 +444,7 @@ classdef load_ac3d
                 end
             end
             
-            %RT = 0.163 .* obj.totalVolume ./ A;
-           % RT = (2.76 / sqrt(273.15 + room_temperature)) .* (obj.totalVolume ./ A);
-            RT = 0.161 .* obj.totalVolume ./ (A + 4*airAbsorption*obj.totalVolume);
+            RT = factor .* obj.totalVolume ./ (A + 4*airAbsorption*obj.totalVolume);
         end
         
         % get surface area of given material
