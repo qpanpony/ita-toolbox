@@ -24,6 +24,8 @@ classdef itaMaterial < itaSimulationInputItem
         impedance;              %Impedance Z - itaSuper
         absorption;             %Absorption coefficient alpha - itaSuper
         scattering;             %Scattering coefficient s - itaSuper
+    end
+    properties(Dependent = true, SetAccess = private)
         absorptionFromImpedance;%Same as absorption but computed from impedance (get only)
     end
     
@@ -96,10 +98,7 @@ classdef itaMaterial < itaSimulationInputItem
                 this.cAir = [];
                 return;
             end
-            
-            if ~isnumeric(c) || ~isscalar(c) || c < 0
-                error('Speed of sound must be a positive numeric scalar')
-            end
+            assert(isnumeric(c) && isscalar(c) && c > 0, 'Speed of sound must be a positive numeric scalar')
             this.cAir = c;
         end
     end
@@ -199,13 +198,14 @@ classdef itaMaterial < itaSimulationInputItem
         function alpha = impedanceToAbsorption(this)
             %Converts the impedance of this object to an absorption
             %coefficient
-            %
-            %Still needs implementation...
             
             alpha = [];
             
-            if ~this.HasImpedance
+            if ~this.HasImpedance()
                 warning('No impedance data available, returning empty data')
+                return
+            elseif ~this.mediumImpedanceDefined()
+                warning('No medium impedance (Z0) defined, returning empty data')
                 return
             end
             
