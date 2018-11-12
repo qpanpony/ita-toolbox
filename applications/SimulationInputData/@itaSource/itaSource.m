@@ -200,23 +200,24 @@ classdef itaSource < itaSpatialSimulationInputItem
     %------General---------------------------------------------------------
     methods
         function bool = HasPistonRadius(this)
-            bool = ~isempty(this.mPistonRadius);
+            bool = arrayfun(@(x) ~isempty(x.mPistonRadius), this);
         end
         function bool = HasSpatialInformation(this)
-            bool = HasSpatialInformation@itaSpatialSimulationInputItem(this);
-            if this.mType == SourceType.Piston
-                bool = bool & this.HasPistonRadius();
-            end
+            hasPositionAndOrientation = HasSpatialInformation@itaSpatialSimulationInputItem(this);
+            isPistonWithoutRadius =...
+                arrayfun(@(x) isequal(x.mType, SourceType.Piston), this) & ~this.HasPistonRadius();
+            
+            bool = hasPositionAndOrientation & ~isPistonWithoutRadius;
         end
         
         function bool = HasPressureTf(this)
-            bool = ~isempty(this.mPressureTf);
+            bool = arrayfun(@(x) ~isempty(x.mPressureTf), this);
         end
         function bool = HasWaveTf(this)
-            bool = ~isempty(this.mWaveTf);
+            bool = arrayfun(@(x) ~isempty(x.mWaveTf), this);
         end
         function bool = HasDirectivity(this)
-            bool = ~isempty(this.mDirectivityFile);
+            bool = arrayfun(@(x) ~isempty(x.mDirectivityFile), this);
         end
         
         function bool = HasGaData(this)
@@ -229,27 +230,20 @@ classdef itaSource < itaSpatialSimulationInputItem
             %Acoustics is available
             bool = this.HasWaveTf() & this.HasSpatialInformation();
         end
-        
-        function bool = isempty(this)
-            %Returns true if none of the frequency dependent data is set
-            bool =  isempty(this.mPressureTf) &&...
-                    isempty(this.mWaveTf) &&...
-                    isempty(this.mDirectivityFile);
-        end
     end
     
     %------Source type specific--------------------------------------------
     methods
         function bool = HasVolumeFlow(this)
-            bool = ~isempty(this.volumeFlowTf);
+            bool = arrayfun(@(x) ~isempty(x.volumeFlowTf), this);
         end
         function bool = HasVelocityTf(this)
-            bool = ~isempty(this.velocityTf);
+            bool = arrayfun(@(x) ~isempty(x.velocityTf), this);
         end
         function bool = HasVelocityCoordinates(this)
             %Checks whether the velocity transfer function has specified
             %channel coordinates for all channels
-            bool = this.HasVelocityTf() & this.itaSuperHasCoordinates( this.velocity );
+            bool = arrayfun(@(x) x.HasVelocityTf() && x.itaSuperHasCoordinates(x.velocityTf), this);
         end
     end
     methods(Access = private, Static = true)

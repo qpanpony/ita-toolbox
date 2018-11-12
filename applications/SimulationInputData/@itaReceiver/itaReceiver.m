@@ -52,14 +52,6 @@ classdef itaReceiver < itaSpatialSimulationInputItem
             %If we use a femGroup, we could use this later on
             %bool = ~isempty(this.mFemGroup);
         end
-        
-        function bool = isempty(this)
-            %Returns true if neither name or any spatial information is
-            %specified
-            bool =  isempty(this.mName) &&...
-                ~this.HasPosition() &&...
-                ~this.HasOrientation();
-        end
     end
     
     %% Public functions    

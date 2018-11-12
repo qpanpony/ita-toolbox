@@ -1,6 +1,6 @@
 classdef (Abstract) itaSpatialSimulationInputItem < itaSimulationInputItem
-    %itaSpatialSimulationInputItem Summary of this class goes here
-    %   Detailed explanation goes here
+    %itaSpatialSimulationInputItem Base class for simulation input data
+    %that has spatial information (position & orientation)
     
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.
@@ -65,10 +65,10 @@ classdef (Abstract) itaSpatialSimulationInputItem < itaSimulationInputItem
     %% Booleans
     methods
         function bool = HasPosition(this)
-            bool = ~isempty(this.mPosition) && this.mPosition.nPoints == 1;
+            bool = arrayfun(@(x) ~isempty(x.mPosition) && isequal(x.mPosition.nPoints, 1), this);
         end
         function bool = HasOrientation(this)
-            bool = ~isempty(this.mOrientation) && this.mOrientation.nPoints == 1;
+            bool = arrayfun(@(x) ~isempty(x.mOrientation) && isequal(x.mOrientation.nPoints, 1), this);
         end
         function bool = HasSpatialInformation(this)
             bool = this.HasPosition & this.HasOrientation;

@@ -11,7 +11,6 @@ classdef (Abstract) itaSimulationInputItem
     methods(Abstract)
         bool = HasGaData(this);   %Returns true if all data which is used for Geometrical Acoustics (GA) is available
         bool = HasWaveData(this); %Returns true if all data which is used for Wave-based Acoustics is available
-        bool = isempty(this);     %Returns true if none of the frequency dependent data is set
         obj = CrossfadeWaveAndGaData(this, crossfadeFreq);
     end
     
@@ -38,9 +37,7 @@ classdef (Abstract) itaSimulationInputItem
         end
         
         function this = set.name(this, strName)
-            if ~ischar(strName) || ~isrow(strName)
-                error('')
-            end
+            assert( ischar(strName) && isrow(strName), 'name must be a char row vector')
             this.mName = strName;
         end
         function out = get.name(this)
@@ -48,10 +45,23 @@ classdef (Abstract) itaSimulationInputItem
         end
     end
     
-    %% Bool
+    %% Booleans - also work on multi instances
     methods        
         function bool = HasName(this)
-            bool = ~isempty(this.name);
+            bool = arrayfun(@(x) ~isempty(x.name), this);
+        end
+        
+        function bool = HasUniqueNames(this)
+            %Returns true if the names of this matrix of
+            %itasimulationInputItems are unique.
+            bool = numel( unique({this.name}) ) == numel(this);
+        end
+        
+        function bool = SharesNameWith(this, otherInputItems)
+            %Compares this matrix of itaSimulationInputItem with another
+            %matrix and returns true if they share atleast one name.
+            assert(isa(otherInputItems, 'itaSimulationInputItem'), 'Input must be of type itaSimulationInputItem.')
+            bool = any( ismember({this.name}, {otherInputItems.name}) );
         end
     end
     

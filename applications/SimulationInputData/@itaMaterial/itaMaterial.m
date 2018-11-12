@@ -137,22 +137,13 @@ classdef itaMaterial < itaSimulationInputItem
     
     methods
         function bool = HasAbsorption(this)
-            bool = false(size(this));
-            for idxMat = 1:numel(this)
-                bool(idxMat) = ~isempty(this(idxMat).mAbsorption);
-            end
+            bool = arrayfun(@(x) ~isempty(x.mAbsorption), this);
         end
         function bool = HasScattering(this)
-            bool = false(size(this));
-            for idxMat = 1:numel(this)
-                bool(idxMat) = ~isempty(this(idxMat).mScattering);
-            end
+            bool = arrayfun(@(x) ~isempty(x.mScattering), this);
         end
         function bool = HasImpedance(this)
-            bool = false(size(this));
-            for idxMat = 1:numel(this)
-                bool(idxMat) = ~isempty(this(idxMat).mImpedance);
-            end
+            bool = arrayfun(@(x) ~isempty(x.mImpedance), this);
         end
         
         function bool = HasGaData(this)
@@ -164,13 +155,6 @@ classdef itaMaterial < itaSimulationInputItem
             %Returns true if all data which is used for Wave-based
             %Acoustics is available
             bool = this.HasImpedance();
-        end
-        
-        function bool = isempty(this)
-            %Returns true if none of the frequency dependent data is set
-            bool =  isempty(this.mImpedance) &&...
-                isempty(this.mAbsorption) &&...
-                isempty(this.mScattering);
         end
     end
     
