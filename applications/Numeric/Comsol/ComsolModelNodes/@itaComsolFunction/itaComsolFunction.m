@@ -48,6 +48,20 @@ classdef itaComsolFunction < itaComsolNode
             assert(isnumeric(freqVector) && isvector(freqVector) && isreal(freqVector), 'Second input must be a real-valued double vector')
             assert(isnumeric(complexDataVector) && isvector(complexDataVector), 'Third input must be a complex-valued double vector')
             assert(ischar(functionUnits) && isrow(functionUnits), 'Fourth input must be a char row vector')
+            assert(numel(freqVector) == numel(complexDataVector), 'Number of elements in frequency and data vector must be equal.')
+            switch numel(freqVector)
+                case 0
+                    error('Empty data specified')
+                case 1
+                    extrapolation = 'const';
+                    interpolation = 'neighbor';
+                case 2
+                    extrapolation = 'linear';
+                    interpolation = 'linear';
+                otherwise
+                    extrapolation = 'linear';
+                    interpolation = 'piecewisecubic'; %'cubicspline'
+            end
             
             interpolationNameReal = [interpolationBaseName '_real'];
             interpolationNameImag = [interpolationBaseName '_imag'];
@@ -58,8 +72,8 @@ classdef itaComsolFunction < itaComsolNode
             propertyStruct.source = 'table';
             propertyStruct.argunit = 'Hz';
             propertyStruct.fununit = functionUnits;
-            propertyStruct.extrap = 'linear';
-            propertyStruct.interp = 'piecewisecubic';
+            propertyStruct.extrap = extrapolation;
+            propertyStruct.interp = interpolation;
             
             obj.setNodeProperties(realInterpolationNode, propertyStruct);
             obj.setNodeProperties(imagInterpolationNode, propertyStruct);
