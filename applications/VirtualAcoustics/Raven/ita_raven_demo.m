@@ -8,7 +8,7 @@
 
 %% Projektdatei einlesen
 % project laden
-ravenProjectPath = '..\RavenInput\Classroom\Classroom.rpf';
+ravenProjectPath = 'C:\ITASoftware\Raven\RavenInput\Classroom\Classroom.rpf';
 
 if (~exist(ravenProjectPath,'file'))
     [filename, pathname] = uigetfile('Classroom.rpf', 'Please select raven project file!');

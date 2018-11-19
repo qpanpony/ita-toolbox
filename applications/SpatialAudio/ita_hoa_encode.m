@@ -1,4 +1,4 @@
-function [ audioOut ] = ita_3da_encodeAmbisonics( audioIn, order, sourcePos )
+function [ audioOut ] = ita_hoa_encodeAmbisonics( audioIn, order, sourcePos )
 %ITA_ENCODEAMBISONICS Encodes a itaAudio with channel coordinates or a
 % itaCoordinate with source positions into ambisonics channels
 %

@@ -204,6 +204,27 @@ classdef itaVA < handle
             state = VAMatlab('get_server_state', this.handle);
         end
         
+		
+		function shutdown_server(this)
+            % Attempts to shut down the remote server
+            %
+            % Server shutdown may be prohibited by the server configuration.
+			% Shutting donw the server from client side is meant for cases
+			% when the server is called by a script to run e.g. a simulation
+			% while the rendering output is recorded. The export is triggered
+			% when the core is finalized (or shut down).
+            %
+            % Parameters:
+            %
+            % 	None
+            %
+            % Return values:
+            %
+            % 	None
+            %
+			VAMatlab( 'call_module', this.handle, 'VACore', struct( 'shutdown', true ) );
+        end
+        
         function connect_tracker( this, remote_ip, local_ip )
             % Connects to a local NatNet tracking server
             % 

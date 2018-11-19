@@ -236,7 +236,9 @@ classdef itaRavenProject < handle
                 obj.raven_ini = IniConfig();
                 obj.raven_ini.ReadFile(obj.ravenIniFile);
                 obj.ravenExe         = obj.raven_ini.GetValues('Global', 'PathRavenExe', obj.ravenExe);
-                obj.raven_ini.WriteFile(obj.ravenIniFile);
+                if (exist(obj.ravenExe,'file'))
+                    obj.raven_ini.WriteFile(obj.ravenIniFile);
+                end
             end
             
             if (~exist(obj.ravenExe,'file'))
@@ -246,23 +248,46 @@ classdef itaRavenProject < handle
                 % RavenConsole
                 locatedRavenExe = which(obj.ravenExe(10:end));
                 
+                % try default raven exe path after instalation
                 if isempty(locatedRavenExe)
-                    disp('[itaRaven]: No raven binary was found! Please select path to RavenConsole.exe!');
+                    if strcmp(computer('arch'), 'win32')
+                        defaultInstallationPathRavenExe = 'C:\ITASoftware\Raven\bin32\RavenConsole.exe';
+                    elseif strcmp(computer('arch'), 'win64')
+                        defaultInstallationPathRavenExe = 'C:\ITASoftware\Raven\bin64\RavenConsole64.exe';
+                    else
+                        error('Only Windows OS are supported.');
+                    end
+                    
+                    if exist(defaultInstallationPathRavenExe,'file')
+                        locatedRavenExe = defaultInstallationPathRavenExe;
+                    end
+                end
+                
+                if isempty(locatedRavenExe)
+                    
+                    disp('[itaRaven]:');
+                    disp('No RAVEN binary was found! Please select path to the RAVEN console application (RavenConsole.exe/RavenConsole64.exe)!');
+                    disp('To run RAVEN simulations, an installation of the RAVEN software is required. ');
+                    disp('Individual licenses for academic purposes are available on request.');
+                    disp('Please contact: las@akustik.rwth-aachen.de');
+                    
                     [ selectedRavenExe, selectedRavenPath] = uigetfile('*.exe',' No raven binary was found! Please select path to RavenConsole.exe');
                     obj.ravenExe = [ selectedRavenPath selectedRavenExe];
                 else
                     obj.ravenExe = locatedRavenExe;
+
                 end
                 
                 if (~ravenIniExists)
                     obj.raven_ini = IniConfig();
-                    %                         obj.raven_ini.ReadFile(obj.ravenIniFile);
                     obj.raven_ini.AddSections({'Global'});
                     obj.raven_ini.AddKeys('Global', {'PathRavenExe'}, {obj.ravenExe});
+                    obj.raven_ini.WriteFile(obj.ravenIniFile);
+                    
                 else
                     obj.raven_ini.SetValues('Global', {'PathRavenExe'}, {obj.ravenExe});
+                    obj.raven_ini.WriteFile(obj.ravenIniFile);
                 end
-                obj.raven_ini.WriteFile(obj.ravenIniFile);
                 
             end
             
