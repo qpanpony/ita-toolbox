@@ -12,6 +12,7 @@ classdef (Abstract)itaComsolNode < handle
     %   -Physics
     %   -Mesh
     %   -Study
+    %   -Batch
     %   -Results
     %   Use mphnavigator() on a comsol model for more information
     

@@ -19,8 +19,6 @@ classdef itaComsolModel < handle
     %       -Interpolations
     %   -Geometry
     %       -for sources (points / boundary surfaces)
-    %
-    %   This class is able to adjust:
     %   -Materials
     %       -...(to be added in future)
     %   -Physics
@@ -30,6 +28,8 @@ classdef itaComsolModel < handle
     %       -... ()
     %   -Study
     %       -frequency vector
+    %   -Batch
+    %       -...
     
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.
@@ -46,6 +46,7 @@ classdef itaComsolModel < handle
         mPhysicsNode;
         mMeshNode;
         mStudyNode;
+        mBatchNode;
         mResultNode;
     end
     properties(Dependent = true, SetAccess = private)
@@ -58,6 +59,7 @@ classdef itaComsolModel < handle
         physics;        %Interface to access Comsol physics sequences (itaComsolPhysics)
         mesh;           %Interface to access Comsol mesh sequences (itaComsolMesh)
         study;          %Interface to access Comsol study clients (itaComsolStudy)
+        batch;          %Interface to access Comsol batch clients (itaComsolBatch)
         result;         %Interface to evaluate results (itaComsolResult)
     end
     
@@ -88,6 +90,9 @@ classdef itaComsolModel < handle
             out = obj.mStudyNode;
         end
         
+        function out = get.batch(obj)
+            out = obj.mBatchNode;
+        end
         function out = get.result(obj)
             out = obj.mResultNode;
         end
@@ -107,6 +112,7 @@ classdef itaComsolModel < handle
             obj.mPhysicsNode = itaComsolPhysics(obj);
             obj.mMeshNode = itaComsolMesh(obj);
             obj.mStudyNode = itaComsolStudy(obj);
+            obj.mBatchNode = itaComsolBatch(obj);
             obj.mResultNode = itaComsolResult(obj);
             
             assert(~isempty(obj.mGeometryNode.activeNode), 'No Comsol geometry node found')
