@@ -142,7 +142,8 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
         end
         
         function plotMesh(this)
-            %TODO: Make sure that the mesh is built
+            if isempty(this.mModel.mesh.activeNode); return; end
+            this.mModel.mesh.activeNode.run;
             mphmesh(this.mModel.modelNode, this.mModel.mesh.activeNode.tag, 'Parent', this.mAxes, 'edgemode', 'off')
             this.mMeshPlotHandles = this.mAxes.Children(1);
             delete(this.mAxes.Children(2));
