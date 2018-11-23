@@ -7,11 +7,17 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
         
         mShowMesh = false;
         mMeshColor = [0 0 0];
+        
+        mBoundaryGroupFilter = 'all';
     end
     
     properties(Dependent = true)
         showMesh;               %Visibility for mesh
         meshColor;              %Color of the mesh lines
+    end
+    
+    properties(Dependent = true, Hidden = true)
+        boundaryGroupFilter;    %Used to filter boundary groups. See itaComsolSelection.filters for more information
     end
     
     %% Constructing / Model related
@@ -48,7 +54,7 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
     end
     methods(Access = protected)
         function out = numberOfBoundaryGroups(this)
-            out = numel(this.mModel.selection.BoundaryGroups());
+            out = numel(this.mModel.selection.BoundaryGroups(this.mBoundaryGroupFilter));
         end
     end
     
@@ -60,6 +66,9 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
         end
         function out = get.meshColor(this)
             out = this.mMeshColor;
+        end
+        function out = get.boundaryGroupFilter(this)
+            out = this.mBoundaryGroupFilter;
         end
     end
     
@@ -81,6 +90,17 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
             this.mMeshColor = color;
             if this.autoRefresh
                 this.applyMeshColor();
+            end
+        end
+        function set.boundaryGroupFilter(this, filter)
+            assert(ischar(filter) && isrow(filter), 'Input must be a char row vector')
+            assert( any( strcmpi(itaComsolSelection.filters(:), filter) ), ...
+                'Invalid filter option. Valid options are:\n%s', strjoin(itaComsolSelection.filters, ' , '))
+            if isequal(this.mBoundaryGroupFilter, filter); return; end
+            
+            this.mBoundaryGroupFilter = filter;
+            if this.autoRefresh && this.axesSpecified()
+                this.RefreshPlot(true);
             end
         end
     end
@@ -123,7 +143,7 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
         
         function plotBoundaryGroups(this)
             
-            boundaryGroups = this.mModel.selection.BoundaryGroups();
+            boundaryGroups = this.mModel.selection.BoundaryGroups(this.mBoundaryGroupFilter);
             this.mBoundaryPlotHandles = cell(1, numel(boundaryGroups));
             colors = get(groot,'DefaultAxesColorOrder');
             for groupID = 1:numel(boundaryGroups)
