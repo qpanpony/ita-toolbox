@@ -14,6 +14,12 @@ classdef itaComsolSource < handle
         mSourceImagDataNode;
     end
     
+    properties(Constant = true)
+        pistonGeometryTagSuffix = '_pistonSourceGeometry';
+        pointSourceGeometryTagSuffix = '_pointSourcePosition';
+        geometryTagSuffixes = {itaComsolSource.pistonGeometryTagSuffix, itaComsolSource.pointSourceGeometryTagSuffix};
+    end
+    
     %% Constructor
     methods
         function obj = itaComsolSource(comsolModel, sourceGeometryNode, sourcePhysicsNode, realInterpolationNode, imagInterpolationNode)
@@ -72,7 +78,7 @@ classdef itaComsolSource < handle
             assert(source.type == SourceType.Piston,'SourceType of given source must be Piston')
             
             baseTag = strrep(source.name, ' ', '_');
-            sourceGeometryBaseTag = [baseTag '_pistonSourceGeometry'];
+            sourceGeometryBaseTag = [baseTag itaComsolSource.pistonGeometryTagSuffix];
             sourceTag = [baseTag '_pistonSource'];
             interpolationBaseTag = [baseTag '_pistonSourceVelocity'];
             
@@ -101,7 +107,7 @@ classdef itaComsolSource < handle
             assert(source.type == SourceType.PointSource,'SourceType of given source must be PointSource')
             
             baseTag = strrep(source.name, ' ', '_');
-            pointTag = [baseTag '_pointSourcePosition'];
+            pointTag = [baseTag itaComsolSource.pointSourceGeometryTagSuffix];
             sourceTag = [baseTag '_pointSource'];
             interpolationBaseTag = [baseTag '_pointSourceVolumeFlow'];
             
