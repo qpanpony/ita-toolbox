@@ -145,6 +145,8 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
             if ~isempty(this.mModel.geometry.activeNode)
                 this.mModel.geometry.activeNode.run;
             end
+            [az, el] = view(this.mAxes); %NOTE: Comsol plot functions overwrite view, so we have to restore it later
+            
             boundaryGroups = this.mModel.selection.BoundaryGroups(this.mBoundaryGroupFilter);
             this.mBoundaryPlotHandles = cell(1, numel(boundaryGroups));
             colors = get(groot,'DefaultAxesColorOrder');
@@ -155,21 +157,31 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
                 
                 this.mBoundaryPlotHandles{groupID} = this.mAxes.Children(1);
             end
+            
             title(this.mAxes, '')
+            view(az, el);
         end
         function plotEdges(this)
+            [az, el] = view(this.mAxes); %NOTE: Comsol plot functions overwrite view, so we have to restore it later
+            
             mphgeom(this.mModel.modelNode, this.mModel.geometry.activeNode.tag, 'Parent', this.mAxes, 'facemode', 'off')
             this.mEdgePlotHandles = this.mAxes.Children(1);
+            
             title(this.mAxes, '')
+            view(az, el);
         end
         
         function plotMesh(this)
             if isempty(this.mModel.mesh.activeNode); return; end
+            [az, el] = view(this.mAxes); %NOTE: Comsol plot functions overwrite view, so we have to restore it later
+            
             this.mModel.mesh.activeNode.run;
             mphmesh(this.mModel.modelNode, this.mModel.mesh.activeNode.tag, 'Parent', this.mAxes, 'edgemode', 'off')
             this.mMeshPlotHandles = this.mAxes.Children(1);
             delete(this.mAxes.Children(2));
+            
             title(this.mAxes, '')
+            view(az, el);
         end
 
         %-----------Remove-------------------------------------------------
