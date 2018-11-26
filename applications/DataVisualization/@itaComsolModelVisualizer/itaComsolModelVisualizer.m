@@ -142,7 +142,9 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
         %-----------Create-------------------------------------------------
         
         function plotBoundaryGroups(this)
-            
+            if ~isempty(this.mModel.geometry.activeNode)
+                this.mModel.geometry.activeNode.run;
+            end
             boundaryGroups = this.mModel.selection.BoundaryGroups(this.mBoundaryGroupFilter);
             this.mBoundaryPlotHandles = cell(1, numel(boundaryGroups));
             colors = get(groot,'DefaultAxesColorOrder');
