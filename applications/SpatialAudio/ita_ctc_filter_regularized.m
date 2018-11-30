@@ -16,7 +16,7 @@ function [ CTC ] = ita_ctcFilter_regularized( varargin )
 %   Postprocessing options can be found below
 %
 %   For smoothing of HRTF or CTC filters use the functions provided by
-%   ita_3da_smoothing
+%   ita_ctc_smoothHRTF
 
 
 %% Options
