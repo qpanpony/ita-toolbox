@@ -20,9 +20,18 @@ end
 nSH = (nmax+1).^2;
 
 filename = ['md' num2str(nmax,'%03d') '.' num2str(nSH,'%05d')];
-
 url = 'http://web.maths.unsw.edu.au/~rsw/Sphere/Extremal/New/';
-hyper = str2num(urlread([url filename])); %#ok<ST2NM>
+fullurl = strcat(url, filename);
+
+% MATLAB seems to have issues with SSL Certificates
+% A workaround is to remove the standard certificate by setting it's
+% filename to an empty string. Not the most elegant solution.
+options = weboptions('CertificateFilename', '', ...
+                     'ContentType', 'text');
+data = webread(fullurl, options);
+
+% use str2num here, as str2double fails to parse the data
+hyper = str2num(data); %#ok<ST2NM>
 
 s = itaSamplingSph(hyper(:,1:3),'cart');
 s.r = ones(s.nPoints,1);

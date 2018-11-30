@@ -431,11 +431,6 @@ function [] = daffv17_write( varargin )
     % integers but within epsilon
     x = cell( round( args.alphapoints ), round( args.betapoints ), args.channels );
     
-    % Speed up for itaHRTF class
-    if isa( args.userdata, 'itaHRTF' )
-        args.userdata = args.userdata.buildsearchdatabase;
-    end
-    
     disp( 'Starting to gather data via callback function, this might take a while ...' )
     for b=1:args.betapoints
         tic
