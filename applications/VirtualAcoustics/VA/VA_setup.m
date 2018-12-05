@@ -1,35 +1,35 @@
-function varargout = itaVA_setup(varargin)
-% ITAVA_SETUP MATLAB code for itaVA_setup.fig
-%      ITAVA_SETUP, by itself, creates a new ITAVA_SETUP or raises the existing
+function varargout = VA_setup(varargin)
+% VA_SETUP MATLAB code for VA_setup.fig
+%      VA_SETUP, by itself, creates a new VA_SETUP or raises the existing
 %      singleton*.
 %
-%      H = ITAVA_SETUP returns the handle to a new ITAVA_SETUP or the handle to
+%      H = VA_SETUP returns the handle to a new VA_SETUP or the handle to
 %      the existing singleton*.
 %
-%      ITAVA_SETUP('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in ITAVA_SETUP.M with the given input arguments.
+%      VA_SETUP('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in VA_SETUP.M with the given input arguments.
 %
-%      ITAVA_SETUP('Property','Value',...) creates a new ITAVA_SETUP or raises the
+%      VA_SETUP('Property','Value',...) creates a new VA_SETUP or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before itaVA_setup_OpeningFcn gets called.  An
+%      applied to the GUI before VA_setup_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to itaVA_setup_OpeningFcn via varargin.
+%      stop.  All inputs are passed to VA_setup_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help itaVA_setup
+% Edit the above text to modify the response to help VA_setup
 
-% Last Modified by GUIDE v2.5 08-Feb-2017 15:42:50
+% Last Modified by GUIDE v2.5 05-Dec-2018 16:00:56
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
                    'gui_Singleton',  gui_Singleton, ...
-                   'gui_OpeningFcn', @itaVA_setup_OpeningFcn, ...
-                   'gui_OutputFcn',  @itaVA_setup_OutputFcn, ...
+                   'gui_OpeningFcn', @VA_setup_OpeningFcn, ...
+                   'gui_OutputFcn',  @VA_setup_OutputFcn, ...
                    'gui_LayoutFcn',  [] , ...
                    'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,15 +44,15 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before itaVA_setup is made visible.
-function itaVA_setup_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before VA_setup is made visible.
+function VA_setup_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to itaVA_setup (see VARARGIN)
+% varargin   command line arguments to VA_setup (see VARARGIN)
 
-% Choose default command line output for itaVA_setup
+% Choose default command line output for VA_setup
 handles.output = hObject;
 
 % Update handles structure
@@ -67,7 +67,7 @@ if ~isempty( current_va_mex_dir )
     
     set( handles.edit_vamatlab_full_path, 'String', current_va_mex_dir )
     try
-        v = VAMatlab( 'getVersion' );
+        v = VAMatlab( 'get_version' );
         set( handles.edit_vamatlab_version, 'String', v )
     catch
         set( handles.edit_vamatlab_version, 'String', 'Failed to execute VAMatlab, probably a depending library is missing.' )
@@ -104,7 +104,7 @@ uiwait( handles.figure1 );
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = itaVA_setup_OutputFcn(hObject, eventdata, handles) 
+function varargout = VA_setup_OutputFcn(hObject, eventdata, handles) 
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -218,7 +218,7 @@ if vamatlab_found
         savepath
     end
     set( handles.edit_vamatlab_full_path, 'String', fullfile( vamatlab_dir, [ 'VAMatlab.' mexext ] ) )
-    v = VAMatlab( 'getVersion' );
+    v = VAMatlab( 'get_version' );
     set( handles.edit_vamatlab_version, 'String', v )
 else
     set( handles.edit_vamatlab_full_path, 'String', 'not found' )

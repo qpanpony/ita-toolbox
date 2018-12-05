@@ -1,22 +1,19 @@
-%% itaVA offline simulation/auralization example that uses impulse responses
+%% VA offline simulation/auralization example that uses impulse responses
 
 % Requires VA to run with a virtual audio device that can be triggered by
 % the user. Also the generic path prototype rendering module(s) has to record the output
 % to hard drive.
 
-buffer_size = 64;
-sampling_rate = 44100;
-
 
 %% Connect and set up simple scene
-va = itaVA( 'localhost' );
+va = VA( 'localhost' );
 
-L = va.create_sound_receiver( 'itaVA_Listener' );
+L = va.create_sound_receiver( 'VA_Listener' );
 va.set_sound_receiver_position( L, [ 0 1.7 0 ] )
-H = va.create_directivity( '$(DefaultHRIR)' );
+H = va.create_directivity_from_file( '$(DefaultHRIR)' );
 va.set_sound_receiver_directivity( L, H );
 
-S = va.create_sound_source( 'itaVA_Source' );
+S = va.create_sound_source( 'VA_Source' );
 X = va.create_signal_source_buffer_from_file( '$(DemoSound)' );
 va.set_signal_source_buffer_playback_action( X, 'play' )
 va.set_signal_source_buffer_looping( X, true );
@@ -25,7 +22,7 @@ va.set_sound_source_signal_source( S, X )
 
 %% Example for a synchronized scene update & audio processing simulation/auralization
 
-timestep = buffer_size / sampling_rate; % here: depends on block size and sample rate
+timestep = 128 / 44100; % here: depends on block size and sample rate
 manual_clock = 0;
 va.set_core_clock( 0 );
 

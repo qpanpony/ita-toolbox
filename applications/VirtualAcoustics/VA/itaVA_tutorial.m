@@ -1,4 +1,4 @@
-%% Short tutorial for itaVA, a Matlab interface for Virtual Acoustics (VA)
+%% Short tutorial for VA, a Matlab interface for Virtual Acoustics (VA)
 % The tutorial covers basic operations for setting up a simple virtual scene
 % (1 receiver, 1 static / 1 moving virtual sound source), and explains how to
 % set up a synchronized playback of multiple virtual sound sources.
@@ -12,7 +12,7 @@
 % which can be downloaded here: http://www.virtualacoustics.org/ (section Download)
 % For a more detailed introduction, the reader is referred to http://www.virtualacoustics.org/start.html
 %
-% Explore itaVA by typing "doc itaVA" in Matlab's command window.
+% Explore VA by typing "doc VA" in Matlab's command window.
 %
 % Author:   Florian Pausch, fpa@akustik.rwth-aachen.de
 % Version:  2018-03-27 (compatible with VA.v2018a_preview.win32-x64.vc12 (and probably higher))
@@ -49,8 +49,8 @@ else
 end
  
 
-%% Step 2: Create itaVA object and connect to VAServer
-a = itaVA;
+%% Step 2: Create VA object and connect to VAServer
+a = VA;
 
 % Connect to VAServer (must be running and listening to default port on localhost)
 if ~a.get_connected % only connect if no connection to server is established
@@ -268,7 +268,7 @@ if useTracker
     a.disconnect_tracker
 end
 
-% disconnect itaVA object from server
+% disconnect VA object from server
 a.disconnect()
 
 
