@@ -63,7 +63,8 @@ a.reset()
 % Optionally add important data directories (if not specified in the VA setup GUI which pops up the first time you use VA)
 a.add_search_path( fullfile( deployDir, 'data' ) );
 a.add_search_path( fullfile( deployDir, 'conf' ) );
-
+%a.add_search_path( 'C:/Users/Rocky/Experiment/InputWAVFiles' )
+%a.add_search_path( 'C:/Users/Rocky/Experiment/HRTFs' )
 
 %% Step 3: Set global output gain
 % set global gain of VA output
@@ -88,7 +89,7 @@ a.set_output_gain(0.3); % value between 0 (-inf dB) and 1 (0 dB)
 %% Step 4: Create a receiver and assign an HRIR set
 % load HRTF set stored in VADataDir\HRIR
 
-HRIRSet = a.create_directivity( 'ITA_Artificial_Head_5x5_44kHz_128.v17.ir.daff' ); % $(DefaultHRIR) macro would work, too
+HRIRSet = a.create_directivity_from_file( 'ITA_Artificial_Head_5x5_44kHz_128.v17.ir.daff' ); % $(DefaultHRIR) macro would work, too
 
 % create a receiver and assign the HRTF set
 L       = a.create_sound_receiver('Listener'); % input parameters: (displayed) name (in VAGUI) / auralization mode / ID of HRIR data set
