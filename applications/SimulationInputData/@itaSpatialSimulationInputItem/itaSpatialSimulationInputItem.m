@@ -18,7 +18,7 @@ classdef (Abstract) itaSpatialSimulationInputItem < itaSimulationInputItem
     %% Constructor
     methods
         function obj = itaSpatialSimulationInputItem()
-            obj.mPosition = itaCoordinates([0 0 0]); 
+            obj.mPosition = itaCoordinates([0 0 0]);
             obj.mOrientation = itaOrientation.FromViewUp([1 0 0], [0 1 0]);
         end
     end
