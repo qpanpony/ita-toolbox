@@ -8,10 +8,11 @@ classdef itaComsolSource < handle
     
     properties(Access = private)
         mModel;
-        mSourceGeometryNode;
-        mSourcePhysicsNode;
-        mSourceRealDataNode;
-        mSourceImagDataNode;
+        mGeometryNode;
+        mBoundaryImpedanceNode;
+        mPhysicsNode;
+        mRealDataNode;
+        mImagDataNode;
     end
     
     properties(Constant = true)
@@ -22,7 +23,7 @@ classdef itaComsolSource < handle
     
     %% Constructor
     methods
-        function obj = itaComsolSource(comsolModel, sourceGeometryNode, sourcePhysicsNode, realInterpolationNode, imagInterpolationNode)
+        function obj = itaComsolSource(comsolModel, sourceGeometryNode, sourcePhysicsNode, realInterpolationNode, imagInterpolationNode, boundaryImpedanceNode)
             %Constructor should only be used to create empty object (no
             %input). To create a non-empty object, use static Create functions!
             
@@ -36,11 +37,18 @@ classdef itaComsolSource < handle
             assert(isa(realInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fourth input must be a comsol function feature node')
             assert(isa(imagInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fifth input must be a comsol function feature node')
             
+            if nargin == 6
+                assert(isa(boundaryImpedanceNode, 'com.comsol.clientapi.impl.PhysicsFeatureClient'), 'Sixth input must be a comsol physics feature node')
+            else
+                boundaryImpedanceNode = [];
+            end
+            
             obj.mModel = comsolModel;
-            obj.mSourceGeometryNode = sourceGeometryNode;
-            obj.mSourcePhysicsNode = sourcePhysicsNode;
-            obj.mSourceRealDataNode = realInterpolationNode;
-            obj.mSourceImagDataNode = imagInterpolationNode;
+            obj.mGeometryNode = sourceGeometryNode;
+            obj.mPhysicsNode = sourcePhysicsNode;
+            obj.mRealDataNode = realInterpolationNode;
+            obj.mImagDataNode = imagInterpolationNode;
+            obj.mBoundaryImpedanceNode = boundaryImpedanceNode;
         end
     end
     
@@ -79,6 +87,7 @@ classdef itaComsolSource < handle
             
             baseTag = strrep(source.name, ' ', '_');
             sourceGeometryBaseTag = [baseTag itaComsolSource.pistonGeometryTagSuffix];
+            soundHardTag = [baseTag '_pistonSourceSoundHardBoundary'];
             sourceTag = [baseTag '_pistonSource'];
             interpolationBaseTag = [baseTag '_pistonSourceVelocity'];
             
@@ -87,12 +96,14 @@ classdef itaComsolSource < handle
             geometry.activeNode = comsolModel.modelNode.geom(physicsNode.geom);
             [sourceGeometryNode, selectionTag] = geometry.CreatePistonGeometry(sourceGeometryBaseTag, source);
             
+            soundHardBoundaryNode = comsolModel.physics.CreateSoundHardBoundary(soundHardTag, selectionTag);
+            
             [realInterpolationNode, imagInterpolationNode, funcExpression] = ...
             itaComsolSource.createVelocityInterpolation(comsolModel, interpolationBaseTag, source.velocityTf.freqVector, source.velocityTf.freqData);
             
             normalVelocityNode = comsolModel.physics.CreateNormalVelocity(sourceTag, selectionTag, funcExpression);
             
-            obj = itaComsolSource(comsolModel, sourceGeometryNode, normalVelocityNode, realInterpolationNode, imagInterpolationNode);
+            obj = itaComsolSource(comsolModel, sourceGeometryNode, normalVelocityNode, realInterpolationNode, imagInterpolationNode, soundHardBoundaryNode);
             obj.Enable();
         end
         function obj = CreatePointSource(comsolModel, source)
@@ -129,16 +140,22 @@ classdef itaComsolSource < handle
     %% Enable / Disable
     methods
         function Disable(obj)
-            obj.mSourceGeometryNode.active(false);
-            obj.mSourcePhysicsNode.active(false);
-            obj.mSourceRealDataNode.active(false);
-            obj.mSourceImagDataNode.active(false);
+            obj.mGeometryNode.active(false);
+            obj.mPhysicsNode.active(false);
+            obj.mRealDataNode.active(false);
+            obj.mImagDataNode.active(false);
+            if ~isempty(obj.mBoundaryImpedanceNode)
+                obj.mBoundaryImpedanceNode.active(false)
+            end
         end
         function Enable(obj)
-            obj.mSourceGeometryNode.active(true);
-            obj.mSourcePhysicsNode.active(true);
-            obj.mSourceRealDataNode.active(true);
-            obj.mSourceImagDataNode.active(true);
+            obj.mGeometryNode.active(true);
+            obj.mPhysicsNode.active(true);
+            obj.mRealDataNode.active(true);
+            obj.mImagDataNode.active(true);
+            if ~isempty(obj.mBoundaryImpedanceNode)
+                obj.mBoundaryImpedanceNode.active(true)
+            end
         end
     end
     

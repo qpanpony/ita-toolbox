@@ -94,6 +94,22 @@ classdef itaComsolPhysics < itaComsolNode
             impedanceNode.set('ImpedanceModel', 'UserDefined');
             impedanceNode.set('Zi', impedanceExpression);
         end
+        
+        function soundHardNode = CreateSoundHardBoundary(obj, soundHardTag, selectionTag)
+            %Creates a sound hard boundary node for the active physics node
+            %   Inputs:
+            %   soundHardTag            Tag for sound hard node [char row vector]
+            %   selectionTag            Tag of the selection the impedance is linked to [char row vector]
+            assert(ischar(soundHardTag) && isrow(soundHardTag), 'First input must be a char row vector')
+            assert(ischar(selectionTag) && isrow(selectionTag), 'Second input must be a char row vector')
+            
+            physics = obj.activeNode;
+            if ~obj.hasFeatureNode(physics, soundHardTag)
+                physics.create(soundHardTag, 'SoundHard', 2);
+            end
+            soundHardNode = physics.feature(soundHardTag);
+            soundHardNode.selection.named(selectionTag);
+        end
     end
     
     %% Source related
