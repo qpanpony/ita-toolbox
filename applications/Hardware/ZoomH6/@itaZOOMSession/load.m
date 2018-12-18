@@ -15,6 +15,15 @@ function load( obj, session_path )
     catch
 
     end
+    
+    if isempty( obj.identifier )
+        lst = dir('*.hprj' );
+        if numel( lst ) ~= 1
+            error 'Could not interpret the given path as a zoom session';
+        else
+             [ ~, obj.identifier ] = fileparts( lst.name );
+        end
+    end
 
     if strcmpi( 'ZOOM', obj.identifier( 1:4 ) )
         id_cells = textscan( obj.identifier( 5:8 ), '%d' );
@@ -23,7 +32,7 @@ function load( obj, session_path )
 
     obj.session_ready = true;
 
-    lst = dir( obj.path );    
+    lst = dir( obj.path );
     for i = 1:numel( lst )
 
         % Skip folders
