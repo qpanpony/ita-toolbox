@@ -1,10 +1,11 @@
 function [ binOut ] = ita_binauralMixdown( lsSignals, varargin )
 %ITA_3DA_BINAURALMIXDOWN Produces a 2-Channel binaural stream out of
 %loudspeaker signal(s) and coordinates (given as optional coordinates or
-%better: encoded in the itaAudio channel coordinates
+%better: encoded in the itaAudio channel coordinates)
 %   Detailed explanation goes here
-opts.HRTF='D:\DATA\sciebo\MKOScripts\HRTFs\2015_ITA-Kunstkopf_HRIR_2ch_D186_1x1_256_v17.daff';
-opts.LSPos=itaCoordinates;
+
+opts.HRTF  = 'D:\DATA\sciebo\MKOScripts\HRTFs\2015_ITA-Kunstkopf_HRIR_2ch_D186_1x1_256_v17.daff';   % Path to the used HRTF
+opts.LSPos = itaCoordinates; % itaCoordinates of the loudspeaker positions
 
 if nargin>1
     opts=ita_parse_arguments(opts,varargin);

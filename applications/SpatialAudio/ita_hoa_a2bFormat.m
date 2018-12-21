@@ -12,23 +12,26 @@ function [ varargout ] = ita_hoa_a2bFormat(varargin)
 %
 % Channel assignment outgoing: W, X, Y, Z
 %
-if nargin == 4
-    FLU=varargin{1};
-    FRD=varargin{2};
-    BLD=varargin{3};
-    BRU=varargin{4};
-elseif nargin == 1
+opts.typeIn=1; % type 2 is for DPA-4 Mics, then channel assignment: FLD, FRU, BLU, BRD
+
+
+if ( ~isa(varargin{2},'itaAudio') )
+    assert( varargin{1}.nChannels == 4 )
+    varargin{1}=merge(varargin{1}(:));
     FLU=varargin{1}.ch(1);
     FRD=varargin{1}.ch(2);
     BLD=varargin{1}.ch(3);
     BRU=varargin{1}.ch(4);
-    assert( varargin{1}.nChannels == 4 )
+    opts=ita_parse_arguments(opts,varargin{2:end});
+elseif ( isa(varargin{1},'itaAudio') && isa(varargin{2},'itaAudio') && isa(varargin{3},'itaAudio') && isa(varargin{4},'itaAudio'))
+    FLU=varargin{1};
+    FRD=varargin{2};
+    BLD=varargin{3};
+    BRU=varargin{4};
+    opts=ita_parse_arguments(opts,varargin{5:end});
 else
-    error('Need 4 channel input or 4 inputs');
+    error('Need 4 channel input or at least 4 itaAudio inputs');
 end
-
-    
-type=1; % type 2 is for DPA-4 Mics
 
 switch type
     case 1
