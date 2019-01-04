@@ -31,14 +31,23 @@ classdef itaComsolSource < handle
             if nargin == 0
                 return;
             end
+            
+            %Geometry only
             assert(isa(comsolModel, 'itaComsolModel'), 'First input must be a single itaComsolModel')
             assert(isa(sourceGeometryNode, 'com.comsol.clientapi.impl.GeomFeatureClient'), 'Second input must be a comsol geometry feature node')
-            assert(isa(sourcePhysicsNode, 'com.comsol.clientapi.physics.impl.PhysicsFeatureClient'), 'Third input must be a comsol physics feature node')
-            assert(isa(realInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fourth input must be a comsol function feature node')
-            assert(isa(imagInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fifth input must be a comsol function feature node')
             
+            %Full source data
+            if nargin > 2
+                assert(isa(sourcePhysicsNode, 'com.comsol.clientapi.physics.impl.PhysicsFeatureClient'), 'Third input must be a comsol physics feature node')
+                assert(isa(realInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fourth input must be a comsol function feature node')
+                assert(isa(imagInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fifth input must be a comsol function feature node')
+            else
+                sourcePhysicsNode = [];
+                realInterpolationNode = [];
+                imagInterpolationNode = [];
+            end
             if nargin == 6
-                assert(isa(boundaryImpedanceNode, 'com.comsol.clientapi.impl.PhysicsFeatureClient'), 'Sixth input must be a comsol physics feature node')
+                assert(isa(boundaryImpedanceNode, 'com.comsol.clientapi.physics.impl.PhysicsFeatureClient'), 'Sixth input must be a comsol physics feature node')
             else
                 boundaryImpedanceNode = [];
             end
@@ -54,6 +63,47 @@ classdef itaComsolSource < handle
     
     %----------Static Creators------------
     methods(Static = true)
+        function obj = CreateGeometry(comsolModel, source)
+            %Creates an source geometry for the given comsol model using
+            %an itaSource depending on its SourceType.
+            %   Inputs:
+            %   comsolModel     Comsol model, the source is created for [itaComsolModel]
+            %   source          Object with source data [single itaSource]
+            %
+            %   Supported source types: Piston
+            assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel), 'First input must be a single itaComsolModel')
+            itaComsolSource.checkInputForValidItaSource(source, true);
+            switch source.type
+                case SourceType.PointSource
+                    obj = itaComsolSource();
+                case SourceType.Piston
+                    obj = itaComsolSource.CreatePistonSourceGeometry(comsolModel, source);
+                otherwise
+                    error('Unknown source type. No source was created')
+            end
+        end
+        function obj = CreatePistonSourceGeometry(comsolModel, source)
+            %Creates a piston source geometry given an itaSource
+            %   In Comsol internally, a workplane with a circle in its center
+            %   is created using the source position and the view and up
+            %   vectors.
+            assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel), 'First input must be a single itaComsolModel')
+            itaComsolSource.checkInputForValidItaSource(source, true);
+            assert(source.type == SourceType.Piston,'SourceType of given source must be Piston')
+            
+            baseTag = strrep(source.name, ' ', '_');
+            sourceGeometryBaseTag = [baseTag itaComsolSource.pistonGeometryTagSuffix];
+
+            physicsNode = comsolModel.physics.activeNode;
+            geometry = itaComsolGeometry(comsolModel);
+            geometry.activeNode = comsolModel.modelNode.geom(physicsNode.geom);
+            [sourceGeometryNode, ~] = geometry.CreatePistonGeometry(sourceGeometryBaseTag, source);
+            
+            obj = itaComsolSource(comsolModel, sourceGeometryNode);
+            obj.Enable();
+        end
+        
+        
         function obj = Create(comsolModel, source)
             %Creates an acoustic source for the given comsol model using
             %an itaSource. Geometry and physics of the source depends on
@@ -140,21 +190,28 @@ classdef itaComsolSource < handle
     %% Enable / Disable
     methods
         function Disable(obj)
-            obj.mGeometryNode.active(false);
-            obj.mPhysicsNode.active(false);
-            obj.mRealDataNode.active(false);
-            obj.mImagDataNode.active(false);
-            if ~isempty(obj.mBoundaryImpedanceNode)
-                obj.mBoundaryImpedanceNode.active(false)
-            end
+            obj.setActive(false);
         end
         function Enable(obj)
-            obj.mGeometryNode.active(true);
-            obj.mPhysicsNode.active(true);
-            obj.mRealDataNode.active(true);
-            obj.mImagDataNode.active(true);
+            obj.setActive(true);
+        end
+    end
+    methods(Access = private)
+        function setActive(obj, bool)
+            if ~isempty(obj.mGeometryNode)
+                obj.mGeometryNode.active(bool);
+            end
+            if ~isempty(obj.mPhysicsNode)
+                obj.mPhysicsNode.active(bool);
+            end
+            if ~isempty(obj.mRealDataNode)
+                obj.mRealDataNode.active(bool);
+            end
+            if ~isempty(obj.mImagDataNode)
+                obj.mImagDataNode.active(bool);
+            end
             if ~isempty(obj.mBoundaryImpedanceNode)
-                obj.mBoundaryImpedanceNode.active(true)
+                obj.mBoundaryImpedanceNode.active(bool);
             end
         end
     end
@@ -168,11 +225,17 @@ classdef itaComsolSource < handle
             [realInterpolationNode, imagInterpolationNode, funcExpression] = comsolModel.func.CreateComplexInterpolation(interpolationBaseName, freqVector, complexDataVector, 'm^3 / s');
         end
         
-        function checkInputForValidItaSource(source)
+        function checkInputForValidItaSource(source, geometryOnly)
+            if nargin == 1; geometryOnly = false; end
+            
             assert(isa(source, 'itaSource') && isscalar(source),'Input must be a single itaSource object')
-            assert(source.HasWaveData(), 'Data for wave based simulation not defined for itaSource')
             assert(isvarname( strrep(source.name, ' ', '_') ),...
                 'Name of given source must be valid variable name (whitespace allowed)')
+            if geometryOnly
+                assert(source.HasSpatialInformation(), 'Geometric information not fully specified for itaSource')
+            else
+                assert(source.HasWaveData(), 'Data for wave based simulation not fully specified for itaSource')
+            end
         end
     end
 end
