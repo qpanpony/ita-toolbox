@@ -3,7 +3,7 @@ classdef ReceiverType
     %   Detailed explanation goes here
     
     enumeration
-        Monaural, Dummyhead
+        Monaural, DummyHead
     end
     
     methods
