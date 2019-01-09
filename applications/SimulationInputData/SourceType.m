@@ -8,7 +8,7 @@ classdef SourceType
     
     methods
         function bool = IsOneDimensional(this)
-            bool = ~(VelocityType.SurfaceDistribution == this);
+            bool = ~(SourceType.SurfaceDistribution == this);
         end
     end
     
