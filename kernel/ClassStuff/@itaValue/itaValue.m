@@ -266,9 +266,12 @@ classdef itaValue
                             res = 'W/m^2';
                             val = 1e-12;
                             log_prefix = 10;
-                        case 'm/s'
+                        case 'm/s' % ISO 1683
                             res = '1nm/s';
                             val = 1e-9;
+                        case 'm/s^2' % ISO 1683
+                            res = '1um/s^2';
+                            val = 1e-6;
                         case 'Pa'
                             res = '20uPa';
                             val = 20e-6;
