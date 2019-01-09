@@ -58,7 +58,7 @@ classdef itaComsolGeometry < itaComsolNode
             %Creates a geometry for a piston based on an itaSource object
             %   Inputs:
             %   pistonGeometryBaseTag:  Base tag for naming created elements
-            %   source:                 itaSourceObject of type Piston
+            %   source:                 itaSource object of type Piston
             assert(ischar(pistonGeometryBaseTag) && isrow(pistonGeometryBaseTag), 'First input must be a char row vector')
             assert(isa(source, 'itaSource') && isscalar(source), 'Second input must be a single itaSource object')
             assert(source.type == SourceType.Piston,'SourceType of given source must be Piston')
@@ -104,6 +104,104 @@ classdef itaComsolGeometry < itaComsolNode
             workPlaneNode.set('planetype', 'coordinates');
             workPlaneNode.set('genpoints', [p0; p1; p2]);
             workPlaneNode.set('unite', true);
+        end
+    end
+    
+    %% 3D - Volumes
+    methods
+        function CreateDummyHeadGeometry(obj, geometryBaseTag, receiver)
+            %Creates a geometry for a piston based on an itaSource object
+            %   Inputs:
+            %   geometryBaseTag:    Base tag for naming created elements
+            %   receiver:           itaReceiver object of type DummyHead
+            assert(ischar(pistonGeometryBaseTag) && isrow(pistonGeometryBaseTag), 'First input must be a char row vector')
+            assert(isa(receiver, 'itaReceiver') && isscalar(receiver), 'Second input must be a single itaReceiver object')
+            assert(receiver.type == ReceiverType.DummyHead,'ReceiverType of given receiver must be DummyHead')
+            
+            geomNode = obj.mActiveNode;
+            
+            importTag = [geometryBaseTag '_import'];
+            filename = 'D:\CAD data\Kunstkopf\KK_lowPoly.mphbin';
+            obj.createImport(importTag, filename)
+            
+            view = itaCoordinates(receiver.orientation.view);
+            phi = view.phi_deg;
+            %itaCoord.theta_deg: 0 = up, 180 = down. We need -90 = up, 90 down, 0 front
+            theta = view.theta_deg - 90;
+            azimuthRotAxis = [0 0 1];
+            elevationRotAxis = [0 0 0];
+            azimuthRotationTag = [geometryBaseTag '_azimuthRotation'];
+            elevationRotationTag = [geometryBaseTag '_azimuthRotation'];
+            
+            elevationRotWorkPlaneXY = itaCoordinates([1 0 0; 1 0 0], 'cyl');
+            elevationRotWorkPlaneXY.phi_deg = [phi phi+90];
+            
+            obj.createRotation(azimuthRotationTag, phi, [0 0 1], importTag)
+            obj.createRotationViaWorkPlane(elevationRotationTag, theta, [0 1 0], azimuthRotationTag,...
+                elevationRotWorkPlaneXY.cart(1, :), elevationRotWorkPlaneXY.cart(2, :))
+            
+            geomNode.create('rot1', 'Rotate');
+            obj.mActiveNode.feature('rot1').setIndex('rot', '90', 0);
+            obj.mActiveNode.feature('rot1').set('axis', [0 0 1]);
+            obj.mActiveNode.feature('rot1').selection('input').set({'imp1'});
+            
+            obj.mActiveNode.create('wp1', 'WorkPlane');
+            obj.mActiveNode.feature('wp1').set('planetype', 'coordinates');
+            obj.mActiveNode.feature('wp1').set('genpoints', [0 0 0; 0 1 0; -1 0 0]);
+            obj.mActiveNode.feature('wp1').set('unite', true);
+            obj.mActiveNode.create('rot2', 'Rotate');
+            obj.mActiveNode.feature('rot2').set('workplane', 'wp1');
+            obj.mActiveNode.feature('rot2').setIndex('rot', '-45', 0);
+            obj.mActiveNode.feature('rot2').set('axis', [0 1 0]);
+            obj.mActiveNode.feature('rot2').selection('input').set({'rot1'});
+            
+            obj.mActiveNode.create('mov1', 'Move');
+            obj.mActiveNode.feature('mov1').setIndex('displx', '1', 0);
+            obj.mActiveNode.feature('mov1').setIndex('disply', '2', 0);
+            obj.mActiveNode.feature('mov1').setIndex('displz', '3', 0);
+            obj.mActiveNode.feature('mov1').selection('input').set({'rot2'});
+            obj.mActiveNode.run;
+        end
+    end
+    methods(Access = private)
+        function importNode = createImport(obj, importTag, filename)
+            geomNode = obj.mActiveNode;
+            if ~obj.hasFeatureNode(geomNode, importTag)
+                geomNode.create(importTag, 'Import');
+            end
+            importNode = geomNode.feature(importTag);
+            importNode.set('type', 'native');
+            importNode.set('filename', filename);
+        end
+        function rotationNode = createRotation(obj, rotationTag, angle, axis, geomTags, workPlaneTag)
+            if ~iscell(geomTags); geomTags = {geomTags}; end
+            assert(isnumeric(angle) && isscalar(angle), 'angle must be a numeric scalar');
+            assert(isnumeric(axis) && isrow(axis) && numel(axis)==3, 'axis must be a numeric 1x3 vector');
+            assert(iscellstr(geomTags), 'geomTags must be a char row vector or cell string');
+            
+            geomNode = obj.mActiveNode;
+            if ~obj.hasFeatureNode(geomNode, rotationTag)
+                geomNode.create(rotationTag, 'Rotate');
+            end
+            rotationNode = obj.mActiveNode.feature(rotationTag);
+            rotationNode.setIndex('rot', angle, 0); %TODO: Is num2str needed?
+            rotationNode.set('axis', axis);
+            rotationNode.selection('input').set(geomTags);
+            if nargin == 6
+                rotationNode.set('workplane', workPlaneTag);
+            end
+        end
+        function rotationNode = createRotationViaWorkPlane(obj, rotationTag, angle, axis, geomTags, workPlaneXVec, workPlaneYVec, workPlaneOrigin)
+            if nargin == 7; workPlaneOrigin = [0 0 0]; end
+            if ~iscell(geomTags); geomTags = {geomTags}; end
+            assert(isnumeric(angle) && isscalar(angle), 'angle must be a numeric scalar');
+            assert(isnumeric(axis) && isrow(axis) && numel(axis)==3, 'axis must be a numeric 1x3 vector');
+            assert(iscellstr(geomTags), 'geomTags must be a char row vector or cell string');
+            
+            workPlaneTag = [rotationTag '_wp'];
+            obj.createWorkPlane(workPlaneTag, workPlaneOrigin, workPlaneXVec, workPlaneYVec);
+            
+            rotationNode = obj.createRotation(rotationTag, angle, axis, geomTags, workPlaneTag);
         end
     end
 end
