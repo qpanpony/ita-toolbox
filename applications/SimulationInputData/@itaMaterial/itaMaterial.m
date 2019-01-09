@@ -120,7 +120,7 @@ classdef itaMaterial < itaSimulationInputItem
                 error('Cannot convert without knowledge density and speed of sound of air. Set rho0Air and cAir first.');
             end
             
-            alpha = this.impedanceToAbsorption();
+            alpha = this.convertImpedanceToAbsorption();
         end
         
         function scattering = get.scattering(this)
@@ -195,7 +195,7 @@ classdef itaMaterial < itaSimulationInputItem
     
     %% Conversions
     methods(Access = private)
-        function alpha = impedanceToAbsorption(this)
+        function alpha = convertImpedanceToAbsorption(this)
             %Converts the impedance of this object to an absorption
             %coefficient
             
@@ -218,7 +218,13 @@ classdef itaMaterial < itaSimulationInputItem
             alpha = itaResult(alphaFreqData, this.impedance.freqVector, 'freq');
         end
         
-        
+        function Z = convertAbsorptionToImpedance(this, h, T, p0)
+            R = sqrt(1 - this.absorption.freqData);
+            Z0 = ita_constants('z_0', 'medium', 'air', 'T', T, 'p', p0, 'phi', h/100);
+            Z = Z0.value * (1+R)./(1-R);
+            
+            Z = itaResult(Z, this.absorption.freqVector, 'freq');
+        end
     end
     
     %% Plot interface
