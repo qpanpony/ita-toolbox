@@ -3,26 +3,21 @@ classdef itaReceiver < itaSpatialSimulationInputItem
     %   Detailed explanation goes here
     
     properties(Access = private)
-        mFemGroup;
-        mType = 'binaural';
+        %mFemGroup;
+        mType = ReceiverType.Monaural;
     end
     properties(Dependent = true)
         %TODO:
         %Not sure if femGroup is really needed or if we can use the
         %position directly (which would be much better)
-        femGroup;    %Corresponding group in FE mesh
-        type;        %Receiver type - 'monaural' / 'binaural'
+        %femGroup;    %Corresponding group in FE mesh
+        type;        %Receiver type used for FE simulations [ReceiverType]
     end
     
     %% Set
     methods
         function this = set.type(this, type)
-            if ~ischar(type) || ~isrow(type)
-                error('Input must be a char row vector')
-            end
-            if ~strcmp(type, 'monaural') && ~strcmp(type, 'binaural')
-                error('Invalid receiver type specified. Valid inputs: monaural / binaural')
-            end
+            assert(isa(type, 'ReceiverType') && isscalar(type), 'Can only assign a single object of type ReceiverType');
             
             this.mType = type;
         end
