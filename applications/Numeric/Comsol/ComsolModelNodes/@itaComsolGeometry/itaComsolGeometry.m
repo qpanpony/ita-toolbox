@@ -109,58 +109,84 @@ classdef itaComsolGeometry < itaComsolNode
     
     %% 3D - Volumes
     methods
-        function CreateDummyHeadGeometry(obj, geometryBaseTag, receiver)
-            %Creates a geometry for a piston based on an itaSource object
+        function geometryNodes = CreateDummyHeadGeometry(obj, geometryBaseTag, receiver)
+            %Creates a geometry for a dummy head based on an itaReceiver object
             %   Inputs:
             %   geometryBaseTag:    Base tag for naming created elements
             %   receiver:           itaReceiver object of type DummyHead
-            assert(ischar(pistonGeometryBaseTag) && isrow(pistonGeometryBaseTag), 'First input must be a char row vector')
+            assert(ischar(geometryBaseTag) && isrow(geometryBaseTag), 'First input must be a char row vector')
             assert(isa(receiver, 'itaReceiver') && isscalar(receiver), 'Second input must be a single itaReceiver object')
             assert(receiver.type == ReceiverType.DummyHead,'ReceiverType of given receiver must be DummyHead')
             
-            geomNode = obj.mActiveNode;
-            
+            %---Import---
             importTag = [geometryBaseTag '_import'];
             filename = 'D:\CAD data\Kunstkopf\KK_lowPoly.mphbin';
-            obj.createImport(importTag, filename)
+            importNode = obj.createImport(importTag, filename);
             
-            view = itaCoordinates(receiver.orientation.view);
-            phi = view.phi_deg;
-            %itaCoord.theta_deg: 0 = up, 180 = down. We need -90 = up, 90 down, 0 front
-            theta = view.theta_deg - 90;
-            azimuthRotAxis = [0 0 1];
-            elevationRotAxis = [0 0 0];
-            azimuthRotationTag = [geometryBaseTag '_azimuthRotation'];
-            elevationRotationTag = [geometryBaseTag '_azimuthRotation'];
+            %---Orientation---
+            [orientationGeomTag, yawRotationNode, pitchRotationNode, rollRotationNode] =...
+                obj.ApplyOrientationToGeometry(geometryBaseTag, receiver.orientation, importTag);
             
-            elevationRotWorkPlaneXY = itaCoordinates([1 0 0; 1 0 0], 'cyl');
-            elevationRotWorkPlaneXY.phi_deg = [phi phi+90];
+            %---Translation---
+            moveTag =  [geometryBaseTag '_move'];
+            moveNode = obj.createMove(moveTag, receiver.position.cart, orientationGeomTag);
             
-            obj.createRotation(azimuthRotationTag, phi, [0 0 1], importTag)
-            obj.createRotationViaWorkPlane(elevationRotationTag, theta, [0 1 0], azimuthRotationTag,...
-                elevationRotWorkPlaneXY.cart(1, :), elevationRotWorkPlaneXY.cart(2, :))
+            geometryNodes = [importNode, yawRotationNode, pitchRotationNode, rollRotationNode, moveNode];
+        end
+        
+        function [outputGeometryTag, yawRotationNode, pitchRotationNode, rollRotationNode] =...
+                ApplyOrientationToGeometry(obj, baseTag, orientation, geomTags, position)
+            %Applies the given orientation to the geometry nodes with the
+            %given tags.
+            %   Inputs (default)
+            %   baseTag:        Basis for the tags of all created rotation nodes [char vector]
+            %   orientation:    Orientation to be applied [itaOrientation with one element]
+            %   geomTags:       Tags of geometry objects that are to be rotated [char vector/string cell]
+            %   position:       Origin for all rotations [1x3 vector] ([0 0 0])
+            %   
+            %   Internally, three rotations are performed in the given order:
+            %   1) yaw (around z-axis)
+            %   2) pitch (around y-axis)
+            %   3) roll (around x-axis)
+            %
+            %   Make sure that your baseTag is unique. Otherwise old
+            %   rotation nodes might be overwritten.
+            if nargin == 4; position = [0 0 0]; end
+            if ~iscell(geomTags); geomTags = {geomTags}; end
+            assert(ischar(baseTag) && isrow(baseTag), 'baseTag must be a char row vector');
+            assert(iscellstr(geomTags), 'geomTags must be a char row vector or cell string');
+            assert(isa(orientation, 'itaOrientation') && orientation.nPoints == 1, 'orientation must be an itaOrientation object with one element');
+            assert(isnumeric(position) && isrow(position) && numel(position)==3, 'position must be a numeric 1x3 vector');
             
-            geomNode.create('rot1', 'Rotate');
-            obj.mActiveNode.feature('rot1').setIndex('rot', '90', 0);
-            obj.mActiveNode.feature('rot1').set('axis', [0 0 1]);
-            obj.mActiveNode.feature('rot1').selection('input').set({'imp1'});
+            %Note: In Comsol we work in Matlab coordinates. But
+            %itaOrientation works with openGL coordinates so we have to
+            %convert the view-up vectors to OpenGL to get correct roll,
+            %pitch and yaw values.
+            %Also the sign for the pitch value has to be changed, since in
+            %openGL the pitch axis is 90° clockwise to the roll axis while
+            %in Matlab it is 90° counter clockwise.
+            viewOgl = orientation.view([2 3 1]); viewOgl = viewOgl .* [-1 1 -1];
+            upOgl = orientation.up([2 3 1]); upOgl = upOgl .* [-1 1 -1];
+            orientation = itaOrientation.FromViewUp(viewOgl, upOgl);
+            roll = orientation.roll_deg;
+            pitch = -orientation.pitch_deg;
+            yaw = orientation.yaw_deg;
             
-            obj.mActiveNode.create('wp1', 'WorkPlane');
-            obj.mActiveNode.feature('wp1').set('planetype', 'coordinates');
-            obj.mActiveNode.feature('wp1').set('genpoints', [0 0 0; 0 1 0; -1 0 0]);
-            obj.mActiveNode.feature('wp1').set('unite', true);
-            obj.mActiveNode.create('rot2', 'Rotate');
-            obj.mActiveNode.feature('rot2').set('workplane', 'wp1');
-            obj.mActiveNode.feature('rot2').setIndex('rot', '-45', 0);
-            obj.mActiveNode.feature('rot2').set('axis', [0 1 0]);
-            obj.mActiveNode.feature('rot2').selection('input').set({'rot1'});
+            yawRotationTag = [baseTag '_yawRotation'];
+            pitchRotationTag = [baseTag '_pitchRotation'];
+            rollRotationTag = [baseTag '_rollRotation'];
             
-            obj.mActiveNode.create('mov1', 'Move');
-            obj.mActiveNode.feature('mov1').setIndex('displx', '1', 0);
-            obj.mActiveNode.feature('mov1').setIndex('disply', '2', 0);
-            obj.mActiveNode.feature('mov1').setIndex('displz', '3', 0);
-            obj.mActiveNode.feature('mov1').selection('input').set({'rot2'});
-            obj.mActiveNode.run;
+            yawAxis = [0 0 1];
+            localYAxisAfterYawRotation = itaCoordinates([1 (yaw+90)*pi/180 0], 'cyl');
+            pitchRotAxis = localYAxisAfterYawRotation.cart;
+            localXAxisAfterPitchRotation = itaCoordinates([1 (pitch+90)*pi/180 yaw*pi/180], 'sph');
+            rollRotAxis = localXAxisAfterPitchRotation.cart;
+            
+            yawRotationNode = obj.createRotation(yawRotationTag, yaw, yawAxis, geomTags, position);
+            pitchRotationNode = obj.createRotation(pitchRotationTag, pitch, pitchRotAxis, yawRotationTag, position);
+            rollRotationNode = obj.createRotation(rollRotationTag, roll, rollRotAxis, pitchRotationTag, position);
+            
+            outputGeometryTag = rollRotationTag;
         end
     end
     methods(Access = private)
@@ -173,25 +199,30 @@ classdef itaComsolGeometry < itaComsolNode
             importNode.set('type', 'native');
             importNode.set('filename', filename);
         end
-        function rotationNode = createRotation(obj, rotationTag, angle, axis, geomTags, workPlaneTag)
+        function rotationNode = createRotation(obj, rotationTag, angle, axis, geomTags, position, workPlaneTag)
             if ~iscell(geomTags); geomTags = {geomTags}; end
             assert(isnumeric(angle) && isscalar(angle), 'angle must be a numeric scalar');
             assert(isnumeric(axis) && isrow(axis) && numel(axis)==3, 'axis must be a numeric 1x3 vector');
             assert(iscellstr(geomTags), 'geomTags must be a char row vector or cell string');
+            if nargin < 6; position = [0 0 0]; end
             
             geomNode = obj.mActiveNode;
             if ~obj.hasFeatureNode(geomNode, rotationTag)
                 geomNode.create(rotationTag, 'Rotate');
             end
             rotationNode = obj.mActiveNode.feature(rotationTag);
+            
             rotationNode.setIndex('rot', angle, 0); %TODO: Is num2str needed?
             rotationNode.set('axis', axis);
+            %rotationNode.set('axistype', 'cartesian');
+            %rotationNode.set('ax3', axis);
             rotationNode.selection('input').set(geomTags);
-            if nargin == 6
+            rotationNode.set('pos', position);
+            if nargin == 7
                 rotationNode.set('workplane', workPlaneTag);
             end
         end
-        function rotationNode = createRotationViaWorkPlane(obj, rotationTag, angle, axis, geomTags, workPlaneXVec, workPlaneYVec, workPlaneOrigin)
+        function [rotationNode, workPlaneNode] = createRotationViaWorkPlane(obj, rotationTag, angle, axis, geomTags, workPlaneXVec, workPlaneYVec, workPlaneOrigin)
             if nargin == 7; workPlaneOrigin = [0 0 0]; end
             if ~iscell(geomTags); geomTags = {geomTags}; end
             assert(isnumeric(angle) && isscalar(angle), 'angle must be a numeric scalar');
@@ -199,9 +230,25 @@ classdef itaComsolGeometry < itaComsolNode
             assert(iscellstr(geomTags), 'geomTags must be a char row vector or cell string');
             
             workPlaneTag = [rotationTag '_wp'];
-            obj.createWorkPlane(workPlaneTag, workPlaneOrigin, workPlaneXVec, workPlaneYVec);
+            workPlaneNode = obj.createWorkPlane(workPlaneTag, workPlaneOrigin, workPlaneOrigin+workPlaneXVec, workPlaneOrigin+workPlaneYVec);
             
-            rotationNode = obj.createRotation(rotationTag, angle, axis, geomTags, workPlaneTag);
+            rotationNode = obj.createRotation(rotationTag, angle, axis, geomTags);
+            rotationNode.set('workplane', workPlaneTag);
+        end
+        function moveNode = createMove(obj, moveTag, translationVec, geomTags)
+            if ~iscell(geomTags); geomTags = {geomTags}; end
+            assert(isnumeric(translationVec) && isrow(translationVec) && numel(translationVec)==3, 'translationVec must be a numeric 1x3 vector');
+            assert(iscellstr(geomTags), 'geomTags must be a char row vector or cell string');
+            
+            geomNode = obj.mActiveNode;
+            if ~obj.hasFeatureNode(geomNode, moveTag)
+                geomNode.create(moveTag, 'Move');
+            end
+            moveNode = obj.mActiveNode.feature(moveTag);
+            moveNode.setIndex('displx', translationVec(1), 0); %TODO: Is num2str needed?
+            moveNode.setIndex('disply', translationVec(2), 0);
+            moveNode.setIndex('displz', translationVec(3), 0);
+            moveNode.selection('input').set(geomTags);
         end
     end
 end

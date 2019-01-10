@@ -7,7 +7,7 @@ classdef itaComsolReceiver < handle
     
     properties(Access = private)
         mModel;
-        mGeometryNode;
+        mGeometryNodes;
     end
     
     properties(Constant = true)
@@ -28,10 +28,12 @@ classdef itaComsolReceiver < handle
             
             %Geometry only
             assert(isa(comsolModel, 'itaComsolModel'), 'First input must be a single itaComsolModel')
-            assert(isa(receiverGeometryNode, 'com.comsol.clientapi.impl.GeomFeatureClient'), 'Second input must be a comsol geometry feature node')
+            assert(isa(receiverGeometryNode, 'com.comsol.clientapi.impl.GeomFeatureClient') ||...
+                isa(receiverGeometryNode, 'com.comsol.clientapi.impl.GeomFeatureClient[]'),...
+                'Second input must be a comsol geometry feature node')
             
             obj.mModel = comsolModel;
-            obj.mGeometryNode = receiverGeometryNode;
+            obj.mGeometryNodes = receiverGeometryNode;
         end
     end
     
@@ -47,7 +49,7 @@ classdef itaComsolReceiver < handle
             %
             %   Supported receiver types: Monaural, DummyHead
             assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel), 'First input must be a single itaComsolModel')
-            itaComsolSource.checkInputForValidItaReceiver(receiver);
+            itaComsolReceiver.checkInputForValidItaReceiver(receiver);
             switch receiver.type
                 case ReceiverType.Monaural
                     obj = itaComsolReceiver();
@@ -63,20 +65,20 @@ classdef itaComsolReceiver < handle
             %comsol model
             %   In Comsol internally, ...
             assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel), 'First input must be a single itaComsolModel')
-            itaComsolSource.checkInputForValidItaReceiver(receiver);
+            itaComsolReceiver.checkInputForValidItaReceiver(receiver);
             assert(receiver.type == ReceiverType.DummyHead,'ReceiverType of given source must be DummyHead')
             
             baseTag = strrep(receiver.name, ' ', '_');
-            sourceGeometryBaseTag = [baseTag itaComsolReceiver.dummyHeadGeometryTagSuffix];
+            receiverGeometryBaseTag = [baseTag itaComsolReceiver.dummyHeadGeometryTagSuffix];
             %soundHardTag = [baseTag '_pistonSourceSoundHardBoundary'];
             
             %physicsNode = comsolModel.physics.activeNode;
             geometry = comsolModel.geometry;
-            [dummyHeadGeometryNode, selectionTag] = geometry.CreateDummyHeadGeometry(sourceGeometryBaseTag, receiver);
+            dummyHeadGeometryNodes = geometry.CreateDummyHeadGeometry(receiverGeometryBaseTag, receiver);
             
             %soundHardBoundaryNode = comsolModel.physics.CreateSoundHardBoundary(soundHardTag, selectionTag);
                         
-            obj = itaComsolSource(comsolModel, dummyHeadGeometryNode);
+            obj = itaComsolReceiver(comsolModel, dummyHeadGeometryNodes);
             obj.Enable();
         end
     end
@@ -92,8 +94,8 @@ classdef itaComsolReceiver < handle
     end
     methods(Access = private)
         function setActive(obj, bool)
-            if ~isempty(obj.mGeometryNode)
-                obj.mGeometryNode.active(bool);
+            for idxGeom=1:numel(obj.mGeometryNodes)
+                obj.mGeometryNodes(idxGeom).active(bool);
             end
         end
     end
