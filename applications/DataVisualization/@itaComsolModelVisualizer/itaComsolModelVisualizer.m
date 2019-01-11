@@ -37,7 +37,8 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
                     error('Given filename does not point to a Comsol (.mph) file')
                 end
                 itaComsolServer.Instance().Connect();
-                obj.mModel = itaComsolModel( mphload(input) );
+                modelTag = 'ModelForComsolVisualizer'; %TODO: Is it possible to have a unique name here?
+                obj.mModel = itaComsolModel( mphload(input), modelTag );
             elseif isa(input, 'itaComsolModel') && isscalar(input)
                 obj.mModel = input;
             else
