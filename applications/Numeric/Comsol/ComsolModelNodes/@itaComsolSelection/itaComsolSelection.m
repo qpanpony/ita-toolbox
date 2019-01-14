@@ -61,13 +61,13 @@ classdef itaComsolSelection < itaComsolNode
             %Returns a boundary group (2D selection) given its name.
             %Returns [] if group is not found.
             assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'Input must be a char row vector')
-            boundaryGroup = obj.selectionOfDimensionByName(boundaryGroupName, 2, filter);
+            boundaryGroup = obj.selectionOfDimensionByName(boundaryGroupName, 2, 'all');
         end
         function volumeGroup = VolumeGroup(obj, volumeGroupName)
             %Returns a volume group (3D selection) given its name.
             %Returns [] if group is not found.
             assert(ischar(volumeGroupName) && isrow(volumeGroupName), 'Input must be a char row vector')
-            volumeGroup = obj.selectionOfDimensionByName(volumeGroupName, 3, filter);
+            volumeGroup = obj.selectionOfDimensionByName(volumeGroupName, 3, 'all');
         end
         
         function pointSelectionNames = PointSelectionNames(obj, filter)
