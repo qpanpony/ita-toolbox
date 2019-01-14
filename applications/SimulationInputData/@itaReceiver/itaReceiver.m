@@ -6,16 +6,16 @@ classdef itaReceiver < itaSpatialSimulationInputItem
         %mFemGroup;
         mType = ReceiverType.Monaural;
         
-        mUserDefinedFilename = '';
-        mRelativeLeftEarMicPosition = itaCoordinates([0 0 0]);
-        mRelativeRightEarMicPosition = itaCoordinates([0 0 0]);
+        mGeometryFilename = '';
+        mRelativeLeftEarMicPosition;
+        mRelativeRightEarMicPosition;
     end
     properties(Dependent = true)
         type;                       %Receiver type used for FE simulations [ReceiverType]
         
         relativeLeftEarMicPosition; %Relative position of left ear microphone to origin of model [itaCoordinates]
         relativeRightEarMicPosition;%Relative position of right ear microphone to origin of model [itaCoordinates]
-        filename;                   %Name of file with geometry used for a binaural receiver
+        geometryFilename;           %Name of file with geometry used for a binaural receiver
     end
     properties(Dependent = true, SetAccess = private)
         leftEarMicPosition;         %Global position of left ear microphone [itaCoordinates]
@@ -39,10 +39,10 @@ classdef itaReceiver < itaSpatialSimulationInputItem
             assert(isa(pos, 'itaCoordinates') && pos.nPoints == 1, 'relativeRightEarMicPosition must be an itaCoordinates with one point')
             this.mRelativeLeftEarMicPosition = pos;
         end
-        function this = set.filename(this, strIn)
-            assert(this.mType == ReceiverType.UserDefined, 'filename can only be set for UserDefined receiver type')
-            assert(ischar(strIn) && isrow(strIn), 'filename must be a char row vector')
-            this.mUserDefinedFilename = strIn;
+        function this = set.geometryFilename(this, strIn)
+            assert(this.mType == ReceiverType.UserDefined, 'geometryFilename can only be set for UserDefined receiver type')
+            assert(ischar(strIn) && isrow(strIn), 'geometryFilename must be a char row vector')
+            this.mGeometryFilename = strIn;
         end
     end
     
@@ -52,19 +52,19 @@ classdef itaReceiver < itaSpatialSimulationInputItem
             out = this.mType;
         end
         function out = get.leftEarMicPosition(this)
-            out = this.relativeLeftEarMicPosition + this.position;
+            out = this.convertLocalToGlobalCoordinates(this.relativeLeftEarMicPosition);
         end
         function out = get.rightEarMicPosition(this)
-            out = this.relativeRightEarMicPosition + this.position;
+            out = this.convertLocalToGlobalCoordinates(this.relativeRightEarMicPosition);
         end
-        function out = get.filename(this)
+        function out = get.geometryFilename(this)
             switch(this.mType)
                 case ReceiverType.Monaural
                     out = '';
                 case ReceiverType.DummyHead
-                    out =  ''; %TODO: Read from ini
+                    out = 'D:\CAD data\Kunstkopf\ITA_Kunstkopf.mphbin'; %TODO: Read from ini
                 case ReceiverType.UserDefined
-                    out = this.filename;
+                    out = this.mGeometryFilename;
             end
         end
         
@@ -73,7 +73,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
                 case ReceiverType.Monaural
                     out = itaCoordinates([0 0 0]);
                 case ReceiverType.DummyHead
-                    out = itaCoordinates([0 0.0705 0]);
+                    out = itaCoordinates([0 0.0705 0]); %TODO: Read from ini
                 case ReceiverType.UserDefined
                     out = this.mRelativeLeftEarMicPosition;
             end
@@ -83,10 +83,24 @@ classdef itaReceiver < itaSpatialSimulationInputItem
                 case ReceiverType.Monaural
                     out = itaCoordinates([0 0 0]);
                 case ReceiverType.DummyHead
-                    out =  itaCoordinates([0 -0.0715 0]);
+                    out =  itaCoordinates([0 -0.0715 0]); %TODO: Read from ini
                 case ReceiverType.UserDefined
                     out = this.mRelativeLeftEarMicPosition;
             end
+        end
+    end
+    
+    %% Coordinate conversion
+    methods(Access = private)
+        function globalPos = convertLocalToGlobalCoordinates(this, localPos)
+            assert(isa(localPos, 'itaCoordinates'), 'Input must be itaCoordinates')
+            x = this.orientation.view;
+            z = this.orientation.up;
+            y = cross(z, x);
+            orientationMatrix = [x; y; z]';
+            
+            posWithGlobalOrientation = itaCoordinates(localPos.cart * orientationMatrix);
+            globalPos = posWithGlobalOrientation + this.position;
         end
     end
     
@@ -100,8 +114,13 @@ classdef itaReceiver < itaSpatialSimulationInputItem
         function bool = HasWaveData(this)
             %Returns true if all data which is used for Wave-based
             %Acoustics is available
-            bool = this.HasSpatialInformation();
-            %TODO: Check for geometry
+            bool = this.HasSpatialInformation() && this.HasBinauralModelData();
+        end
+        function bool = HasBinauralModelData(this)
+            bool = ~(   isempty(this.geometryFile) ||...
+                        isempty(this.relativeLeftEarMicPosition) ||...
+                        isempty(this.relativeRightEarMicPosition)...
+                     );
         end
     end
     

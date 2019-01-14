@@ -120,8 +120,7 @@ classdef itaComsolGeometry < itaComsolNode
             
             %---Import---
             importTag = [geometryBaseTag '_import'];
-            filename = 'D:\CAD data\Kunstkopf\KK_lowPoly.mphbin';
-            importNode = obj.createImport(importTag, filename);
+            importNode = obj.createImport(importTag, receiver.geometryFilename);
             
             %---Orientation---
             [orientationGeomTag, yawRotationNode, pitchRotationNode, rollRotationNode] =...
