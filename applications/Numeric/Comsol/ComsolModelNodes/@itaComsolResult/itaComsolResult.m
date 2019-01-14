@@ -19,29 +19,34 @@ classdef itaComsolResult < handle
     
     %% Results
     methods
-        function p = Pressure(obj, itaCoords)
-            %Evaluates the pressure at the mesh nodes or the given
-            %itaCoordinates
-            %   Optitional input:   itaCoordinates with coordinates for evaluation
+        function p = Pressure(obj, evalPos)
+            %Evaluates the pressure at the mesh nodes (no input) or for the
+            %given itaCoordinates / itaReceiver
+            %   evalPos (optional): itaCoordinates with coordinates for evaluation
+            %                       or itaReceiver
             if nargin == 1
                 p = obj.ByExpression('p');
             else
-                assert(isa(itaCoords, 'itaCoordinates'), 'Input must be of type itaCoordinates')
-                p = obj.ByExpression('p', itaCoords);
+                assert(isa(evalPos, 'itaCoordinates') || isa(evalPos, 'itaReceiver'), 'Input must be of type itaCoordinates or itaReceiver')
+                p = obj.ByExpression('p', evalPos);
             end
         end
-        function res = ByExpression(obj, expression, itaCoords)
+        function res = ByExpression(obj, expression, evalPos)
             %Evaluates the given expression either at the mesh nodes or at
             %the given itaCoordinates
             %   Inputs:
-            %   First input:        char row-vector with expression to be evaluated
-            %   Optitional input:   itaCoordinates with coordinates for evaluation
+            %   expression:             char row-vector with expression to be evaluated
+            %   evalPos (optional):     itaCoordinates with coordinates for evaluation
+            %                           or itaReceiver
             assert(ischar(expression) && isrow(expression), 'First input must be char row vector with the expression of the result')
             if nargin == 2
                 res = obj.getResultAtMeshNodes(expression);
             else
-                assert(isa(itaCoords, 'itaCoordinates'), 'Second input must be of type itaCoordinates')
-                res = obj.getResultAtCoords(expression, itaCoords);
+                if isa(evalPos, 'itaReceiver')
+                    evalPos = obj.extractCoordsFromReceiver(evalPos);
+                end
+                assert(isa(evalPos, 'itaCoordinates'), 'Second input must be of type itaCoordinates or itaReceiver')
+                res = obj.getResultAtCoords(expression, evalPos);
             end
         end
     end
@@ -72,6 +77,22 @@ classdef itaComsolResult < handle
             freqVector = info.solvals;
             res = itaResult(freqData, freqVector, 'freq');
             res.channelCoordinates = itaCoords;
+        end
+    end
+    methods(Access = private, Static = true)
+        function coords = extractCoordsFromReceiver(receiver)
+            numCoords = numel(receiver) * (receiver.type.IsBinaural() + 1);
+            coords = itaCoordinates(numCoords);
+            for idxReceiver = 1:numel(receiver)
+                currentReceiver = receiver(idxReceiver);
+                if receiver.type.IsMonaural()
+                    coords.cart(idxReceiver, :) = currentReceiver.position.cart;
+                else
+                    coords.cart([2*idxReceiver-1, 2*idxReceiver], :) =...
+                        [currentReceiver.leftEarMicPosition.cart;...
+                         currentReceiver.rightEarMicPosition.cart];
+                end
+            end
         end
     end
 end
