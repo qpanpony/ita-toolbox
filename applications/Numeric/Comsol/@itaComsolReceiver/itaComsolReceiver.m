@@ -56,7 +56,7 @@ classdef itaComsolReceiver < handle
                 case ReceiverType.DummyHead
                     obj = itaComsolReceiver.CreateDummyHead(comsolModel, receiver);
                 otherwise
-                    error('Unknown source type. No source was created')
+                    error('Unknown receiver type. No receiver was created')
             end
         end
         

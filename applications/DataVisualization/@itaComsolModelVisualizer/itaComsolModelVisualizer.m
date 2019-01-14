@@ -176,7 +176,7 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
             if isempty(this.mModel.mesh.activeNode); return; end
             [az, el] = view(this.mAxes); %NOTE: Comsol plot functions overwrite view, so we have to restore it later
             
-            this.mModel.mesh.activeNode.run;
+            this.mModel.mesh.activeNode.run; %TODO: Catch error from building mesh?!
             mphmesh(this.mModel.modelNode, this.mModel.mesh.activeNode.tag, 'Parent', this.mAxes, 'edgemode', 'off')
             this.mMeshPlotHandles = this.mAxes.Children(1);
             delete(this.mAxes.Children(2));
