@@ -9,6 +9,7 @@ classdef itaComsolReceiver < handle
         mModel;
         mGeometryNodes;
         mSelectionTags = {};
+        mActive = true;
     end
     
     properties(Dependent = true, SetAccess = private)
@@ -105,12 +106,17 @@ classdef itaComsolReceiver < handle
         function Enable(obj)
             obj.setActive(true);
         end
+        
+        function out = IsActive(obj)
+            out = obj.mActive;
+        end
     end
     methods(Access = private)
         function setActive(obj, bool)
             for idxGeom=1:numel(obj.mGeometryNodes)
                 obj.mGeometryNodes(idxGeom).active(bool);
             end
+            obj.mActive = bool;
         end
     end
     

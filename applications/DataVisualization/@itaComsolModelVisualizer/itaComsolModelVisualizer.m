@@ -179,10 +179,14 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
             %NOTE: An error during building the mesh can occur, if
             %including a dummy head geometry while the mesh size is to big.
             %Setting mesh size to "finer" or smaller should fix this.
-            this.mModel.mesh.activeNode.run; %TODO: Catch error from building mesh?!
-            mphmesh(this.mModel.modelNode, this.mModel.mesh.activeNode.tag, 'Parent', this.mAxes, 'edgemode', 'off')
-            this.mMeshPlotHandles = this.mAxes.Children(1);
-            delete(this.mAxes.Children(2));
+            try
+                this.mModel.mesh.activeNode.run; %TODO: Catch error from building mesh?!
+                mphmesh(this.mModel.modelNode, this.mModel.mesh.activeNode.tag, 'Parent', this.mAxes, 'edgemode', 'off')
+                this.mMeshPlotHandles = this.mAxes.Children(1);
+                delete(this.mAxes.Children(2));
+            catch err
+                warning(err.identifier, 'Error during Comsol mesh building:\n%s', err.message)
+            end
             
             title(this.mAxes, '')
             view(az, el);
