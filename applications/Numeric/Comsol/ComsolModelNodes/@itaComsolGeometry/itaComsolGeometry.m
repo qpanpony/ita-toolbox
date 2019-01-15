@@ -90,7 +90,6 @@ classdef itaComsolGeometry < itaComsolNode
             geomNode = obj.mActiveNode;
             workPlaneNode = obj.createWorkPlane(workPlaneTag, p0, p1, p2);
             
-            %TODO: Change workPlaneNode.label so that the selection can be filtered out later on
             workPlaneNode.set('selresult', true);
             workPlaneNode.set('selresultshow', 'bnd');
             selectionTag = [char(geomNode.tag) '_' char(workPlaneNode.tag) '_bnd'];
@@ -109,7 +108,7 @@ classdef itaComsolGeometry < itaComsolNode
     
     %% 3D - Volumes
     methods
-        function geometryNodes = CreateDummyHeadGeometry(obj, geometryBaseTag, receiver)
+        function [geometryNodes, selectionTag] = CreateDummyHeadGeometry(obj, geometryBaseTag, receiver)
             %Creates a geometry for a dummy head based on an itaReceiver object
             %   Inputs:
             %   geometryBaseTag:    Base tag for naming created elements
@@ -128,7 +127,7 @@ classdef itaComsolGeometry < itaComsolNode
             
             %---Translation---
             moveTag =  [geometryBaseTag '_move'];
-            moveNode = obj.createMove(moveTag, receiver.position.cart, orientationGeomTag);
+            [moveNode, selectionTag] = obj.createMoveWithSelection(moveTag, receiver.position.cart, orientationGeomTag);
             
             geometryNodes = [importNode, yawRotationNode, pitchRotationNode, rollRotationNode, moveNode];
         end
@@ -211,7 +210,7 @@ classdef itaComsolGeometry < itaComsolNode
             end
             rotationNode = obj.mActiveNode.feature(rotationTag);
             
-            rotationNode.setIndex('rot', angle, 0); %TODO: Is num2str needed?
+            rotationNode.setIndex('rot', angle, 0);
             rotationNode.set('axis', axis);
             %rotationNode.set('axistype', 'cartesian');
             %rotationNode.set('ax3', axis);
@@ -244,10 +243,18 @@ classdef itaComsolGeometry < itaComsolNode
                 geomNode.create(moveTag, 'Move');
             end
             moveNode = obj.mActiveNode.feature(moveTag);
-            moveNode.setIndex('displx', translationVec(1), 0); %TODO: Is num2str needed?
+            moveNode.setIndex('displx', translationVec(1), 0);
             moveNode.setIndex('disply', translationVec(2), 0);
             moveNode.setIndex('displz', translationVec(3), 0);
             moveNode.selection('input').set(geomTags);
+        end
+        function [moveNode, selectionTag] = createMoveWithSelection(obj, moveTag, translationVec, geomTags)
+            geomNode = obj.mActiveNode;
+            moveNode = obj.createMove(moveTag, translationVec, geomTags);
+            
+            moveNode.set('selresult', true);
+            moveNode.set('selresultshow', 'dom');
+            selectionTag = [char(geomNode.tag) '_' char(moveNode.tag) '_dom'];
         end
     end
 end

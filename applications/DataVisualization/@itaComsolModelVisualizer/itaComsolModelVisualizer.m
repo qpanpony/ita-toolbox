@@ -176,6 +176,9 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
             if isempty(this.mModel.mesh.activeNode); return; end
             [az, el] = view(this.mAxes); %NOTE: Comsol plot functions overwrite view, so we have to restore it later
             
+            %NOTE: An error during building the mesh can occur, if
+            %including a dummy head geometry while the mesh size is to big.
+            %Setting mesh size to "finer" or smaller should fix this.
             this.mModel.mesh.activeNode.run; %TODO: Catch error from building mesh?!
             mphmesh(this.mModel.modelNode, this.mModel.mesh.activeNode.tag, 'Parent', this.mAxes, 'edgemode', 'off')
             this.mMeshPlotHandles = this.mAxes.Children(1);
