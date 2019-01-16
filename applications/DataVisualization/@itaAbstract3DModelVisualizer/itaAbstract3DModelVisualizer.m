@@ -16,6 +16,7 @@ classdef (Abstract)itaAbstract3DModelVisualizer < handle
         mShowEdges = true;
         mShowBoundarySurfaces = true;
         
+        mBoundaryGroupNames;
         mBoundaryGroupVisibility;
         mTransparency = 0.3;
         mEdgeColor = [0 0 0];
@@ -32,6 +33,9 @@ classdef (Abstract)itaAbstract3DModelVisualizer < handle
         boundaryGroupVisibility;%Visibility for distinct boundary groups (logical vector)
         transparency;           %Transparency of boundary surfaces (0 <= t <= 1)
         edgeColor;              %Color for edges ([r g b], 0 <= r <= 1)
+    end
+    properties(Dependent = true, SetAccess = private)
+        boundaryGroupNames;     %Names of boundary groups of current model
     end
     
     %% Model related
@@ -81,6 +85,10 @@ classdef (Abstract)itaAbstract3DModelVisualizer < handle
         end
         function out = get.edgeColor(this)
             out = this.mEdgeColor;
+        end
+        
+        function out = get.boundaryGroupNames(this)
+            out = this.mBoundaryGroupNames;
         end
     end
     

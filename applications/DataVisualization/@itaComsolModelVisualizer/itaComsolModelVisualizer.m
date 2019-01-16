@@ -46,6 +46,7 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
             end
             
             obj.clearPlotItems();
+            obj.mBoundaryGroupNames = obj.mModel.selection.BoundaryGroupNames(obj.mBoundaryGroupFilter);
             obj.mBoundaryGroupVisibility = true( 1, obj.numberOfBoundaryGroups() );
             
             if obj.autoRefresh && obj.axesSpecified()

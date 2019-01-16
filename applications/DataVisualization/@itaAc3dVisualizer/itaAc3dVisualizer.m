@@ -33,6 +33,7 @@ classdef itaAc3dVisualizer < itaAbstract3DModelVisualizer
             end
             
             obj.clearPlotItems();
+            obj.mBoundaryGroupNames = obj.mModel.getMaterialNames;
             obj.mBoundaryGroupVisibility = true( 1, obj.numberOfBoundaryGroups() );
             
             if obj.autoRefresh && obj.axesSpecified()
