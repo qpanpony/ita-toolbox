@@ -127,7 +127,7 @@ classdef itaComsolReceiver < handle
             
             assert(isa(receiver, 'itaReceiver') && isscalar(receiver),'Input must be a single itaReceiver object')
             assert(isvarname( strrep(receiver.name, ' ', '_') ),...
-                'Name of given source must be valid variable name (whitespace allowed)')
+                'Name of given receiver must be valid variable name (whitespace allowed)')
             assert(receiver.HasSpatialInformation(), 'Geometric information not fully specified for itaReceiver')
         end
     end
