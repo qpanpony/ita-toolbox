@@ -11,7 +11,9 @@ function [ CTC ] = ita_ctcFilter_regularized( varargin )
 %   ch(4) = LS2 Right Ear
 %   ch(5) = LS3 Left Ear
 %   ...
-%
+%   Make sure that the HRTFs compensate for irregular loudspeaker arrays or
+%   off-centered listeners.
+% 
 %   The calculation algorithm is a simple inversion. Pre- and
 %   Postprocessing options can be found below
 %

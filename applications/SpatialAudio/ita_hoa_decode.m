@@ -1,4 +1,4 @@
-function [ OutputSignals ] = ita_3da_decodeAmbisonics( Bformat, LoudspeakerPos, varargin )
+function [ OutputSignals ] = ita_3da_decode( Bformat, LoudspeakerPos, varargin )
 %ITA_DECODEAMBISONICS Decodes a BFormat Signal in ANC with SN3D
 %normalization
 %   Detailed explanation goes here

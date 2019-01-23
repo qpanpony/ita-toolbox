@@ -1,10 +1,13 @@
-function [ audioOut ] = ita_hoa_encodeAmbisonics( audioIn, order, sourcePos )
+function [ audioOut ] = ita_hoa_encode( audioIn, order, sourcePos, varargin )
 %ITA_ENCODEAMBISONICS Encodes a itaAudio with channel coordinates or a
 % itaCoordinate with source positions into ambisonics channels
 %
 %   Detailed explanation goes here
 
 %% Init
+opts.distanceloss=true;
+opts=ita_parse_arguments(opts,varargin);
+
 if isa(audioIn, 'itaAudio')
     aud=true;
 elseif isa(audioIn, 'itaCoordinates')
@@ -49,4 +52,7 @@ if aud
             audioOut=audioOut+ita_merge(audioOut_temp);
         end
     end
+end
+if opts.distanceLoss
+    audioOut=audioOut/sourcePos.r;
 end
