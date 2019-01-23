@@ -9,6 +9,7 @@ classdef itaComsolReceiver < handle
         mModel;
         mGeometryNodes;
         mSelectionTags = {};
+        mMeshNodes;
         mActive = true;
     end
     
@@ -18,12 +19,13 @@ classdef itaComsolReceiver < handle
     
     properties(Constant = true)
         dummyHeadGeometryTagSuffix = '_dummyHeadGeometry';
+        dummyHeadMeshTagSuffix = '_dummyHeadMeshSize';
         geometryTagSuffixes = {itaComsolReceiver.dummyHeadGeometryTagSuffix};
     end
     
     %% Constructor
     methods
-        function obj = itaComsolReceiver(comsolModel, receiverGeometryNode, selectionTags)
+        function obj = itaComsolReceiver(comsolModel, receiverGeometryNode, selectionTags, meshNodes)
             %Constructor should only be used to create empty object (no
             %input). To create a non-empty object, use static Create functions!
             
@@ -39,9 +41,18 @@ classdef itaComsolReceiver < handle
             assert(~isempty(selectionTags) && iscellstr(selectionTags),...
                 'Third input must be a cell of char vectors');
             
+            if nargin == 4
+                assert(isa(meshNodes, 'com.comsol.clientapi.impl.MeshFeatureClient') ||...
+                isa(meshNodes, 'com.comsol.clientapi.impl.MeshFeatureClient[]'),...
+                    'Fourth input must be a comsol mesh feature node')
+            else
+                meshNodes = [];
+            end
+            
             obj.mModel = comsolModel;
             obj.mGeometryNodes = receiverGeometryNode;
             obj.mSelectionTags = selectionTags;
+            obj.mMeshNodes = meshNodes;
         end
     end
     
@@ -78,15 +89,22 @@ classdef itaComsolReceiver < handle
             
             baseTag = strrep(receiver.name, ' ', '_');
             receiverGeometryBaseTag = [baseTag itaComsolReceiver.dummyHeadGeometryTagSuffix];
+            meshSizeTag = [baseTag itaComsolReceiver.dummyHeadMeshTagSuffix];
             %soundHardTag = [baseTag '_pistonSourceSoundHardBoundary'];
             
             %physicsNode = comsolModel.physics.activeNode;
             geometry = comsolModel.geometry;
             [dummyHeadGeometryNodes, selectionTag] = geometry.CreateDummyHeadGeometry(receiverGeometryBaseTag, receiver);
             
+            meshNode = comsolModel.mesh;
+            sizeNode = meshNode.CreateSize(meshSizeTag, selectionTag);
+            meshNode.SetPositionOfFeature(meshSizeTag, 1);
+            sizeNode.set('table', 'default');
+            sizeNode.set('hauto', 1);
+            
             %soundHardBoundaryNode = comsolModel.physics.CreateSoundHardBoundary(soundHardTag, selectionTag);
                         
-            obj = itaComsolReceiver(comsolModel, dummyHeadGeometryNodes, selectionTag);
+            obj = itaComsolReceiver(comsolModel, dummyHeadGeometryNodes, selectionTag, sizeNode);
             obj.Enable();
         end
     end
@@ -115,6 +133,9 @@ classdef itaComsolReceiver < handle
         function setActive(obj, bool)
             for idxGeom=1:numel(obj.mGeometryNodes)
                 obj.mGeometryNodes(idxGeom).active(bool);
+            end
+            for idxNode=1:numel(obj.mMeshNodes)
+                obj.mMeshNodes(idxNode).active(bool);
             end
             obj.mActive = bool;
         end

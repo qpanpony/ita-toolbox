@@ -71,6 +71,21 @@ classdef (Abstract)itaComsolNode < handle
         end
     end
     
+    %% Accessing Features (of active node)
+    methods
+        function SetPositionOfFeature(obj, featureTag, positionIndex)
+            %If the feature of given tag exist in the active node, it is
+            %moved to the given position within the sequence
+            assert(ischar(featureTag) && isrow(featureTag), 'featureTag must be a char row vector')
+            assert(isnumeric(positionIndex) && positionIndex >= 1 && mod(positionIndex,1)==0, 'positionIndex must be an integer >= 1')
+            
+            if isempty(obj.activeNode); return; end
+            if ~obj.hasFeatureNode(obj.activeNode, featureTag); return; end
+            
+            obj.activeNode.feature.move(featureTag, positionIndex);
+        end
+    end
+    
     %% -----------Helper Function Section------------------------------- %%
     %% Root node functions
     methods(Access = private)

@@ -127,7 +127,8 @@ classdef itaComsolGeometry < itaComsolNode
             
             %---Translation---
             moveTag =  [geometryBaseTag '_move'];
-            [moveNode, selectionTag] = obj.createMoveWithSelection(moveTag, receiver.position.cart, orientationGeomTag);
+            moveNode = obj.createMove(moveTag, receiver.position.cart, orientationGeomTag);
+            selectionTag = obj.createSelectionForGeomNode(moveNode, 2);
             
             geometryNodes = [importNode, yawRotationNode, pitchRotationNode, rollRotationNode, moveNode];
         end
@@ -248,13 +249,33 @@ classdef itaComsolGeometry < itaComsolNode
             moveNode.setIndex('displz', translationVec(3), 0);
             moveNode.selection('input').set(geomTags);
         end
-        function [moveNode, selectionTag] = createMoveWithSelection(obj, moveTag, translationVec, geomTags)
-            geomNode = obj.mActiveNode;
-            moveNode = obj.createMove(moveTag, translationVec, geomTags);
-            
-            moveNode.set('selresult', true);
-            moveNode.set('selresultshow', 'dom');
-            selectionTag = [char(geomNode.tag) '_' char(moveNode.tag) '_dom'];
+    end
+    
+    %% Selections
+    methods(Access = private)
+        function selectionTag = createSelectionForGeomNode(obj, geomFeatureNode, dimension)
+            geomFeatureNode.set('selresult', true);
+            geomFeatureNode.set('selresultshow', obj.dimensionToTag(dimension));
+            selectionTag = obj.getSelectionTag(geomFeatureNode, dimension);
+        end
+        function selectionTag = getSelectionTag(obj, geomFeatureNode, dimension)
+            geomNode = obj.activeNode;
+            selectionTag = [char(geomNode.tag) '_' char(geomFeatureNode.tag) '_' obj.dimensionToTag(dimension)];
+        end
+    end
+    methods(Access = private, Static = true)
+        function dimTag = dimensionToTag(dimension)
+            dimTag = '';
+            switch dimension
+                case 0
+                    dimTag = 'pnt';
+                case 1
+                    dimTag = '';
+                case 2
+                    dimTag = 'bnd';
+                case 3
+                    dimTag = 'dom';
+            end
         end
     end
 end
