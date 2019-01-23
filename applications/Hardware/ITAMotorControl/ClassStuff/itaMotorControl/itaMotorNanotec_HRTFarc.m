@@ -183,7 +183,7 @@ classdef itaMotorNanotec_HRTFarc < itaMotorNanotec
            sArgs = this.sArgs_default_motor;
            sArgs.continuous = false;
            if ~isempty(varargin)
-               sArgs = ita_parse_arguments(sArgs,varargin);
+               [sArgs,~] = ita_parse_arguments(sArgs,varargin);
            end
            if sArgs.continuous
                 ret = this.prepare_move(position, sArgs);

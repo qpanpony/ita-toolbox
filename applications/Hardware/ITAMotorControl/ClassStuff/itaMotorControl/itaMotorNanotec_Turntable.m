@@ -158,7 +158,7 @@ classdef itaMotorNanotec_Turntable < itaMotorNanotec
            sArgs.direct = true;
            sArgs.speed = this.sArgs_default_motor.speed;
            if ~isempty(varargin)
-               sArgs = ita_parse_arguments(sArgs,varargin);
+               [sArgs,~] = ita_parse_arguments(sArgs,varargin);
            end
            if sArgs.continuous
                 ret = this.prepare_move(position, 'speed', sArgs.speed,'continuous', true); 
