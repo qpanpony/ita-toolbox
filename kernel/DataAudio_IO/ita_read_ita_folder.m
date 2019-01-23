@@ -19,6 +19,7 @@ for index = 1:numMeas
       fprintf('#'); 
    end
 end
+fprintf('\n'); 
 result = itaObjTmp;
 
 end

@@ -17,6 +17,8 @@ function varargout = ita_plot_phase(varargin)
 %   'aspectratio' ([]) :           Sets the ratio of the axis
 %   'hold' ('on'|->'off') :        Hold on enables multiple plotting in one figure
 %   'ylog' (1 |-> 0) :             will plot on a logarithmic y axis
+%   'unwrapRefZeroFreq' (>0, e.g. 100)
+%                                  Unwrap with alignment of all channels at given frequency in Hz
 %
 %  Example:
 %   figure-handle = ita_plot_phase(audioObjIn)
@@ -33,6 +35,8 @@ function varargout = ita_plot_phase(varargin)
 
 % Author: MMT -- Email: mmt@akustik.rwth-aachen.de
 % Created:  05-Nov-2009
+% Last Modified: SL -- Email: liebich@iks.rwth-aachen.de
+% 22-Jan-2019
 
 %% Get Function String
 thisFuncStr  = [upper(mfilename) ':'];     %Use to show warnings or infos in this functions
@@ -44,7 +48,8 @@ matlabdefaults = ita_set_plot_preferences; %set ita toolbox preferences and get 
 sArgs = struct('pos1_data','itaSuper','nodb',ita_preferences('nodb'),'unwrap',false,'wrapTo360',false,...
     'figure_handle',[],'axes_handle',[],'linfreq',ita_preferences('linfreq'),'linewidth',ita_preferences('linewidth'),...
     'fontname',ita_preferences('fontname'),'fontsize',ita_preferences('fontsize'), 'xlim',[],'ylim',[],'axis',[],...
-    'aspectratio',[],'hold','off','precise',true,'ylog',false,'plotargs',[]);
+    'aspectratio',[],'hold','off','precise',true,'ylog',false,'plotargs',[],...
+    'unwrapRefZeroFreq',-1);
 [data sArgs] = ita_parse_arguments(sArgs, varargin);
 
 % set default if the linewidth is not set correct
@@ -90,6 +95,10 @@ bin_vector = bin_vector(:);
 if sArgs.unwrap
     plotData = unwrap(angle(data.freqData(bin_indices,:)),[],1) .* 180/pi;
     phase_str = 'Unwraped Phase';
+elseif sArgs.unwrapRefZeroFreq > 0
+    idxRefZero = data.freq2index(sArgs.unwrapRefZeroFreq); % get index for 20 Hz to use for unwrap
+    plotData = ita_unwrap(angle(data.freqData(bin_indices,:)),'dim',1,'refZeroBin',idxRefZero) .* 180/pi;
+    phase_str = 'Unwrapped and aligned Phase';
 elseif sArgs.wrapTo360
     plotData = wrapTo2Pi(unwrap(angle(data.freqData(bin_indices,:)),[],1)) .* 180/pi;
     phase_str = 'Phase (wrapped to 360)';
@@ -123,6 +132,9 @@ end
 if sArgs.hold
     nPlots = numel(get(sArgs.axes_handle,'Children'));
     co=get(sArgs.axes_handle,'ColorOrder');
+    if nPlots > size(co,1) %pdi:bugfix for a lot of channels
+       co = repmat(co,2,1);
+    end
     set(sArgs.axes_handle,'ColorOrder',co([(nPlots+1):end 1:nPlots],:));
 end
 
@@ -150,6 +162,16 @@ if sArgs.unwrap
     plimits(1) = 180 * floor(plimits(1)./180);
     plimits(2) = 180 * ceil (plimits(2)./180);
     sArgs.ylim = plimits;
+elseif sArgs.unwrapRefZeroFreq > 0
+    % restrict determiniation of phase to range [100, 10000] Hz % SL: A
+    % little hacky
+    idR = data.freq2index([100,10000]); % get index for 20 Hz to use for unwrap
+    plotDataRanged = plotData(idR(1):idR(2),:);
+    plimits = [min(min(plotDataRanged(:)),-180) max(max(plotDataRanged(:)),180)];
+    plimits(1) = 180 * floor(plimits(1)./180);
+    plimits(2) = 180 * ceil (plimits(2)./180);
+    sArgs.ylim = plimits;
+    sArgs.unwrap = true; % active tick modification
 elseif sArgs.wrapTo360
     sArgs.ylim = [0 360];
 else

@@ -108,7 +108,8 @@ setappdata(fgh,'ActiveAxis',axh1);
 setappdata(fgh,'ita_domain', 'frequency and group delay');
 
 %% Make first axis current
-axes(axh1);  
+%axes(axh1); sl - same bugfix as in ita_plot_freq_phase: hbr - produce error on 2016b
+set(fgh,'CurrentAxes',axh1)
 
 %% Return the figure handle
 if nargout == 1

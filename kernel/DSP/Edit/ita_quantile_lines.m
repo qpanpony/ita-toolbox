@@ -1,10 +1,10 @@
-function varargout = ita_quartile_lines(varargin)
+function varargout = ita_quantile_lines(varargin)
 %ITA_MEDIAN - Get the median over all channels.
 %
-%  This function calculates the frequency domain quartile lines following
+%  This function calculates the frequency domain quantile lines following
 %  the definition of the boxplot
 %
-%  Syntax: analysis_results = ita_quartile_lines(dat, Options)
+%  Syntax: analysis_results = ita_quantile_lines(dat, Options)
 %           Options:
 %               'minmax25' (default)
 %               'minmax25reduced'
@@ -27,10 +27,10 @@ thisFuncStr  = [upper(mfilename) ':'];
 
 %% Initialization and Input Parsing
 narginchk(1,2);
-sArgs           = struct('pos1_a','itaAudioFrequency');
+sArgs           = struct('pos1_a','itaAudioFrequency','options','string');
 [result, sArgs] = ita_parse_arguments(sArgs,varargin); 
 if nargin < 2
-    options = 'minmax25';
+    options = 'minmax25reduced';
 else
     options = varargin{2};
 end
@@ -40,21 +40,27 @@ end
 
 %% Calculate lines
 if(strcmpi(options,'minmax25'))
-    quartileLines(1) = maxMagnPhase(result);
-    quartileLines(4) = medianMagnPhase(result);
-    quartileLines([5,3]) = quartileMagnPhase(result,[0.25,0.75]);
-    quartileLines([6,2]) = quartileMagnPhase(result,[0.025,0.975]);
-    quartileLines(7) = minMagnPhase(result);
+    quantileLines(1) = maxMagnPhase(result);
+    quantileLines(4) = medianMagnPhase(result);
+    quantiletmp1 = quantileMagnPhase(result,[0.25,0.75]);
+    quantileLines(5) = quantiletmp1.ch(1);
+    quantileLines(3) = quantiletmp1.ch(2);
+    quantiletmp2 = quantileMagnPhase(result,[0.025,0.975]);
+    quantileLines(6) = quantiletmp2.ch(1);
+    quantileLines(2) = quantiletmp2.ch(2);
+    quantileLines(7) = minMagnPhase(result);
 elseif(strcmpi(options,'minmax25reduced'))
-    quartileLines(1) = maxMagnPhase(result);
-    quartileLines(3) = medianMagnPhase(result);
-    quartileLines([4,2]) = quartileMagnPhase(result,[0.25,0.75]);
-    quartileLines(5) = minMagnPhase(result);
+    quantileLines(1) = maxMagnPhase(result);
+    quantileLines(3) = medianMagnPhase(result);
+    quantiletmp1 = quantileMagnPhase(result,[0.25,0.75]);
+    quantileLines(4) = quantiletmp1.ch(1);
+    quantileLines(2) = quantiletmp1.ch(2);
+    quantileLines(5) = minMagnPhase(result);
 elseif(strcmpi(options,'tukey'))
-    quartileLines(1) = medianMagnPhase(result);
-    quartileLines(2) = quartileMagnPhase(result,[0.25,0.75]);
-    % calculate inter quartile difference
-%     IQD = quartileLines(2)
+    quantileLines(1) = medianMagnPhase(result);
+    quantileLines(2) = quantileMagnPhase(result,[0.25,0.75]);
+    % calculate inter quantile difference
+%     IQD = quantileLines(2)
 %     
 % IQD = diff(quantilesSpec);
 % IQDFactor = 3;
@@ -67,7 +73,7 @@ else
     error('Unknown input options')
 end
 
-result = ita_merge(quartileLines);
+result = ita_merge(quantileLines);
 
 
 %% Add history line

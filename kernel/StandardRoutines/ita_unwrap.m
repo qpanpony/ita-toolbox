@@ -17,14 +17,20 @@ function varargout = ita_unwrap(varargin)
 %   (additional)    to wrap nearer to 0°
 %                   Default: false
 %
+%
+%
 % OUTPUT:
 %   out:            Unwrapped phase data
 
 % Author: Stefan Liebich (IKS) -- Email: liebich@iks.rwth-aachen.de
 % Created:  21-Jan-2019
 % TODO:
-% - consider denoised/smoothed phase for unwrap?
-
+% - implement smoothing for unwrapping?
+%   'useSmoothing'  Uses a smoothed version of the phase to determine the
+%                   frequencies when to unwrap
+%                   Possible values: 'lin','log'
+%                   Default: 'none'
+%                   see ita_smooth
 
 %% get inputs and set defaults
 sArgs = struct('pos1_data1','numeric','cutoff',pi,'dim',1,'refZeroBin',2,'unwrap_range',[inf,-inf],'allowInvert',false);

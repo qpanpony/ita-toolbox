@@ -1,13 +1,13 @@
-function varargout = quartileMagnPhase(varargin)
-% calulate quartile values for magnitude and phase
+function varargout = quantileMagnPhase(varargin)
+% calulate quantile values for magnitude and phase
 %
-%  Syntax: quartileLines = quartileMagnPhase(itaObjs, quartileBound)
+%  Syntax: quantileLines = quantileMagnPhase(itaObjs, quantileBound)
 %
 % INPUT: 
 %       itaObjs - ITA objects to perform the operation on
-%       quartileBound - Boundaries for the quartile (usage see MATLAB buildin quartile)
+%       quantileBound - Boundaries for the quantile (usage see MATLAB buildin quantile)
 % OUTPUT: 
-%       quartileLines - itaObjs with indicated quartile lines in frequency domain
+%       quantileLines - itaObjs with indicated quantile lines in frequency domain
 
 % Author: Stefan Liebich (IKS) -- Email: liebich@iks.rwth-aachen.de
 % Created:  21-Jan-2019
@@ -19,7 +19,7 @@ function varargout = quartileMagnPhase(varargin)
 
 narginchk(1,2);
 result = varargin{1};
-quartileBounds = varargin{2};
+quantileBounds = varargin{2};
 
 if numel(result)>1 %get max over multiple instances and not over channel of each struct
     tmp = result(1);
@@ -31,9 +31,9 @@ if numel(result)>1 %get max over multiple instances and not over channel of each
     result(2) = result(1);
     
     % calculate min in magn and phase separately
-    magnTmp = (quantile(abs(data),quartileBounds,3));
+    magnTmp = (quantile(abs(data),quantileBounds,3));
     idxRefZero = tmp.freq2index(100); % get index for 20 Hz to use for unwrap
-    phaseTmp = (quantile(ita_unwrap(angle(data),'refZeroBin',idxRefZero),quartileBounds,3));
+    phaseTmp = (quantile(ita_unwrap(angle(data),'refZeroBin',idxRefZero),quantileBounds,3));
     
     % combine min values in magn and phase
     result(1).data = magnTmp(:,:,1) .* exp(1i * phaseTmp(:,:,1));
@@ -42,8 +42,8 @@ if numel(result)>1 %get max over multiple instances and not over channel of each
     % reset the channel names based on the individual channel instances
     resChannelNames = result.channelNames;
     for idxCh = 1:result(1).nChannels   %alter name field of all channels
-        resChannelNames1{idxCh} = ['quartile_',mat2str(quartileBounds(1)*100),'(' resChannelNames{idxCh} ')'];
-        resChannelNames2{idxCh} = ['quartile_',mat2str(quartileBounds(2)*100),'(' resChannelNames{idxCh} ')'];
+        resChannelNames1{idxCh} = ['quantile_',mat2str(quantileBounds(1)*100),'(' resChannelNames{idxCh} ')'];
+        resChannelNames2{idxCh} = ['quantile_',mat2str(quantileBounds(2)*100),'(' resChannelNames{idxCh} ')'];
     end
     result(1).channelNames = resChannelNames1;
     result(2).channelNames = resChannelNames2;
@@ -51,9 +51,9 @@ if numel(result)>1 %get max over multiple instances and not over channel of each
 else % max over channels
     
     % calculate min in magn and phase separately
-    magnTmp = squeeze(quantile(abs(result.freqData),quartileBounds,2)); 
+    magnTmp = squeeze(quantile(abs(result.freqData),quantileBounds,2)); 
     idxRefZero = result.freq2index(100); % get index for 20 Hz to use for unwrap
-    phaseTmp = squeeze(quantile(ita_unwrap(angle(result.freqData),'refZeroBin',idxRefZero),quartileBounds,2));
+    phaseTmp = squeeze(quantile(ita_unwrap(angle(result.freqData),'refZeroBin',idxRefZero),quantileBounds,2));
     result = result.ch(1:2);
     
     % combine min values in magn and phase in two channels
@@ -61,11 +61,11 @@ else % max over channels
     
     % reset the channel names based on the comment
     resChannelComment = result.comment;
-    resChannelNames{1} = ['quartile_',mat2str(quartileBounds(1)*100),'(' resChannelComment ')'];
-    resChannelNames{2} = ['quartile_',mat2str(quartileBounds(2)*100),'(' resChannelComment ')'];
+    resChannelNames{1} = ['quantile_',mat2str(quantileBounds(1)*100),'(' resChannelComment ')'];
+    resChannelNames{2} = ['quantile_',mat2str(quantileBounds(2)*100),'(' resChannelComment ')'];
     result.channelNames = resChannelNames;
 end
 
 %% Add history line
-varargout{1} = ita_metainfo_add_historyline(result,'itaSuper.quartileMagnPhase',varargin);
+varargout{1} = ita_metainfo_add_historyline(result,'itaSuper.quantileMagnPhase',varargin);
 end
