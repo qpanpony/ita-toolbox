@@ -1,4 +1,4 @@
-function  weights = ita_3da_panVBAP(pos_LS,pos_VS,varargin)
+function  weights = ita_vbap_pan(pos_LS,pos_VS,varargin)
 %panVBAP - Calculate weights for VBAP
 %
 %  This function receives the position of the loudspeakers and the position
@@ -24,7 +24,7 @@ Number_of_active_loudspeakers = 3;
 % end
 opts.dim=3;         % Zwei oder Dreidimensionales panning, standard ist 3
 opts.distanceloss = true;
-opts.normalizationGain=1;
+opts.normalizationGain=1/3;
 opts=ita_parse_arguments(opts,varargin);
 
 % Init
@@ -54,8 +54,8 @@ for idx = 1:pos_VS.nPoints
     p = pos_VS.n(idx).cart;
     L = active_loudspeakers.cart;
     g = p*pinv(L);
-    % Re-normalize.
+    % Re-normalize
     g = abs(g)/norm(g);
-    weights(idx,index) = g;
+    weights(idx,index) = (g./pos_VS.r(idx).*pos_LS.r(index)').*1/3;
 end
 

@@ -53,6 +53,6 @@ if aud
         end
     end
 end
-if opts.distanceLoss
+if opts.distanceloss
     audioOut=audioOut/sourcePos.r;
 end
