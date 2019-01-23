@@ -33,7 +33,7 @@ matlabdefaults = ita_set_plot_preferences; %#ok<NASGU> %set ita toolbox preferen
 
 
 %% Input argument handling
-sArgs = struct('pos1_data','itaAudio', 'freqRange', [-inf, inf], 'freqMarkers', [0],...
+sArgs = struct('pos1_data','itaAudio', 'freqRange', [-inf, inf], 'freqMarkers', [],...
         'nominal', [],'showUncertainty', false,'addUnc', [],...
         'nodb',ita_preferences('nodb'),'figure_handle',[],'axes_handle',[],...
         'linewidth',ita_preferences('linewidth'),'fontname',ita_preferences('fontname'),...
@@ -72,13 +72,15 @@ if( ischar(sArgs.freqMarkers) )
 end
 
 % check if the markers exceed the plotted range
-if( min(sArgs.freqMarkers) < sArgs.freqRange(1) )
-    sArgs.freqMarkers(sArgs.freqMarkers < sArgs.freqRange(1)) = [];
-    warning('Marker frequency range goes further down than shown frequency range. Ignoring markers out of bounds.')
-end
-if( max(sArgs.freqMarkers) > sArgs.freqRange(2) )
-    sArgs.freqMarkers(sArgs.freqMarkers > sArgs.freqRange(2)) = [];
-    warning('Marker frequency range goes further up than shown frequency range. Ignoring markers out of bounds.')
+if( ~isempty( sArgs.freqMarkers ) )
+    if( min(sArgs.freqMarkers) < sArgs.freqRange(1) )
+        sArgs.freqMarkers(sArgs.freqMarkers < sArgs.freqRange(1)) = [];
+        warning('Marker frequency range goes further down than shown frequency range. Ignoring markers out of bounds.')
+    end
+    if( max(sArgs.freqMarkers) > sArgs.freqRange(2) )
+        sArgs.freqMarkers(sArgs.freqMarkers > sArgs.freqRange(2)) = [];
+        warning('Marker frequency range goes further up than shown frequency range. Ignoring markers out of bounds.')
+    end
 end
 
 %% extract data and calculate real and imaginary part
@@ -108,6 +110,8 @@ if( ~isempty(sArgs.nominal) && sArgs.showUncertainty)
     xData = hCont.Children(1).XData;
     yData = hCont.Children(1).YData;
     limStatic = [min(xData),max(xData),min(yData),max(yData)];
+elseif( isempty(sArgs.nominal) && sArgs.showUncertainty)
+    warning('no nominal path given for calculation of uncertainty');
 end
 
 %% plot data
