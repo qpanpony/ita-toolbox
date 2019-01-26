@@ -1,4 +1,4 @@
-function [ OutputSignals ] = ita_3da_decode( Bformat, LoudspeakerPos, varargin )
+function [ OutputSignals ] = ita_hoa_decode( Bformat, LoudspeakerPos, varargin )
 %ITA_DECODEAMBISONICS Decodes a BFormat Signal in ANC with SN3D
 %normalization
 %   Detailed explanation goes here
@@ -6,8 +6,8 @@ function [ OutputSignals ] = ita_3da_decode( Bformat, LoudspeakerPos, varargin )
 %  BFormat<nmax,LS>
 
 opts.decoding='remax'; % Decoding strategy (remax,inphase,plane)
-%  opts.decoding='none'; 
- 
+%  opts.decoding='none';
+opts.distanceloss=true;
 opts = ita_parse_arguments(opts,varargin);
 
 % Initializing further parameters
@@ -68,7 +68,7 @@ if isa(Bformat,'itaAudio')
     end
 else
     for k=1:numel(weights)
-        Bformat(:,k)=weights(k).*Bformat(:,k); 
+        Bformat(:,k)=weights(k).*Bformat(:,k);
     end
 end
 
@@ -81,7 +81,11 @@ if isa(Bformat,'itaAudio')
         for l=1:nmax
             temp(l)=Bformat.ch(l)*Yinv(l,k);
         end
-        OutputSignals(k)=sum(temp);
+        if opts.distanceloss
+            OutputSignals(k)=sum(temp)*LoudspeakerPos.r(k);
+        else
+            OutputSignals(k)=sum(temp);
+        end
     end
     OutputSignals=ita_merge(OutputSignals(:));
     OutputSignals.channelCoordinates=LoudspeakerPos;

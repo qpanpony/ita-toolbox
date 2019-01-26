@@ -452,6 +452,11 @@ device(end+1,:) = { 'ITA-KK KE4 Child right','0.0098573 V/Pa','ke4',0};
 device(end+1,:) = { 'Neumann-KK left','1 V/Pa','schoeps',1};
 device(end+1,:) = { 'Neumann-KK right','1 V/Pa','schoeps',1};
 
+% values are taken from calibration sheets by DKD (Deutscher
+% Kalibrierdienst)
+device(end+1,:) = { 'GRAS Headphone Testfixture Left','0.01211 V/Pa','RA0401',1};
+device(end+1,:) = { 'GRAS Headphone Testfixture Right','0.0124 V/Pa','RA0401',1};
+
 device(end+1,:) = { 'HEAD HMS III with ear simulator - IEC 711','0.01165 V/Pa','none',0};
 
 device(end+1,:) = { 'Hoertnix BTE right front_hwch01','0.0159 V/Pa','none',1};
