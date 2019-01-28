@@ -8,17 +8,41 @@ function varargout = ita_plot_nyquist(varargin)
 %   options:
 %       freqRange:  User can specify the frequency in Hz that should be plotted
 %                   [from, to] -> [-inf, inf], e.g. [20,10000]
+%                   It is advisable to select the frequency range to get
+%                   clear images
 %       freqMarkers: User can activate markers that are marking certain frequencies in the Nyquist plot
 %                   [frequenciesToMark] -> [0], e.g. [20:10:100]
 %                       Alternative: 'interactive'
 %                                       include interactive slider to adjust the marker positions for all markers at once 
 %
 %  Example:
-%   audioObjOut = ita_plot_nyquist(audioObjIn)
+%
+% most simple example with only incating the frequency range
+% freqRange = [20,1000]
+%           [hNy,hax] = ita_plot_nyquist(audioObjIn,'freqRange',freqRange);
+%
+% additionally plot into a given figure
+% hFig = figure;
+%           [hNy,hax] = ita_plot_nyquist(audioObjIn,'figure_handle',hFig,'freqRange',freqRange);
+%
+% additionally include a nominal path, internally calculate the additive
+% uncertainty and show the circles
+% markers are shown for [20:10:100] in all curves
+%           [hNy,hax] = ita_plot_nyquist(audioObjIn,'nominal',nominal,'showUncertainty',true,'freqRange',freqRange,'freqMarkers',[20:10:100]);
+%
+% include the interactive frequency markers (including markers and
+% uncertainty cirlces)
+% furthermore, specify externally calculated additive uncertainty (makes
+% e.g. sense when a smaller set than in 'audioObjIn' is used for the
+% calculation of the uncertainty, to check if all paths are contained)
+%           [hNy,hax] = ita_plot_nyquist(audioObjIn,'nominal',nominal,'showUncertainty',true,'addUnc',Wa,'freqRange',freqRange,'freqMarkers','interactive');
+
+
 %
 %
 %   Reference page in Help browser 
 %        <a href="matlab:doc ita_plot_nyquist">doc ita_plot_nyquist</a>
+
 
 
 % Author: Stefan Liebich (IKS) -- Email: liebich@iks.rwth-aachen.de
@@ -34,7 +58,7 @@ matlabdefaults = ita_set_plot_preferences; %#ok<NASGU> %set ita toolbox preferen
 
 %% Input argument handling
 sArgs = struct('pos1_data','itaAudio', 'freqRange', [-inf, inf], 'freqMarkers', [],...
-        'nominal', [],'showUncertainty', false,'addUnc', [],...
+        'nominal', [],'showUncertainty', false,'activateShadedUncertainty',true,'addUnc', [],...
         'nodb',ita_preferences('nodb'),'figure_handle',[],'axes_handle',[],...
         'linewidth',ita_preferences('linewidth'),'fontname',ita_preferences('fontname'),...
     'fontsize',ita_preferences('fontsize'),'color',[],...
@@ -121,7 +145,7 @@ ylabel('Imaginary Part')
 title('Nyquist Plot')
 grid on;
 hold all;
-axis equal
+% axis equal
 
 if ~isempty(sArgs.color)
     set(hPl,'Color',sArgs.color);
@@ -134,12 +158,16 @@ end
 
 %% apply static limits 
 % much faster!
-addSpace = 1.05;
-xlim(limStatic(1:2)*addSpace); % additional 10%
-ylim(limStatic(3:4)*addSpace);
+addSpace = 0.05;
+limStaticAdd = abs(limStatic) * addSpace + eps;
+limStaticAdd([1,3]) = - limStaticAdd([1,3]);
+% limStaticAdd(3) = - limStaticAdd(3);
+xlim(limStatic(1:2)+limStaticAdd(1:2)); % additional 10%
+ylim(limStatic(3:4)+limStaticAdd(1:2));
 
 %% Nyquist specifics (-1,0) point and circle around origin
 plot(-1,0,'rx','Tag','helpers') % nyquist reference point
+plot(0,0,'r+','Tag','helpers') % origin
 
 x = 0; y = 0; r = 1;
 th = 0:pi/25:2*pi;
@@ -170,13 +198,33 @@ getYMarkerPos = @(f) Z_im(getLocalIdx(f),:);
     
 if( ~boolMarkersInteractive ) % place markers at specified frequencies
     possibleMarks = ['+','o','*','.','x','s','d','v','p','h','<','>'];
+    
+    % get marker index
     idxMarkers = data.freq2index(sArgs.freqMarkers);
     idxMarkersLocal = idxMarkers - idxRange(1) + 1; % consider the local frequency data vector
+    
+    % makers for all data
     for idM = 1:length(sArgs.freqMarkers)
-        plot(Z_real(idxMarkersLocal(idM),:),Z_im(idxMarkersLocal(idM),:),['k',possibleMarks(mod(idM,length(possibleMarks)))],'Tag','markers');
+        plot(Z_real(idxMarkersLocal(idM),:),Z_im(idxMarkersLocal(idM),:),['k',possibleMarks(mod(idM-1,length(possibleMarks))+1)],'Tag','markers');
     end
     
-else % interactive marker placement
+    % marker for nominal
+    if( ~isempty(sArgs.nominal) )
+        hMarkNom = plot(Z_nom_real(idxMarkersLocal),Z_nom_imag(idxMarkersLocal),'kx','Tag','nominalMarker');
+    end
+    
+    % show cirlces
+    if( sArgs.showUncertainty )
+        idxCircles = [];
+        for idM = 1:length(sArgs.freqMarkers)
+            idxCircles = [idxCircles,(idxMarkersLocal(idM)-1)*182+1 : (idxMarkersLocal(idM))*182]; % each circle contains 182 points
+        end
+        circleXData = hCont.Children(1).XData(idxCircles);
+        circleYData = hCont.Children(1).YData(idxCircles);
+        plot(circleXData,circleYData,'k-','Tag','currentUncertainty');
+    end
+    
+else  % interactive marker placement
 
     % plot initial set of markers
     curFreq = sArgs.freqRange(1);
@@ -186,6 +234,7 @@ else % interactive marker placement
     if( ~isempty(sArgs.nominal) )
         freqIdx = getLocalIdx(curFreq);
         hMarkNom = plot(Z_nom_real(freqIdx),Z_nom_imag(freqIdx),'kx','Tag','nominalMarker');
+        hLineNom = plot([0, Z_nom_real(freqIdx)],[0, Z_nom_imag(freqIdx)],'k','Tag','nominalLine');
     end
     
     if( sArgs.showUncertainty )
@@ -214,17 +263,23 @@ else % interactive marker placement
         'Position',newposTxt,'FontSize',9,...
         'String',['f=',mat2str(curFreq),'Hz'],'Visible','on','Tag','sliderText');
 end
+
 %% create legend
-% lnh = legend(data.channelNames);
-% if( length(lnh.String) > 6)
-%     lnh.Visible = 'off';
-% end
+lnh = legend(data.channelNames);
+if( length(lnh.String) > 6)
+    lnh.Visible = 'off';
+end
 
 %% deactivate hold
 hold off;
 
 %% axes tweeking
 set(axh,'NextPlot','replace'); %much faster with background circles
+
+%% deactivate the shaded circles
+if( ~sArgs.activateShadedUncertainty )
+    delete(hCont);
+end
 
 
 %% return handle
@@ -246,6 +301,7 @@ function changeMarkerPos(source,event)
     hGroup = findobj(hAx.Children,'Type','hggroup');
     hCurUnc = findobj(hAx.Children,'Tag','currentUncertainty');
     hCurNom = findobj(hAx.Children,'Tag','nominalMarker');
+    hCurNomLine = findobj(hAx.Children,'Tag','nominalLine');
     hNom = findobj(hAx.Children,'Tag','nominal');
 
     
@@ -277,8 +333,8 @@ function changeMarkerPos(source,event)
         newXMarkerPosNom = hNom.XData(freqIdx);
         newYMarkerPosNom = hNom.YData(freqIdx);
         set(hCurNom,'XData',newXMarkerPosNom,'YData',newYMarkerPosNom)
+        set(hCurNomLine,'XData',[0,newXMarkerPosNom],'YData',[0, newYMarkerPosNom])
     end
-    
     
     
     %% mark currenct uncertainty circle
@@ -289,6 +345,7 @@ function changeMarkerPos(source,event)
         set(hCurUnc,'XData',circleXData);
         set(hCurUnc,'YData',circleYData);
     end
+    
         
     
     %% update text
