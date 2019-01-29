@@ -92,17 +92,17 @@ classdef itaValue
         end
         
         %% *********************** conversions *****************************
-        function res = num2str(a,varargin)
+        function res = num2str(this,varargin)
             % convert to string with value followed by unit string
-            if length(a) > 1
+            if length(this) > 1
                 res = [];
-                for idx = 1:length(a)
-                    res = [res ' '  num2str(a(idx),varargin{:})]; %#ok<AGROW>
+                for idx = 1:length(this)
+                    res = [res ' '  num2str(this(idx),varargin{:})]; %#ok<AGROW>
                 end
             else
-                res = num2str(a.value(:),varargin{:});
-                if ~isempty(a.unit)
-                    res = [res , repmat([' ' a.unit],numel(a.value),1)];
+                res = num2str(this.value(:),varargin{:});
+                if ~isempty(this.unit)
+                    res = [res , repmat([' ' this.unit],numel(this.value),1)];
                 end
             end
         end
