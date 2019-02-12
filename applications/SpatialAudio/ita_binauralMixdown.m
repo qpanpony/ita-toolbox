@@ -29,7 +29,7 @@ binOut=itaAudio;
 for k=1:lsSignals.nChannels
     hrtf=hrtfSet.findnearestHRTF(opts.LSPos.n(k));
     if opts.distanceLoss
-        hrtf=hrtf/LSPos.r(k);
+        hrtf=hrtf/opts.LSPos.r(k);
     end
     convolved=ita_convolve(lsSignals.ch(k),hrtf);
     if k==1
