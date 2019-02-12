@@ -286,8 +286,8 @@ try
         % differentiate between plot types
         % standard line plot
         plotType = get(chdr{iGraph},'Type');
-        if any(strcmpi(plotType,'line')) && ~(any(strcmpi(plotType,'bar')) || any(strcmpi(plotType,'patch'))) % workaround for bar plots
-            files = [files gle_makeplot(fid,axesHandles(iGraph),chdr{iGraph}(strcmpi(plotType,'line')),PlotLegends{iGraph},DeltaX,DeltaY,iGraph,sArgs,'line')]; 
+        if any(strcmpi(plotType,'line') | strcmpi(plotType,'scatter')) && ~(any(strcmpi(plotType,'bar')) || any(strcmpi(plotType,'patch'))) % workaround for bar plots
+            files = [files gle_makeplot(fid,axesHandles(iGraph),chdr{iGraph}(strcmpi(plotType,'line') | strcmpi(plotType,'scatter')),PlotLegends{iGraph},DeltaX,DeltaY,iGraph,sArgs,'line')]; 
             
             % bar graphs (toolbox bar plots use patches)
         elseif any(strcmpi(plotType,'bar')) || any(strcmpi(plotType,'patch')) || (any(strcmpi(plotType,'hggroup')) && any(isprop(chdr{iGraph},'BarLayout'))) % rsc - bar plot are hggroup but have a BarLayout Property
@@ -662,13 +662,22 @@ fprintf(fid,'\tylabels dist axisLabelDist\n');
 
 %% here come the actual plots
 if strcmpi(plot_type,'line') || strcmpi(plot_type,'errorbar')
-    % gather line-specific data
-    line_color = get(chdr,'Color');
     marker     = get(chdr,'marker');
-%     marker_size = get(chdr,'MarkerSize');
-    line_style = get(chdr,'LineStyle');
     line_width = get(chdr,'LineWidth');
+    line_color = cell(numel(chdr),1);
+    line_style = cell(numel(chdr),1);
+    for iChdr = 1:numel(chdr)
+        if strcmpi(chdr(iChdr).Type,'scatter')
+            line_color{iChdr} = chdr(iChdr).CData;
+            line_style{iChdr} = 'o';
+        else
+            % gather line-specific data
+            line_color{iChdr} = get(chdr(iChdr),'Color');
+            line_style{iChdr} = get(chdr(iChdr),'LineStyle');
+        end
+    end
 else
+    
     line_color = get(chdr,'FaceColor');
     if ~iscell(line_color)
         line_color = {line_color};
