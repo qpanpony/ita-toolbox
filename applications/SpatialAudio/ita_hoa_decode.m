@@ -33,7 +33,7 @@ if(sum(strcmp(lower(opts.decoding),{'remax' 'both'})))
     syms x;
     
     f=1/2^(N+1)/factorial(N+1)*diff(((x^2-1)^(N+1)),(N+1));%Legendre Polynom n=0 m=order+1
-    maxroot=max(eval(solve(f))); %find maximum root(Nullstelle)
+    maxroot = double(max(vpasolve(f))); %find maximum root(Nullstelle)
     for k=1:nmax
         leggie=legendre(ita_sph_linear2degreeorder(k),abs(maxroot)); % g_m=P_m(r_E)
         weightsReMax(k)=leggie(1);% pick n=0
