@@ -73,7 +73,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
                 case ReceiverType.Monaural
                     out = itaCoordinates([0 0 0]);
                 case ReceiverType.DummyHead
-                    out = itaCoordinates([0 0.0705 0]); %TODO: Read from ini
+                    out = itaCoordinates([0 0.0711 0]); %TODO: Read from ini
                 case ReceiverType.UserDefined
                     out = this.mRelativeLeftEarMicPosition;
             end
@@ -83,7 +83,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
                 case ReceiverType.Monaural
                     out = itaCoordinates([0 0 0]);
                 case ReceiverType.DummyHead
-                    out =  itaCoordinates([0 -0.0715 0]); %TODO: Read from ini
+                    out =  itaCoordinates([0 -0.0712 0]); %TODO: Read from ini
                 case ReceiverType.UserDefined
                     out = this.mRelativeLeftEarMicPosition;
             end
