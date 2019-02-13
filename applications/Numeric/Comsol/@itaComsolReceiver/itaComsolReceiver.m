@@ -99,8 +99,8 @@ classdef itaComsolReceiver < handle
             meshNode = comsolModel.mesh;
             sizeNode = meshNode.CreateSize(meshSizeTag, selectionTag);
             meshNode.SetPositionOfFeature(meshSizeTag, 1);
-            sizeNode.set('table', 'default');
-            sizeNode.set('hauto', 1);
+            meshNode.SetMinimumSizeProperties(sizeNode, ...
+                'hmax', 0.04, 'hmin', 0.004, 'hgrad', 1.3, 'hcurve', 0.2, 'hnarrow', 1)
             
             %soundHardBoundaryNode = comsolModel.physics.CreateSoundHardBoundary(soundHardTag, selectionTag);
                         
