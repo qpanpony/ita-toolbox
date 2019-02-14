@@ -1,12 +1,12 @@
 function varargout = ita_device_list_ITA(mode,token,varargin)
 % ITA_DEVICE_LIST - the ITA device List
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%  PLEASE BE VERY CAREFUL WHEN EDITING THE DEVICE LIST
-%   BY HAND, CONSULT PDI OR MMT BEFORE MAKING CHANGES
+%  PLEASE BE VERY CAREFUL WHEN EDITING THE DEVICE LIST BY HAND, PLEASE 
+%  CONSULT THE ITA-TOOLBOX DEVELOPER TEAM BEFORE MAKING ANY CHANGES
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %  Syntax:
 %   res = ita_device_list() returns all devices in a cell
@@ -29,12 +29,6 @@ function varargout = ita_device_list_ITA(mode,token,varargin)
 % This file is part of the application Measurement for the ITA-Toolbox. All rights reserved.
 % You can find the license for this m-file in the application folder.
 % </ITA-Toolbox>
-
-
-% if exist('ita_device_list_ITA.m','file')
-%    varargout = ita_device_list_ITA(mode,token,varargin{:});
-%    return;
-% end
 
 
 if nargin == 3
