@@ -49,7 +49,7 @@ if nargin >= 1 && isa(mode,'itaMeasurementChainElements')
     MCE = mode;
     devHandle = ita_device_list_handle;
     list = devHandle(); %get entire list
-    [elementfound idx]      = ismember(MCE.name,list(:,1)); %find element
+    [elementfound, idx]      = ismember(MCE.name,list(:,1)); %find element
     if elementfound
         sens         = list{idx,2};
 %         picModel     = ita_model2picture(list{idx,3});
@@ -64,7 +64,7 @@ if nargin >= 1 && isa(mode,'itaMeasurementChainElements')
 %             MCE.picModel    = picModel;
         end
     else
-        ita_verbose_info('Element not in list',1);
+        ita_verbose_info(['Element not found in the device list: ', MCE.name], 1);
     end
     
     
@@ -122,7 +122,7 @@ if nargin >= 2
             end
         end
         if isempty(res)
-            disp(['element not in list: ' token '.'])
+            ita_verbose_info(['Element not found in the device list: ', token], 1)
             start_idx = strfind(token,'(');
             end_idx   = strfind(token,')');  
             if ~isempty(start_idx) && ~isempty(end_idx)
