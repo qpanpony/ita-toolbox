@@ -32,6 +32,16 @@ classdef itaComsolPhysics < itaComsolNode
             
             acousticModelNode.set('minput_pressure', pressure);
         end
+        function SetRelativeHumidity(obj, humidity)
+            %Sets the relative humidity for the acoustic simulation.
+            %Expects a single numeric value between 0 and 1
+            assert(isnumeric(humidity) && isscalar(humidity) && humidity >= 0  && humidity <= 1,...
+                'Input must be a numeric scalar between 0 and 1')
+            acousticModelNode = obj.getAcousticModelNode();
+            assert(~isempty(acousticModelNode), 'No Comsol node for acoustic model found')
+            
+            acousticModelNode.set('minput_relativehumidity', humidity);
+        end
     end
     methods(Access = private)
         function acousticModelNode = getAcousticModelNode(obj)
