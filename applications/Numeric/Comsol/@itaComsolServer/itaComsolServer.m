@@ -53,14 +53,14 @@ classdef itaComsolServer < handle
             end
             
             if (~exist(obj.comsolServerExePath,'file'))
-                disp('[itaComsol]: No Comsol Server binary was found! Please select path to comsolmphserver.exe!');
+                disp(['[' class(obj) ']: No Comsol Server binary was found! Please select path to comsolmphserver.exe!']);
                 obj.SelectComsolServerPath();                
             end
             if ~exist(obj.matlabLiveLinkPath,'dir')
                 obj.matlabLiveLinkPath = fullfile(fileparts( fileparts( fileparts(obj.comsolServerExePath) ) ), 'mli');
                 obj.writeIniFile();
                 if ~exist(obj.matlabLiveLinkPath,'dir')
-                    disp('[itaComsol]: No Comsol Matlab Livelink folder was found! Please select path to the corresponding folder (usually called "mli")');
+                    disp(['[' class(obj) ']: No Comsol Matlab Livelink folder was found! Please select path to the corresponding folder (usually called "mli")']);
                     obj.SelectMatlabLivelinkPath();
                 end
             end
