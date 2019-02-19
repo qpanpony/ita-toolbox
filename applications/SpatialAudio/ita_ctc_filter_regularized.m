@@ -106,9 +106,9 @@ end
 [Cm Cn]=size(CTC);
 for idx=1:Cm
     CTC(idx,1).channelNames = {['CTC-' num2str(idx) 'L''']};
-    CTC(idx,1).channelCoordinates = H.channelCoordinates(idx*Cn-1);
+    CTC(idx,1).channelCoordinates = H.channelCoordinates.n(idx*Cn-1);
     CTC(idx,2).channelNames = {['CTC-' num2str(idx) 'R''']};
-    CTC(idx,2).channelCoordinates = H.channelCoordinates(idx*Cn);
+    CTC(idx,2).channelCoordinates = H.channelCoordinates.n(idx*Cn);
 end
 end
 
