@@ -12,7 +12,8 @@ for index = 1:numMeas
    
    % read a single measurement
 %    relation = ita_read_ita(sprintf('%s/data/%d.ita',fullFolderName,index));
-   itaObjTmp(index) = ita_read_ita(sprintf('%s/%s',folderName,filelist(index).name));
+
+   itaObjTmp(index) = ita_read_ita([folderName,filesep,filelist(index).name]);
    
    % indicate progress by 10 sharp symbols
    if(diff( floor((index+(0:1)) / numMeas * 10) ) > 0)

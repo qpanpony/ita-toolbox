@@ -43,6 +43,10 @@ sArgs        = struct('pos1_data','itaAudioFrequency','pos2_freqvec','vector',..
     );
 [data,freq_vec,sArgs] = ita_parse_arguments(sArgs,varargin); 
 
+if ( isempty(sArgs.beta) ) %workaround to provide the parameter beta also in higher level ita_divide_spk() function
+   sArgs.beta = 10^(-200/20);
+end
+
 %% Init
 data.signalType = 'energy'; % set signal type after transformation to freq domain !
 

@@ -87,7 +87,7 @@ if nargin == 0
 end
 
 %% Initialization
-sArgs   = struct('pos1_num','itaSuper','pos2_den','anything','regularization',[],'mode','circular','zerophase',true);
+sArgs   = struct('pos1_num','itaSuper','pos2_den','anything','regularization',[],'mode','circular','zerophase',true,'beta',[]);
 sArgs   = ita_parse_arguments(sArgs,varargin);
 num     = sArgs.num;
 den     = sArgs.den;
@@ -115,7 +115,7 @@ end
 
 %% Regularization or not?
 if ~isempty( sArgs.regularization )
-   res = num * ita_invert_spk_regularization(den,sArgs.regularization,'zerophase',sArgs.zerophase); %% TODO 
+   res = num * ita_invert_spk_regularization(den,sArgs.regularization,'zerophase',sArgs.zerophase,'beta',sArgs.beta); %% TODO 
    if strcmpi(den.signalType ,'power') && strcmpi(num.signalType,'power')
        res.signalType = 'energy';
    end

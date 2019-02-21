@@ -59,6 +59,7 @@ matlabdefaults = ita_set_plot_preferences; %#ok<NASGU> %set ita toolbox preferen
 %% Input argument handling
 sArgs = struct('pos1_data','itaAudio', 'freqRange', [-inf, inf], 'freqMarkers', [],...
         'nominal', [],'showUncertainty', false,'activateShadedUncertainty',true,'addUnc', [],...
+        'MarkMaxUnc',false,...
         'nodb',ita_preferences('nodb'),'figure_handle',[],'axes_handle',[],...
         'linewidth',ita_preferences('linewidth'),'fontname',ita_preferences('fontname'),...
     'fontsize',ita_preferences('fontsize'),'color',[],...
@@ -145,7 +146,7 @@ ylabel('Imaginary Part')
 title('Nyquist Plot')
 grid on;
 hold all;
-% axis equal
+axis equal
 
 if ~isempty(sArgs.color)
     set(hPl,'Color',sArgs.color);
@@ -161,7 +162,6 @@ end
 addSpace = 0.05;
 limStaticAdd = abs(limStatic) * addSpace + eps;
 limStaticAdd([1,3]) = - limStaticAdd([1,3]);
-% limStaticAdd(3) = - limStaticAdd(3);
 xlim(limStatic(1:2)+limStaticAdd(1:2)); % additional 10%
 ylim(limStatic(3:4)+limStaticAdd(1:2));
 
@@ -197,15 +197,27 @@ getXMarkerPos = @(f) Z_real(getLocalIdx(f),:);
 getYMarkerPos = @(f) Z_im(getLocalIdx(f),:);
     
 if( ~boolMarkersInteractive ) % place markers at specified frequencies
-    possibleMarks = ['+','o','*','.','x','s','d','v','p','h','<','>'];
+    possibleMarks = ['+','o','*','x','v','d','s','p','.','h','<','>'];
     
     % get marker index
     idxMarkers = data.freq2index(sArgs.freqMarkers);
     idxMarkersLocal = idxMarkers - idxRange(1) + 1; % consider the local frequency data vector
     
-    % makers for all data
+    % markers for all data
     for idM = 1:length(sArgs.freqMarkers)
         plot(Z_real(idxMarkersLocal(idM),:),Z_im(idxMarkersLocal(idM),:),['k',possibleMarks(mod(idM-1,length(possibleMarks))+1)],'Tag','markers');
+    end
+    
+    % line for maximum marker
+    if( ~isempty(sArgs.nominal) && sArgs.MarkMaxUnc )
+        for idM = 1:length(sArgs.freqMarkers)
+            % determine maximum marker
+            allMarkers = Z_real(idxMarkersLocal(idM),:) + 1i* Z_im(idxMarkersLocal(idM),:);
+            nomMarker = Z_nom_real(idxMarkersLocal(idM))+ 1i* Z_nom_imag(idxMarkersLocal(idM));
+            [~,maxIdx] = max(abs(allMarkers - nomMarker));
+            lineCoord = [nomMarker,allMarkers(maxIdx)];
+            hMarkMax = plot(real(lineCoord),imag(lineCoord),'k','Tag','nominalMarkerLine');
+        end
     end
     
     % marker for nominal
