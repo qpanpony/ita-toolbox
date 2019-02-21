@@ -49,7 +49,12 @@ channelUnits = cell(1,nDataSet);
 nodes = zeros(nDataSet,1);
 switch ds.abscissaUnitsLabel
     case 's' % data from B&K Pulse or other measurement systems
-        SamplingRate = round(1./DataSet{1}.dx);
+        if ~isempty(ds.dx)
+            SamplingRate = 1./ds.dx;
+        else
+            SamplingRate = median(1./diff(unique(abscissa)));
+        end
+        SamplingRate = round(SamplingRate,-1);
         for i=1:nDataSet %Read the data into the variables
             y = DataSet{i}.measData(:);
             if ~isempty(y)
