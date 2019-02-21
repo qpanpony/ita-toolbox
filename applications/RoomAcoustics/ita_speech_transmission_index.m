@@ -42,7 +42,7 @@ end
 
 if ir.trackLength < 1.6
     ita_verbose_info('IR is shorter than ISO 60268-16 recommends, I hope you know what you are doing! I will extend the data',0);
-    ir = ita_extend_dat(ir,1.6);
+    ir = ita_extend_dat(ir,round(ir.samplingRate*1.6));
 end
 
 if strcmpi(sArgs.gender,'male')
