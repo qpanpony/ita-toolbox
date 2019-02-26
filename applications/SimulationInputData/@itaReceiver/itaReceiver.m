@@ -73,7 +73,8 @@ classdef itaReceiver < itaSpatialSimulationInputItem
                 case ReceiverType.Monaural
                     out = itaCoordinates([0 0 0]);
                 case ReceiverType.DummyHead
-                    out = itaCoordinates([0 0.0711 0]); %TODO: Read from ini
+                    %out = itaCoordinates([0 0.07022 0]);
+                    out = itaCoordinates([0 0.071 0]); %TODO: Read from ini
                 case ReceiverType.UserDefined
                     out = this.mRelativeLeftEarMicPosition;
             end
@@ -83,7 +84,8 @@ classdef itaReceiver < itaSpatialSimulationInputItem
                 case ReceiverType.Monaural
                     out = itaCoordinates([0 0 0]);
                 case ReceiverType.DummyHead
-                    out =  itaCoordinates([0 -0.0712 0]); %TODO: Read from ini
+                    %out =  itaCoordinates([0 -0.07147 0]);
+                    out =  itaCoordinates([0 -0.072 0]); %TODO: Read from ini
                 case ReceiverType.UserDefined
                     out = this.mRelativeLeftEarMicPosition;
             end
@@ -94,10 +96,10 @@ classdef itaReceiver < itaSpatialSimulationInputItem
     methods(Access = private)
         function globalPos = convertLocalToGlobalCoordinates(this, localPos)
             assert(isa(localPos, 'itaCoordinates'), 'Input must be itaCoordinates')
-            x = this.orientation.view;
-            z = this.orientation.up;
-            y = cross(z, x);
-            orientationMatrix = [x; y; z]';
+            x = this.orientation.view; x = x/norm(x);
+            z = this.orientation.up; z = z/norm(z);
+            y = cross(z, x); %y = y/norm(y);
+            orientationMatrix = [x; y; z];
             
             posWithGlobalOrientation = itaCoordinates(localPos.cart * orientationMatrix);
             globalPos = posWithGlobalOrientation + this.position;
