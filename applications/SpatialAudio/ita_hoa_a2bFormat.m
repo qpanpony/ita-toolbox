@@ -12,10 +12,9 @@ function [ varargout ] = ita_hoa_a2bFormat(varargin)
 %
 % Channel assignment outgoing: W, X, Y, Z
 %
-opts.typeIn=1; % type 2 is for DPA-4 Mics, then channel assignment: FLD, FRU, BLU, BRD
+opts.type=1; % type 2 is for DPA-4 Mics, then channel assignment: FLD, FRU, BLU, BRD
 
-
-if ( ~isa(varargin{2},'itaAudio') )
+if nargin < 2 || ~isa(varargin{2},'itaAudio')
     assert( varargin{1}.nChannels == 4 )
     varargin{1}=merge(varargin{1}(:));
     FLU=varargin{1}.ch(1);
@@ -33,20 +32,25 @@ else
     error('Need 4 channel input or at least 4 itaAudio inputs');
 end
 
-switch type
+switch opts.type
     case 1
-        W = FLU + FRD + BLD + BRU;
-        X = FLU + FRD - BLD - BRU;
-        Y = FLU - FRD + BLD - BRU;
-        Z = FLU - FRD - BLD + BRU;
+        W =  FLU + FRD + BLD + BRU;
+        X =  FLU + FRD - BLD - BRU;
+        Y =  FLU - FRD + BLD - BRU;
+        Z =  FLU - FRD - BLD + BRU;
     case 2
-        W = FLD+FRU+BLU+BRD;
-        X = FLD+FRU-BLU-BRD;
-        Y = FLD-FRU+BLU-BRD;
-        Z = -FLD+FRU+BLU-BRD;
+        W =  FLD + FRU + BLU + BRD;
+        X =  FLD + FRU - BLU - BRD;
+        Y =  FLD - FRU + BLU - BRD;
+        Z = -FLD + FRU + BLU - BRD;
 end
 
-if nargout == 1
+W.channelNames = {'W'};
+X.channelNames = {'X'};
+Y.channelNames = {'Y'};
+Z.channelNames = {'Z'};
+
+if ~nargout || nargout == 1
     varargout{ 1 } = ita_merge(W,X,Y,Z);
 else
     varargout{ 1 } = W;
