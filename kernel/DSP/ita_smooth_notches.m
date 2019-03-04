@@ -14,9 +14,13 @@ function varargout = ita_smooth_notches(varargin)
 %           'smoothType' ('LogFreqOctave1')
 %                                : type of smoothing used to smooth curve.
 %                                  Please see ita_smooth for more details.
+%           'dataTypes' ('Abs+GDelay')
+%                                : data type of smoothing 'Real', 'Complex', 'Abs', 'GDelay', 'Abs+GDelay' or 'Abs+Phase';
+%                                  Please see ita_smooth for more details.
+%                                   
 %
 %  Example:
-%   audioObjOut = ita_smooth_notches(audioObjIn,12)
+%   audioObjOut = ita_smooth_notches(audioObjIn)
 %
 %  See also:
 %   ita_smooth, ita_toolbox_gui, ita_read, ita_write, ita_generate
@@ -37,13 +41,13 @@ function varargout = ita_smooth_notches(varargin)
 
 
 %% Initialization and Input Parsing
-sArgs        = struct('pos1_data','itaAudio', 'bandwidth', 1/3,'squeezeFactor',0.3,'threshold',3,'smoothType','LogFreqOctave1');
+sArgs        = struct('pos1_data','itaAudio', 'bandwidth', 1/3,'squeezeFactor',0.3,'threshold',3,'smoothType','LogFreqOctave1','dataTypes','Abs+GDelay');
 [input,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 %% Smooth Notches
 % sgolay = Savitzky-Golay filter. Only possible with Curve Fitting Toolbox.
 % ita_smooth will catch this.
-input_smooth = ita_smooth(input,sArgs.smoothType, sArgs.bandwidth, 'Abs+GDelay','sgolay',2);
+input_smooth = ita_smooth(input,sArgs.smoothType, sArgs.bandwidth, sArgs.dataTypes,'sgolay',2);
 ratio = input/input_smooth;
 
 if sArgs.threshold  % next step is only necessary if threshold was not set to zero.

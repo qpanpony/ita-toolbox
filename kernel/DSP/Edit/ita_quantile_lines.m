@@ -68,6 +68,23 @@ elseif(strcmpi(options,'tukey'))
 % lowerBoundIQD = medianSpec - IQDFactor/2*IQD;
 % OutlierLower = y < repmat(lowerBoundIQD, size(y, 1), 1);
 % OutlierUpper = y > repmat(upperBoundIQD, size(y, 1), 1);
+    error('not yet implemented')
+elseif(strcmpi(options,'meanstd'))
+    meanTmp = meanMagnPhase(result);
+    stdTmp = stdMagnPhase(result);
+    quantileLines(1) = meanTmp;
+    
+    magnTmp = abs(meanTmp.freqData) + abs(stdTmp.freqData);
+    phaseTmp = angle(meanTmp.freqData) + angle(stdTmp.freqData);
+    tmpITA = result;
+    tmpITA.freqData = magnTmp .* exp(1i * phaseTmp);
+    quantileLines(2) = tmpITA;
+    
+    magnTmp = abs(meanTmp.freqData) - abs(stdTmp.freqData);
+    phaseTmp = angle(meanTmp.freqData) - angle(stdTmp.freqData);
+    tmpITA = result;
+    tmpITA.freqData = magnTmp .* exp(1i * phaseTmp);
+    quantileLines(3) = tmpITA;
     
 else
     error('Unknown input options')
