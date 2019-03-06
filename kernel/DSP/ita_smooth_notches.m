@@ -16,7 +16,7 @@ function varargout = ita_smooth_notches(varargin)
 %                                  Please see ita_smooth for more details.
 %
 %  Example:
-%   audioObjOut = ita_smooth_notches(audioObjIn,12)
+%   audioObjOut = ita_smooth_notches(audioObjIn)
 %
 %  See also:
 %   ita_smooth, ita_toolbox_gui, ita_read, ita_write, ita_generate
