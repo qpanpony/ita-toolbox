@@ -9,6 +9,9 @@ function varargout = meanMagnPhase(varargin)
 % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder. 
 % </ITA-Toolbox>
 
+activateUnwrap = 1; % for debug purposes
+unwrapRefFreq = 100; % Hz
+
 narginchk(1,1);
 result = varargin{1};
 if numel(result)>1 %get max over multiple instances and not over channel of each struct
@@ -21,8 +24,12 @@ if numel(result)>1 %get max over multiple instances and not over channel of each
     
     % calculate min in magn and phase separately
     magnMed = squeeze(mean(abs(data),3));
-    idxRefZero = tmp.freq2index(100); % get index for 20 Hz to use for unwrap
-    phaseMed = squeeze(mean(ita_unwrap(angle(data),'refZeroBin',idxRefZero),3));
+    if( activateUnwrap )
+        idxRefZero = tmp.freq2index(unwrapRefFreq); % get index for 20 Hz to use for unwrap
+        phaseMed = squeeze(mean(ita_unwrap(angle(data),'refZeroBin',idxRefZero),3));
+    else
+        phaseMed = squeeze(mean(angle(data),3));
+    end
     
     % combine min values in magn and phase
     result.data = magnMed .* exp(1i * phaseMed);
@@ -31,8 +38,12 @@ else % max over channels
     
     % calculate min in magn and phase separately
     magnMed = squeeze(mean(abs(result.freqData),2)); 
-    idxRefZero = result.freq2index(100); % get index for 20 Hz to use for unwrap
-    phaseMed = squeeze(mean(ita_unwrap(angle(result.freqData),'refZeroBin',idxRefZero),2));
+    if( activateUnwrap )
+        idxRefZero = result.freq2index(unwrapRefFreq); % get index for 20 Hz to use for unwrap
+        phaseMed = squeeze(mean(ita_unwrap(angle(result.freqData),'refZeroBin',idxRefZero),2));
+    else
+        phaseMed = squeeze(mean(angle(result.freqData),2));
+    end
     
     % combine min values in magn and phase
     result.data = magnMed .* exp(1i * phaseMed); 
