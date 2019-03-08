@@ -91,7 +91,8 @@ end
 %% output
 if sArgs.createPlot
     fgh = ita_plot_freq(data);
-    plotResult = itaResult([[nan(sum(freqVector<min(freq)),1); 10.^((refCurve+soundReductionIndex)./20); nan(sum(freqVector>max(freq)),1)], [ones(sum(freqVector<=500),1)*10.^(soundReductionIndex./20); nan(sum(freqVector>500),1)]],freqVector,'freq');
+    combinedFreq = unique([freq; freqVector]);
+    plotResult = itaResult([[nan(sum(combinedFreq<min(freq)),1); 10.^((refCurve+soundReductionIndex)./20); nan(sum(combinedFreq > max(freq)),1)],[ones(sum(combinedFreq<=500),1)*10.^(soundReductionIndex./20); nan(sum(combinedFreq > 500),1)]],combinedFreq,'freq');
     ita_plot_freq(plotResult,'figure_handle',fgh,'axes_handle',gca,'hold');
     bar(gca,deficiencies.freqVector,deficiencies.freq,'hist');
     [maxDef,maxIdx] = max(deficiencies.freq);
@@ -101,7 +102,7 @@ if sArgs.createPlot
         singleNumberString = [outputStr ' = ' num2str(soundReductionIndex) 'dB'];
     end
     legend({'Sound transmission loss','Shifted reference curve',singleNumberString,['Deficiencies (sum: ' num2str(sum(deficiencies.freq)) 'dB, max: ' num2str(maxDef) 'dB at ' num2str(deficiencies.freqVector(maxIdx)) 'Hz)']});
-    xlim([min(freq) max(freq)]);
+    xlim([min(combinedFreq) max(combinedFreq)]);
     ylim([0 max(max(soundReduction),max(refCurve)+soundReductionIndex)+15]);
 end
 
