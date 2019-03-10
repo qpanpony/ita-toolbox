@@ -207,6 +207,12 @@ for idx = 1:length(field_token)
                         if ~ishandle(value)
                             error([thisFuncStr callFuncStr sprintf('Wrong input parameter at position %i (%s instead of %s) ', pos_num, class(value), 'handle' )])
                         end
+                    case {'cell,numeric'} % combination of two possibilities would be useful, workaround SL
+                        if isnumeric(value) || isa(value,'cell')
+                            % everything is fine
+                        else
+                            error([thisFuncStr callFuncStr sprintf('Wrong input parameter at position %i (%s instead of %s) ', pos_num, class(value), 'numeric or cell' )])
+                        end
                     otherwise
                         if ~isa(value,compare_string)
                             error([thisFuncStr callFuncStr sprintf('Wrong input parameter at position %i (%s instead of %s) ', pos_num, class(value),compare_string )])
