@@ -173,7 +173,7 @@ classdef itaSource < itaSpatialSimulationInputItem
         end
     end
     
-    %------Surface Sources-------------------------------------------------
+    %------Piston----------------------------------------------------------
     methods
         function this = set.pistonRadius(this, radius)
             assert(( isscalar(radius) || isempty(radius) ) && isnumeric(radius) && isreal(radius),...
@@ -194,20 +194,41 @@ classdef itaSource < itaSpatialSimulationInputItem
             end
         end
     end
+    
+    %% Conversion
+    methods(Static = true)
+        function out = GetVolumeFlowFromPressure(pressureTf, T, p0, h)
+            assert(isa(pressureTf, 'itaAudio') && pressureTf.nChannels == 1, 'pressureTf must be an itaAudio with one channel')
+            assert(isnumeric(T) && isnumeric(p0) && isnumeric(h) && isscalar(T) && isscalar(p0) && isscalar(h),...
+                'T, p0 and h must be numeric scalars');
+            
+            
+            rho0 = ita_constants('rho_0', 'medium', 'air', 'T', T, 'p', p0, 'phi', h/100);
+            pressureToVolumeFlowMagnitude =  2 ./ (1j * rho0.value * pressureTf.freqVector);
+            out = itaAudio(pressureTf.freqData .* pressureToVolumeFlowMagnitude,...
+                pressureTf.samplingRate, 'freq');
+        end
+    end
 
 
     %% Booleans
     %------General---------------------------------------------------------
     methods
+        function bool = HasSourceType(this, sourceType)
+            assert(isa(sourceType, 'SourceType'), 'Input must be a SourceType')
+            bool = arrayfun(@(x) isequal(x.mType, sourceType), this);
+        end
         function bool = HasPistonRadius(this)
             bool = arrayfun(@(x) ~isempty(x.mPistonRadius), this);
         end
-        function bool = HasSpatialInformation(this)
-            hasPositionAndOrientation = HasSpatialInformation@itaSpatialSimulationInputItem(this);
-            isPistonWithoutRadius =...
-                arrayfun(@(x) isequal(x.mType, SourceType.Piston), this) & ~this.HasPistonRadius();
+        function bool = HasWaveGeometry(this)
+            %Returns true if all information on source geometry
+            %for a wave-absed simulation is available
+            %   This excludes position and orientation
+            isPiston = this.HasSourceType(SourceType.Piston);
+            isPistonWithRadius = isPiston & this.HasPistonRadius();
             
-            bool = hasPositionAndOrientation & ~isPistonWithoutRadius;
+            bool = ~isPiston | isPistonWithRadius;
         end
         
         function bool = HasPressureTf(this)
@@ -228,7 +249,7 @@ classdef itaSource < itaSpatialSimulationInputItem
         function bool = HasWaveData(this)
             %Returns true if all data which is used for Wave-based
             %Acoustics is available
-            bool = this.HasWaveTf() & this.HasSpatialInformation();
+            bool = this.HasWaveTf() & this.HasSpatialInformation() & this.HasWaveGeometry();
         end
     end
     
