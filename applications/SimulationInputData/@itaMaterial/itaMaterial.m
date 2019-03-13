@@ -10,6 +10,10 @@ classdef itaMaterial < itaSimulationInputItem
     % </ITA-Toolbox>
     
     properties(Access = private, Hidden = true)
+        mImpedanceType = ImpedanceType.UserDefined;
+        mAbsorptionType = ImpedanceType.UserDefined;
+        mScatteringType = ScatteringType.UserDefined;
+        
         mImpedance;
         mAbsorption;
         mScattering;
@@ -21,6 +25,10 @@ classdef itaMaterial < itaSimulationInputItem
     end
     
     properties(Dependent = true)
+        impedanceType;          %ImpedanceType
+        absorptionType;         %ImpedanceType
+        scatteringType;         %ScatteringType
+        
         impedance;              %Impedance Z - itaSuper
         absorption;             %Absorption coefficient alpha - itaSuper
         scattering;             %Scattering coefficient s - itaSuper
@@ -51,8 +59,35 @@ classdef itaMaterial < itaSimulationInputItem
         end
     end
     
+    methods(Static = true)
+        function obj = SoundHard()
+            obj = itaMaterial;
+            obj.mImpedanceType = ImpedanceType.SoundHard;
+            obj.mAbsorptionType = ImpedanceType.SoundHard;
+        end
+        function obj = SoundHardNoScattering()
+            obj = itaMaterial;
+            obj.mImpedanceType = ImpedanceType.SoundHard;
+            obj.mAbsorptionType = ImpedanceType.SoundHard;
+            obj.mScatteringType = ScatteringType.Zero;
+        end
+    end
+    
     %% Set functions
     methods
+        function this = set.impedanceType(this, impedanceType)
+            assert(isa(impedanceType, 'ImpedanceType'), 'The impedanceType property must be an object of the class ImpedanceType.')
+            this.mImpedanceType = impedanceType;
+        end
+        function this = set.absorptionType(this, absorptionType)
+            assert(isa(absorptionType, 'ImpedanceType'), 'The absorptionType property must be an object of the class ImpedanceType.')
+            this.mAbsorptionType = absorptionType;
+        end
+        function this = set.scatteringType(this, scatterType)
+            assert(isa(scatterType, 'ScatteringType'), 'The scatteringType property must be an object of the class ImpedanceType.')
+            this.mScatteringType = scatterType;
+        end
+        
         function this = set.impedance(this, impedance)
             if isnumeric(impedance) && isempty(impedance)
                 this.mImpedance = [];
@@ -105,8 +140,24 @@ classdef itaMaterial < itaSimulationInputItem
     
     %% Get functions
     methods
+        function impedanceType = get.impedanceType(this)
+            impedanceType = this.mImpedanceType;
+        end
+        function absorptionType = get.absorptionType(this)
+            absorptionType = this.mAbsorptionType;
+        end
+        function scatteringType = get.scatteringType(this)
+            scatteringType = this.mScatteringType;
+        end
+        
         function alpha = get.absorption(this)
-            alpha = this.mAbsorption;
+            switch this.mAbsorptionType
+                case ImpedanceType.SoundHard
+                    freqData = zeros( size(this.gaThirdOctavefreqs) );
+                    alpha = itaResult(freqData, this.gaThirdOctavefreqs, 'freq');
+                otherwise
+                    alpha = this.mAbsorption;
+            end
         end
         
         function alpha = get.absorptionFromImpedance(this)
@@ -124,25 +175,49 @@ classdef itaMaterial < itaSimulationInputItem
         end
         
         function scattering = get.scattering(this)
-            scattering = this.mScattering;
+            switch this.mScatteringType
+                case  ScatteringType.Zero
+                    freqData = zeros( size(this.gaThirdOctavefreqs) );
+                    scattering = itaResult(freqData, this.gaThirdOctavefreqs, 'freq');
+                otherwise
+                    scattering = this.mScattering;
+            end
         end
         
         function Z = get.impedance(this)
-            Z = this.mImpedance;
+            switch this.mImpedanceType
+                case ImpedanceType.SoundHard
+                    Z = inf;
+                otherwise
+                    Z = this.mImpedance;
+            end
         end
     end
     
     %% Booleans
     
     methods
+        function bool = HasImpedanceType(this, impedanceType)
+            assert(isa(impedanceType, 'ImpedanceType'), 'Input must be an ImpedanceType')
+            bool = arrayfun(@(x) x.mImpedanceType == impedanceType, this);
+        end
+        function bool = HasAbsorptionType(this, impedanceType)
+            assert(isa(impedanceType, 'ImpedanceType'), 'Input must be an ImpedanceType')
+            bool = arrayfun(@(x) x.mAbsorptionType == impedanceType, this);
+        end
+        function bool = HasScatteringType(this, scatterType)
+            assert(isa(scatterType, 'ScatteringType'), 'Input must be a ScatteringType')
+            bool = arrayfun(@(x) x.mScatteringType == scatterType, this);
+        end
+        
         function bool = HasAbsorption(this)
-            bool = arrayfun(@(x) ~isempty(x.mAbsorption), this);
+            bool = arrayfun(@(x) ~isempty(x.mAbsorption), this) | this.absorptionDefinedByType();
         end
         function bool = HasScattering(this)
-            bool = arrayfun(@(x) ~isempty(x.mScattering), this);
+            bool = arrayfun(@(x) ~isempty(x.mScattering), this) | this.scatteringDefinedByType();
         end
         function bool = HasImpedance(this)
-            bool = arrayfun(@(x) ~isempty(x.mImpedance), this);
+            bool = arrayfun(@(x) ~isempty(x.mImpedance), this) | this.impedanceDefinedByType();
         end
         
         function bool = HasGaData(this)
@@ -154,6 +229,23 @@ classdef itaMaterial < itaSimulationInputItem
             %Returns true if all data which is used for Wave-based
             %Acoustics is available
             bool = this.HasImpedance();
+        end
+    end
+    methods(Access = private)
+        function bool = impedanceDefinedByType(this)
+            bool = ~this.HasImpedanceType(ImpedanceType.UserDefined);
+        end
+        function bool = absorptionDefinedByType(this)
+            bool = ~this.HasAbsorptionType(ImpedanceType.UserDefined);
+        end
+        function bool = scatteringDefinedByType(this)
+            bool = ~this.HasScatteringType(ScatteringType.UserDefined);
+        end
+    end
+    
+    methods(Hidden = true)
+        function bool = HasNonInfImpedance(this)
+            bool = this.HasImpedance & ~this.HasImpedanceType(ImpedanceType.SoundHard);
         end
     end
     

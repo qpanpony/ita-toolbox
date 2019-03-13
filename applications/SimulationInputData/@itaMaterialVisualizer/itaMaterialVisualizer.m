@@ -70,7 +70,7 @@ classdef itaMaterialVisualizer < handle
         function varargout = plotImpedance(this, varargin)
             %Plots the impedance for all given materials
             %   For specification of plot input arguments: See ita_plot_freq()
-            [fgh, ax] = this.plotParameter('impedance', 'HasImpedance', varargin{:});
+            [fgh, ax] = this.plotParameter('impedance', 'HasNonInfImpedance', varargin{:});
             ylabel(ax, 'Impedance\it Z');
             if nargout
                 varargout{1} = fgh;
@@ -83,7 +83,7 @@ classdef itaMaterialVisualizer < handle
         function [fgh, ax] = plotParameter(this, parameter, checkFunction, varargin)
             materialsWithParameter = this.mMaterials(this.mMaterials.(checkFunction));
             if numel(materialsWithParameter) == 0
-                error('Cannot plot material parameter, since it is specified for none of the given materials')
+                error('Cannot plot material parameter, since it is not specified or cannot be visualized for any of the given materials')
             end
             
             parameterData = itaResult();
