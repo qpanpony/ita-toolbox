@@ -21,8 +21,13 @@ classdef itaComsolImpedance < handle
             %functions instead!
             assert(isa(comsolModel, 'itaComsolModel'), 'First input must be a single itaComsolModel')
             assert(isa(impedancePhysicsNode, 'com.comsol.clientapi.physics.impl.PhysicsFeatureClient'), 'Second input must be a comsol physics feature node')
-            assert(isa(realInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Third input must be a comsol function feature node')
-            assert(isa(imagInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fourth input must be a comsol function feature node')
+            if nargin > 2
+                assert(isa(realInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Third input must be a comsol function feature node')
+                assert(isa(imagInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fourth input must be a comsol function feature node')
+            else
+                realInterpolationNode = [];
+                imagInterpolationNode = [];
+            end
             
             obj.mModel = comsolModel;
             obj.mImpedancePhysicsNode = impedancePhysicsNode;
@@ -46,9 +51,17 @@ classdef itaComsolImpedance < handle
             assert(isa(comsolModel, 'itaComsolModel'), 'First input must be a single itaComsolModel')
             assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'Second input must be a char row vector')
             assert(isvarname(strrep(boundaryGroupName, ' ', '_')), 'Given boundary group name must be valid variable name (whitespace allowed)')
-            if isa(data, 'itaMaterial'); data = data.impedance; end
-            assert(isa(data, 'itaSuper') && numel(data) == 1 && data.nChannels == 1,...
-                'Third input must either be an itaMaterial with a valid impedance or a single itaSuper')
+            
+            dataAssertStr = 'Third input must either be an itaMaterial with a valid impedance or a single itaSuper';
+            assert(isa(data, 'itaMaterial') || isa(data, 'itaSuper'), dataAssertStr)
+            if isa(data, 'itaSuper')
+                assert(numel(data) == 1 && data.nChannels == 1, dataAssertStr)
+                material = itaMaterial;
+                material.impedance = data;
+            else
+                material = data;
+            end
+            assert(material.HasImpedance(), dataAssertStr)
             
             boundaryGroupNode = comsolModel.selection.BoundaryGroup(boundaryGroupName);
             assert(~isempty(boundaryGroupNode), 'No boundary group with given name found!')
@@ -58,27 +71,54 @@ classdef itaComsolImpedance < handle
             impedanceTag = [baseTag '_impedance'];
             selectionTag = char(boundaryGroupNode.tag);
             
+            switch material.impedanceType
+                case ImpedanceType.SoundHard
+                    obj = itaComsolImpedance.createSoundHard(comsolModel, impedanceTag, selectionTag);
+                case ImpedanceType.UserDefined
+                    obj = itaComsolImpedance.createUserDefinedImpedance(...
+                        comsolModel, material, interpolationBaseTag, impedanceTag, selectionTag);
+                otherwise
+                    error('Unsupported ImpedanceType')
+            end
+            obj.Enable;
+        end
+    end
+    methods(Static = true, Access = private)
+        function obj = createSoundHard(comsolModel, impedanceTag, selectionTag)
+            impedanceNode = comsolModel.physics.CreateImpedance(impedanceTag, selectionTag, 'inf');
+            
+            obj = itaComsolImpedance(comsolModel, impedanceNode);
+        end
+        function obj = createUserDefinedImpedance(comsolModel, material, interpolationBaseTag, impedanceTag, selectionTag)
             [realInterpolationNode, imagInterpolationNode, funcExpression] = ...
-                itaComsolImpedance.createImpedanceInterpolation(comsolModel, interpolationBaseTag, data.freqVector, data.freqData);
+                itaComsolImpedance.createImpedanceInterpolation(comsolModel, interpolationBaseTag, material.impedance.freqVector, material.impedance.freqData);
             
             impedanceNode = comsolModel.physics.CreateImpedance(impedanceTag, selectionTag, funcExpression);
             
             obj = itaComsolImpedance(comsolModel, impedanceNode, realInterpolationNode, imagInterpolationNode);
-            obj.Enable();
         end
     end
     
     %% Enable / Disable
     methods
         function Disable(obj)
-            obj.mImpedancePhysicsNode.active(false);
-            obj.mImpedanceRealDataNode.active(false);
-            obj.mImpedanceImagDataNode.active(false);
+            obj.setActive(false);
         end
         function Enable(obj)
-            obj.mImpedancePhysicsNode.active(true);
-            obj.mImpedanceRealDataNode.active(true);
-            obj.mImpedanceImagDataNode.active(true);
+            obj.setActive(true);
+        end
+    end
+    methods(Access = private)
+        function setActive(obj, bool)
+            if ~isempty(obj.mImpedancePhysicsNode)
+                obj.mImpedancePhysicsNode.active(bool);
+            end
+            if ~isempty(obj.mImpedanceRealDataNode)
+                obj.mImpedanceRealDataNode.active(bool);
+            end
+            if ~isempty(obj.mImpedanceImagDataNode)
+                obj.mImpedanceImagDataNode.active(bool);
+            end
         end
     end
     
