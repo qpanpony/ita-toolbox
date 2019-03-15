@@ -23,7 +23,8 @@ function varargout = ita_plot_all(varargin)
 matlabdefaults = ita_set_plot_preferences; %#ok<NASGU> %set ita toolbox preferences and get the matlab default settings
 
 %% Initialization
-sArgs = struct('pos1_data','itaSuper','nodb',false,'unwrap',false,'figure_handle',[],'linewidth',ita_preferences('linewidth'),'fontname',ita_preferences('fontname'),'fontsize',ita_preferences('fontsize'),'aspectratio',[],'hold','off','precise',true,'ylog',false);
+sArgs = struct('pos1_data','itaSuper','nodb',false,'unwrap',false,'figure_handle',[],'linewidth',ita_preferences('linewidth'),'fontname',ita_preferences('fontname'),'fontsize',ita_preferences('fontsize'),'aspectratio',[],'hold','off','precise',true,'ylog',false,...
+    'colormap',matlabdefaults.color_table);
 [data, sArgs] = ita_parse_arguments(sArgs, varargin);
 
 % set default if the linewidth is not set correct

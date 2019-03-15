@@ -64,7 +64,7 @@ matlabdefaults = ita_set_plot_preferences; %#ok<NASGU> %set ita toolbox preferen
 %% Initialization
 sArgs = struct('pos1_data','itaSuper','nodb',true,'unwrap',false,'wrapTo360',false,'figure_handle',[],'axes_handle',[],'linfreq','off','linewidth',ita_preferences('linewidth'),...
     'fontname',ita_preferences('fontname'), 'xlim',[],'ylim',[],'axis',[],'aspectratio',[],'hold','off','precise',true,'ylog',false,'plotargs',[],...
-    'unwrapRefZeroFreq', -1);
+    'unwrapRefZeroFreq', -1,'colormap',matlabdefaults.color_table);
 [data, sArgs] = ita_parse_arguments(sArgs, varargin); 
 if numel(data) > 1
     ita_verbose_info([thisFuncStr 'There is more than one instance stored in that object. Plotting the first one only.'],0);

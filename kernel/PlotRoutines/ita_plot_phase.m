@@ -49,6 +49,7 @@ sArgs = struct('pos1_data','itaSuper','nodb',ita_preferences('nodb'),'unwrap',fa
     'figure_handle',[],'axes_handle',[],'linfreq',ita_preferences('linfreq'),'linewidth',ita_preferences('linewidth'),...
     'fontname',ita_preferences('fontname'),'fontsize',ita_preferences('fontsize'), 'xlim',[],'ylim',[],'axis',[],...
     'aspectratio',[],'hold','off','precise',true,'ylog',false,'plotargs',[],...
+    'colormap',matlabdefaults.color_table,...
     'unwrapRefZeroFreq',-1);
 [data sArgs] = ita_parse_arguments(sArgs, varargin);
 
@@ -56,6 +57,8 @@ sArgs = struct('pos1_data','itaSuper','nodb',ita_preferences('nodb'),'unwrap',fa
 if isempty(sArgs.linewidth) || ~isnumeric(sArgs.linewidth) || ~isfinite(sArgs.linewidth)
     sArgs.linewidth = 1;
 end
+% change colormap to user specified % SL
+set(0,'DefaultAxesColorOrder',sArgs.colormap)
 
 %% Plotting of multi-instances
 if numel(data) > 1
