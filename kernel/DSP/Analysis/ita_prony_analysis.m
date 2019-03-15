@@ -6,7 +6,7 @@ function varargout = ita_prony_analysis(varargin)
 %  Options (default): 'domain' ('frequency'):    frequency or time domain
 %                     'freq_weighted' (0):       makes only sense in frequency domain
 %                     'warp' (0):                frequency warping with ita_audio_warp and ita_zpk_warp
-%                     'simplify' (0):            TODO HUHU
+%                     'simplify' (0):            Cancel Pole/Zeros too close to each other
 %                     'smooth' (0):              TODO HUHU
 %
 %   See also ita_preferences_aspectratio, ita_plottools_aspectratio, ita_check_compatibility, ita_reversephase.
@@ -15,13 +15,19 @@ function varargout = ita_prony_analysis(varargin)
 %        <a href="matlab:doc ita_prony_analysis">doc ita_prony_analysis</a>
 
 % <ITA-Toolbox>
-% This file is part of the ITA-Toolbox. Some rights reserved. 
-% You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder. 
+% This file is part of the ITA-Toolbox. Some rights reserved.
+% You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
 % </ITA-Toolbox>
 
 
 % Author: Pascal Dietrich -- Email: pdi@akustik.rwth-aachen.de
 % Created:  10-Mar-2009
+
+warning('function needs to be fixed')
+%% DEBUG flags
+showIntermediateResults = 0;
+showSOS = 0;
+saveResult = 0;
 
 %% Get ITA Toolbox preferences and Function String
 verboseMode  = ita_preferences('verboseMode');  %#ok<NASGU> Use to show additional information for the user
@@ -36,6 +42,7 @@ fs = data.samplingRate;
 input_time = data.timeVector;
 input_freq = data.freqVector;
 input_omega = input_freq/fs*2*pi;
+
 
 % H = [];
 % w = [];
@@ -91,9 +98,11 @@ for chidx = 1:data.nChannels
     %% Pole/Zero calculation
     [z,p,k] = tf2zp(inumz,idenz);
     
-    Zs{chidx} = z;
-    Ps{chidx} = p;
-    Ks{chidx} = k;
+    if showIntermediateResults
+        Zs{chidx} = z;
+        Ps{chidx} = p;
+        Ks{chidx} = k;
+    end
     
     %% Dewarp
     if flag_dewarp
@@ -103,14 +112,16 @@ for chidx = 1:data.nChannels
     %% Cancel Pole/Zeros too close to each other
     if sArgs.simplify
         threshold = 1e-2;
-%         subset = 30;
+        %         subset = 30;
         [z,p,k] = ita_zpk_reduce(z,p,k,'dist',threshold);
         %         [z,p,k] = ita_zpk_reduce(z,p,k,'subset',subset);
     end
     
-    Zw{chidx} = z;
-    Pw{chidx} = p;
-    Kw{chidx} = k;
+    if showIntermediateResults
+        Zw{chidx} = z;
+        Pw{chidx} = p;
+        Kw{chidx} = k;
+    end
     
     
     
@@ -122,37 +133,43 @@ for chidx = 1:data.nChannels
     end
     
     
-    %     [zz,pp,k] = ita_zpk_decompose3(z,p,k); 
+    %     [zz,pp,k] = ita_zpk_decompose3(z,p,k);
     % %     zz = [z(1:2:end) z(2:2:end)];
     % %     pp = [p(1:2:end) p(2:2:end)];
     %     for idx = 1:size(zz,1);
     %         [a(idx,:) b(idx,:)]= zp2tf(zz(idx,:).',pp(idx,:).',1);
     %     end
     
-    
-    [sos,g] = zp2sos(z,p,k,'up'); % TODO HUHU Documentation
-    % sos = [a b];
-    h = g*ones(size(input_omega));
-    for idx = 1:size(sos,1)
-        hn = freqz(sos(idx,1:3),sos(idx,4:6),input_omega);
-        h = h.*hn;
-        subplot(3,3,1:6)
-        semilogx(input_freq,20*log10([data.ch(chidx).freqData h hn]));
-        hold all
-        semilogx(input_freq,angle([data.ch(chidx).freqData h hn]));
-        hold off
-        subplot(3,3,7)
-        zplane(sos(idx,1:3),sos(idx,4:6))
-        subplot(3,3,8:9)
-        impz(sos(idx,1:3),sos(idx,4:6),input_time*fs,fs);
-        drawnow
+    if showSOS
+        [sos,g] = zp2sos(z,p,k,'up'); % TODO HUHU Documentation
+        % sos = [a b];
+        h = g*ones(size(input_omega));
+        for idx = 1:size(sos,1)
+            hn = freqz(sos(idx,1:3),sos(idx,4:6),input_omega);
+            h = h.*hn;
+            subplot(3,3,1:6)
+            semilogx(input_freq,20*log10([data.ch(chidx).freqData h hn]));
+            hold all
+            semilogx(input_freq,angle([data.ch(chidx).freqData h hn]));
+            hold off
+            subplot(3,3,7)
+            zplane(sos(idx,1:3),sos(idx,4:6))
+            subplot(3,3,8:9)
+            impz(sos(idx,1:3),sos(idx,4:6),input_time*fs,fs);
+            drawnow
+        end
     end
-%     H{chidx} = h;
-    Z{chidx} = z;
-    P{chidx} = p;
-    K{chidx} = k;
+    
+    if showIntermediateResults
+        %     H{chidx} = h;
+        Z{chidx} = z;
+        P{chidx} = p;
+        K{chidx} = k;
+    end
 end
-save('zpk_full_l1','Z','P','K','Zs','Ps','Ks','Zw','Pw','Kw','H')
+if showIntermediateResults && saveResult
+    save('zpk_full_l1','Z','P','K','Zs','Ps','Ks','Zw','Pw','Kw','H')
+end
 for idx = 1:length(Z)
     ita_plot_zplanepz(Z{idx},P{idx},K{idx}); hold all
 end

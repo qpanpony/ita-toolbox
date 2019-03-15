@@ -35,7 +35,11 @@ thisFuncStr  = [upper(mfilename) ':'];     %Use to show warnings or infos in thi
 sArgs        = struct('pos1_data','itaAudioFrequency', 'pos2_z', 'double','pos3_p', 'double','pos4_k', 'double' );
 [input,z,p,k,sArgs] = ita_parse_arguments(sArgs,varargin); %#ok<NASGU>
 
-input.freqData = freqz(poly(z)*k, poly(p), input.freqVector/input.samplingRate*pi*2);
+
+[num,den] = zp2tf(z,p,k); % also takes real(poly(z)*k) and inserts additional poles at the origin
+input.freqData = freqz(num, den, input.freqVector/input.samplingRate*pi*2); 
+
+% input.freqData = freqz(poly(z)*k, poly(p), input.freqVector/input.samplingRate*pi*2);
 input.channelNames{1} = 'reconstructed';
 
 

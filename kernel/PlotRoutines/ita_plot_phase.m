@@ -95,10 +95,10 @@ bin_vector = bin_vector(:);
 
 %% Get plot data
 %get phase vector
-if sArgs.unwrap
+if sArgs.unwrap == 1 && sArgs.unwrapRefZeroFreq == -1
     plotData = unwrap(angle(data.freqData(bin_indices,:)),[],1) .* 180/pi;
     phase_str = 'Unwraped Phase';
-elseif sArgs.unwrapRefZeroFreq > 0
+elseif sArgs.unwrap == 1 && sArgs.unwrapRefZeroFreq > 0
     idxRefZero = data.freq2index(sArgs.unwrapRefZeroFreq); % get index for 20 Hz to use for unwrap
     plotData = ita_unwrap(angle(data.freqData(bin_indices,:)),'dim',1,'refZeroBin',idxRefZero) .* 180/pi;
     phase_str = 'Unwrapped and aligned Phase';

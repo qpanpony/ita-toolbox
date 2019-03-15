@@ -20,6 +20,8 @@ function varargout = ita_audio_warp(varargin)
 
 % Author: Bruno Masiero -- Email: bma@akustik.rwth-aachen.de
 % Created:  02-Sep-2010 
+% Bugfix filtfilt -> filter: Stefan Liebich (IKS) -- Email: liebich@iks.rwth-aachen.de
+%  Modified:  07-Mar-2019
 
 % For some more help read the wiki available at
 % (https://www.akustik.rwth-aachen.de/ITA-Toolbox/wiki)
@@ -43,8 +45,12 @@ if isempty(sArgs.length)
     sArgs.length = input.nSamples;
 end
 
-bw = [lambda 1]';
-aw = [1 lambda]';
+% implements dewarping
+bw = [lambda 1]'; 
+aw = [1 lambda]'; 
+% implements warping
+% bw = [-lambda 1]'; 
+% aw = [1 -lambda]'; 
 signal = input.timeData;
 out = zeros(size(signal));
 
@@ -52,7 +58,8 @@ for idx = 1:input.nChannels
     temp = [1; zeros(sArgs.length-1,1)];
     out(:,idx) = signal(1,idx)*temp;
     for jdx = 2:sArgs.length
-        temp = filtfilt(bw,aw,temp);
+        temp = filter(bw,aw,temp); % SL: WarpTB contains filter not filtfilt
+%         temp = filtfilt(bw,aw,temp); % does not create a shift
         out(:,idx) = out(:,idx) + signal(jdx,idx)*temp;
     end
 end
