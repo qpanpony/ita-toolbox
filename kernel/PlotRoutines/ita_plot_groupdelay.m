@@ -45,13 +45,16 @@ thisFuncStr  = [upper(mfilename) ':'];     %Use to show warnings or infos in thi
 matlabdefaults = ita_set_plot_preferences; %set ita toolbox preferences and get the matlab default settings
 
 %% Initialization
-sArgs = struct('pos1_data','itaSuper','nodb',ita_preferences('nodb'),'unwrap',false,'figure_handle',[],'axes_handle',[],'linfreq',ita_preferences('linfreq'),'linewidth',ita_preferences('linewidth'),'fontname',ita_preferences('fontname'),'fontsize',ita_preferences('fontsize'), 'xlim',[],'ylim',[],'axis',[],'aspectratio',[],'hold','off','precise',true,'ylog',false,'normalize',false);
+sArgs = struct('pos1_data','itaSuper','nodb',ita_preferences('nodb'),'unwrap',false,'figure_handle',[],'axes_handle',[],'linfreq',ita_preferences('linfreq'),'linewidth',ita_preferences('linewidth'),'fontname',ita_preferences('fontname'),'fontsize',ita_preferences('fontsize'), 'xlim',[],'ylim',[],'axis',[],'aspectratio',[],'hold','off','precise',true,'ylog',false,'normalize',false,...
+    'colormap',matlabdefaults.color_table);
 [data sArgs] = ita_parse_arguments(sArgs, varargin);
 
 % set default if the linewidth is not set correct
 if isempty(sArgs.linewidth) || ~isnumeric(sArgs.linewidth) || ~isfinite(sArgs.linewidth)
     sArgs.linewidth = 1;
 end
+% change colormap to user specified % SL
+set(0,'DefaultAxesColorOrder',sArgs.colormap)
 
 %% Plotting of multi-instances
 if numel(data) > 1

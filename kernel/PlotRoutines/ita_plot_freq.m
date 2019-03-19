@@ -59,9 +59,9 @@ matlabdefaults = ita_set_plot_preferences; %set ita toolbox preferences and get 
 
 %% Initialization
 sArgs = struct('pos1_data','itaSuper','nodb',ita_preferences('nodb'),'figure_handle',[],'axes_handle',[],'linfreq',ita_preferences('linfreq'),'linewidth',ita_preferences('linewidth'),'fontname',ita_preferences('fontname')...
-    ,'fontsize',ita_preferences('fontsize'), 'xlim',[],'ylim',[],'axis',[],'aspectratio',[],'hold','off','precise',true,'ylog',false,'unwrap',false,'wrapTo360',false,'plotcmd',@plot,'plotargs',[],'fastmode',0);
+    ,'fontsize',ita_preferences('fontsize'), 'xlim',[],'ylim',[],'axis',[],'aspectratio',[],'hold','off','precise',true,'ylog',false,'unwrap',false,'wrapTo360',false,'plotcmd',@plot,'plotargs',[],'fastmode',0,...
+    'colormap',matlabdefaults.color_table);
 [data, sArgs] = ita_parse_arguments(sArgs, varargin);
-
 % bugfix for multiple instances (mpo)
 if numel(data) > 1
     ita_verbose_info([thisFuncStr 'There is more than one instance stored in that object. Plotting the first one only.'],0);
@@ -76,6 +76,10 @@ end
 if isempty(sArgs.linewidth) || ~isnumeric(sArgs.linewidth) || ~isfinite(sArgs.linewidth)
     sArgs.linewidth = 1;
 end
+
+% change colormap to user specified % SL
+set(0,'DefaultAxesColorOrder',sArgs.colormap)
+
 
 %% check if there is data
 if numel(data.data) == 0;
