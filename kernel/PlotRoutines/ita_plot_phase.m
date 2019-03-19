@@ -17,8 +17,9 @@ function varargout = ita_plot_phase(varargin)
 %   'aspectratio' ([]) :           Sets the ratio of the axis
 %   'hold' ('on'|->'off') :        Hold on enables multiple plotting in one figure
 %   'ylog' (1 |-> 0) :             will plot on a logarithmic y axis
-%   'unwrapRefZeroFreq' (>0, e.g. 100)
-%                                  Unwrap with alignment of all channels at given frequency in Hz
+%   'align' (0)                    Aligns unwrap to minimize Euclidean distance
+%   'alignFreq' (>0, e.g. 100)     Unwrap with alignment of all channels at given frequency in Hz
+%   'onlyAlignPhase' (0)     : Aligns phase to minimize Euclidean distance without unwrap; prevents unwrap!
 %
 %  Example:
 %   figure-handle = ita_plot_phase(audioObjIn)
@@ -49,7 +50,7 @@ sArgs = struct('pos1_data','itaSuper','nodb',ita_preferences('nodb'),'unwrap',fa
     'figure_handle',[],'axes_handle',[],'linfreq',ita_preferences('linfreq'),'linewidth',ita_preferences('linewidth'),...
     'fontname',ita_preferences('fontname'),'fontsize',ita_preferences('fontsize'), 'xlim',[],'ylim',[],'axis',[],...
     'aspectratio',[],'hold','off','precise',true,'ylog',false,'plotargs',[],...
-    'unwrapRefZeroFreq',-1);
+    'align',0,'alignFreq',-1,'onlyAlignPhase',0);
 [data sArgs] = ita_parse_arguments(sArgs, varargin);
 
 % set default if the linewidth is not set correct
@@ -92,19 +93,29 @@ bin_vector = bin_vector(:);
 
 %% Get plot data
 %get phase vector
-if sArgs.unwrap == 1 && sArgs.unwrapRefZeroFreq == -1
-    plotData = unwrap(angle(data.freqData(bin_indices,:)),[],1) .* 180/pi;
-    phase_str = 'Unwraped Phase';
-elseif sArgs.unwrap == 1 && sArgs.unwrapRefZeroFreq > 0
-    idxRefZero = data.freq2index(sArgs.unwrapRefZeroFreq); % get index for 20 Hz to use for unwrap
-    plotData = ita_unwrap(angle(data.freqData(bin_indices,:)),'dim',1,'refZeroBin',idxRefZero) .* 180/pi;
-    phase_str = 'Unwrapped and aligned Phase';
-elseif sArgs.wrapTo360
-    plotData = wrapTo2Pi(unwrap(angle(data.freqData(bin_indices,:)),[],1)) .* 180/pi;
-    phase_str = 'Phase (wrapped to 360)';
-else%normal case
-    plotData = angle(data.freqData(bin_indices,:)) .* 180/pi;
-    phase_str = 'Phase';
+if sArgs.onlyAlignPhase
+    % no unwrap
+    plotData = ita_align_phase(angle(data.freqData(bin_indices,:))) .* 180/pi;
+    phase_str = 'Aligned Phase';
+else
+    if sArgs.unwrap == 1 && sArgs.alignFreq == -1 && sArgs.align == 0
+        plotData = unwrap(angle(data.freqData(bin_indices,:)),[],1) .* 180/pi;
+        phase_str = 'Unwrapped Phase';
+    elseif sArgs.unwrap == 1 && sArgs.align
+        if sArgs.alignFreq > 0
+            idxRefZero = data.freq2index(sArgs.alignFreq); % get index to frequency for aligning
+        else
+            idxRefZero = -1;
+        end
+        plotData = ita_unwrap(angle(data.freqData(bin_indices,:)),'align',sArgs.align,'refZeroBin',idxRefZero) .* 180/pi;
+        phase_str = 'Unwrapped and aligned Phase';
+    elseif sArgs.wrapTo360
+        plotData = wrapTo2Pi(unwrap(angle(data.freqData(bin_indices,:)),[],1)) .* 180/pi;
+        phase_str = 'Phase (wrapped to 360)';
+    else%normal case
+        plotData = angle(data.freqData(bin_indices,:)) .* 180/pi;
+        phase_str = 'Phase';
+    end
 end
 
 %% Figure and axis handle
@@ -162,7 +173,13 @@ if sArgs.unwrap
     plimits(1) = 180 * floor(plimits(1)./180);
     plimits(2) = 180 * ceil (plimits(2)./180);
     sArgs.ylim = plimits;
-elseif sArgs.unwrapRefZeroFreq > 0
+elseif sArgs.onlyAlignPhase
+    plimits = [min(min(plotData(:)),-180) max(max(plotData(:)),180)];
+    plimits(1) = 180 * floor(plimits(1)./180);
+    plimits(2) = 180 * ceil (plimits(2)./180);
+    sArgs.ylim = plimits;
+    sArgs.unwrap = true; % active tick modification
+elseif sArgs.alignFreq > 0
     % restrict determiniation of phase to range [100, 10000] Hz % SL: A
     % little hacky
     idR = data.freq2index([100,10000]); % get index for 20 Hz to use for unwrap

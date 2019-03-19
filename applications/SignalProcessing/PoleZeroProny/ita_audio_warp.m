@@ -58,8 +58,8 @@ for idx = 1:input.nChannels
     temp = [1; zeros(sArgs.length-1,1)];
     out(:,idx) = signal(1,idx)*temp;
     for jdx = 2:sArgs.length
-        temp = filter(bw,aw,temp); % SL: WarpTB contains filter not filtfilt
-%         temp = filtfilt(bw,aw,temp); % does not create a shift
+%         temp = filter(bw,aw,temp); % SL: WarpTB contains filter not filtfilt
+        temp = filtfilt(bw,aw,temp); % does not create a shift
         out(:,idx) = out(:,idx) + signal(jdx,idx)*temp;
     end
 end

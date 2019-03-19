@@ -18,8 +18,9 @@ function varargout = ita_plot_freq_phase(varargin)
 %   'axis' ([])              : Sets the limts for both axis
 %   'aspectratio' ([])       : Sets the ratio of the axis
 %   'hold' ('on'|->'off')    : Sets hold
-%   'unwrapRefZeroFreq' (>0, e.g. 100)
-%                                  Unwrap with alignment of all channels at given frequency in Hz
+%   'align' (0)                    Aligns unwrap to minimize Euclidean distance
+%   'alignFreq' (>0, e.g. 100)     Unwrap with alignment of all channels at given frequency in Hz
+%   'onlyAlignPhase' (0)     : Aligns phase to minimize Euclidean distance without unwrap; prevents unwrap!
 %
 %  Examples:
 %  Two plots in one figure using hold
@@ -53,7 +54,7 @@ function varargout = ita_plot_freq_phase(varargin)
 % Autor: Pascal Dietrich -- Email: pdi@akustik.rwth-aachen.de
 % Created:  23-Jun-2008
 % Last Modified: SL -- Email: liebich@iks.rwth-aachen.de
-% 22-Jan-2019
+% 15-Mar-2019
 
 %% Get Function String
 thisFuncStr  = [upper(mfilename) ':']; %Use to show warnings or infos in this functions
@@ -64,7 +65,7 @@ matlabdefaults = ita_set_plot_preferences; %#ok<NASGU> %set ita toolbox preferen
 %% Initialization
 sArgs = struct('pos1_data','itaSuper','nodb',true,'unwrap',false,'wrapTo360',false,'figure_handle',[],'axes_handle',[],'linfreq','off','linewidth',ita_preferences('linewidth'),...
     'fontname',ita_preferences('fontname'), 'xlim',[],'ylim',[],'axis',[],'aspectratio',[],'hold','off','precise',true,'ylog',false,'plotargs',[],...
-    'unwrapRefZeroFreq', -1);
+    'align',0,'alignFreq', -1,'onlyAlignPhase',0);
 [data, sArgs] = ita_parse_arguments(sArgs, varargin); 
 if numel(data) > 1
     ita_verbose_info([thisFuncStr 'There is more than one instance stored in that object. Plotting the first one only.'],0);

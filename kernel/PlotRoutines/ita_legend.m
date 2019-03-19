@@ -51,7 +51,7 @@ legendEntryHandle 	= [legendInfoCell{:}];
 set(legendEntryHandle, 'IconDisplayStyle','on');                            % set all on (in case ita_legend is called twice)
 set(legendEntryHandle(nLines-excludeIdx+1), 'IconDisplayStyle','off');  
 
-legend(legendStrCell, varargin{:})
+legend(legendStrCell, varargin{:});
 
 % %end function
 end
