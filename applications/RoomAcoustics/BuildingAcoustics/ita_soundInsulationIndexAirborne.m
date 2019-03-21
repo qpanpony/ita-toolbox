@@ -91,7 +91,7 @@ end
 %% output
 if sArgs.createPlot
     fgh = ita_plot_freq(data);
-    combinedFreq = unique([freq; freqVector]);
+    combinedFreq = unique(round([freq; freqVector]./10).*10);
     plotResult = itaResult([[nan(sum(combinedFreq<min(freq)),1); 10.^((refCurve+soundReductionIndex)./20); nan(sum(combinedFreq > max(freq)),1)],[ones(sum(combinedFreq<=500),1)*10.^(soundReductionIndex./20); nan(sum(combinedFreq > 500),1)]],combinedFreq,'freq');
     ita_plot_freq(plotResult,'figure_handle',fgh,'axes_handle',gca,'hold');
     bar(gca,deficiencies.freqVector,deficiencies.freq,'hist');
