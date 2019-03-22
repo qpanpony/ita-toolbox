@@ -14,12 +14,13 @@ classdef itaSource < itaSpatialSimulationInputItem
     % </ITA-Toolbox>
     
     properties(Access = protected, Hidden = true)
-        mWaveTf;                                    %itaSuper
-        mPressureTf;                                %itaSuper
-        mDirectivity;                               %itaSuper
-        mDirectivityFile;                           %Char vector
-        mType = SourceType.PointSource;             %SourceType
-        mPistonRadius;                              %Double scalar
+        mWaveTf;                                        %itaSuper
+        mPressureTf;                                    %itaSuper
+        mDirectivity;                                   %itaSuper
+        mDirectivityFile;                               %Char vector
+        mType = SourceType.PointSource;                 %SourceType
+        mSensitivityType = SensitivityType.UserDefined  %SensitivityType
+        mPistonRadius;                                  %Double scalar
     end
     
     properties(Dependent = true, SetAccess = private)
@@ -29,6 +30,7 @@ classdef itaSource < itaSpatialSimulationInputItem
     end
     properties(Dependent = true)
         type;     %Iindicates what the wave TF represents - PointSource, Piston, SurfaceDistribution (see SourceType)
+        sensitivityType; %Switch between a flat frequency response and a user-defined one.
         
         volumeFlowTf; %volume flow transfer function of the point source used for wave-based simulations
         velocityTf;
@@ -51,6 +53,19 @@ classdef itaSource < itaSpatialSimulationInputItem
         end
         function out = get.type(this)
             out = char(this.mType);
+        end
+    end
+    
+    %% Sensitivity Type
+    methods
+        function this = set.sensitivityType(this, sensitivityType)
+            assert(isa(sensitivityType, 'SensitivityType') && isscalar(sensitivityType), 'Can only assign a single object of type SensitivityType')
+            if this.mSensitivityType == sensitivityType; return; end
+            
+            this.mSensitivityType = sensitivityType;
+        end
+        function out = get.sensitivityType(this)
+            out = char(this.mSensitivityType);
         end
     end
     
@@ -232,10 +247,10 @@ classdef itaSource < itaSpatialSimulationInputItem
         end
         
         function bool = HasPressureTf(this)
-            bool = arrayfun(@(x) ~isempty(x.mPressureTf), this);
+            bool = arrayfun(@(x) ~isempty(x.mPressureTf), this) | this.tfDefinedByType();
         end
         function bool = HasWaveTf(this)
-            bool = arrayfun(@(x) ~isempty(x.mWaveTf), this);
+            bool = arrayfun(@(x) ~isempty(x.mWaveTf), this) | this.tfDefinedByType();
         end
         function bool = HasDirectivity(this)
             bool = arrayfun(@(x) ~isempty(x.mDirectivityFile), this);
@@ -265,6 +280,11 @@ classdef itaSource < itaSpatialSimulationInputItem
             %Checks whether the velocity transfer function has specified
             %channel coordinates for all channels
             bool = arrayfun(@(x) x.HasVelocityTf() && x.itaSuperHasCoordinates(x.velocityTf), this);
+        end
+    end
+    methods(Access = private)
+        function bool = tfDefinedByType(this)
+            bool = arrayfun(@(x) isequal(x.mSensitivityType, SensitivityType.Flat), this);
         end
     end
     methods(Access = private, Static = true)
