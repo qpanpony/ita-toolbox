@@ -39,8 +39,12 @@ classdef itaComsolSource < handle
             %Full source data
             if nargin > 2
                 assert(isa(sourcePhysicsNode, 'com.comsol.clientapi.physics.impl.PhysicsFeatureClient'), 'Third input must be a comsol physics feature node')
-                assert(isa(realInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fourth input must be a comsol function feature node')
-                assert(isa(imagInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient'), 'Fifth input must be a comsol function feature node')
+                assert(isa(realInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient') ||...
+                    (isnumeric(realInterpolationNode) && isempty(realInterpolationNode)),...
+                    'Fourth input must be a comsol function feature node')
+                assert(isa(imagInterpolationNode, 'com.comsol.clientapi.impl.FunctionFeatureClient') ||...
+                    (isnumeric(realInterpolationNode) && isempty(realInterpolationNode)),...
+                    'Fifth input must be a comsol function feature node')
             else
                 sourcePhysicsNode = [];
                 realInterpolationNode = [];
@@ -137,7 +141,6 @@ classdef itaComsolSource < handle
             
             baseTag = strrep(source.name, ' ', '_');
             sourceGeometryBaseTag = [baseTag itaComsolSource.pistonGeometryTagSuffix];
-            soundHardTag = [baseTag '_pistonSourceSoundHardBoundary'];
             sourceTag = [baseTag '_pistonSource'];
             interpolationBaseTag = [baseTag '_pistonSourceVelocity'];
             
@@ -146,14 +149,19 @@ classdef itaComsolSource < handle
             geometry.activeNode = comsolModel.modelNode.geom(physicsNode.geom);
             [sourceGeometryNode, selectionTag] = geometry.CreatePistonGeometry(sourceGeometryBaseTag, source);
             
-            soundHardBoundaryNode = comsolModel.physics.CreateSoundHardBoundary(soundHardTag, selectionTag);
+            %soundHardTag = [baseTag '_pistonSourceSoundHardBoundary'];
+            %soundHardBoundaryNode = comsolModel.physics.CreateSoundHardBoundary(soundHardTag, selectionTag);
             
-            [realInterpolationNode, imagInterpolationNode, funcExpression] = ...
-            itaComsolSource.createVelocityInterpolation(comsolModel, interpolationBaseTag, source.velocityTf.freqVector, source.velocityTf.freqData);
-            
+            if source.sensitivityType == SensitivityType.UserDefined
+                [realInterpolationNode, imagInterpolationNode, funcExpression] = ...
+                    itaComsolSource.createVelocityInterpolation(comsolModel, interpolationBaseTag, source.velocityTf.freqVector, source.velocityTf.freqData);
+            else
+                funcExpression = '1[m/s]'; %TODO: Change this so that this becomes 1Pa at 1m on main axis
+                realInterpolationNode = []; imagInterpolationNode = [];
+            end
             normalVelocityNode = comsolModel.physics.CreateNormalVelocity(sourceTag, selectionTag, funcExpression);
             
-            obj = itaComsolSource(comsolModel, sourceGeometryNode, normalVelocityNode, realInterpolationNode, imagInterpolationNode, soundHardBoundaryNode);
+            obj = itaComsolSource(comsolModel, sourceGeometryNode, normalVelocityNode, realInterpolationNode, imagInterpolationNode);
             obj.Enable();
         end
         function obj = CreatePointSource(comsolModel, source)
@@ -177,9 +185,13 @@ classdef itaComsolSource < handle
             geometry.activeNode = comsolModel.modelNode.geom(physicsNode.geom);
             [sourceGeometryNode, selectionTag] = geometry.CreatePointWithSelection(pointTag, source.position);
             
-            [realInterpolationNode, imagInterpolationNode, funcExpression] = ...
-            itaComsolSource.createVolumeFlowInterpolation(comsolModel, interpolationBaseTag, source.volumeFlowTf.freqVector, source.volumeFlowTf.freqData);
-            
+            if source.sensitivityType == SensitivityType.UserDefined
+                [realInterpolationNode, imagInterpolationNode, funcExpression] = ...
+                    itaComsolSource.createVolumeFlowInterpolation(comsolModel, interpolationBaseTag, source.volumeFlowTf.freqVector, source.volumeFlowTf.freqData);
+            else
+                funcExpression = ['2[Pa*m] / (i* freq * ' char(physicsNode.tag) '.rho)'];
+                realInterpolationNode = []; imagInterpolationNode = [];
+            end
             pointSourceNode = comsolModel.physics.CreateMonopolePointSource(sourceTag, selectionTag, funcExpression);
         
             obj = itaComsolSource(comsolModel, sourceGeometryNode, pointSourceNode, realInterpolationNode, imagInterpolationNode);
