@@ -28,7 +28,7 @@ function varargout = ita_plottools_figurepreparations(varargin)
 thisFuncStr  = [upper(mfilename) ':'];     %Use to show warnings or infos in this functions
 
 %% Initialization and Input Parsing
-options         = struct('pos1_data','itaSuper','pos2_fgh','handle','pos3_axh','handle','pos4_lnh','handle','options',struct('legend','','options','','abscissa','','PlotData',''),'legend',ita_preferences('legend'));
+options         = struct('pos1_data','itaSuper','pos2_fgh','handle','pos3_axh','handle','pos4_lnh','handle','options',struct('legend','','options','','abscissa','','PlotData','','hold',''),'legend',ita_preferences('legend'));
 options.data    = itaAudio;
 [data,fgh,axh,lnh,options] = ita_parse_arguments(options,varargin);
 legendflat      = options.legend;

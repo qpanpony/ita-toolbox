@@ -51,7 +51,7 @@ sArgs = struct('pos1_data','itaSuper','nodb',ita_preferences('nodb'),'unwrap',fa
     'fontname',ita_preferences('fontname'),'fontsize',ita_preferences('fontsize'), 'xlim',[],'ylim',[],'axis',[],...
     'aspectratio',[],'hold','off','precise',true,'ylog',false,'plotargs',[],...
     'align',0,'alignFreq',-1,'onlyAlignPhase',0,...
-    'colormap',matlabdefaults.color_table);
+    'colormap',[]);
 [data sArgs] = ita_parse_arguments(sArgs, varargin);
 
 % set default if the linewidth is not set correct
@@ -59,7 +59,9 @@ if isempty(sArgs.linewidth) || ~isnumeric(sArgs.linewidth) || ~isfinite(sArgs.li
     sArgs.linewidth = 1;
 end
 % change colormap to user specified % SL
-set(0,'DefaultAxesColorOrder',sArgs.colormap)
+if ~isempty(sArgs.colormap)
+    set(0,'DefaultAxesColorOrder',sArgs.colormap)
+end
 
 %% Plotting of multi-instances
 if numel(data) > 1
@@ -145,9 +147,14 @@ end
 %% Cycle through color order if hold
 if sArgs.hold
     nPlots = numel(get(sArgs.axes_handle,'Children'));
-    co=get(sArgs.axes_handle,'ColorOrder');
-    if nPlots > size(co,1) %pdi:bugfix for a lot of channels
-       co = repmat(co,2,1);
+    if isempty(sArgs.colormap)
+        co = get(sArgs.axes_handle,'ColorOrder');
+    else
+        co = sArgs.colormap; 
+    end
+    if nPlots > size(co,1) %pdi:bugfix for a lot of channels %sl:bugfix for bugfix
+       exceed = nPlots/size(co,1);
+       co = repmat(co,ceil(exceed),1);
     end
     set(sArgs.axes_handle,'ColorOrder',co([(nPlots+1):end 1:nPlots],:));
 end

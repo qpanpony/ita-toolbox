@@ -27,12 +27,13 @@ if numel(result)>1 %get max over multiple instances and not over channel of each
     if( activateUnwrap )
         idxRefZero = tmp.freq2index(unwrapRefFreq); % get index for 20 Hz to use for unwrap
         phaseMed = squeeze(mean(ita_unwrap(angle(data),'refZeroBin',idxRefZero),3));
+%         phaseMed = squeeze(mean(ita_align_phase(angle(data)),3));
     else
         phaseMed = squeeze(mean(angle(data),3));
     end
     
     % combine min values in magn and phase
-    result.data = magnMed .* exp(1i * phaseMed);
+    result.freqData = magnMed .* exp(1i * phaseMed);
     
 else % max over channels
     
@@ -41,12 +42,13 @@ else % max over channels
     if( activateUnwrap )
         idxRefZero = result.freq2index(unwrapRefFreq); % get index for 20 Hz to use for unwrap
         phaseMed = squeeze(mean(ita_unwrap(angle(result.freqData),'refZeroBin',idxRefZero),2));
+%         phaseMed = squeeze(mean(ita_align_phase(angle(result.freqData)),2));
     else
         phaseMed = squeeze(mean(angle(result.freqData),2));
     end
     
     % combine min values in magn and phase
-    result.data = magnMed .* exp(1i * phaseMed); 
+    result.freqData = magnMed .* exp(1i * phaseMed); 
 end
 
 resChannelNames = result.channelNames;

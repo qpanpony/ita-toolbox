@@ -12,7 +12,7 @@ function varargout = ita_plot_freq_phase(varargin)
 %  Options: (standard: -> )
 %   'precise' ('on'|->'off') : Plots all data, no decimation
 %   'unwrap' ('on'|->'off')  : Unwraps phase
-%   'figure_hadle' ([])      : Sets the figure_handle
+%   'figure_handle' ([])      : Sets the figure_handle
 %   'xlim' ([])              : Sets the limits for the x axis
 %   'ylim' ([])              : Sets the limits for the y axis
 %   'axis' ([])              : Sets the limts for both axis
@@ -66,7 +66,7 @@ matlabdefaults = ita_set_plot_preferences; %#ok<NASGU> %set ita toolbox preferen
 sArgs = struct('pos1_data','itaSuper','nodb',true,'unwrap',false,'wrapTo360',false,'figure_handle',[],'axes_handle',[],'linfreq','off','linewidth',ita_preferences('linewidth'),...
     'fontname',ita_preferences('fontname'), 'xlim',[],'ylim',[],'axis',[],'aspectratio',[],'hold','off','precise',true,'ylog',false,'plotargs',[],...
     'align',0,'alignFreq', -1,'onlyAlignPhase',0,...
-    'unwrapRefZeroFreq', -1,'colormap',matlabdefaults.color_table);
+    'unwrapRefZeroFreq', -1,'colormap',[]);
 
 [data, sArgs] = ita_parse_arguments(sArgs, varargin); 
 if numel(data) > 1

@@ -50,7 +50,7 @@ matlabdefaults = ita_set_plot_preferences; %set ita toolbox preferences and get 
 %% Initialization
 sArgs = struct('pos1_data','itaSuper','nodb',true,'figure_handle',[],'axes_handle',[],'linewidth',ita_preferences('linewidth'),'fontname',ita_preferences('fontname'),...
     'fontsize',ita_preferences('fontsize'), 'xlim',[],'ylim',[],'axis',[],'aspectratio',[],'hold','off','precise',true,'ylog',false,'plotcmd',@plot,'plotargs',[],'fastmode',0,...
-    'colormap',matlabdefaults.color_table);
+    'colormap',[]);
 [data, sArgs] = ita_parse_arguments(sArgs, varargin);
 
 
@@ -66,7 +66,10 @@ if isempty(sArgs.linewidth) || ~isnumeric(sArgs.linewidth) || ~isfinite(sArgs.li
 end
 
 % change colormap to user specified % SL
-set(0,'DefaultAxesColorOrder',sArgs.colormap)
+if ~isempty(sArgs.colormap)
+    set(0,'DefaultAxesColorOrder',sArgs.colormap)
+end
+
 %% check if there is data
 if numel(data.data) == 0;
     ita_verbose_info('Empty data object, nothing to plot.',0)
@@ -133,9 +136,14 @@ end
 %% Cycle through color order if hold
 if sArgs.hold
     nPlots = numel(get(sArgs.axes_handle,'Children'));
-    co = get(sArgs.axes_handle,'ColorOrder');
+    if isempty(sArgs.colormap)
+        co = get(sArgs.axes_handle,'ColorOrder');
+    else
+        co = sArgs.colormap; 
+    end
     if nPlots > size(co,1) %pdi:bugfix for a lot of channels
-       co = repmat(co,2,1);
+       exceed = nPlots/size(co,1);
+       co = repmat(co,ceil(exceed),1);
     end
     set(sArgs.axes_handle,'ColorOrder',co([(nPlots+1):end 1:nPlots],:));
 end

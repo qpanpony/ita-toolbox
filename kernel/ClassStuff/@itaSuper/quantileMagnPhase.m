@@ -36,8 +36,8 @@ if numel(result)>1 %get max over multiple instances and not over channel of each
     phaseTmp = (quantile(ita_unwrap(angle(data),'refZeroBin',idxRefZero),quantileBounds,3));
     
     % combine min values in magn and phase
-    result(1).data = magnTmp(:,:,1) .* exp(1i * phaseTmp(:,:,1));
-    result(2).data = magnTmp(:,:,2) .* exp(1i * phaseTmp(:,:,2));
+    result(1).freqData = magnTmp(:,:,1) .* exp(1i * phaseTmp(:,:,1));
+    result(2).freqData = magnTmp(:,:,2) .* exp(1i * phaseTmp(:,:,2));
     
     % reset the channel names based on the individual channel instances
     resChannelNames = result.channelNames;

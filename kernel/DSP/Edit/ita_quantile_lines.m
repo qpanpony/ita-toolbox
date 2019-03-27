@@ -6,9 +6,11 @@ function varargout = ita_quantile_lines(varargin)
 %
 %  Syntax: analysis_results = ita_quantile_lines(dat, Options)
 %           Options:
-%               'minmax25' (default)
-%               'minmax25reduced'
+%               'minmax25' 
+%               'minmax25reduced' (default)
 %               'tukey'
+%               'meanstd'
+%               'meanminmax'
 %
 %  See also ita_mean, ita_get_value.
 %
@@ -86,6 +88,10 @@ elseif(strcmpi(options,'meanstd'))
     tmpITA.freqData = magnTmp .* exp(1i * phaseTmp);
     quantileLines(3) = tmpITA;
     
+elseif(strcmpi(options,'meanminmax'))
+    quantileLines(1) = maxMagnPhase(result);
+    quantileLines(2) = meanMagnPhase(result);
+    quantileLines(3) = minMagnPhase(result);    
 else
     error('Unknown input options')
 end

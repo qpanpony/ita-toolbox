@@ -25,7 +25,7 @@ if numel(result)>1 %get max over multiple instances and not over channel of each
     phaseMin = squeeze(min(ita_unwrap(angle(data),'refZeroBin',idxRefZero),[],3));
     
     % combine min values in magn and phase
-    result.data = magnMin .* exp(1i * phaseMin);
+    result.freqData = magnMin .* exp(1i * phaseMin);
 else % max over channels
     
     % calculate min in magn and phase separately
@@ -34,7 +34,7 @@ else % max over channels
     phaseMin = squeeze(min(ita_unwrap(angle(result.freqData),'refZeroBin',idxRefZero),[],2));
     
     % combine min values in magn and phase
-    result.data = magnMin .* exp(1i * phaseMin); 
+    result.freqData = magnMin .* exp(1i * phaseMin); 
 end
 
 

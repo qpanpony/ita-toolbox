@@ -28,14 +28,14 @@ if numel(result)>1 %get max over multiple instances and not over channel of each
     phaseMax = squeeze(max(ita_unwrap(angle(data),'refZeroBin',idxRefZero),[],3));    
     
     % combine max values in magn and phase
-    result.data = magnMax .* exp(1i * phaseMax);
+    result.freqData = magnMax .* exp(1i * phaseMax);
 else % max over channels
     % calculate max in magn and phase separately
     magnMax = squeeze(max(abs(result.freqData),[],2)); 
     idxRefZero = result.freq2index(100); % get index for 20 Hz to use for unwrap
     phaseMax = squeeze(max(ita_unwrap(angle(result.freqData),'refZeroBin',idxRefZero),[],2));
     % combine max values in magn and phase
-    result.data = magnMax .* exp(1i * phaseMax); 
+    result.freqData = magnMax .* exp(1i * phaseMax); 
 end
 
 resChannelNames = result.channelNames;

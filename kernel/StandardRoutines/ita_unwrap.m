@@ -37,7 +37,7 @@ function varargout = ita_unwrap(varargin)
 
 
 %% get inputs and set defaults
-sArgs = struct('pos1_data1','numeric','cutoff',pi,'dim',1,'align',1,'refZeroBin',-1,'unwrap_range',[inf,-inf],'allowInvert',false);
+sArgs = struct('pos1_data1','numeric','cutoff',pi,'dim',1,'align',0,'refZeroBin',-1,'unwrap_range',[inf,-inf],'allowInvert',false);
 [data1,sArgs] = ita_parse_arguments(sArgs, varargin);
 
     %% unwrap and align
@@ -48,6 +48,8 @@ sArgs = struct('pos1_data1','numeric','cutoff',pi,'dim',1,'align',1,'refZeroBin'
         if sArgs.dim ~= 1
            error('not implemented yet') 
         end
+    else
+        [phase_aligned] = unwrap(data1, sArgs.cutoff, sArgs.dim); % what about other dimensions
     end
 
 
