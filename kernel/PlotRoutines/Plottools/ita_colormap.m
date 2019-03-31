@@ -1,9 +1,11 @@
-function rgb = ita_colormap
+function rgb = ita_colormap(numentries)
 % enhancement of the artemis scale, increasing lightness with increasing value -> ideal for color and b&W plots
+if nargin < 1 % SL additional parameter for number of entries
+    numentries = 64;
+end
 
-
-x = linspace(0,1,64);
-rgb = artemis;
+x = linspace(0,1,numentries);
+rgb = artemis(numentries);
 
 for idr = 1:20
     wb = sqrt(sum(rgb.^2,2))/sqrt(3);
@@ -22,7 +24,6 @@ for idr = 1:20
             rgb(idx,rgb(idx,:) > 1 & rgb(idx,:)>0) = rgb(idx,rgb(idx,:) > 1 & rgb(idx,:)>0) + num/sum(rgb(idx,:) > 1 & rgb(idx,:)>0);
         end
     end
-    
     
     
     rgb(rgb<0) = 0;

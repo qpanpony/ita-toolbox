@@ -106,7 +106,7 @@ else
     if sArgs.unwrap == 1 && sArgs.alignFreq == -1 && sArgs.align == 0
         plotData = unwrap(angle(data.freqData(bin_indices,:)),[],1) .* 180/pi;
         phase_str = 'Unwrapped Phase';
-    elseif sArgs.unwrap == 1 && sArgs.align
+    elseif sArgs.unwrap == 1 && ( sArgs.align || sArgs.alignFreq > 0)
         if sArgs.alignFreq > 0
             idxRefZero = data.freq2index(sArgs.alignFreq); % get index to frequency for aligning
         else
@@ -169,6 +169,12 @@ if ~sArgs.linfreq
 else
     lnh = plot(bin_vector,plotData,'LineWidth',sArgs.linewidth);
 end
+if sArgs.linfreq %SL: bugfix
+    set(sArgs.axes_handle,'XScale','linear');
+else
+    set(sArgs.axes_handle,'XScale','log');
+end
+
 axh = get(fgh,'CurrentAxes');
 setappdata(axh,'ChannelHandles',lnh);
 
