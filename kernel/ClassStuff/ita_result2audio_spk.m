@@ -26,7 +26,7 @@ function audioObj = ita_result2audio_spk(resultObj, samplingRate, fftDegree, var
 thisFuncStr  = [upper(mfilename) ':'];
 
 %% Initialization and Input Parsing
-sArgs = struct('pos1_data','itaResult','pos2_samplingRate','integer', 'pos3_fftDegree','integer');
+sArgs = struct('pos1_data','itaResult','pos2_samplingRate','integer', 'pos3_fftDegree','numeric');
 ita_parse_arguments(sArgs,{resultObj, samplingRate, fftDegree});
 assert(logical(resultObj.isFreq), [thisFuncStr 'Data must be in frequency domain.'])
 
