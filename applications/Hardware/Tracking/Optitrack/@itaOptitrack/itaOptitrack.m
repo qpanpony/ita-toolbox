@@ -1192,17 +1192,12 @@ classdef itaOptitrack < handle
         end
         
         %% decode NatNet frame data for further usage in Matlab
-        function getData(varargin)
-            
-            Optitrack_obj = varargin{1};
-            data          = varargin{2}; %#ok
-            frameID       = varargin{3};
-            frameTime     = varargin{4};
+        function getData(Optitrack_obj, data, frameID, frameTime)
             
             Optitrack_obj.tempRigidBodyLogData = nan(1,13,Optitrack_obj.numRigidBodies);
             
             for idx=1:data.nRigidBodies % TODO: quick and dirty solution with for loop, implement without for loop
-                rigidBodyData = data.RigidBodies(idx); %#ok
+                rigidBodyData = data.RigidBodies(idx);
                                 
                 % Rigid body position [X,Y,Z]
                 X = double(rigidBodyData.x);
