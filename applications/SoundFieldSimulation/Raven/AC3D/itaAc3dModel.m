@@ -1,4 +1,4 @@
-classdef load_ac3d
+classdef itaAc3dModel
     % Class for GA model info
 
 % <ITA-Toolbox>
@@ -29,7 +29,7 @@ classdef load_ac3d
     methods
         
         % CONSTRUCTOR
-        function obj = load_ac3d(filename)
+        function obj = itaAc3dModel(filename)
             if nargin > 0
                 obj = obj.readAc3DModelFile(filename);
             end
