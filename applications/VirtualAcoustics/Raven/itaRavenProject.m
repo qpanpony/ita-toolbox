@@ -2465,7 +2465,7 @@ classdef itaRavenProject < handle
         %------------------------------------------------------------------
         function histo = getHistogram(obj)
             if isempty(obj.histogram)
-                error('No histogram present.');
+                error(sprintf('No histogram present.\nHINT: This error message might occur due to a corrupted SketchUp export.\nIf you are sure that the histogram is set, you could try to export your room model and raven project file again.')); %#ok
             end
             
             if numel(obj.histogramRT) > 1
@@ -2516,7 +2516,7 @@ classdef itaRavenProject < handle
         %------------------------------------------------------------------
         function histo = getHistogramEnergyAdded(obj)
             if isempty(obj.histogram)
-                error('No histogram present.');
+                error(sprintf('No histogram present.\nHINT: This error message might occur due to a corrupted SketchUp export.\nIf you are sure that the histogram is set, you could try to export your room model and raven project file again.')); %#ok
             end
             
             numberFrequencyBands = size(obj.histogram{find(~cellfun(@isempty, obj.histogram), 1)}.data, 2);
@@ -4323,7 +4323,7 @@ classdef itaRavenProject < handle
             end
             % load histogram
             if isempty(obj.histogram)
-                error('No histogram present.');
+                error(sprintf('No histogram present.\nHINT: This error message might occur due to a corrupted SketchUp export.\nIf you are sure that the histogram is set, you could try to export your room model and raven project file again.')); %#ok
             end
             
             % preallocation
@@ -4852,7 +4852,7 @@ classdef itaRavenProject < handle
                         sphereEnergy(i) = 10*log10( sum(obj.monauralIR{sourceID+1,i}.^2) );
                     end
                 else
-                    error('No histogram present.');
+                    error(sprintf('No histogram present.\nHINT: This error message might occur due to a corrupted SketchUp export.\nIf you are sure that the histogram is set, you could try to export your room model and raven project file again.')); %#ok
                 end
             else
                 sphereEnergy = zeros(size(obj.histogram,2), 1);
@@ -4975,7 +4975,7 @@ classdef itaRavenProject < handle
                         surfaceEnergy(i) = 10*log10( sum(obj.monauralIR{sourceID+1,i}.^2) );
                     end
                 else
-                    error('No histogram present.');
+                    error(sprintf('No histogram present.\nHINT: This error message might occur due to a corrupted SketchUp export.\nIf you are sure that the histogram is set, you could try to export your room model and raven project file again.')); %#ok
                 end
             else
                 sphereEnergy = zeros(size(obj.histogram,2), 1);
@@ -5010,7 +5010,7 @@ classdef itaRavenProject < handle
                         surfaceEnergy(i) = sum(obj.monauralIR{sourceID+1,i}.^2);
                     end
                 else
-                    error('No histogram present.');
+                    error(sprintf('No histogram present.\nHINT: This error message might occur due to a corrupted SketchUp export.\nIf you are sure that the histogram is set, you could try to export your room model and raven project file again.')); %#ok
                 end
             else
                 sphereEnergy = zeros(size(obj.histogram,2), 1);
@@ -5068,7 +5068,7 @@ classdef itaRavenProject < handle
                         end
                     end
                 else
-                    error('No histogram present.');
+                    error(sprintf('No histogram present.\nHINT: This error message might occur due to a corrupted SketchUp export.\nIf you are sure that the histogram is set, you could try to export your room model and raven project file again.')); %#ok
                 end
             else
                 numTimeSteps = numel(obj.histogram{find(~cellfun(@isempty, obj.histogram), 1)}.timevector);

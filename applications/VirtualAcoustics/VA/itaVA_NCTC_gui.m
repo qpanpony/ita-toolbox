@@ -55,7 +55,7 @@ function itaVA_NCTC_gui_OpeningFcn(hObject, eventdata, handles, varargin)
 % Choose default command line output for itaVA_NCTC_gui
 handles.output = hObject;
 
-handles.va = itaVA;
+handles.va = VA;
 handles.repros = [];
 handles.current_repro_params = struct();
 

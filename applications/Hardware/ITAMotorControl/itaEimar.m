@@ -111,11 +111,12 @@ classdef itaEimar < itaMeasurementTasksScan
     % </ITA-Toolbox>
     
     properties
-        waitForSerialPort   =     0.020;   % Time to wait between two commands
-        timeout_response    =     0.1;    % Time in seconds within each motor has to response to a command!
-        timeout_move        =   300;      % Time in seconds within each device has to reach their new position!
+        waitForSerialPort   =     0.020;    % Time to wait between two commands
+        timeout_response    =     0.1;      % Time in seconds within each motor has to response to a command!
+        timeout_move        =   300;        % Time in seconds within each device has to reach their new position!
         failed_command_repititions  =   5;  % How often do we repeat commands until we throw an error?
-        doSorting           =     true;   % sort the measurement coordinates for arm due to shorter measurement time 
+        doSorting           =     true;     % sort the measurement coordinates for arm due to shorter measurement time 
+        armCorrectionAngle  =   0;          % Correct the position of the arm. Check at 90Â° if horizontal. Value <0 -> higher position
     end
     % *********************************************************************
     properties (Access = protected, Hidden = true)
@@ -924,7 +925,7 @@ classdef itaEimar < itaMeasurementTasksScan
                 return;
             end
             
-            angle = angle - 119.01; % Larger substractive value: Higher position. Checkt at 90°.
+            angle = angle - 119.01 + this.armCorrectionAngle; % Larger substractive value: Higher position. Checkt at 90ï¿½.
             
             
             
@@ -938,7 +939,7 @@ classdef itaEimar < itaMeasurementTasksScan
             %                       64. 254="Vorschubkonstantenmodus", 255=Adaptive Stepdivider
             % Closed_loop       =   Turn on the closed loop regulation
             % Acceleration_ramp =   Value in Hz/ms
-            % Gear_ratio        =   Getriebeübersetzung
+            % Gear_ratio        =   Gear Ratio
             % Current           =   Maximum current in percent
             % Ramp_mode         =   0=trapez, 1=sinus-ramp, 2=jerkfree-ramp
             % -------------------------------------------------------------
@@ -1000,11 +1001,11 @@ classdef itaEimar < itaMeasurementTasksScan
                 this.add_to_commandlist(sprintf('#%d:CL_KD_v_Z=%d\r'    , this.motorID_arm, D_zaehler));
                 this.add_to_commandlist(sprintf('#%d:CL_KD_v_N=%d\r'    , this.motorID_arm, D_nenner));
                 % Pos-Kreis:
-                % Für 10°/s
+                % For 10 deg/s
                 %P = 100;% (400 = default)
                 %I = 1.5;% (2 = default)
                 %D = 300;% (700 = default)
-                % Für 3°/s
+                % For 3 deg/s
                 P           =   200;% (400 = default)
                 I           =   1.0;% (2 = default)
                 D           =   300;% (700 = default)

@@ -1,4 +1,4 @@
-%% Short tutorial for itaVA, a Matlab interface for Virtual Acoustics (VA)
+%% Short tutorial for VA, a Matlab interface for Virtual Acoustics (VA)
 % The tutorial covers basic operations for setting up a simple virtual scene
 % (1 receiver, 1 static / 1 moving virtual sound source), and explains how to
 % set up a synchronized playback of multiple virtual sound sources.
@@ -12,7 +12,7 @@
 % which can be downloaded here: http://www.virtualacoustics.org/ (section Download)
 % For a more detailed introduction, the reader is referred to http://www.virtualacoustics.org/start.html
 %
-% Explore itaVA by typing "doc itaVA" in Matlab's command window.
+% Explore VA by typing "doc VA" in Matlab's command window.
 %
 % Author:   Florian Pausch, fpa@akustik.rwth-aachen.de
 % Version:  2018-03-27 (compatible with VA.v2018a_preview.win32-x64.vc12 (and probably higher))
@@ -49,8 +49,8 @@ else
 end
  
 
-%% Step 2: Create itaVA object and connect to VAServer
-a = itaVA;
+%% Step 2: Create VA object and connect to VAServer
+a = VA;
 
 % Connect to VAServer (must be running and listening to default port on localhost)
 if ~a.get_connected % only connect if no connection to server is established
@@ -63,7 +63,8 @@ a.reset()
 % Optionally add important data directories (if not specified in the VA setup GUI which pops up the first time you use VA)
 a.add_search_path( fullfile( deployDir, 'data' ) );
 a.add_search_path( fullfile( deployDir, 'conf' ) );
-
+%a.add_search_path( 'C:/Users/Rocky/Experiment/InputWAVFiles' )
+%a.add_search_path( 'C:/Users/Rocky/Experiment/HRTFs' )
 
 %% Step 3: Set global output gain
 % set global gain of VA output
@@ -88,7 +89,7 @@ a.set_output_gain(0.3); % value between 0 (-inf dB) and 1 (0 dB)
 %% Step 4: Create a receiver and assign an HRIR set
 % load HRTF set stored in VADataDir\HRIR
 
-HRIRSet = a.create_directivity( 'ITA_Artificial_Head_5x5_44kHz_128.v17.ir.daff' ); % $(DefaultHRIR) macro would work, too
+HRIRSet = a.create_directivity_from_file( 'ITA_Artificial_Head_5x5_44kHz_128.v17.ir.daff' ); % $(DefaultHRIR) macro would work, too
 
 % create a receiver and assign the HRTF set
 L       = a.create_sound_receiver('Listener'); % input parameters: (displayed) name (in VAGUI) / auralization mode / ID of HRIR data set
@@ -268,7 +269,7 @@ if useTracker
     a.disconnect_tracker
 end
 
-% disconnect itaVA object from server
+% disconnect VA object from server
 a.disconnect()
 
 

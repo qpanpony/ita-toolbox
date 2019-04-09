@@ -348,6 +348,10 @@ classdef itaOptitrack < handle
         
         %% DESTRUCTOR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function destroy(Optitrack_obj)
+            delete(Optitrack_obj);
+            warning('[itaOptitrack] Method .destroy will be changed to Method .delete in future versions');
+        end
+        function delete(Optitrack_obj)
             % delete Optitrack_obj (invalid handle remains -> clear('Optitrack_obj'))
             
             if Optitrack_obj.isConnected

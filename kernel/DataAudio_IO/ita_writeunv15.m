@@ -24,7 +24,7 @@ thisFuncStr  = [upper(mfilename) ':'];     %#ok<NASGU> Use to show warnings or i
 
 %% Initialization and Input Parsing
 sArgs        = struct('pos1_Mesh','itaCoordinates','pos2_unvFilename','string');
-[Mesh,unvFilename,sArgs] = ita_parse_arguments(sArgs,varargin); %#ok<NASGU>
+[Mesh,unvFilename] = ita_parse_arguments(sArgs,varargin);
 
 if isa(Mesh,'itaMeshNodes') && ~isempty(Mesh.ID)
     ids = Mesh.ID(:);

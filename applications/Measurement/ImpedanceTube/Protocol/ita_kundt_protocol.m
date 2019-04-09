@@ -1,4 +1,4 @@
-function varargout = ita_kundt_protocol(varargin)
+function ita_kundt_protocol(varargin)
 %ITA_KUNDT_PROTOCOL - calculates loudness level of a signal according to DIN
 
 % <ITA-Toolbox>
@@ -8,16 +8,17 @@ function varargout = ita_kundt_protocol(varargin)
 
 
 % TODO:
-% - path2TeX in ita_preferences`?
+% - ita_parse_arguments verwenden...
 % - auswähle wo pdf gespeichert wird?
 % - zwei variablen 'humidity' und 'luftfeuchtigkeit', eine löschen
 % - einheitliche dateinstruktur, mit raw daten, temperatur, anuahl der mics, mic positionen, ...
 % - ita header anders, nur ita logi in toolbox, text mit tex
 % - option fuer keine smooth => text in protokoll anpassen
-% - 
+% - Missing LOGO
 
 
 % normal call, no input => call gui
+
 protocolHeaderPNG = 'KopfzeileGKB.png';
 if isempty(varargin)
     protocolLanguage = questdlg('Please choose a protocol language:', ...
@@ -31,7 +32,7 @@ if isempty(varargin)
     linFreq = false;
     
     % raw dateien auswählen
-    [files pathName del] = uigetfile('*_raw.ita', 'MultiSelect','on');
+    [files, pathName, ~] = uigetfile('*_raw.ita', 'MultiSelect','on');
     cd(pathName)
     pause(0.1)
     if isequal(files,0)
@@ -55,19 +56,8 @@ if isempty(varargin)
     catch
         nameDerProbe = 'Probe A';
     end
-    %%
-
-% enter your MIKTEX path here |  |  |  |  |  |
-%                            \ /\ /\ /\ /\ /\ /
-%                             .  .  .  .  .  .
-% texpath = '"C:\Program Files\MiKTeX 2.8\miktex\bin\pdf.latex.exe"';
-% texpath = '"D:\Program Files\MiKTeX 2.9\miktex\bin\pdflatex.exe"';
-%texpath = '"D:\Programme\MiKTeX 2.9\miktex\bin\pdflatex.exe"';
-texpath = '"C:\Program Files\MiKTeX 2.9\miktex\bin\x64\pdflatex.exe"';
-%                             .  .  .  .  .  .
-%                            / \/ \/ \/ \/ \/ \
-%                             |  |  |  |  |  |
     
+    texpath = ita_preferences('miktexpath');
     
 else % mgu mode
     inStruct = varargin{1};
@@ -78,13 +68,12 @@ else % mgu mode
     nameDerProbe = inStruct.nameDerProbe;
     texpath = [ '"' fullfile(inStruct.texpath, 'pdflatex.exe') '"'];
     
-    
+    currpath = pwd;
     cd(pathName)
     pause(0.1)
     if isequal(files,0)
         return
     end
-    
     
     
 end
@@ -95,20 +84,11 @@ TimeWindow1 = [0.18 0.222];
 x_lim = [80 8000];
 y_lim = [0 1];
 
-
-
 lWidthMean = 1.5;
 lWidthStd = 1.1;
 
 
-
-
-
-raw_data= ita_read(fullfile(pathName, files));
-
-
-
-
+raw_data = ita_read(fullfile(files));
 nMeasurements = numel(raw_data);
 
 % datum der messung
@@ -249,13 +229,11 @@ if nargin == 0
     smooth_reps                 = pList{9};
     
     temp        = ita_str2num(temperatur);
-humidity    =  ita_str2num(luftfeuchtigkeit)/100;
+    humidity    =  ita_str2num(luftfeuchtigkeit)/100;
     
     
-else  % mgu mode
-    
-
-    nameDesPruefers             = ita_preferences('AuthorStr');
+else  % mgu mode, aka no GUI Mode
+    nameDesPruefers             = inStruct.nameDesPruefers;
     temperatur                  = inStruct.temperatur;
     luftfeuchtigkeit            = inStruct.luftfeuchtigkeit*100;
     beschreibungDerProbe        = inStruct.beschreibungDerProbe;
@@ -264,10 +242,8 @@ else  % mgu mode
     delTexFile                  = inStruct.delTexFile;
     smooth                      = inStruct.smooth;
     smooth_reps                 = inStruct.smootheReps;
-    
-    
-    temp     = inStruct.temperatur;
-    humidity = inStruct.luftfeuchtigkeit;
+    temp                        = inStruct.temperatur;
+    humidity                    = inStruct.luftfeuchtigkeit;
 end
 
 if (~exist('Auswertung','dir'))
@@ -309,9 +285,8 @@ gesWaitbar = nMeasurements + smooth_reps;
 for iMeasurement = 1:nMeasurements
     [Impedance(iMeasurement), Refl] = ita_kundt_calc_impedance(rawData_win(iMeasurement) , KindOfTube , temp, humidity);
     absorption(iMeasurement) = 1 - abs(Refl)^2 ;
-
-%     absorption(iMeasurement).channelNames = {strrep(inStruct.files{iMeasurement}, '_rawMeasurment.ita', '')};
-      absorption(iMeasurement).channelNames = {rawData_win(iMeasurement).comment};
+    
+    absorption(iMeasurement).channelNames = {rawData_win(iMeasurement).comment};
     waitbar(iMeasurement/gesWaitbar, wbh, 'calculate absorption');
 end
 absorption = absorption.merge;
@@ -331,7 +306,7 @@ ita_write(absorption, [probeFileName '_noSmooth.ita'], 'overwrite')
 
 %% from Martin Guski (2012-06-01) optional impedance polt
 boolPlotImpedance = 0;
-if boolPlotImpedance == 1 
+if boolPlotImpedance == 1
     impSmooth = absorption;
     if ~isempty(smooth)
         for idsmooth = 1:smooth_reps
@@ -362,13 +337,11 @@ if boolPlotImpedance == 1
         
         pltstd = merge(impMean + impStd,impMean - impStd );
         pltstd.plotLineProperties = {'LineStyle','--','Color',color};
-        %     fgh = ita_plot_freq(pltstd,'nodb','xlim',x_lim,'ylim',y_lim,'figure_handle',fgh,'hold','on', 'linewidth', lWidthStd);
-        
         
         % imp
         fgh = ita_plot_freq(pltstd,'nodb','xlim',x_lim,'figure_handle',fgh,'hold','on', 'linewidth', lWidthStd);
         
-        lgh = legend({nameDerProbe},'Interpreter','none', 'location', 'northwest');
+        legend({nameDerProbe},'Interpreter','none', 'location', 'northwest');
         set(gca, 'TickDir', 'out', 'box', 'off')
         probeFileName = [ 'Auswertung/' strrep(nameDerProbe, ' ','_'),  '_' nameCell{i} '_mean(' num2str(nMeasurements) ')' ];
         
@@ -378,7 +351,7 @@ if boolPlotImpedance == 1
         %     title('')
         ylabel(sprintf('%s(impedance) [%s]',nameCell{i}, impMean.channelUnits{1} ))
         ita_saveplot('aspectRatio',0.5 , 'filename', probeFileName, 'figures', fgh, 'exportPNG', true)
-%         close(fgh)
+        %         close(fgh)
     end
     
 end
@@ -387,9 +360,6 @@ end
 
 absSmooth = absorption;
 if ~isempty(smooth)
-    
-    % absSmooth.freqData(1:absSmooth.freq2index(100), :) = 0;
-    % ita_verbose_info('Freq < 60 Hz werden zu Null gesetzt!',0)
     
     for idxSmooth = 1:smooth_reps
         waitbar((nMeasurements+idxSmooth)/gesWaitbar, wbh, sprintf('smoothing %i / %i',idxSmooth, smooth_reps));
@@ -411,42 +381,20 @@ absStd  = ita_std(absSmooth);
 
 
 %% terzen der std exportieren
-% % % thirdOctAlpha = ita_spk2frequencybands(absMean,'bandsPerOctave',3,'method','averaged','freqRange',x_lim);
-% % % thirdOctAlphaStd = ita_spk2frequencybands(absStd,'bandsPerOctave',3,'method','averaged','freqRange',x_lim);
-% % % exportData = [{'Name:', inStruct.nameDerProbe ''; '' '' ''; 'Freq', 'Mean' 'std'}; num2cell([thirdOctAlpha.freqVector thirdOctAlpha.freqData thirdOctAlphaStd.freqData])];
-% % % tmpPath = 'D:\tmp';
-% % % xlswrite(fullfile(tmpPath, probeFileName), exportData)
-% % % movefile(fullfile(tmpPath, [probeFileName ,'.xls']), fullfile(pathName, [probeFileName ,'.xls']))
-% % % return
-
 fgh = figure;
 color = colormap; % Same color as plot before
 color = color(1,:);
 
 absMean.plotLineProperties = {'Color',color};
 ita_plot_freq(absMean,'nodb','xlim',x_lim,'ylim',y_lim,'figure_handle', fgh, 'linewidth', lWidthMean, 'linfreq', linFreq);
-%ita_plot_freq(absMean,'nodb','figure_handle', fgh, 'linfreq', linFreq);
 
 pltstd = merge(absMean + absStd,absMean - absStd );
 pltstd.plotLineProperties = {'LineStyle','--','Color',color};
 fgh = ita_plot_freq(pltstd,'nodb','figure_handle',fgh,'hold','on', 'linewidth', lWidthStd, 'linfreq', linFreq);
-%fgh = ita_plot_freq(pltstd,'nodb','figure_handle',fgh,'hold','on', 'linfreq', linFreq);
-
-% imp
-% ita_plot_cmplx(absMean,'nodb','ylim',y_lim,'figure_handle', fgh, 'linewidth', lWidthMean);
-% fgh = ita_plot_cmplx(pltstd,'nodb','xlim',x_lim,'figure_handle',fgh,'hold','on', 'linewidth', lWidthStd);
 
 legend({nameDerProbe},'Interpreter','none', 'location', 'best');
 
-
-
 set(gca, 'TickDir', 'out', 'box', 'off')
-% lWidth = 1.5;
-% lines=findobj(gca,'type','line');
-% set(lines,'LineWidth',lWidth)
-% set(gca, 'LineWidth', 3)
-
-
 set(fgh, 'position', [0 0 750 350])
 axis([x_lim y_lim ])
 ita_savethisplot(fgh,  grafikName, 'resolution', 300)
@@ -468,7 +416,7 @@ keyValueCell   = { '<\itaBriefkopfBild>' protocolHeaderPNG;
     '<\nameDerProbe>'  nameDerProbe
     '<\anzahlDerMessungen>' num2str(nMeasurements)
     '<\samplesOderWiederholungen>'  samplesOderWiederholungen
-    '<\dateinameGrafik>'  grafikName
+    '<\dateinameGrafik>'  grafikName(12:end)
     '<\smoothParameter>'  smooth
     '<\beschreibungDesMaterials>'  beschreibungDerProbe
     '<\terzWertA>' sprintf('%1.2f', thirdOctAlpha.freqData(1))
@@ -496,66 +444,45 @@ keyValueCell   = { '<\itaBriefkopfBild>' protocolHeaderPNG;
 ita_fillInTemplate(templateFileName, keyValueCell, texFileName);
 fclose('all');
 
-
-
 % kopieren scheint einfacher als latex pfade mit leerzeichen erklären...
-[stat res] = system(['copy "' [protocolPath protocolHeaderPNG] '" ']);
-
+% This may be obsolte. Missing Logo
+[~, ~] = system(['copy "' [protocolPath protocolHeaderPNG] '" ']);
 
 % create pdf
+cd 'Auswertung'
 if ita_preferences('verboseMode') == 2
-     system([texpath ' ' texFileName]) % mit ausgabe
- else
-     [status result] = system([texpath ' ' texFileName]); % ohne ausgabe zur console
-     if status
-         error(result)
-     end
+    system([texpath ' ' texFileName(12:end)]) % mit ausgabe
+else
+    [status, result] = system([texpath ' ' texFileName(12:end)]); % ohne ausgabe zur console
+    if status
+        cd(currpath)
+        ita_verbose_info(['Running pdflatex failed with the error message: ', ...
+            result ,'Please try running pdflatex manually'], 0);
+        
+    end
+end
+
+close(wbh);
+
+delete(protocolHeaderPNG);
+delete([probeFileName(12:end) '.log'] );
+delete([probeFileName(12:end) '.aux'] );
+if exist([probeFileName(12:end) '.bbl'], 'file')~=0
+    delete([probeFileName(12:end) '.bbl']);
+end
+if exist([probeFileName(12:end) '.blg'],'file')~=0
+    delete([probeFileName(12:end) '.blg'] );
+end
+
+if delTexFile
+    delete(texFileName(12:end));
+end
+if delPictureFile
+    delete([probeFileName(12:end) '.png']);
 end
 
 
+cd(currpath)
 
-close(wbh);
-% 
-% löscht überflüssige Dateien
-%  try
-%      open([probeFileName '.pdf']);
-     delete(protocolHeaderPNG);
-     delete([probeFileName '.log'] );
-     delete([probeFileName '.aux'] );
-     if exist([probeFileName '.bbl'], 'file')~=0
-         delete([probeFileName '.bbl']);
-     end
-     if exist([probeFileName '.blg'],'file')~=0
-         delete([probeFileName '.blg'] );
-     end
-     
-     % TODO: Order in itaToolbox wo Template und header dring liegt
-%  catch %#ok<CTCH>
-%      warning('Please, insert your path of miktex in linie 33. In addition there could be difficulties with your tex file. Please try to compile it separately.') %#ok<WNTAG>
-%  end
- 
- if delTexFile
-     delete(texFileName);
- end
- if delPictureFile
-     delete([probeFileName '.png']);
- end
- %if nargout==1
-   %  outStruct.pathName         = pathName;
-  %   outStruct.files            = files;
-  %   outStruct.nameDerProbe     = nameDerProbe;
-  %   outStruct.temperatur = temperatur;
-  %   outStruct.luftfeuchtigkeit = luftfeuchtigkeit;
-   %  outStruct.beschreibungDerProbe = beschreibungDerProbe;
-   %  outStruct.protocolLanguage   = protocolLanguage;
-   %  outStruct.linFreq            = linFreq;
-   %  outStruct.sampleOderWiederholungen = samplesOderWiederholungen;
-   %  outStruct.delPicture = delPictureFile;
-   %  outStruct.delTexFile = delTexFile;
-   %  outStruct.smooth         = smooth;
-   %  outStruct.smootheReps    = smooth_reps;
-   %  outStruct.nameDesPruefers = nameDesPruefers;
-   %  outStruct.texpath = texpath;
-   %  varargout{1}=outStruct;
- end
+end
 

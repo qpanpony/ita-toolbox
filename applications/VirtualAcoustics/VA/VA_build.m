@@ -7,7 +7,7 @@
 %           It takes the class template code and inserts
 %           all stubs for the functions in the VAConnector
 %           interface. These are derived using the reflexion
-%           mechanism ('enumerateFunctions')
+%           mechanism ('enumerate_functions')
 %
 
 va_base_dir = '..'; % VA folder with bin, lib, matlab, data etc.
@@ -24,7 +24,7 @@ if exist( va_script_dir, 'dir' ) ~= 7
 end
 
 if exist( [ 'VAMatlab' '.' mexext ], 'file' )
-    warning( 'VAMatlab already found at location "%s", are you sure to build itaVA against this executable? Will proceed now.', which( 'VAMatlab' ) )
+    warning( 'VAMatlab already found at location "%s", are you sure to build VA against this executable? Will proceed now.', which( 'VAMatlab' ) )
 else
     % Add to PATH temporarily and attempt to move lib to bin dir
     addpath( va_script_dir, va_bin_dir )
@@ -36,12 +36,12 @@ else
 end
 
 % Parameters
-templateFile = 'itaVA.m.proto';
-outputFile = fullfile( va_script_dir, 'itaVA.m' );
+templateFile = 'VA.m.proto';
+outputFile = fullfile( va_script_dir, 'VA.m' );
 
-fprintf( 'Generating code for itaVA Matlab class ''%s'' ...\n', outputFile );
+fprintf( 'Generating code for VA Matlab class ''%s'' ...\n', outputFile );
 code = fileread( templateFile );
-stubCode = itaVA_generateStubs();
+stubCode = VA_generate_stubs();
 
 code = strrep( code, '###STUBCODE###', stubCode );
 

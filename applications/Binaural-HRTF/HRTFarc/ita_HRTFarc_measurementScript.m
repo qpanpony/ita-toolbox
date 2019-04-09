@@ -51,12 +51,15 @@ ms.twait = 0.03;
 coords = ita_generateSampling_equiangular(5,5);
 coords_cut = coords.n(coords.theta_deg == 90);
 
+iMS.measurementSetup = ms;
 iMS.measurementPositions = coords_cut;
+
+iMS.waitBeforeMeasurement = 1;
 
 saveName = 'test';
 iMS.dataPath = saveName;
 iMS.reference;
-
+iMS.doSorting = 0;
 iMS.run;
 
 % always leave the turntable in reference position

@@ -2,6 +2,8 @@
 itaVA_experimental_start_server
 itaVA_experimental_renderer_prepare
 
+% @todo apply new VA method naming conventions (all small caps with
+% underscores between words)
 
 %% Direct signal out without room (variables L and S prepared by itaVA_experimental_renderer_prepare)
 dirac = ita_amplify( ita_generate_impulse, '-12dB' );

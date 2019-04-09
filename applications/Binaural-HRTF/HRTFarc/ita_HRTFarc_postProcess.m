@@ -10,7 +10,7 @@ function result = ita_HRTFarc_postProcess(varargin)
 %           'opt2' (defaultopt1) : description
 %           'opt3' (defaultopt1) : description
 %
-%  Example:
+%  Example: 
 %   audioObjOut = ita_HRTF_arc_postProcess(audioObjIn)
 %
 %  See also:
@@ -111,7 +111,7 @@ for index = 1:numFiles
         allMeasurementsRaw(index,index2) = tmp;
         
 
-        data_crop      =   ita_time_window(tmp,options.tw);% Q: options.tw = [6ms 8ms]
+        data_crop      =   ita_time_window(tmp,options.tw,'time');% Q: options.tw = [6ms 8ms]
         % make end sample be div by 4 for daff export
         endSample = round(options.tw(2) .* tmp(1).samplingRate)+1;
         endSample = endSample + mod(endSample,4);

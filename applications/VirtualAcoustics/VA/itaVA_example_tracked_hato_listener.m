@@ -1,7 +1,7 @@
 %% itaVA tracked head-above-torso listener example code
 
 % Create itaVA and connect
-va = itaVA( 'localhost' );
+va = VA( 'localhost' );
 va.reset()
 va.set_output_gain( .25 )
 
@@ -17,7 +17,7 @@ va.set_sound_source_signal_source( S, X );
 
 % Create a sound receiver with HATO (actually OTAH) HRTF
 L = va.create_sound_receiver( 'itaVA_Tracked_HATO_Listener' );
-H = va.create_directivity( 'FABIAN_OTAH_5x5x5_256_44100Hz.v17.ir.daff' );
+H = va.create_directivity_from_file( 'FABIAN_OTAH_5x5x5_256_44100Hz.v17.ir.daff' );
 va.set_sound_receiver_directivity( L, H );
 
 

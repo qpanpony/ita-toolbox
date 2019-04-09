@@ -111,7 +111,6 @@ if ~allIsWell %pdi: performance reasons
             R_l = R_mol/M_r; % [J/(kg*K)] gas constant for dry air
             R_d = itaValue(461,'J/kg*K'); % gas constant of water vapor
             R_f = R_l/(1-(h/100)*(1-R_l/R_d)); % [J/(kg K)] gas constant for air with relative humidity phi
-            R_f_mol = R_f*M_r; % [N m / (mol K)] molar gas constant for air with rel. humidity
             kappa = 1.4; % heat capacity ratio
             nu = itaValue(0.0261,'W/(m*K)');%#ok<NASGU> % heat conductivity
             C_v = itaValue(718,'J/(kg*K)');%#ok<NASGU> % specific heat capacity
@@ -130,7 +129,7 @@ if ~allIsWell %pdi: performance reasons
     constants.p_stat = sArgs.p;
     
     %% Speed of sound
-    constants.c = sqrt(kappa*R_f_mol*sArgs.T/M_r);
+    constants.c = sqrt(kappa*R_f*sArgs.T);
     c = constants.c;
     
     %% Air attenuation
@@ -183,9 +182,9 @@ end
 
 for idx = 1:numel(sArgs.what)
     if isfield(constants,lower(sArgs.what{idx}))
-        varargout{idx} = constants.(sArgs.what{idx});
+        varargout{idx} = constants.(sArgs.what{idx}); %#ok<AGROW>
     elseif strcmpi(sArgs.what{idx},'all')
-        varargout{idx} = constants;
+        varargout{idx} = constants; %#ok<AGROW>
     else
         error([thisFuncStr ' I dont know that constant yet, please teach me!']);
     end

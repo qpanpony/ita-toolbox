@@ -471,6 +471,7 @@ classdef  itaHRTF < itaAudio
             chCoord.theta(2:2:2*props.numRecords) = thetaM;
 
             this.mMetadata = metadata;
+            this.samplingRate = props.samplerate;
             this.data = data;
             this.mDirCoord = itaCoordinates([radius thetaM phiM],'sph');
             this.channelCoordinates = chCoord;
