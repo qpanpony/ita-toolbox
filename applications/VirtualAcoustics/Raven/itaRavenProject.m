@@ -3005,7 +3005,7 @@ classdef itaRavenProject < handle
             end
             
             % get reverberation time after sabine
-            A = roommodel.getEquivalentAbsorptionArea_sabine();
+            A = roommodel.getEquivalentAbsorptionArea_sabine(obj.pathMaterials);
         end
         
         %------------------------------------------------------------------
@@ -3037,7 +3037,7 @@ classdef itaRavenProject < handle
                 end
             end
             
-            % get reverberation time after sabine
+            % get reverberation time after eyring
             A = roommodel.getEquivalentAbsorptionArea_eyring(obj.pathMaterials);
         end
         
@@ -3073,7 +3073,8 @@ classdef itaRavenProject < handle
             end
             
             % determine factor (default: 0.161) and air absorption
-            factor = 24*log(10) / calculateSoundSpeed(obj.getTemperature, obj.getHumidity,obj.getPressure);
+%             factor = 24*log(10) / calculateSoundSpeed(obj.getTemperature, obj.getHumidity,obj.getPressure);
+            factor = 0.161;
             airAbsorption = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
             
             % get reverberation time
@@ -3748,7 +3749,14 @@ classdef itaRavenProject < handle
             end
             
             % check back the reverberation times
-            thisReverbTime = obj.getT30(1);     % average over receivers
+            numSources=size(obj.getSourcePosition,1);
+            
+           thisReverbTime = obj.getT30(true,false,false,0);          
+           for iSources=2:numSources
+                thisReverbTime = thisReverbTime + obj.getT30(true,false,false,iSources-1);          
+           end
+           thisReverbTime = thisReverbTime / numSources;
+           
             
             % if desired, rename the materials of the model
             if isempty(obj.model)
@@ -3789,12 +3797,19 @@ classdef itaRavenProject < handle
             equivalentAirAbsorptionArea = 4* roommodel.getVolume() * airAbscoeffs;
             
             if numel(targetReverbTime) == 10 % go to octave resolution
-                A = A(3:3:end);
-                equivalentAirAbsorptionArea = equivalentAirAbsorptionArea(3:3:end);
+                
+                A = mean([A(2:3:end);A(3:3:end); A(4:3:end)]);
+%                 A = A(3:3:end);
+                equivalentAirAbsorptionArea = mean([equivalentAirAbsorptionArea(2:3:end);equivalentAirAbsorptionArea(3:3:end); equivalentAirAbsorptionArea(4:3:end)]);
+
+%                 equivalentAirAbsorptionArea = equivalentAirAbsorptionArea(3:3:end);
             end
             alphas_default = 1 - exp(((-0.163 * roommodel.getVolume() ./ targetReverbTime) - equivalentAirAbsorptionArea)/(S));
+%             alphas_alt = min((A+equivalentAirAbsorptionArea)/S,1);
             alphas_alt = (A+equivalentAirAbsorptionArea)/S;
-            alphas_neu = 1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:));
+           
+            alphas_neu = abs(1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:)));
+%             alphas_neu = 1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:));
             
             absorptionFactors = alphas_neu(:) ./ alphas_alt(:);
             absorptionFactors(isnan(absorptionFactors)) = 1;
@@ -3832,7 +3847,11 @@ classdef itaRavenProject < handle
                 obj.run();
                 
                 % check back the reverberation times
-                newReverbTime = obj.getT30(1);
+                newReverbTime = obj.getT30(true,false,false,0);
+                for iSources=2:numSources
+                    newReverbTime = newReverbTime + obj.getT30(true,false,false,iSources-1);
+                end
+                newReverbTime = newReverbTime / numSources;
                 
                 figure;
                 nRT = numel(targetReverbTime);
@@ -3841,7 +3860,7 @@ classdef itaRavenProject < handle
                 
                 ylabel('T30 [s]');
                 xlabel('Frequency band [Hz]');
-                ylim([0 1.1*max(targetReverbTime)]);
+                ylim([0 1.2*max(targetReverbTime)]);
                 
                 ax = gca;
                 ax.XTickLabel = {32 63 125 250 500 1000 2000 4000 8000 16000};

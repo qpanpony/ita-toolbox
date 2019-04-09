@@ -22,7 +22,7 @@ rpf = itaRavenProject(ravenProjectPath);
 rpf.setISOrder_PS(2);
 
 % 20000 ray tracing partikel
-rpf.setNumParticles(200);
+rpf.setNumParticles(20000);
 
 % set impulse response length in ms (at least length of reverberation time)
 rpf.setFilterLength(2800);  %[ms]
