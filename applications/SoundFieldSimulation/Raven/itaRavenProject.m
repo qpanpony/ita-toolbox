@@ -648,11 +648,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -864,12 +864,12 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                         obj.model{iRoom}.plotModel(tgtAxes, comp2axesMapping, wireframe);
                         hold on;
                     end
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     obj.model.plotModel(tgtAxes, comp2axesMapping, wireframe);
                 end
             else
@@ -956,12 +956,12 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                         obj.model{iRoom}.plotModel(tgtAxes, comp2axesMapping, wireframe);
                         hold on;
                     end
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     obj.model.plotModel(tgtAxes, comp2axesMapping, wireframe);
                 end
             else
@@ -1787,13 +1787,13 @@ classdef itaRavenProject < handle
                     roomID = 0;
                 end
                 if isempty(obj.model)
-                    roommodel = load_ac3d(obj.modelFileList{roomID + 1});
+                    roommodel = itaAc3dModel(obj.modelFileList{roomID + 1});
                 else
                     roommodel = obj.model{roomID + 1};
                 end
             else
                 if isempty(obj.model)
-                    roommodel = load_ac3d(obj.modelFileList);
+                    roommodel = itaAc3dModel(obj.modelFileList);
                 else
                     roommodel = obj.model;
                 end
@@ -3007,11 +3007,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -3039,11 +3039,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -3073,11 +3073,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -3106,11 +3106,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -3139,11 +3139,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -3174,11 +3174,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -3226,11 +3226,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -3259,11 +3259,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -3292,11 +3292,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -3879,11 +3879,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -4021,11 +4021,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -4177,11 +4177,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
@@ -4316,11 +4316,11 @@ classdef itaRavenProject < handle
             if isempty(obj.model)
                 if iscell(obj.modelFileList)
                     for iRoom = 1 : numel(obj.modelFileList)
-                        obj.model{iRoom} = load_ac3d(obj.modelFileList{iRoom});
+                        obj.model{iRoom} = itaAc3dModel(obj.modelFileList{iRoom});
                     end
                     roommodel = obj.model{roomID + 1};
                 else
-                    obj.model = load_ac3d(obj.modelFileList);
+                    obj.model = itaAc3dModel(obj.modelFileList);
                     roommodel = obj.model;
                 end
             else
