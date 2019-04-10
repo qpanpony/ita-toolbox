@@ -939,7 +939,7 @@ classdef itaRavenProject < handle
                 end
             end
             if nargin < 3
-                comp2axesMapping = [3 1 2];
+                comp2axesMapping = [1 -3 2];
             end
             if nargin < 2
                 if (ishandle(obj.plotModelHandle))
