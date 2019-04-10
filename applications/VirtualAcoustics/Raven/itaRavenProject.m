@@ -275,7 +275,7 @@ classdef itaRavenProject < handle
                     obj.ravenExe = [ selectedRavenPath selectedRavenExe];
                 else
                     obj.ravenExe = locatedRavenExe;
-
+                    
                 end
                 
                 if (~ravenIniExists)
@@ -589,7 +589,7 @@ classdef itaRavenProject < handle
         function keepImpulseResponseFiles(obj, keepFiles)
             % keepImpulseResponseFiles
             %
-            %   By default, RAVEN Impulse Responses are deleted from the hard disk 
+            %   By default, RAVEN Impulse Responses are deleted from the hard disk
             %   after simulation and are only available in your rpf project
             %
             %   By setting keepOutFiles to 1 / true, results are kept in
@@ -598,7 +598,7 @@ classdef itaRavenProject < handle
             obj.keepOutputFiles     = keepFiles;
             obj.rpf_ini.SetValues('Global', 'keepOutputFiles', keepFiles);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
-        end        
+        end
         
         %------------------------------------------------------------------
         function openOutputFolder(obj)
@@ -714,6 +714,123 @@ classdef itaRavenProject < handle
             obj.model = [];
             
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        %------------------------------------------------------------------
+        function [outputFilePath] = setModelToShoebox(obj, length,width,height)
+            % setModelToShoebox
+            % creates a shoebox room model and automatically sets the model
+            % of the current project to the defined shoebox room.
+            % The shoebox room has 6 materials assigned (matShoebox1 ..
+            % matShoebox6), which can be set using
+            %       rpf.setMaterial(matShoebox1,abs,scat)
+            %
+            % surface order:
+            % (1) floor, (2) ceiling,
+            % (3) larger wall (length x height; left, view from origin)
+            % (4) smaller wall (width x height; front)
+            % (5) larger wall (length x height; right)
+            % (6) smaller wall (width x height; back)
+            
+            % Using:
+            %   outputFileName = rpf.setModelToShoebox(myLength,myWidth,myHeight);
+            %
+            %   see ita_raven_demo_shoebox for more details on usage
+            %
+            % Input:
+            %   length, width, height (all in meters)
+            %
+            % Output:
+            %   outputFilePath: full path of save ac3d model
+            %
+            
+            outputFileName = ['Shoebox_' num2str(length) 'x' num2str(width) 'x' num2str(height) '.ac' ];
+            
+            if strfind(obj.modelFileList,'RavenModels')
+                outputFilePath = [ obj.modelFileList(1:strfind(obj.modelFileList,'RavenModels')+10) '\' outputFileName ];
+                
+            else
+                % if model wasn't stored in RavenModels folder, save it in
+                % the folder of the current rpf file.
+                outputFilePath = [ fileparts(obj.ravenProjectFile) '\' outputFileName ];
+            end
+            
+            fid = fopen(outputFilePath,'w');
+            fprintf(fid,'AC3Db\n');
+            for iMat=1:6
+                fprintf(fid,['MATERIAL "matShoebox' num2str(iMat) '" rgb ' num2str(0.0) ' ' num2str(0.0) ' ' num2str(0.1*iMat) ' amb 0.2 0.2 0.2  emis 0 0 0  spec 0.2 0.2 0.2  shi 128  trans 0 \n']);
+            end
+            
+            fprintf(fid,'OBJECT world\n');
+            fprintf(fid,'kids 6\n');
+            
+            lS=sprintf('%1.4f',length);
+            wS=sprintf('%1.4f',-width);
+            hS=sprintf('%1.4f',height);
+            
+            for iWall=1:6
+                fprintf(fid,'OBJECT poly\n');
+                fprintf(fid,'name "polygon_object"\n');
+                fprintf(fid,'numvert 4\n');
+                
+                if iWall==1
+                    fprintf(fid,'0 0 0\n');
+                    fprintf(fid,[lS ' 0 0\n']);
+                    fprintf(fid,[lS ' 0 ' wS '\n']);
+                    fprintf(fid,['0 0 ' wS '\n']);
+                end
+                
+                if iWall==2
+                    fprintf(fid,[lS ' ' hS ' 0\n']);
+                    fprintf(fid,['0 ' hS ' 0\n']);
+                    fprintf(fid,['0 ' hS ' '  wS '\n']);
+                    fprintf(fid,[lS ' ' hS ' '  wS '\n']);
+                end
+                
+                if iWall==3
+                    fprintf(fid,[lS ' 0 0\n']);
+                    fprintf(fid,'0 0 0\n');
+                    fprintf(fid,['0 ' hS ' 0\n']);
+                    fprintf(fid,[lS ' ' hS ' 0\n']);
+                end
+                
+                if iWall==4
+                    fprintf(fid,'0 0 0\n');
+                    fprintf(fid,['0 0 ' wS '\n']);
+                    fprintf(fid,['0 ' hS ' '  wS '\n']);
+                    fprintf(fid,['0 ' hS ' 0\n']);
+                end
+                
+                if iWall==5
+                    fprintf(fid,['0 0 ' wS '\n']);
+                    fprintf(fid,[lS ' 0 ' wS '\n']);
+                    fprintf(fid,[lS ' ' hS ' '  wS '\n']);
+                    fprintf(fid,['0 ' hS ' '  wS '\n']);
+                end
+                
+                if iWall==6
+                    fprintf(fid,[lS ' 0 ' wS '\n']);
+                    fprintf(fid,[lS ' 0 0\n']);
+                    fprintf(fid,[lS ' ' hS ' 0\n']);
+                    fprintf(fid,[lS ' ' hS ' '  wS '\n']);
+                end
+                
+                fprintf(fid,'numsurf 1\n');
+                fprintf(fid,'SURF 0x10\n');
+                fprintf(fid,['mat ' num2str(iWall-1) '\n']);
+                fprintf(fid,'refs 4\n');
+                fprintf(fid,'3 0 0\n');
+                fprintf(fid,'2 0 0\n');
+                fprintf(fid,'1 0 0\n');
+                fprintf(fid,'0 0 0\n');
+                fprintf(fid,'kids 0\n');
+                
+                
+            end
+            
+            fclose(fid);
+            obj.setModel(outputFilePath);
+            
         end
         
         %------------------------------------------------------------------
@@ -916,7 +1033,7 @@ classdef itaRavenProject < handle
             % remove [1] in legend entry
             for iMat=1:numberMaterials
                 leg.String{iMat} = leg.String{iMat}(1:end-4);
-            end           
+            end
             
             % export plot to raven output
             if (exportPlot)
@@ -929,7 +1046,7 @@ classdef itaRavenProject < handle
                 set(gcf,'PaperUnits','inches','PaperPosition',1.34*[0 0 8 5]);
                 
                 if strcmpi(fileType,'pdf')
-                    set(gcf,'PaperUnits','centimeters','PaperSize',[25.7, 16.5]);              
+                    set(gcf,'PaperUnits','centimeters','PaperSize',[25.7, 16.5]);
                     print('-dpdf','-r200', fileNamePDF);
                     close(currentPlot);
                 else
@@ -1010,7 +1127,7 @@ classdef itaRavenProject < handle
                 set(gcf,'PaperUnits','inches','PaperPosition',1.34*[0 0 8 5]);
                 
                 if strcmpi(fileType,'pdf')
-                    set(gcf,'PaperUnits','centimeters','PaperSize',[25.7, 16.5]);              
+                    set(gcf,'PaperUnits','centimeters','PaperSize',[25.7, 16.5]);
                     print('-dpdf','-r200', fileNamePDF);
                     close(currentPlot);
                 else
@@ -1644,7 +1761,7 @@ classdef itaRavenProject < handle
             obj.rpf_ini.SetValues('RayTracing', 'resolutionElevation_DetectionSphere', resEle);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
-
+        
         %------------------------------------------------------------------
         function setFilterLength(obj, filter_length)    % filter length parameter needed in [ms]
             if filter_length < 3
@@ -1771,15 +1888,15 @@ classdef itaRavenProject < handle
             %   setOutputPath(path)
             %
             %      Set the RAVEN output path. If you keep the output files
-            %      (cf. keepOutputFiles variable / method keepOutputFiles), 
+            %      (cf. keepOutputFiles variable / method keepOutputFiles),
             %      Impulse Responses as wave files are stored here :
             
             %           <projectName>/<date>/<time>/<IRtype>)
-            %       
+            %
             %      Absorption and scattering plots are also saved here.
             %
             %      Use method openOutputFolder to open result folder.
-            % 
+            %
             obj.pathResults = path;
             obj.rpf_ini.SetValues('Global', 'ProjectPath_Output', path);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
@@ -3073,7 +3190,7 @@ classdef itaRavenProject < handle
             end
             
             % determine factor (default: 0.161) and air absorption
-%             factor = 24*log(10) / calculateSoundSpeed(obj.getTemperature, obj.getHumidity,obj.getPressure);
+            %             factor = 24*log(10) / calculateSoundSpeed(obj.getTemperature, obj.getHumidity,obj.getPressure);
             factor = 0.161;
             airAbsorption = determineAirAbsorptionParameter(obj.getTemperature, obj.getPressure, obj.getHumidity);
             
@@ -3751,12 +3868,12 @@ classdef itaRavenProject < handle
             % check back the reverberation times
             numSources=size(obj.getSourcePosition,1);
             
-           thisReverbTime = obj.getT30(true,false,false,0);          
-           for iSources=2:numSources
-                thisReverbTime = thisReverbTime + obj.getT30(true,false,false,iSources-1);          
-           end
-           thisReverbTime = thisReverbTime / numSources;
-           
+            thisReverbTime = obj.getT30(true,false,false,0);
+            for iSources=2:numSources
+                thisReverbTime = thisReverbTime + obj.getT30(true,false,false,iSources-1);
+            end
+            thisReverbTime = thisReverbTime / numSources;
+            
             
             % if desired, rename the materials of the model
             if isempty(obj.model)
@@ -3799,17 +3916,17 @@ classdef itaRavenProject < handle
             if numel(targetReverbTime) == 10 % go to octave resolution
                 
                 A = mean([A(2:3:end);A(3:3:end); A(4:3:end)]);
-%                 A = A(3:3:end);
+                %                 A = A(3:3:end);
                 equivalentAirAbsorptionArea = mean([equivalentAirAbsorptionArea(2:3:end);equivalentAirAbsorptionArea(3:3:end); equivalentAirAbsorptionArea(4:3:end)]);
-
-%                 equivalentAirAbsorptionArea = equivalentAirAbsorptionArea(3:3:end);
+                
+                %                 equivalentAirAbsorptionArea = equivalentAirAbsorptionArea(3:3:end);
             end
             alphas_default = 1 - exp(((-0.163 * roommodel.getVolume() ./ targetReverbTime) - equivalentAirAbsorptionArea)/(S));
-%             alphas_alt = min((A+equivalentAirAbsorptionArea)/S,1);
+            %             alphas_alt = min((A+equivalentAirAbsorptionArea)/S,1);
             alphas_alt = (A+equivalentAirAbsorptionArea)/S;
-           
+            
             alphas_neu = abs(1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:)));
-%             alphas_neu = 1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:));
+            %             alphas_neu = 1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:));
             
             absorptionFactors = alphas_neu(:) ./ alphas_alt(:);
             absorptionFactors(isnan(absorptionFactors)) = 1;
