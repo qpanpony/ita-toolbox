@@ -40,6 +40,7 @@ end
 LSSignals=itaAudio(size(CTCFilter,1),1);
 for k=1:size(CTCFilter,1)
     LSSignals(k)=ita_convolve(inL,CTCFilter(k,1))+ita_convolve(inR,CTCFilter(k,2));
+    LSSignals(k).channelCoordinates=CTCFilter(k,1).channelCoordinates;
 end
 
 %% Return in time domain as multichannel audio

@@ -92,17 +92,17 @@ classdef itaValue
         end
         
         %% *********************** conversions *****************************
-        function res = num2str(a,varargin)
+        function res = num2str(this,varargin)
             % convert to string with value followed by unit string
-            if length(a) > 1
+            if length(this) > 1
                 res = [];
-                for idx = 1:length(a)
-                    res = [res ' '  num2str(a(idx),varargin{:})]; %#ok<AGROW>
+                for idx = 1:length(this)
+                    res = [res ' '  num2str(this(idx),varargin{:})]; %#ok<AGROW>
                 end
             else
-                res = num2str(a.value(:),varargin{:});
-                if ~isempty(a.unit)
-                    res = [res , repmat([' ' a.unit],numel(a.value),1)];
+                res = num2str(this.value(:),varargin{:});
+                if ~isempty(this.unit)
+                    res = [res , repmat([' ' this.unit],numel(this.value),1)];
                 end
             end
         end
@@ -266,9 +266,12 @@ classdef itaValue
                             res = 'W/m^2';
                             val = 1e-12;
                             log_prefix = 10;
-                        case 'm/s'
+                        case 'm/s' % ISO 1683
                             res = '1nm/s';
                             val = 1e-9;
+                        case 'm/s^2' % ISO 1683
+                            res = '1um/s^2';
+                            val = 1e-6;
                         case 'Pa'
                             res = '20uPa';
                             val = 20e-6;

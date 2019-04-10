@@ -1,87 +1,68 @@
-%% Init 
-% Before you start to measure the TFs of the HRTF, please make sure that:
-% 0. set ita_preferences: playing/recording device: ASIO Hammerfall 
-% connect the first channel output to the first channel input
-%% calibrate
-ms_calibrate = itaMSTF;
-ms_calibrate.inputChannels = 11;
-ms_calibrate.outputChannels = 19;
-ms_calibrate.run_latency;
+function ita_HRTFarc_measurementScript(varargin)
+%ita_HRTFarc_measurementScript - +++ example of continuous measurement with the new HRTFarc +++
+%
+% This is an example of a step-wise measurement. Only use this with the
+% turntable and subject rotation
+%
+%   Reference page in Help browser 
+%        <a href="matlab:doc test">doc test</a>
 
-latency = ms_calibrate.latencysamples;
-
-%%
-%                         MovtecCOM Port: COM3 
-%                         midi output device: multiface midi
-% 1. turntable is runnig
-% 2. you change the sensitivity of the microphones with ita_robocontrol
-% 3. you created a itaEimar object. This object has to be reseted for each
-% measurement
-% 4. load interleaved sweep 
-
-%ita_robocontrol('-20dB','Norm','0dBu')
-HRTF_Eimar  = itaEimar;
-outCh       = 19:1:82;
-
-inCh        = 11:12;
-% inCh        = 11:14; %flute
-% fluet  75mm and 200mm
-outAmp      = 35;
-freqRange   = [200 22050];
-latency     = 619;
-
-iMS_HRTF                = itaMSTFinterleaved; % please close it...
-iMS_HRTF.inputChannels  = inCh;
-iMS_HRTF.outputChannels = outCh;
-iMS_HRTF.freqRange      = freqRange;
-iMS_HRTF.latencysamples = latency;
-iMS_HRTF.outputamplification = outAmp;
-iMS_HRTF.optimize;
-iMS_HRTF.skipCrop = 1;
-% %% Old interleaved
-
-phiRes          = 2.5;
-coord           = ita_generateSampling_equiangular(phiRes,1);       % create coordinates
-coord_cut       = coord.n(coord.theta_deg == 90);
-coord_cut       = coord_cut.n(coord_cut.phi_deg <= 180 );
-% this prevents that the turntable move to every single direction%
-%pause(30); 
-% coord_cut = coord_cut.n(1);
-HRTF_Eimar.measurementPositions     = coord_cut;
-HRTF_Eimar.waitBeforeMeasurement    = 1;
-HRTF_Eimar.measurementSetup         = iMS_HRTF;
-HRTF_Eimar.doSorting = false;
+% <ITA-Toolbox>
+% This file is part of the ITA-Toolbox. Some rights reserved. 
+% You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder. 
+% </ITA-Toolbox>
 
 
-%% Teller rotieren und Kamera
-% Camera
-%  IP http://137.226.61.17/
-% benutzername: itacam
-HRTF_Eimar.reset
-HRTF_Eimar.reference;
- HRTF_Eimar.move_turntable(90)
-%% Init/ Reset Turntable
-% dataPath    = [datestr(now,'yyyymmmmdd_HHMM') 'reference_' num2str(phiRes) 'degree_KE3'];
-dataPath    = [datestr(now,'yyyymmmmdd_HHMM') 'Jan' num2str(phiRes)];
-HRTF_Eimar.dataPath = dataPath;
-HRTF_Eimar.reset
-HRTF_Eimar.reference;
+% Author: Jan-Gerrit Richter -- Email: jri@akustik.rwth-aachen.de
+% Created:  04-Oct-2018 
 
-disp('...................................................................')
-disp('Reference position reached!')
-disp('...................................................................')
-%% Run measurement with Eimar
-tic
-HRTF_Eimar.run
-t= toc;
-disp('...................................................................')
-disp(['Total time: ' num2str(round(t/60*100)/100)])
-disp('...................................................................')
+% set this to 1 if you want to measure the system latency
+options.measureLatency = 0;
 
-% run postprocessing
-if (iMS_HRTF.skipCrop == 1)
-    ita_HRTFarc_cropMeasurementData(iMS_HRTF,dataPath);
+% init the motor object
+iMS = test_itaEimarMotorControl;
+
+% init the measurement object
+ms = itaMSTFinterleaved;
+
+if options.measureLatency == 0
+    ms.latencysamples = 629;
+else
+    ms.inputChannels = 11;
+    ms.outputChannels = 20;
+    
+    input('Connect the amp to ch 11')
+    ms.run_latency;
+    input('Disconnect the amp')
 end
-test_rbo_HRTF_meas_peakDetection(dataPath)
 
 
+ms.outputChannels = (1:64)+18;
+% for continuous measurement, three inputs are required, left right and the
+% switch
+ms.inputChannels = [11 12 13];
+
+%define a freq range
+ms.freqRange = [500 22050];
+
+ms.optimize
+ms.twait = 0.03;
+
+coords = ita_generateSampling_equiangular(5,5);
+coords_cut = coords.n(coords.theta_deg == 90);
+
+iMS.measurementSetup = ms;
+iMS.measurementPositions = coords_cut;
+
+iMS.waitBeforeMeasurement = 1;
+
+saveName = 'test';
+iMS.dataPath = saveName;
+iMS.reference;
+iMS.doSorting = 0;
+iMS.run;
+
+% always leave the turntable in reference position
+iMS.reference
+
+end

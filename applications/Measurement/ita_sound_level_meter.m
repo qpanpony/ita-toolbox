@@ -73,8 +73,8 @@ runningFreqData = zeros(nBins-1,numel(recChannels));
 weightingTypes = {'            none','               A','               C'};
 weightingFilters = [flat,abs(weighting_filter(flat,octFreqVec(2:end),'A')).^2,abs(weighting_filter(flat,octFreqVec(2:end),'C')).^2];
 weightingLabels = {'','(A)','(C)'};
-timeConstantTypes = {'       Slow (1.0s)','     Fast (0.125s)','   Impulse (35ms)'};
-timeConstants = [1,0.125,0.035];
+timeConstantTypes = {'       Slow (1.0s)','     Fast (0.125s)'};
+timeConstants = [1,0.125];
 
 if isempty(sArgs.micEq)
     micEq = flat;
@@ -157,7 +157,7 @@ tic;
 % frequency weighting
 currentWeightingType = 1;
 weightingFilt = weightingFilters(:,currentWeightingType);
-yLabel = ['dB' upper(weightingLabels{currentWeightingType}) ' re 20uPa'];
+yLabel = ['SPL in dB' upper(weightingLabels{currentWeightingType}) ' re 20uPa'];
 ylabel(h.ax, yLabel,'FontSize',16)
 
 % time weighting/smoothing
@@ -173,7 +173,7 @@ while ~h.livePar.exit
         weightingFilt = weightingFilters(:,currentWeightingType);
         lineHandleSelfNoise.YData = self_noise_plot + 10.*log10(weightingFilt);
         
-        yLabel = ['dB' upper(weightingLabels{currentWeightingType}) ' re 20uPa'];
+        yLabel = ['SPL in dB' upper(weightingLabels{currentWeightingType}) ' re 20uPa'];
         ylabel(h.ax, yLabel,'FontSize',16)
         % time weighting/smoothing
         currentTimeConstantType = get(h.timeConstantType, 'Value');
@@ -311,7 +311,7 @@ end
 if ~playRecHandle('isInitialised')
     return;
 elseif playRecHandle('getRecMaxChannel') < max(channelList)
-    disp('Selected device does not support %d output channels\n', max(channelList));
+    fprintf('Selected device does not support %d output channels\n', max(channelList));
     return;
 end
 

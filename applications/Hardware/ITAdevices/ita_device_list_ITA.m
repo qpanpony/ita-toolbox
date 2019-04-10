@@ -1,12 +1,12 @@
 function varargout = ita_device_list_ITA(mode,token,varargin)
 % ITA_DEVICE_LIST - the ITA device List
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-%  PLEASE BE VERY CAREFUL WHEN EDITING THE DEVICE LIST
-%   BY HAND, CONSULT PDI OR MMT BEFORE MAKING CHANGES
+%  PLEASE BE VERY CAREFUL WHEN EDITING THE DEVICE LIST BY HAND, PLEASE 
+%  CONSULT THE ITA-TOOLBOX DEVELOPER TEAM BEFORE MAKING ANY CHANGES
 %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 %  Syntax:
 %   res = ita_device_list() returns all devices in a cell
@@ -31,12 +31,6 @@ function varargout = ita_device_list_ITA(mode,token,varargin)
 % </ITA-Toolbox>
 
 
-% if exist('ita_device_list_ITA.m','file')
-%    varargout = ita_device_list_ITA(mode,token,varargin{:});
-%    return;
-% end
-
-
 if nargin == 3
     hwch = varargin{1};
 else
@@ -49,7 +43,7 @@ if nargin >= 1 && isa(mode,'itaMeasurementChainElements')
     MCE = mode;
     devHandle = ita_device_list_handle;
     list = devHandle(); %get entire list
-    [elementfound idx]      = ismember(MCE.name,list(:,1)); %find element
+    [elementfound, idx]      = ismember(MCE.name,list(:,1)); %find element
     if elementfound
         sens         = list{idx,2};
 %         picModel     = ita_model2picture(list{idx,3});
@@ -64,7 +58,7 @@ if nargin >= 1 && isa(mode,'itaMeasurementChainElements')
 %             MCE.picModel    = picModel;
         end
     else
-        ita_verbose_info('Element not in list',1);
+        ita_verbose_info(['Element not found in the device list: ', MCE.name], 1);
     end
     
     
@@ -111,29 +105,25 @@ if nargin >= 2
         start_idx = strfind(token,'[');
         end_idx   = strfind(token,']');
         if ~isempty(start_idx) && ~isempty(end_idx)
-            token     = token(start_idx+1:end_idx-1); %get the name
+            name = token(start_idx+1:end_idx-1); %get the name
+        else
+            name = token;
         end
-        name = token;
         for idx = 1:size(device,1)
-            if strcmpi(token,device{idx,1})
+            if strcmpi(name,device{idx,1})
                 res = itaValue(device{idx,2});
                 break
             end
         end
-%         % etwas schoener
-%         idxDevice = find(strcmpi(device(:,1), token));
-%         if ~isempty(idxDevice)
-%             res = itaValue(device{idxDevice,2});
-%         end
-        
-        start_idx = strfind(token,'(');
-        end_idx   = strfind(token,')');
-        if ~isempty(start_idx) && ~isempty(end_idx)
-            res = itaValue(token(start_idx+1:end_idx-1));
-        end
         if isempty(res)
-            res = itaValue(-1);
-            disp(['element not in list: ' token '.'])
+            ita_verbose_info(['Element not found in the device list: ', token], 1)
+            start_idx = strfind(token,'(');
+            end_idx   = strfind(token,')');  
+            if ~isempty(start_idx) && ~isempty(end_idx)
+                res = itaValue(token(start_idx+1:end_idx-1));
+            else
+                res = itaValue(-1);
+            end
         end
     end
 end
@@ -451,6 +441,11 @@ device(end+1,:) = { 'ITA-KK KE4 Child right','0.0098573 V/Pa','ke4',0};
 
 device(end+1,:) = { 'Neumann-KK left','1 V/Pa','schoeps',1};
 device(end+1,:) = { 'Neumann-KK right','1 V/Pa','schoeps',1};
+
+% values are taken from calibration sheets by DKD (Deutscher
+% Kalibrierdienst)
+device(end+1,:) = { 'GRAS Headphone Testfixture Left','0.01211 V/Pa','RA0401',1};
+device(end+1,:) = { 'GRAS Headphone Testfixture Right','0.0124 V/Pa','RA0401',1};
 
 device(end+1,:) = { 'HEAD HMS III with ear simulator - IEC 711','0.01165 V/Pa','none',0};
 

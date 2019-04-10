@@ -21,17 +21,17 @@ function varargout = ita_plot_2D(varargin)
 %  Example:
 %   axes = ita_plot_2D(audioObjIn,1000)
 %
-%   Reference page in Help browser 
+%   Reference page in Help browser
 %        <a href="matlab:doc ita_plot_2D">doc ita_plot_2D</a>
 
 % <ITA-Toolbox>
-% This file is part of the ITA-Toolbox. Some rights reserved. 
-% You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder. 
+% This file is part of the ITA-Toolbox. Some rights reserved.
+% You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
 % </ITA-Toolbox>
 
 
 % Author: MMT -- Email: mmt@akustik.rwth-aachen.de
-% Created:  09-Jan-2010 
+% Created:  09-Jan-2010
 
 %% Get Function String
 thisFuncStr  = [upper(mfilename) ':'];     %Use to show warnings or infos in this functions
@@ -58,7 +58,7 @@ else
 end
 
 % only display image if one is given and alpha is not zero
-if (ndims(sArgs.backgroundImage) < 3) || (sArgs.alpha <= 0)
+if ismatrix(sArgs.backgroundImage) || (sArgs.alpha <= 0)
     displayImage = 0;
 else
     displayImage = 1;
@@ -129,6 +129,8 @@ switch sArgs.plotType
         if numel(sArgs.plotRange) == 1
             tmp = 10*round(0.1*magMax)+10;
             sArgs.plotRange = [tmp-sArgs.plotRange tmp];
+        else
+            tmp = sArgs.plotRange(2);
         end
         plotData(plotData < sArgs.plotRange(1)) = tmp-500;
         % colorbar limits
@@ -172,37 +174,29 @@ if axesMode
         if strcmp(get(chdr(i),'Type'),'image') && displayImage
             imageAxes = chdr(i);
             set(imageAxes,'CData',sArgs.backgroundImage,'AlphaData',sArgs.alpha);
-        % axes for the surface plot
-%         elseif ~isempty(strfind(get(chdr(i),'Type'),'surface'))
-%             surfaceAxes = chdr(i);
-%             set(surfaceAxes,'XData',X,'YData',Y,'ZData',plotData);
-%             set(sArgs.currentAxes,'CLim',[lim1 lim2]);
-%             title(sArgs.currentAxes,titleStr);
         % axes for the contour plot
-        elseif ~isempty(strfind(get(chdr(i),'Type'),'hg'))
+        elseif contains(get(chdr(i),'Type'),'hg')
             contourAxes = chdr(i);
             set(contourAxes,'XData',X,'YData',Y,'ZData',plotData);
             set(sArgs.currentAxes,'CLim',[lim1 lim2]);
             title(sArgs.currentAxes,titleStr);
         end
     end
-    % no axes specified, create new figure
+% no axes specified, create new figure
 else
     scrsz = get(0,'ScreenSize');
     if sArgs.newFigure
         visible = 'on';
         
-        if ~isempty(sArgs.filename);
+        if ~isempty(sArgs.filename)
             visible = 'off';
         end
-        hgf = figure('Name',titleStr,'Position',[1 (1/3)*scrsz(4) (1/3)*scrsz(3) scrsz(4)/3],'Visible',visible);
+        figure('Name',titleStr,'Position',[1 (1/3)*scrsz(4) (1/3)*scrsz(3) scrsz(4)/3],'Visible',visible);
     end
     ita_whitebg([0 0 0]);
     if sArgs.alpha < 1
-%         surfaceAxes = surf(X,Y,plotData,'EdgeColor','none');
-        [C,contourAxes] = contourf(X,Y,plotData,'EdgeColor','none','LevelStep',levelStep);
+        [~,contourAxes] = contourf(X,Y,plotData,'EdgeColor','none','LevelStep',levelStep);
         axis([min(X(:)) max(X(:)) min(Y(:)) max(Y(:)) lim1 lim2]);
-%         view(0,90);
         hold on;
         if displayImage
             image(x,y,sArgs.backgroundImage,'AlphaData',sArgs.alpha);
@@ -216,28 +210,24 @@ else
             set(gca,'YDir','normal')
         end
         hold on;
-%         surfaceAxes = surf(X,Y,plotData,'EdgeColor','none');
-        [C,contourAxes] = contourf(X,Y,plotData,'EdgeColor','none','LevelStep',levelStep);
-        axis([min(X(:)) max(X(:)) min(Y(:)) max(Y(:)) lim1 lim2]); 
-%         view(0,90);
+        [~,contourAxes] = contourf(X,Y,plotData,'EdgeColor','none','LevelStep',levelStep);
+        axis([min(X(:)) max(X(:)) min(Y(:)) max(Y(:)) lim1 lim2]);
     end
     hold off;
     colorbar; set(gca,'CLim',[lim1 lim2]);
     xlabel(xLabel); ylabel(yLabel);
     axis equal;
     axis tight;
-    title(titleStr);    
+    title(titleStr);
 end
 
 %% save figure?
 if ~isempty(sArgs.filename)
-       print('-dpng','-r300',fullfile(pwd, [sArgs.filename]))
+    print('-dpng','-r300',fullfile(pwd, [sArgs.filename]))
 end
-
 
 %% Set Output
 if nargout
-    % varargout(1) = {get(surfaceAxes,'Parent')};
     varargout(1) = {get(contourAxes,'Parent')};
 end
 

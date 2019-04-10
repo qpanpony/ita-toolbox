@@ -1,5 +1,8 @@
 %% itaVA simple example code for a text-to-speech sound source
 
+% @todo apply new VA method naming conventions (all small caps with
+% underscores between words)
+
 % Quick setup
 itaVAq
 va.reset();

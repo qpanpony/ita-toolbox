@@ -17,11 +17,19 @@ for idx = 1:this.nChannels
         this.freqData(:,idx) = this.freqData(:,idx)./20e-6;
     end
 end
+
+xscale_idx = find(strcmpi(this.plotAxesProperties, 'xscale'));
+if ~isempty(xscale_idx) && xscale_idx < length(this.plotAxesProperties) && strcmpi(this.plotAxesProperties{xscale_idx+1}, 'lin')
+    plot_func = @plot;
+else
+    plot_func = @semilogx;
+end
+
 if this.allowDBPlot
-    h = semilogx(xVec, calcLog(this));
+    h = plot_func(xVec, calcLog(this));
     ylabel('Modulus in dB')
 else
-    h = semilogx(xVec, this.freqData);
+    h = plot_func(xVec, this.freqData);
     ylabel('Modulus')
 
 end

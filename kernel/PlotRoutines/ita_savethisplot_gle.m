@@ -286,11 +286,11 @@ try
         % differentiate between plot types
         % standard line plot
         plotType = get(chdr{iGraph},'Type');
-        if any(strcmpi(plotType,'line')) && ~(any(strcmpi(plotType,'bar')) || any(strcmpi(plotType,'patch'))) % workaround for bar plots
-            files = [files gle_makeplot(fid,axesHandles(iGraph),chdr{iGraph}(strcmpi(plotType,'line')),PlotLegends{iGraph},DeltaX,DeltaY,iGraph,sArgs,'line')]; 
+        if any(strcmpi(plotType,'line') | strcmpi(plotType,'scatter')) && ~(any(strcmpi(plotType,'bar')) || any(strcmpi(plotType,'patch'))) % workaround for bar plots
+            files = [files gle_makeplot(fid,axesHandles(iGraph),chdr{iGraph}(strcmpi(plotType,'line') | strcmpi(plotType,'scatter')),PlotLegends{iGraph},DeltaX,DeltaY,iGraph,sArgs,plotType)];
             
             % bar graphs (toolbox bar plots use patches)
-        elseif any(strcmpi(plotType,'bar')) || any(strcmpi(plotType,'patch')) || (any(strcmpi(plotType,'hggroup')) && any(isprop(chdr{iGraph},'BarLayout'))) % rsc - bar plot are hggroup but have a BarLayout Property
+        elseif any(strcmpi(plotType,'bar')) || any(strcmpi(plotType,'patch')) || any(strcmpi(plotType,'histogram')) || (any(strcmpi(plotType,'hggroup')) && any(isprop(chdr{iGraph},'BarLayout'))) % rsc - bar plot are hggroup but have a BarLayout Property
             chdrIdx = logical(strcmpi(plotType,'bar') + strcmpi(plotType,'patch')+ strcmpi(plotType,'hggroup'));
             files = [files gle_makeplot(fid,axesHandles(iGraph),chdr{iGraph}(chdrIdx),PlotLegends{iGraph},DeltaX,DeltaY,iGraph,sArgs,'bar')]; 
             
@@ -430,9 +430,14 @@ end
 function files = gle_makeplot(fid,axh,chdr,plotLegend,DeltaX,DeltaY,n,sArgs,plot_type)
 
 Nplots = length(chdr);
+% somehow matlab flips the data order for multiple plots
+if Nplots > 1
+    chdr = flipud(chdr);
+    plot_type = flipud(plot_type);
+end
 % gather subplot-specific data
-x_data = flipud(get(chdr,'XData'));
-y_data = flipud(get(chdr,'YData'));
+x_data = get(chdr,'XData');
+y_data = get(chdr,'YData');
 
 if ~iscell(x_data)
     x_data = {x_data(:).'};
@@ -442,8 +447,12 @@ if ~iscell(y_data)
     y_data = {y_data(:).'};
 end
 
-if strcmpi(plot_type,'bar')
-    for i = 1:Nplots
+if ~iscell(plot_type)
+    plot_type = {plot_type};
+end
+
+for i = 1:Nplots
+    if strcmpi(plot_type{i},'bar')
         if size(x_data{i},1) > 1
             x_data{i} = x_data{i}(2,:);
         end
@@ -451,16 +460,18 @@ if strcmpi(plot_type,'bar')
             y_data{i} = y_data{i}(2,:);
         end
     end
-end
-
-if strcmpi(plot_type,'errorbar')
-    errup =  flipud(get(chdr,'UData'));
-    errdown =  flipud(get(chdr,'LData'));
-    if ~iscell(errup)
-        errup = {errup};
-    end
-    if ~iscell(errdown)
-        errdown = {errdown};
+    
+    errup = cell(Nplots,1);
+    errdown = cell(Nplots,1);
+    if strcmpi(plot_type{i},'errorbar')
+        errup   = get(chdr(i),'UData');
+        errdown = get(chdr(i),'LData');
+        if ~iscell(errup)
+            errup = {errup};
+        end
+        if ~iscell(errdown)
+            errdown = {errdown};
+        end
     end
 end
 
@@ -526,31 +537,6 @@ end
 
 scaling_factor = sArgs.font_scale;
 
-%% Map log to lin for bar plots
-if strcmp(x_scale,'log') && strcmpi(plot_type,'bar') %Log scale does not work for bar plots in gle
-    x_scale = 'lin';
-    x_tick = log2(x_tick);
-    x_lim = log2(x_lim);
-    x_data = cellfun(@log2,x_data,'UniformOutput',false);
-    N = size(x_data{1},2);
-    bar_width = (max(x_lim)-min(x_lim))./ (N+1) ./ (Nplots+1);
-    % have to correct the positions
-    % MATLAB uses xpositions for each bar, GLE only one position for all
-    if Nplots == 1
-        x_data = cellfun(@plus,x_data,{bar_width},'UniformOutput',false);
-    else
-        if rem(Nplots,2) % odd
-            x_data = cellfun(@plus,repmat(x_data(floor(Nplots/2)+1),[Nplots,1]),repmat({bar_width/2},[Nplots,1]),'UniformOutput',false);
-        else % eve
-            x_data = {(x_data{Nplots/2} + x_data{Nplots/2+1})./2};
-            x_data = cellfun(@plus,repmat(x_data,[Nplots,1]),repmat({bar_width/2},[Nplots,1]),'UniformOutput',false);
-        end
-    end
-else
-    N = size(x_data{1},2);
-    bar_width = (max(x_lim)-min(x_lim))./ (N+1) ./ (Nplots+1);
-end
-
 %% write some axis and label settings
 % these settings will now come from the template as variables
 fprintf(fid,'set alabeldist axisLabelDist\n');
@@ -570,14 +556,39 @@ fprintf(fid,'\tvscale auto\n');
 %% write CSV data files
 precision_string = '%2.5e';
 files = cell(1,Nplots);
-for k = 1:Nplots
-    CSV_FileName = ['subplot' num2str(n) 'p' num2str(k) '.csv'];
-    DatFileName = CSV_FileName;
-    files(k) = {DatFileName};
-    if strcmpi(plot_type,'errorbar')
-        M = [x_data{k}(:) y_data{k}(:) errdown{k}(:) errup{k}(:)];
+for i = 1:Nplots
+    % Map log to lin for bar plots
+    if strcmp(x_scale,'log') && strcmpi(plot_type{i},'bar') %Log scale does not work for bar plots in gle
+        x_scale = 'lin';
+        x_tick = log2(x_tick);
+        x_lim = log2(x_lim);
+        x_data = cellfun(@log2,x_data,'UniformOutput',false);
+        N = size(x_data{1},2);
+        bar_width = (max(x_lim)-min(x_lim))./ (N+1) ./ (Nplots+1);
+        % have to correct the positions
+        % MATLAB uses xpositions for each bar, GLE only one position for all
+        if Nplots == 1
+            x_data = cellfun(@plus,x_data,{bar_width},'UniformOutput',false);
+        else
+            if rem(Nplots,2) % odd
+                x_data = cellfun(@plus,repmat(x_data(floor(Nplots/2)+1),[Nplots,1]),repmat({bar_width/2},[Nplots,1]),'UniformOutput',false);
+            else % eve
+                x_data = {(x_data{Nplots/2} + x_data{Nplots/2+1})./2};
+                x_data = cellfun(@plus,repmat(x_data,[Nplots,1]),repmat({bar_width/2},[Nplots,1]),'UniformOutput',false);
+            end
+        end
     else
-        M = [x_data{k}(:) y_data{k}(:)];
+        N = size(x_data{1},2);
+        bar_width = (max(x_lim)-min(x_lim))./ (N+1) ./ (Nplots+1);
+    end
+    
+    CSV_FileName = ['subplot' num2str(n) 'p' num2str(i) '.csv'];
+    DatFileName = CSV_FileName;
+    files(i) = {DatFileName};
+    if strcmpi(plot_type,'errorbar')
+        M = [x_data{i}(:) y_data{i}(:) errdown{i}(:) errup{i}(:)];
+    else
+        M = [x_data{i}(:) y_data{i}(:)];
     end
     try
         ita_dlmwrite(DatFileName,M,'precision',precision_string);
@@ -661,93 +672,100 @@ fprintf(fid,'\tynames%s\n',y_ticklabelStr);
 fprintf(fid,'\tylabels dist axisLabelDist\n');
 
 %% here come the actual plots
-if strcmpi(plot_type,'line') || strcmpi(plot_type,'errorbar')
-    % gather line-specific data
-    line_color = get(chdr,'Color');
-    marker     = get(chdr,'marker');
-%     marker_size = get(chdr,'MarkerSize');
-    line_style = get(chdr,'LineStyle');
-    line_width = get(chdr,'LineWidth');
-else
-    line_color = get(chdr,'FaceColor');
-    if ~iscell(line_color)
-        line_color = {line_color};
-    end
-    %     colors =ita_plottools_colortable('ita');
-    colors = colormap;
-    %     if Nplots > 1
-    %         colors = get(get(chdr(1),'Parent'),'ColorOrder');
-    %     else
-    %         colors = get(get(chdr,'Parent'),'ColorOrder');
-    %     end
-    colors = colors(1:floor(size(colors,1)/Nplots):end,:);
-    for i = 1:Nplots
+marker     = cell(numel(chdr),1);
+line_width = cell(numel(chdr),1);
+line_color = cell(numel(chdr),1);
+line_style = cell(numel(chdr),1);
+for i = 1:Nplots
+    if strcmpi(plot_type{i},'line') || strcmpi(plot_type{i},'errorbar')
+        % gather line-specific data
+        marker{i} = get(chdr(i),'marker');
+        line_width{i} = get(chdr(i),'LineWidth');
+        line_color{i} = get(chdr(i),'Color');
+        line_style{i} = get(chdr(i),'LineStyle');
+    elseif strcmpi(plot_type{i},'scatter')
+        marker{i}     = get(chdr(i),'marker');
+        line_width{i} = 0;
+        line_color{i} = chdr(i).CData;
+        line_style{i} = 'none';
+    else
+        line_color = get(chdr,'FaceColor');
+        if ~iscell(line_color)
+            line_color = {line_color};
+        end
+        colors = colormap;
+        colors = colors(1:floor(size(colors,1)/Nplots):end,:);
         if strcmpi(line_color{i},'flat') % pdi: why is is flat ???
             line_color(i) = {colors(end-i+1,:)};
         end
+        line_style{i} = '-';
+        line_width{i} = '1';
     end
-    line_style(1:Nplots) = {'-'};
-    line_width(1:Nplots) = {'1'};
-    marker(1:Nplots) = {''};
 end
 
-% somehow matlab flips the data order for multiple plots
 if ~iscell(line_style)
     line_style = {line_style};
-else
-    line_style = flipud(line_style);
 end
 if ~iscell(line_color)
     line_color = {line_color};
-else
-    line_color = flipud(line_color);
 end
 if ~iscell(line_width)
     line_width = {line_width};
-else
-    line_width = flipud(line_width);
 end
 if ~iscell(marker)
     marker = {marker};
-else
-    marker = flipud(marker);
 end
 
 %% line or bar plot
-% line
-if strcmpi(plot_type,'line')
-    % generate plot command(s) (i.e. generate the d# commands)
-    lineCommand = 'line';
-    if sArgs.stem
-        lineCommand = [lineCommand ' impulses'];
-    end
-    for l = 1:Nplots
+for i = 1:Nplots
+    % line
+    if strcmpi(plot_type{i},'line')
+        % generate plot command(s) (i.e. generate the d# commands)
+        lineCommand = 'line';
+        if sArgs.stem
+            lineCommand = [lineCommand ' impulses'];
+        end
+        
         if sArgs.blackandwhite
-            fprintf(fid,gle_lineplot_cmd(l,[0 0 0],l, ...
-                line_width{l},marker{l},lineCommand));
+            fprintf(fid,gle_lineplot_cmd(i,[0 0 0],i, ...
+                line_width{i},marker{i},lineCommand));
         else
-            fprintf(fid,gle_lineplot_cmd(l,line_color{l},line_style{l}, ...
-                line_width{l},marker{l},lineCommand));
+            fprintf(fid,gle_lineplot_cmd(i,line_color{i},line_style{i}, ...
+                line_width{i},marker{i},lineCommand));
         end
         if sArgs.fill
-           fprintf(fid,gle_lineplot_fill(l,line_color{l}));
+            fprintf(fid,gle_lineplot_fill(i,line_color{i}));
         end
-    end
-    
-    %bar
-elseif strcmpi(plot_type,'bar')
-    fprintf(fid,gle_barplot_cmd(Nplots,line_color, bar_width, x_scale));
-    line_width(:) = {6*2*bar_width* Nplots};
-    %errorbar
-elseif strcmpi(plot_type,'errorbar')
-    % generate plot command(s) (i.e. generate the d# commands)
-    for l = 1:Nplots
+    % scatter     
+    elseif strcmpi(plot_type{i},'scatter')
+        % generate plot command(s) (i.e. generate the d# commands)
+        lineCommand = '';
+        if sArgs.stem
+            lineCommand = [lineCommand ' impulses'];
+        end
         if sArgs.blackandwhite
-            fprintf(fid,gle_errorbar_cmd((l-1)*3+1,[0 0 0],l, ...
-                line_width{l},marker{l}));
+            fprintf(fid,gle_lineplot_cmd(i,[0 0 0],i, ...
+                0,marker{i},lineCommand));
         else
-            fprintf(fid,gle_errorbar_cmd((l-1)*3+1,line_color{l},line_style{l}, ...
-                line_width{l},marker{l}));
+            fprintf(fid,gle_lineplot_cmd(i,line_color{i},line_style{i}, ...
+                0,marker{i},lineCommand));
+        end
+        if sArgs.fill
+            fprintf(fid,gle_lineplot_fill(i,line_color{i}));
+        end
+    %bar
+    elseif strcmpi(plot_type{i},'bar')
+        fprintf(fid,gle_barplot_cmd(Nplots,line_color, bar_width, x_scale));
+        line_width(i) = {6*2*bar_width* Nplots};
+    %errorbar
+    elseif strcmpi(plot_type,'errorbar')
+        % generate plot command(s) (i.e. generate the d# commands)
+        if sArgs.blackandwhite
+            fprintf(fid,gle_errorbar_cmd((i-1)*3+1,[0 0 0],i, ...
+                line_width{i},marker{i}));
+        else
+            fprintf(fid,gle_errorbar_cmd((i-1)*3+1,line_color{i},line_style{i}, ...
+                line_width{i},marker{i}));
         end
     end
 end
@@ -769,17 +787,17 @@ if ~isempty(keys)
     % where the legend should be placed (t(op)l(eft),tr,bl,br etc.)
     fprintf(fid,'\tposition %s\n',sArgs.legend_position);
     
-    for l = 1:min(numel(keys), numel(line_color)) % works for any number of legend entries
+    for i = 1:min(numel(keys), numel(line_color)) % works for any number of legend entries
         % use several columns for large number of keys
-        if Nplots > 4 && ismember(l,4:3:13)
+        if Nplots > 4 && ismember(i,4:3:13)
             fprintf(fid,'\tseparator\n');
         end
         if sArgs.blackandwhite %nice black and white, with thick lines
-            fwrite(fid,gle_key_cmd([0 0 0],l, ...
-                max(line_width{l}*6,0.06),marker{l},test_for_tex(keys{l})),'char');
+            fwrite(fid,gle_key_cmd([0 0 0],i, ...
+                max(line_width{i}*6,0.06),marker{i},test_for_tex(keys{i})),'char');
         else
-            fwrite(fid,gle_key_cmd(line_color{l},line_style{l}, ...
-                line_width{l},marker{l},test_for_tex(keys{l})),'char');
+            fwrite(fid,gle_key_cmd(line_color{i},line_style{i}, ...
+                line_width{i},marker{i},test_for_tex(keys{i})),'char');
         end
     end
     
@@ -1092,8 +1110,6 @@ scaling_factor = sArgs.font_scale;
 % try to downscale
 % z_data = z_data([1 2:5:end],:);
 % x_data = x_data([1 2:5:end]);
-
-
 
 %% start to write axis and label settings
 % need this for colormaps

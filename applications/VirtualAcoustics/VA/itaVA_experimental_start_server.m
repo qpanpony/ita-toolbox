@@ -1,5 +1,5 @@
 if ~exist( 'VAServer.exe', 'file' )
-    itaVA_setup
+    VA_setup
 end
 
 [ basepath, basename, ext ]= fileparts( which( 'VAServer.exe') );

@@ -181,7 +181,7 @@ for iCh = 1:ir.nChannels
         while  tmpData(nInputSamples(iCh)-1,iCh) == 0
             nInputSamples(iCh) = nInputSamples(iCh)-1;
             if nInputSamples(iCh) == 1
-                error('Channles %i is empty')
+                error(['Channel ' num2str(iCh) ' is empty'])
             end
             
         end

@@ -11,12 +11,14 @@ function [ CTC ] = ita_ctcFilter_regularized( varargin )
 %   ch(4) = LS2 Right Ear
 %   ch(5) = LS3 Left Ear
 %   ...
-%
+%   Make sure that the HRTFs compensate for irregular loudspeaker arrays or
+%   off-centered listeners.
+% 
 %   The calculation algorithm is a simple inversion. Pre- and
 %   Postprocessing options can be found below
 %
 %   For smoothing of HRTF or CTC filters use the functions provided by
-%   ita_3da_smoothing
+%   ita_ctc_smoothHRTF
 
 
 %% Options
@@ -104,7 +106,9 @@ end
 [Cm Cn]=size(CTC);
 for idx=1:Cm
     CTC(idx,1).channelNames = {['CTC-' num2str(idx) 'L''']};
+    CTC(idx,1).channelCoordinates = H.channelCoordinates.n(idx*Cn-1);
     CTC(idx,2).channelNames = {['CTC-' num2str(idx) 'R''']};
+    CTC(idx,2).channelCoordinates = H.channelCoordinates.n(idx*Cn);
 end
 end
 
