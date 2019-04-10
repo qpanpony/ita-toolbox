@@ -43,8 +43,8 @@ function varargout = ita_roomacoustics_EDC(varargin)
 
 %% Input Parsing
 sArgs         = struct('pos1_data','itaAudio', 'method', 'cutWithCorrection', 'intersectionTime', 'itaResult', 'lateRevEstimation', 'itaResult', 'noiseRMS',  'itaResult', 'normTo0dB', true, 'plot', false ,'calcCenterTime', false, 'inputIsSquared', false);
-[input,sArgs] = ita_parse_arguments(sArgs,varargin);
-
+sArgs= ita_parse_arguments(sArgs,varargin);
+input = sArgs.data;
 
 % check if method is known
 possibleMethods = {'noCut' 'justCut' 'cutWithCorrection' 'subtractNoise' 'subtractNoiseAndCutWithCorrection' 'unknownNoise' 'noCutWithCorrection' };
