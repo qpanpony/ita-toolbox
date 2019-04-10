@@ -8,18 +8,20 @@ function varargout = ita_roomacoustics_EDC(varargin)
 %   EDCs = ita_roomacoustics_EDC(inputIR, options)
 %
 %   Options (default):
-%           'method' ('cutWithCorrectionISO') :
+%           'method' ('cutWithCorrection') :
 %                                      'cutWithCorrection'   : truncate impulse response according to given intersection time and apply correction (accorrding ISO 3382-1:2009)
 %                                      'justCut'             : truncate impulse response according to given intersection time
 %                                      'noCut'               : take whole imulse response for EDC calculation
 %                                      'subtractNoise'       : subtract noise estimation  from impulse response
 %                                      'unknownNoise'        : apply moving average window with width T/5 (according (old) ISO 3382:2000 )
-
-
 %
-%           'intersectionTime' ()         : itersection times for all input channels as itaResult (for methods 'cutWithCorrectionISO' and 'justCut')
+%           'intersectionTime' ()         : itersection times for all input channels as itaResult (for methods 'cutWithCorrection' and 'justCut')
 %           'normTo0dB' (true)            : EDC starts at 0 dB
-%  Example:
+%
+%  Examples:
+%   EDCs = ita_roomacoustics_EDC(RIR, 'method','noCut')
+%   EDCs = ita_roomacoustics_EDC(myRIR, 'method', 'unknownNoise')
+
 %   EDCs = ita_roomacoustics_EDC(RIR, 'intersectionTime', iTimes)
 %
 %  See also:
@@ -43,8 +45,7 @@ function varargout = ita_roomacoustics_EDC(varargin)
 
 %% Input Parsing
 sArgs         = struct('pos1_data','itaAudio', 'method', 'cutWithCorrection', 'intersectionTime', 'itaResult', 'lateRevEstimation', 'itaResult', 'noiseRMS',  'itaResult', 'normTo0dB', true, 'plot', false ,'calcCenterTime', false, 'inputIsSquared', false);
-sArgs= ita_parse_arguments(sArgs,varargin);
-input = sArgs.data;
+[input,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 % check if method is known
 possibleMethods = {'noCut' 'justCut' 'cutWithCorrection' 'subtractNoise' 'subtractNoiseAndCutWithCorrection' 'unknownNoise' 'noCutWithCorrection' };
