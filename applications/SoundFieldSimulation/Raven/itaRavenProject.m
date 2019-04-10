@@ -4990,9 +4990,9 @@ classdef itaRavenProject < handle
             figure;
             for i = 1 : numel(sphereEnergy)
                 [x,y,z] = sphere(16);
-                x = x * obj.radiusSphere + obj.receiverPositions(i, 1);
+                x = x * obj.radiusSphere + -obj.receiverPositions(i, 3);
                 y = y * obj.radiusSphere + obj.receiverPositions(i, 2);
-                z = z * obj.radiusSphere + obj.receiverPositions(i, 3);
+                z = z * obj.radiusSphere + obj.receiverPositions(i, 1);
                 c = ones(size(z,1), size(z,2)) * sphereEnergy(i);
                 surf(z, x, y, c);
                 hold on;
@@ -5205,9 +5205,9 @@ classdef itaRavenProject < handle
                 fig = figure;
                 for i_sphere = 1 : size(sphereEnergy, 1)
                     [x,y,z] = sphere(16);
-                    x = x * obj.radiusSphere + obj.receiverPositions(i_sphere, 1);
+                    x = x * obj.radiusSphere + -obj.receiverPositions(i_sphere, 3);
                     y = y * obj.radiusSphere + obj.receiverPositions(i_sphere, 2);
-                    z = z * obj.radiusSphere + obj.receiverPositions(i_sphere, 3);
+                    z = z * obj.radiusSphere + obj.receiverPositions(i_sphere, 1);
                     c = zeros(size(z,1), size(z,2));
                     sphere_handle(i_sphere) = surf(z, x, y, c);
                     hold on;
