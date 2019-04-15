@@ -888,15 +888,15 @@ classdef itaRavenProject < handle
             comp2axesMapping = abs(comp2axesMapping);
             
             spos = obj.getSourcePosition;
-            spos = spos(:, comp2axesMapping).*invertAxes;
+            spos = spos(:, comp2axesMapping).*repmat(invertAxes,size(spos,1),1);
             sview = obj.getSourceViewVectors;
-            sview = sview(:, comp2axesMapping).*invertAxes;
+            sview = sview(:, comp2axesMapping).*repmat(invertAxes,size(sview,1),1);
             snames = obj.getSourceNames;
             
             rpos = obj.getReceiverPosition;
-            rpos = rpos(:, comp2axesMapping).*invertAxes;
+            rpos = rpos(:, comp2axesMapping).*repmat(invertAxes,size(rpos,1),1);
             rview = obj.getReceiverViewVectors;
-            rview = rview(:, comp2axesMapping).*invertAxes;
+            rview = rview(:, comp2axesMapping).*repmat(invertAxes,size(rview,1),1);
             rnames = obj.getReceiverNames;
             
             % plot source and receivers
@@ -1367,6 +1367,26 @@ classdef itaRavenProject < handle
             obj.rpf_ini.SetValues('PrimarySources', 'sourceDirectivity', obj.sourceDirectivityString);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
+        
+        
+        %------------------------------------------------------------------
+        function setSourceDirectivityPath(obj, myPath)
+            %
+            %   setSourceDirectivityPath(path)
+            %
+            %      Set the RAVEN source directivity database path. Here all
+            %      directivities (.daff files) should be located
+            %
+            %      To generate new files, check out opendaff in the 
+            %      \applications\VirtualAcoustics\openDAFF\
+            %
+            %      RAVEN currently only supports OpenDAFFv1.5 files
+            %
+            obj.pathMaterials = myPath;
+            obj.rpf_ini.SetValues('Global', 'ProjectPath_DirectivityDB', path);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
         
         %------------------------------------------------------------------
         function pos = getSourcePosition(obj, srcID)
