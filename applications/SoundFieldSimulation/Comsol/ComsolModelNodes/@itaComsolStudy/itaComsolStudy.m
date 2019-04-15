@@ -25,6 +25,93 @@ classdef itaComsolStudy < itaComsolNode
         end
     end
     
+    %% Parametric Sweep from Matlab
+    methods
+        function varargout = RunParametricSweep(obj, parameterName, parameterValues, varargin)
+            %Runs multiple simulation from Matlab varying one Comsol
+            %paramter and storing the results in .mph files
+            %   Mendatory inputs:
+            %   parameterName: Identifyer of the parameter [char row vector]
+            %   parameterValues: Array of values for the paramter [Numeric vector or cellstring]
+            %   
+            %   Options(default):
+            %   parameterUnit (''): Unit used for all parameter values [char row vector]
+            %   resultFolder (same as original model): Folder where results are to be stored [char row vector]
+            %   showProgress (false): Enable/disable Comsol UI that shows simulation progress [boolean]
+            %   
+            %   Output:
+            %   resultPath: Folder where result files are stored
+            %   
+            %   The simulation results are stored in .mph files with
+            %   filenames based on the original filename and the parameter
+            %   values (e.g. C:\modelPath\modelName_parameterName_-3[s]_result.mph).
+            %   WARNING:
+            %   There is a bug in Comsol where the model path which is
+            %   provided by the Matlab Livelink classes does not match the
+            %   real filepath. This occurs when copying a Comsol model to
+            %   another directory, renaming it or also using "Save As" in
+            %   Comsol. The model path in Matlab will still be the original
+            %   one and so the results will be stored there!
+            
+            %---Parse Options---
+            sArgs = struct('parameterUnit','','resultFolder',[],'showProgress', false);
+            sArgs = ita_parse_arguments(sArgs,varargin);
+            parameterUnit = sArgs.parameterUnit;
+            resultFolder = sArgs.resultFolder;
+            showProgress = sArgs.showProgress;
+            
+            %---Check data types---
+            if (ischar(parameterValues) && isrow(parameterValues))
+                parameterValues = {parameterValues};
+            elseif (isnumeric(parameterValues) && isvector(parameterValues))
+                parameterValues = sprintfc('%d',parameterValues); %Conversion to cell-string
+            end
+            assert(ischar(parameterName) && isrow(parameterName), 'parameterName must be a char row vector');
+            assert(iscellstr(parameterValues), 'parameterValues must be a numeric array or a cell string');
+            assert(isempty(parameterUnit)|| ( ischar(parameterUnit) && isrow(parameterUnit) ),...
+                'parameterUnit must be a char row vector');
+            
+            %---Check other stuff---
+            study = obj.activeNode;
+            assert(~isempty(study), 'No active study is set yet')
+            assert(obj.mModel.parameter.Exists(parameterName), 'Given parameter is not part of the Comsol model')
+            assert(~isempty(obj.modelNode.name), 'Specify a model name first (e.g. by saving it)')
+            
+            com.comsol.model.util.ModelUtil.showProgress(showProgress);
+            
+            unitParameterExt = '';
+            if ~isempty(parameterUnit); unitParameterExt = [ '[' parameterUnit ']']; end
+            
+            %---init folder and filenames---
+            [folder, name] = fileparts(char(obj.modelNode.modelPath));
+            if isempty(resultFolder); resultFolder = folder; end
+            baseModelName = [name '_' parameterName '_'];
+            baseModelPath = fullfile(resultFolder, baseModelName);
+            
+            disp('Comsol - Parametric Sweep: Start!')
+            disp('---------------------------------')
+            for idxValue = 1:numel(parameterValues)
+                parameterValue = [parameterValues{idxValue} unitParameterExt];
+                obj.mModel.parameter.Set(parameterName, parameterValue);
+                
+                disp(['Comsol - Parametric Sweep: Starting simulation ' num2str(idxValue) ' of ' num2str(numel(parameterValues)) '.'])
+                obj.Run(showProgress);
+                disp(['Comsol - Parametric Sweep: Finished simulation ' num2str(idxValue) '.'])
+                
+                resultFilename = [baseModelPath parameterValue '_result.mph'];
+                mphsave(obj.modelNode, resultFilename);
+                
+                %TODO: Clean up results to free memory?
+            end
+            disp('---------------------------------')
+            disp('Comsol - Parametric Sweep: Done!')
+            disp('The results can be found in the following folder:')
+            disp(resultFolder)
+            
+            if nargout; varargout{1} = resultFolder; end
+        end
+    end
+    
     %% Frequency Vector
     methods
         function SetAllFrequencyVectors(obj, freqVector)
