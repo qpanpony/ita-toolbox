@@ -25,7 +25,7 @@ classdef (Abstract)itaComsolNode < handle
         mNodeClassName;
     end
     properties(Dependent = true, Access = protected)
-        modelNode;          %Comsol model node (=mModel.modelNode)
+        modelNode;          %Comsol model node (= mModel.modelNode)
     end
     properties(Dependent = true)
         activeNode;         %The active child node
@@ -142,6 +142,8 @@ classdef (Abstract)itaComsolNode < handle
                 out = comsolNode.objectNames();
             elseif ismethod( comsolNode, 'feature' )
                 out = itaComsolNode.getChildNodeTags( comsolNode.feature() );
+            elseif ismethod( comsolNode, 'group' )
+                out = itaComsolNode.getChildNodeTags( comsolNode.group() );
             else
                 error(['Comsol Node of type "' class(comsolNode) '" does not seem to have a function to return children'])
             end

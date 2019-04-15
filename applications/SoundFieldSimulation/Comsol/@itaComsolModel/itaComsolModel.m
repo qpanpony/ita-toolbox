@@ -11,6 +11,7 @@ classdef itaComsolModel < handle
     %   -Materials
     %   -Physics
     %       -especially, impedances at boundaries
+    %       -sources
     %   -Mesh
     %   -Study
     %
@@ -39,6 +40,7 @@ classdef itaComsolModel < handle
     properties(Access = private)
         mModel;         %Comsol model node (com.comsol.clientapi.impl.ModelClient)
         
+        mParameterNode;
         mSelectionNode;
         mFunctionNode;
         mGeometryNode;
@@ -52,6 +54,7 @@ classdef itaComsolModel < handle
     properties(Dependent = true, SetAccess = private)
         modelNode;      %The comsol model node
         
+        parameter;     %Interface to access Comsol parameter clients (itaComsolParameters)
         selection;      %Interface to access Comsol selection clients (itaComsolSelection)
         func;           %Interface to access Comsol function clients (itaComsolFunction)
         geometry;       %Interface to access Comsol geometry sequences (itaComsolMaterial)
@@ -67,7 +70,10 @@ classdef itaComsolModel < handle
         function out = get.modelNode(obj)
             out = obj.mModel;
         end
-
+        
+        function out = get.parameter(obj)
+            out = obj.mParameterNode;
+        end
         function out = get.selection(obj)
             out = obj.mSelectionNode;
         end
@@ -105,6 +111,7 @@ classdef itaComsolModel < handle
                 error('Input must be a comsol model (com.comsol.clientapi.impl.ModelClient)')
             end
             obj.mModel = comsolModel;
+            obj.mParameterNode = itaComsolParameters(obj);
             obj.mSelectionNode = itaComsolSelection(obj);
             obj.mFunctionNode = itaComsolFunction(obj);
             obj.mGeometryNode = itaComsolGeometry(obj);
