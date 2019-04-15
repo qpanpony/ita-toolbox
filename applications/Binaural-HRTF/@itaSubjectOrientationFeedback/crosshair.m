@@ -1,4 +1,4 @@
-function crosshair( ot, currentTrackingData, caseToPlot )
+function crosshair( otf, currentTrackingData, caseToPlot )
 %CROSSHAIR plots the crosshair of an initial and a current position/orientation
 % 
 %crosshair([itaOptitrack] OptiTrack_object, 
@@ -28,10 +28,10 @@ blue      = [0/255,84/255,159/255];
 yellow    = [246/255, 168/255, 0/255];
 red       = [204/255, 7/255, 30/255];
 
-if ot.iCount == 1
-%     if strcmp(caseToPlot, 'initial')
-        subplotIndex = generate_figure_properties(ot); % add properties to figure
-        prepare_images(ot, subplotIndex);                     % load smileys etc.
+% if ot.iCount == 1
+if strcmp(caseToPlot, 'initial')
+        subplotIndex = generate_figure_properties(otf); % add properties to figure
+        prepare_images(otf, subplotIndex);                     % load smileys etc.
 %     elseif strcmp(caseToPlot, 'training')
 %         subplotIndex = generate_figure_properties(ot, true); % add properties to figure
 %         prepare_images(ot, subplotIndex);                    % load smileys etc.
@@ -49,7 +49,7 @@ pauseTimeRead   = 6.5;
 %% extract position and orientation (initial and current)
 % extract current calibration as initial position
 % initial position as reference
-calibPosOrient = ot.dataCalibration.head;
+calibPosOrient = otf.optiTrackObject.dataCalibration.head;
 calibPos = calibPosOrient.position;
 x_ref = calibPos.x; 
 y_ref = calibPos.y;
@@ -129,11 +129,11 @@ if strcmp(caseToPlot, 'initial') % plot green cross-hair as reference only in th
     xyzCirc = [xCirc; yCirc; zCirc];
     xyzCirc = R_ref*xyzCirc;
 
-    ot.(ot.figName).crss_ref = plot3(xyz1(1,:) + x_ref, xyz1(2,:) + y_ref, xyz1(3,:) + z_ref, '-', ...
+    otf.(otf.figName).crss_ref = plot3(xyz1(1,:) + x_ref, xyz1(2,:) + y_ref, xyz1(3,:) + z_ref, '-', ...
                                xyz2(1,:) + x_ref, xyz2(2,:) + y_ref, xyz2(3,:) + z_ref, '-', ...
                                'Color', green, 'LineWidth', 2.5);
     hold on;
-    ot.(ot.figName).circ_ref = plot3(xyzCirc(1,:) + x_ref, ...
+    otf.(otf.figName).circ_ref = plot3(xyzCirc(1,:) + x_ref, ...
                                xyzCirc(2,:) + y_ref, ...
                                xyzCirc(3,:) + z_ref, ...
                                'LineWidth', 2.5, 'Color', green);
@@ -149,11 +149,11 @@ if strcmp(caseToPlot, 'initial') % plot green cross-hair as reference only in th
 
     % draw arrow for roll
     whichArrow = 'rol';
-    draw_orientation_arrows(ot, r, centre_ref, blue, whichArrow, orientDiffs, orient, R_ref, toleranceOrient(1,:), rolDiff);
+    draw_orientation_arrows(otf, r, centre_ref, blue, whichArrow, orientDiffs, orient, R_ref, toleranceOrient(1,:), rolDiff);
     
     % draw arrows for x, y, z
-    draw_position_arrows(ot, x,y,z, centre_ref, blue, 'y');
-    draw_position_arrows(ot, x,y,z, centre_ref, blue, 'x');
+    draw_position_arrows(otf, x,y,z, centre_ref, blue, 'y');
+    draw_position_arrows(otf, x,y,z, centre_ref, blue, 'x');
 %     draw_position_arrows(ot, x,y,z, centre_ref, blue, 'z');
     
     
@@ -162,17 +162,17 @@ elseif strcmp(caseToPlot, 'current')
 
     % delete plots of old frame
     try %#ok<TRYNC>
-        delete(ot.(ot.figName).crss);
-        delete(ot.(ot.figName).circ);
+        delete(otf.(otf.figName).crss);
+        delete(otf.(otf.figName).circ);
         
-        delete(ot.(ot.figName).pitArrow);
+        delete(otf.(otf.figName).pitArrow);
         
-        delete(ot.(ot.figName).xxxAnnotation);
-        delete(ot.(ot.figName).yyyAnnotation);
-        delete(ot.(ot.figName).zzzAnnotation);
-        delete(ot.(ot.figName).rolAnnotation);
-        delete(ot.(ot.figName).pitAnnotation);
-        delete(ot.(ot.figName).yawAnnotation);
+        delete(otf.(otf.figName).xxxAnnotation);
+        delete(otf.(otf.figName).yyyAnnotation);
+        delete(otf.(otf.figName).zzzAnnotation);
+        delete(otf.(otf.figName).rolAnnotation);
+        delete(otf.(otf.figName).pitAnnotation);
+        delete(otf.(otf.figName).yawAnnotation);
     end
     
     % make new plots of current frame
@@ -194,50 +194,50 @@ elseif strcmp(caseToPlot, 'current')
     % plot cross and circle of current position
     subplot('position',  [0.24, 0.3, 0.56, 0.56]);
     hold on;
-    ot.(ot.figName).crss = plot3(xyz1(1,:) + x_0, xyz1(2,:) + y_0, xyz1(3,:) + z_0, '-', ...
+    otf.(otf.figName).crss = plot3(xyz1(1,:) + x_0, xyz1(2,:) + y_0, xyz1(3,:) + z_0, '-', ...
                            xyz2(1,:) + x_0, xyz2(2,:) + y_0, xyz2(3,:) + z_0, '-', ...
                            'Color', grey, 'LineWidth', 2.5);
-    ot.(ot.figName).circ = plot3(xyzCirc(1,:) + x_0, xyzCirc(2,:) + y_0, xyzCirc(3,:) + z_0, ...
+    otf.(otf.figName).circ = plot3(xyzCirc(1,:) + x_0, xyzCirc(2,:) + y_0, xyzCirc(3,:) + z_0, ...
                            'LineWidth', 2.5, 'Color', grey);
 % 	view(0,90);
-    show_arrows(ot, rolDiff, 'rol', toleranceOrient(1,:));
-    show_arrows(ot, yDiff,   'y',   tolerancePos(1,:));
+    show_arrows(otf, rolDiff, 'rol', toleranceOrient(1,:));
+    show_arrows(otf, yDiff,   'y',   tolerancePos(1,:));
     
     % show nose for pitch and yaw
-    draw_orientation_arrows(ot, r, centre_ref, blue, 'pit', orientDiffs, orient, R_ref, toleranceOrient(2,:), pitDiff);
+    draw_orientation_arrows(otf, r, centre_ref, blue, 'pit', orientDiffs, orient, R_ref, toleranceOrient(2,:), pitDiff);
     % show arrow for z
 %     show_arrows(ot, zDiff,   'z',   tolerancePos(3,:));
 
     % show arrows for yaw, x and z -- (display only in figure south west)
-    show_arrows(ot, xDiff, 'x', tolerancePos(1,:));
+    show_arrows(otf, xDiff, 'x', tolerancePos(1,:));
     
     % show difference of initial and current position via smileys
     myColour = [green; yellow; red;];
-    show_some_smileys(ot, yDiff,   'yyyDiff', tolerancePos(2,:),    myColour, 32);
-    show_some_smileys(ot, pitDiff, 'pitDiff', toleranceOrient(2,:), myColour, 35);
-    show_some_smileys(ot, rolDiff, 'rolDiff', toleranceOrient(1,:), myColour, 34);
+    show_some_smileys(otf, yDiff,   'yyyDiff', tolerancePos(2,:),    myColour, 32);
+    show_some_smileys(otf, pitDiff, 'pitDiff', toleranceOrient(2,:), myColour, 35);
+    show_some_smileys(otf, rolDiff, 'rolDiff', toleranceOrient(1,:), myColour, 34);
 
-    show_some_smileys(ot, yawDiff, 'yawDiff', toleranceOrient(3,:), myColour, 36);
-    show_some_smileys(ot, xDiff,   'xxxDiff', tolerancePos(1,:),    myColour, 31);
-    show_some_smileys(ot, zDiff,   'zzzDiff', tolerancePos(3,:),    myColour, 33);
+    show_some_smileys(otf, yawDiff, 'yawDiff', toleranceOrient(3,:), myColour, 36);
+    show_some_smileys(otf, xDiff,   'xxxDiff', tolerancePos(1,:),    myColour, 31);
+    show_some_smileys(otf, zDiff,   'zzzDiff', tolerancePos(3,:),    myColour, 33);
 %     centre_ref
     
 elseif strcmp(caseToPlot, 'training')
     
 %     centre_ref
-    if ot.iCount == 1
+    if otf.iCount == 1
         
         % create all the text parts and their text fields
-        createTxtPartsAndFields(ot);
+        createTxtPartsAndFields(otf);
         
-        showExplanation(ot, grey);
+        showExplanation(otf, grey);
         
         %% draw initial crosshair
         
         alpha(1) = 0; alpha(2) = 360;
         radius = r;
         [xCirc, yCirc, zCirc] = create_circle(radius, alpha);
-        if ~strcmp(ot.train, 'all') && ~strcmp(ot.train, '') && ~strcmp(ot.train, 'end')
+        if ~strcmp(otf.train, 'all') && ~strcmp(otf.train, '') && ~strcmp(otf.train, 'end')
             subplot(2,3,5);
             ax = gca;
             ax.YDir = 'normal';
@@ -252,10 +252,10 @@ elseif strcmp(caseToPlot, 'training')
             xyzCirc = [xCirc; yCirc; zCirc];
             xyzCirc = R_ref*xyzCirc;
 
-            ot.(ot.figName).crss_ref = plot3(xyz1(1,:) + x_ref, xyz1(2,:) + y_ref, xyz1(3,:) + z_ref, '-', ...
+            otf.(otf.figName).crss_ref = plot3(xyz1(1,:) + x_ref, xyz1(2,:) + y_ref, xyz1(3,:) + z_ref, '-', ...
                 xyz2(1,:) + x_ref, xyz2(2,:) + y_ref, xyz2(3,:) + z_ref, '-', ...
                 'Color', green, 'LineWidth', 2.5);
-            ot.(ot.figName).circ_ref = plot3(xyzCirc(1,:) + x_ref, ...
+            otf.(otf.figName).circ_ref = plot3(xyzCirc(1,:) + x_ref, ...
                 xyzCirc(2,:) + y_ref, ...
                 xyzCirc(3,:) + z_ref, ...
                 'LineWidth', 2.5, 'Color', green);
@@ -267,22 +267,22 @@ elseif strcmp(caseToPlot, 'training')
             axis off
 
             % draw arrow for x, y, z
-            draw_position_arrows(ot, x,y,z, centre_ref, blue, 'x');
-            draw_position_arrows(ot, x,y,z, centre_ref, blue, 'y');
+            draw_position_arrows(otf, x,y,z, centre_ref, blue, 'x');
+            draw_position_arrows(otf, x,y,z, centre_ref, blue, 'y');
 %             draw_position_arrows(ot, x,y,z, centre_ref, blue, 'z');
 
             % draw arrow for roll
-            draw_orientation_arrows(ot, r, centre_ref, blue, 'rol', orientDiffs, orient, R_ref, toleranceOrient(1,:), rolDiff);
+            draw_orientation_arrows(otf, r, centre_ref, blue, 'rol', orientDiffs, orient, R_ref, toleranceOrient(1,:), rolDiff);
 
-            ot.train = 'x';
+            otf.train = 'x';
         end
     end
     
     % delete old plot
     try
-        delete(ot.(ot.figName).crss);
-        delete(ot.(ot.figName).circ);
-        delete(ot.(ot.figName).pitArrow);
+        delete(otf.(otf.figName).crss);
+        delete(otf.(otf.figName).circ);
+        delete(otf.(otf.figName).pitArrow);
     catch
         error('what a pitty');
     end
@@ -292,7 +292,7 @@ elseif strcmp(caseToPlot, 'training')
     alpha(1) = 0;    alpha(2) = 360;
 
     [xCirc, yCirc, zCirc] = create_circle(radius, alpha);
-    if ~strcmp(ot.train, 'all') && ~strcmp(ot.train, '') && ~strcmp(ot.train, 'end')
+    if ~strcmp(otf.train, 'all') && ~strcmp(otf.train, '') && ~strcmp(otf.train, 'end')
         subplot(2,3,5);
         ax = gca;
         ax.YDir = 'normal';
@@ -306,194 +306,194 @@ elseif strcmp(caseToPlot, 'training')
         xyzCirc = R_curr*xyzCirc;
         
         % plot cross and circle of current position
-        ot.(ot.figName).crss = plot3(xyz1(1,:) + x_0, xyz1(2,:) + y_0, xyz1(3,:) + z_0, '-', ...
+        otf.(otf.figName).crss = plot3(xyz1(1,:) + x_0, xyz1(2,:) + y_0, xyz1(3,:) + z_0, '-', ...
                                xyz2(1,:) + x_0, xyz2(2,:) + y_0, xyz2(3,:) + z_0, '-', ...
                                'Color', grey, 'LineWidth', 2.5);
-        ot.(ot.figName).circ = plot3(xyzCirc(1,:) + x_0, xyzCirc(2,:) + y_0, xyzCirc(3,:) + z_0, ...
+        otf.(otf.figName).circ = plot3(xyzCirc(1,:) + x_0, xyzCirc(2,:) + y_0, xyzCirc(3,:) + z_0, ...
                                'LineWidth', 2.5, 'Color', grey);
     end
     %% train orientations for plot on the right
 %     draw_orientation_arrows(ot, r, centre_ref, blue, ot.train, orientDiffs, orient, R_ref, toleranceOrient(3,:), yawDiff);
 %     draw_orientation_arrows(ot, r, centre_ref, blue, ot.train, orientDiffs, orient, R_ref, toleranceOrient(2,:), pitDiff);
-    if strcmp(ot.train, 'x')
-        set(ot.txtField{7},'string',ot.txtPart{17},  'HorizontalAlignment', 'center', 'Visible', 'on');
-        show_arrows(ot, xDiff, ot.train, tolerancePos(1,:))
+    if strcmp(otf.train, 'x')
+        set(otf.txtField{7},'string',otf.txtPart{17},  'HorizontalAlignment', 'center', 'Visible', 'on');
+        show_arrows(otf, xDiff, otf.train, tolerancePos(1,:))
         
-        if ot.first && ot.second && ot.third
-            set(ot.txtField{7}, 'visible', 'off');
-            set(ot.txtField{1}, 'visible', 'off');
-            ot.train = 'y';
-            ot.first  = 0;
-            ot.second = 0;
-            ot.third  = 0;
-            set(ot.txtField{7}, 'visible', 'off');
-            set(ot.txtField{1},'string',ot.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
+        if otf.first && otf.second && otf.third
+            set(otf.txtField{7}, 'visible', 'off');
+            set(otf.txtField{1}, 'visible', 'off');
+            otf.train = 'y';
+            otf.first  = 0;
+            otf.second = 0;
+            otf.third  = 0;
+            set(otf.txtField{7}, 'visible', 'off');
+            set(otf.txtField{1},'string',otf.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeGOOD);
             
-            set(ot.txtField{6},'string',ot.txtPart{25},  'HorizontalAlignment', 'center', 'Visible', 'on');
+            set(otf.txtField{6},'string',otf.txtPart{25},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeNormal);
-            set(ot.txtField{1}, 'visible', 'off');
-            set(ot.txtField{6}, 'visible', 'off');
+            set(otf.txtField{1}, 'visible', 'off');
+            set(otf.txtField{6}, 'visible', 'off');
             
-            set(ot.(ot.figName).xArrowTipLowr, 'visible', 'off');
-            set(ot.(ot.figName).xArrowTipGrtr, 'visible', 'off');
-            set(ot.(ot.figName).xArrow, 'visible', 'off');
+            set(otf.(otf.figName).xArrowTipLowr, 'visible', 'off');
+            set(otf.(otf.figName).xArrowTipGrtr, 'visible', 'off');
+            set(otf.(otf.figName).xArrow, 'visible', 'off');
         end
-    elseif strcmp(ot.train, 'y')
-        set(ot.txtField{7},'string',ot.txtPart{22},  'HorizontalAlignment', 'center', 'Visible', 'on');
+    elseif strcmp(otf.train, 'y')
+        set(otf.txtField{7},'string',otf.txtPart{22},  'HorizontalAlignment', 'center', 'Visible', 'on');
 %         show_arrows(ot, yDiff,   ot.train,   tolerancePos(2,:))
-        show_arrows(ot, -yDiff,   ot.train,   tolerancePos(2,:)) % HIER:(07.03.) -yDiff
+        show_arrows(otf, -yDiff,   otf.train,   tolerancePos(2,:)) % HIER:(07.03.) -yDiff
         
-        if ot.first && ot.second && ot.third
-            set(ot.txtField{1}, 'visible', 'off');
-            ot.train = 'z';
-            ot.first  = 0;
-            ot.second = 0;
-            ot.third  = 0;
-            set(ot.txtField{7}, 'visible', 'off');
-            set(ot.txtField{1},'string',ot.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
+        if otf.first && otf.second && otf.third
+            set(otf.txtField{1}, 'visible', 'off');
+            otf.train = 'z';
+            otf.first  = 0;
+            otf.second = 0;
+            otf.third  = 0;
+            set(otf.txtField{7}, 'visible', 'off');
+            set(otf.txtField{1},'string',otf.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeGOOD);
             
-            set(ot.txtField{6},'string',ot.txtPart{26},  'HorizontalAlignment', 'center', 'Visible', 'on');
+            set(otf.txtField{6},'string',otf.txtPart{26},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeNormal);
-            set(ot.txtField{1}, 'visible', 'off');
-            set(ot.txtField{6}, 'visible', 'off');
+            set(otf.txtField{1}, 'visible', 'off');
+            set(otf.txtField{6}, 'visible', 'off');
             
-            set(ot.(ot.figName).yArrowTipLowr, 'visible', 'off');
-            set(ot.(ot.figName).yArrowTipGrtr, 'visible', 'off');
-            set(ot.(ot.figName).yArrow, 'visible', 'off');
+            set(otf.(otf.figName).yArrowTipLowr, 'visible', 'off');
+            set(otf.(otf.figName).yArrowTipGrtr, 'visible', 'off');
+            set(otf.(otf.figName).yArrow, 'visible', 'off');
         end
-    elseif strcmp(ot.train, 'z')
-        set(ot.txtField{7},'string',ot.txtPart{19},  'HorizontalAlignment', 'center', 'Visible', 'on');
-        show_arrows(ot, zDiff, ot.train, tolerancePos(3,:))
+    elseif strcmp(otf.train, 'z')
+        set(otf.txtField{7},'string',otf.txtPart{19},  'HorizontalAlignment', 'center', 'Visible', 'on');
+        show_arrows(otf, zDiff, otf.train, tolerancePos(3,:))
         
-        if ot.first && ot.second && ot.third
-            set(ot.txtField{1}, 'visible', 'off');
-            ot.train = 'yaw';
-            ot.first  = 0;
-            ot.second = 0;
-            ot.third  = 0;
-            set(ot.txtField{7}, 'visible', 'off');
-            set(ot.txtField{1},'string',ot.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
+        if otf.first && otf.second && otf.third
+            set(otf.txtField{1}, 'visible', 'off');
+            otf.train = 'yaw';
+            otf.first  = 0;
+            otf.second = 0;
+            otf.third  = 0;
+            set(otf.txtField{7}, 'visible', 'off');
+            set(otf.txtField{1},'string',otf.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeGOOD);
 
-            set(ot.txtField{6},'string',ot.txtPart{21},  'HorizontalAlignment', 'center', 'Visible', 'on');
+            set(otf.txtField{6},'string',otf.txtPart{21},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeRead);
-            set(ot.txtField{1}, 'visible', 'off');
-            set(ot.txtField{6}, 'visible', 'off');
+            set(otf.txtField{1}, 'visible', 'off');
+            set(otf.txtField{6}, 'visible', 'off');
             
 %             set(ot.(ot.figName).zArrowTipLowr, 'visible', 'off');
 %             set(ot.(ot.figName).zArrowTipGrtr, 'visible', 'off');
 %             set(ot.(ot.figName).zArrow, 'visible', 'off');
         end
-    elseif strcmp(ot.train, 'yaw')
-        set(ot.txtField{7},'string',ot.txtPart{20},  'HorizontalAlignment', 'center', 'Visible', 'on');
-        draw_orientation_arrows(ot, r, centre_ref, blue, ot.train, orientDiffs, orient, R_ref, toleranceOrient(3,:), yawDiff);
+    elseif strcmp(otf.train, 'yaw')
+        set(otf.txtField{7},'string',otf.txtPart{20},  'HorizontalAlignment', 'center', 'Visible', 'on');
+        draw_orientation_arrows(otf, r, centre_ref, blue, otf.train, orientDiffs, orient, R_ref, toleranceOrient(3,:), yawDiff);
         
-        if ot.first && ot.second && ot.third
-            set(ot.txtField{1}, 'visible', 'off');
-            ot.train = 'rol';
-            ot.first  = 0;
-            ot.second = 0;
-            ot.third  = 0;
-            set(ot.txtField{7}, 'visible', 'off');
-            set(ot.txtField{1},'string',ot.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
+        if otf.first && otf.second && otf.third
+            set(otf.txtField{1}, 'visible', 'off');
+            otf.train = 'rol';
+            otf.first  = 0;
+            otf.second = 0;
+            otf.third  = 0;
+            set(otf.txtField{7}, 'visible', 'off');
+            set(otf.txtField{1},'string',otf.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeGOOD);
-            set(ot.txtField{1}, 'visible', 'off');
+            set(otf.txtField{1}, 'visible', 'off');
             
-            set(ot.txtField{6},'string',ot.txtPart{27},  'HorizontalAlignment', 'center', 'Visible', 'on');
+            set(otf.txtField{6},'string',otf.txtPart{27},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeNormal);
-            set(ot.txtField{6}, 'visible', 'off');
+            set(otf.txtField{6}, 'visible', 'off');
             
         end
-    elseif strcmp(ot.train, 'rol')
-        set(ot.txtField{7},'string',ot.txtPart{23},  'HorizontalAlignment', 'center', 'Visible', 'on');
-        show_arrows(ot, rolDiff,   ot.train,   toleranceOrient(1,:))
+    elseif strcmp(otf.train, 'rol')
+        set(otf.txtField{7},'string',otf.txtPart{23},  'HorizontalAlignment', 'center', 'Visible', 'on');
+        show_arrows(otf, rolDiff,   otf.train,   toleranceOrient(1,:))
         
-        if ot.first && ot.second && ot.third
-            set(ot.txtField{1}, 'visible', 'off');
-            ot.train = 'pit';
-            ot.first  = 0;
-            ot.second = 0;
-            ot.third  = 0;
-            set(ot.txtField{7}, 'visible', 'off');
-            set(ot.txtField{1},'string',ot.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
+        if otf.first && otf.second && otf.third
+            set(otf.txtField{1}, 'visible', 'off');
+            otf.train = 'pit';
+            otf.first  = 0;
+            otf.second = 0;
+            otf.third  = 0;
+            set(otf.txtField{7}, 'visible', 'off');
+            set(otf.txtField{1},'string',otf.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeGOOD);
             
-            set(ot.txtField{6},'string',ot.txtPart{28},  'HorizontalAlignment', 'center', 'Visible', 'on');
+            set(otf.txtField{6},'string',otf.txtPart{28},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeRead);
-            set(ot.txtField{1}, 'visible', 'off');
-            set(ot.txtField{6}, 'visible', 'off');
+            set(otf.txtField{1}, 'visible', 'off');
+            set(otf.txtField{6}, 'visible', 'off');
             
-            set(ot.(ot.figName).rolArrowTipLowr, 'visible', 'off');
-            set(ot.(ot.figName).rolArrowTipGrtr, 'visible', 'off');
-            set(ot.(ot.figName).rolArrow, 'visible', 'off');
+            set(otf.(otf.figName).rolArrowTipLowr, 'visible', 'off');
+            set(otf.(otf.figName).rolArrowTipGrtr, 'visible', 'off');
+            set(otf.(otf.figName).rolArrow, 'visible', 'off');
         end
-    elseif strcmp(ot.train, 'pit')
-        set(ot.txtField{7},'string',ot.txtPart{24},  'HorizontalAlignment', 'center', 'Visible', 'on');
+    elseif strcmp(otf.train, 'pit')
+        set(otf.txtField{7},'string',otf.txtPart{24},  'HorizontalAlignment', 'center', 'Visible', 'on');
         try
-            delete(ot.(ot.figName).pitArrow);
+            delete(otf.(otf.figName).pitArrow);
         catch
             error('what a pitty');
         end
         % 2DO: ersetzt ja yaw-arrow, aber die yawDiff wird hier nicht
-        draw_orientation_arrows(ot, r, centre_ref, blue, ot.train, orientDiffs, orient, R_ref, toleranceOrient(2,:), pitDiff);
-        if ot.first && ot.second && ot.third
-            ot.train = 'all';
-            set(ot.txtField{1}, 'visible', 'off');
-            set(ot.txtField{7}, 'visible', 'off');
-            set(ot.txtField{1},'string',ot.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
+        draw_orientation_arrows(otf, r, centre_ref, blue, otf.train, orientDiffs, orient, R_ref, toleranceOrient(2,:), pitDiff);
+        if otf.first && otf.second && otf.third
+            otf.train = 'all';
+            set(otf.txtField{1}, 'visible', 'off');
+            set(otf.txtField{7}, 'visible', 'off');
+            set(otf.txtField{1},'string',otf.txtPart{18},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeGOOD);
             
             try %#ok<TRYNC>
-                set(ot.(ot.figName).crss, 'visible', 'off');
-                set(ot.(ot.figName).circ, 'visible', 'off');
-                set(ot.(ot.figName).circ_ref, 'visible', 'off');
-                set(ot.(ot.figName).crss_ref, 'visible', 'off');
-                set(ot.(ot.figName).pitArrow, 'visible', 'off');
-                set(ot.(ot.figName).rolArrow, 'visible', 'off');
-                set(ot.(ot.figName).rolArrowTipLowr, 'visible', 'off');
-                set(ot.(ot.figName).rolArrowTipGrtr, 'visible', 'off');
-                set(ot.(ot.figName).xArrow, 'visible', 'off');
-                set(ot.(ot.figName).xArrowTipLowr, 'visible', 'off');
-                set(ot.(ot.figName).xArrowTipGrtr, 'visible', 'off');
-                set(ot.(ot.figName).yArrow, 'visible', 'off');
-                set(ot.(ot.figName).yArrowTipGrtr, 'visible', 'off');
-                set(ot.(ot.figName).yArrowTipLowr, 'visible', 'off');
+                set(otf.(otf.figName).crss, 'visible', 'off');
+                set(otf.(otf.figName).circ, 'visible', 'off');
+                set(otf.(otf.figName).circ_ref, 'visible', 'off');
+                set(otf.(otf.figName).crss_ref, 'visible', 'off');
+                set(otf.(otf.figName).pitArrow, 'visible', 'off');
+                set(otf.(otf.figName).rolArrow, 'visible', 'off');
+                set(otf.(otf.figName).rolArrowTipLowr, 'visible', 'off');
+                set(otf.(otf.figName).rolArrowTipGrtr, 'visible', 'off');
+                set(otf.(otf.figName).xArrow, 'visible', 'off');
+                set(otf.(otf.figName).xArrowTipLowr, 'visible', 'off');
+                set(otf.(otf.figName).xArrowTipGrtr, 'visible', 'off');
+                set(otf.(otf.figName).yArrow, 'visible', 'off');
+                set(otf.(otf.figName).yArrowTipGrtr, 'visible', 'off');
+                set(otf.(otf.figName).yArrowTipLowr, 'visible', 'off');
             end
             
-            set(ot.txtField{6},'string',ot.txtPart{29},  'HorizontalAlignment', 'center', 'Visible', 'on');
+            set(otf.txtField{6},'string',otf.txtPart{29},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeNormal);
-            set(ot.txtField{1}, 'visible', 'off');
-            set(ot.txtField{6}, 'visible', 'off');
-            set(ot.(ot.figName).pitArrow, 'visible', 'off');
+            set(otf.txtField{1}, 'visible', 'off');
+            set(otf.txtField{6}, 'visible', 'off');
+            set(otf.(otf.figName).pitArrow, 'visible', 'off');
             
-            set(ot.txtField{1},'string',ot.txtPart{31},  'HorizontalAlignment', 'center', 'Visible', 'on');
+            set(otf.txtField{1},'string',otf.txtPart{31},  'HorizontalAlignment', 'center', 'Visible', 'on');
             pause(pauseTimeNormal);
-            set(ot.txtField{1}, 'visible', 'off');
+            set(otf.txtField{1}, 'visible', 'off');
  
         end
-    elseif strcmp(ot.train, 'all')
+    elseif strcmp(otf.train, 'all')
 
-        ot.iCount = 0;
-        ot.train = '';
+        otf.iCount = 0;
+        otf.train = '';
 %         ot.doTraining = false;
         try %#ok<TRYNC>
-            delete(ot.(ot.figName).crss);
-            delete(ot.(ot.figName).circ);
-            delete(ot.(ot.figName).crss_ref);
-            delete(ot.(ot.figName).circ_ref);
+            delete(otf.(otf.figName).crss);
+            delete(otf.(otf.figName).circ);
+            delete(otf.(otf.figName).crss_ref);
+            delete(otf.(otf.figName).circ_ref);
             
             
         end
         return;
-    elseif strcmp(ot.train, '')
-        ot.doTraining = false;  % HIER: gucken, ob das das problem löst, dass der plot noch mal kurz aufploppt am ende des trainings
+    elseif strcmp(otf.train, '')
+        otf.doTraining = false;  % HIER: gucken, ob das das problem löst, dass der plot noch mal kurz aufploppt am ende des trainings
         try %#ok<TRYNC>
-            delete(ot.(ot.figName).crss);
-            delete(ot.(ot.figName).circ);
-            delete(ot.(ot.figName).crss_ref);
-            delete(ot.(ot.figName).circ_ref);
+            delete(otf.(otf.figName).crss);
+            delete(otf.(otf.figName).circ);
+            delete(otf.(otf.figName).crss_ref);
+            delete(otf.(otf.figName).circ_ref);
             
             
         end
@@ -924,37 +924,32 @@ R = [cos(a)*cos(b),   cos(a)*sin(b)*sin(c) - sin(a)*cos(c),   cos(a)*sin(b)*cos(
            -sin(b),                          cos(b)*sin(c),                          cos(b)*cos(c);];
 end
 
-function prepare_images(ot, subplotIndex)
+function prepare_images(otf, subplotIndex)
 % this function preloads images for smileys and save them as properties of 
-% figure ot.(ot.figName)
     [folder, ~, ~] = fileparts(which(mfilename));
-    ot.(ot.figName).smiley_hap = imread(fullfile(folder,'pic\smileys\smiley_happy.png'));
-    ot.(ot.figName).smiley_wor = imread(fullfile(folder,'pic\smileys\smiley_worried.png'));
-    ot.(ot.figName).smiley_sad = imread(fullfile(folder,'pic\smileys\smiley_sad.png'));
-   
-%     ot.(ot.figName).smiley_hap = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\smileys\smiley_happy.png');
-%     ot.(ot.figName).smiley_wor = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\smileys\smiley_worried.png');
-%     ot.(ot.figName).smiley_sad = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\smileys\smiley_sad.png');
+    otf.(otf.figName).smiley_hap = imread(fullfile(folder,'pic\smileys\smiley_happy.png'));
+    otf.(otf.figName).smiley_wor = imread(fullfile(folder,'pic\smileys\smiley_worried.png'));
+    otf.(otf.figName).smiley_sad = imread(fullfile(folder,'pic\smileys\smiley_sad.png'));
     
     varPrefix = ['sp_'; 'sm_';];
 
     for indx = 1 : 6
-        ot.(ot.figName).([(varPrefix(1,:)), num2str(subplotIndex(indx))]) = subplot(6,6,subplotIndex(indx,1));
-        tmp_hap = imshow(ot.(ot.figName).smiley_hap); % rgb2gray(.)
-        set(ot.(ot.figName).([(varPrefix(1,:)), num2str(subplotIndex(indx))]), 'NextPlot', 'add');
+        otf.(otf.figName).([(varPrefix(1,:)), num2str(subplotIndex(indx))]) = subplot(6,6,subplotIndex(indx,1));
+        tmp_hap = imshow(otf.(otf.figName).smiley_hap); % rgb2gray(.)
+        set(otf.(otf.figName).([(varPrefix(1,:)), num2str(subplotIndex(indx))]), 'NextPlot', 'add');
         set(tmp_hap, 'visible', 'off');
         
-        tmp_wor = imshow(ot.(ot.figName).smiley_wor);
-        set(ot.(ot.figName).([(varPrefix(1,:)), num2str(subplotIndex(indx))]), 'NextPlot', 'add');
+        tmp_wor = imshow(otf.(otf.figName).smiley_wor);
+        set(otf.(otf.figName).([(varPrefix(1,:)), num2str(subplotIndex(indx))]), 'NextPlot', 'add');
         set(tmp_wor, 'visible', 'off');
         
-        tmp_sad = imshow(ot.(ot.figName).smiley_sad);
-        set(ot.(ot.figName).([(varPrefix(1,:)), num2str(subplotIndex(indx))]), 'NextPlot', 'add');
+        tmp_sad = imshow(otf.(otf.figName).smiley_sad);
+        set(otf.(otf.figName).([(varPrefix(1,:)), num2str(subplotIndex(indx))]), 'NextPlot', 'add');
         set(tmp_sad, 'visible', 'off');
         
         % save all images in field of struct "tmpImgs" for later use in
         % function "show_smileys"
-        ot.tmpImgs.(['field', num2str(subplotIndex(indx))]) = [tmp_hap, tmp_wor, tmp_sad];
+        otf.tmpImgs.(['field', num2str(subplotIndex(indx))]) = [tmp_hap, tmp_wor, tmp_sad];
     end
 end
 
