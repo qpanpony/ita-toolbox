@@ -26,7 +26,7 @@ classdef itaComsolParameters < itaComsolNode
                 paramNode = parameterNodeNames{idxNode};
                 if ~any(strcmp(cell(paramNode.varnames), parameterName)); continue; end
                 
-                paramNode.set(parameterName, value)
+                paramNode.set(parameterName, value);
                 return;
             end
             error('Parameter of with given name is not defined')

@@ -54,7 +54,7 @@ classdef itaComsolModel < handle
     properties(Dependent = true, SetAccess = private)
         modelNode;      %The comsol model node
         
-        parameter;     %Interface to access Comsol parameter clients (itaComsolParameters)
+        parameter;      %Interface to access Comsol parameter clients (itaComsolParameters)
         selection;      %Interface to access Comsol selection clients (itaComsolSelection)
         func;           %Interface to access Comsol function clients (itaComsolFunction)
         geometry;       %Interface to access Comsol geometry sequences (itaComsolMaterial)
