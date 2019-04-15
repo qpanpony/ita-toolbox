@@ -280,6 +280,10 @@ classdef itaOptitrack < handle
         debugInfo        = 0;     % print additional info (e.g. duplicate frames)
     end
     
+    properties(Dependent = true, Hidden = true)
+        lastValidDataFrame        %for external access while tracking
+    end
+    
     %% Public methods
     methods
         %% CONSTRUCTOR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -361,6 +365,11 @@ classdef itaOptitrack < handle
             delete(Optitrack_obj)
             fprintf('[itaOptitrack] Successfully deleted itaOptitrack object. Remaining object is no longer valid (invalid handle).\n')
         
+        end
+        
+        %% DEPENDENT GET %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        function res = get.lastValidDataFrame(this)
+            res = this.tempRigidBodyLogData;
         end
         
         %%
@@ -618,10 +627,7 @@ classdef itaOptitrack < handle
                     Optitrack_obj.loggingState = Optitrack_obj.stopped;
 
                     % delete all existing timers
-                    existingTimers = timerfindall;
-                    if ~isempty(existingTimers)
-                        delete(existingTimers(:));
-                    end
+                    delete(Optitrack_obj.timerData)
 
                     if Optitrack_obj.singleShot
                         % delete rows in rigidBodyLogData containing NaN's in
