@@ -1382,7 +1382,7 @@ classdef itaRavenProject < handle
             %
             %      RAVEN currently only supports OpenDAFFv1.5 files
             %
-            obj.pathMaterials = myPath;
+            obj.pathDirectivities = myPath;
             obj.rpf_ini.SetValues('Global', 'ProjectPath_DirectivityDB', path);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
