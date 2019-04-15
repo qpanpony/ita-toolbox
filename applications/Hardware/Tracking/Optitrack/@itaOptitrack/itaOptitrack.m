@@ -957,6 +957,11 @@ classdef itaOptitrack < handle
                     Optitrack_obj.saveNameCalibration = sArgs.saveNameCalibration;
                     Optitrack_obj.countdownDuration   = sArgs.countdownDuration;
                     
+                    if isempty(Optitrack_obj.saveNameCalibration)
+                        Optitrack_obj.saveNameCalibration = ['OptiTrackCalibration',...
+                            datestr(now,'dd-mmmm-yyyy')];
+                    end
+                    
                     if ~Optitrack_obj.isCalibrated
                         
                         % message box for calibration with countdown
