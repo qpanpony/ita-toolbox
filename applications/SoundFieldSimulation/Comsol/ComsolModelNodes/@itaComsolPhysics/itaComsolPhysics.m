@@ -48,7 +48,7 @@ classdef itaComsolPhysics < itaComsolNode
             %Note: This assumes that the first child of the physics node is
             %always the acoustic model node
             physics = obj.activeNode;
-            physicsFeatures = obj.getChildNodes(physics);
+            physicsFeatures = obj.getFeatureNodes(physics);
             
             acousticModelNode = [];
             if ~isempty(physicsFeatures)
@@ -61,7 +61,7 @@ classdef itaComsolPhysics < itaComsolNode
     methods
         function impedanceNodes = ImpedanceNodes(obj)
             %Returns the impedance nodes of the active physics node.
-            impedanceNodes = obj.getChildNodesByType(obj.mActiveNode, 'Impedance');
+            impedanceNodes = obj.getFeatureNodesByType(obj.mActiveNode, 'Impedance');
         end
         function impedanceNodeOfBoundary = ImpedanceNodeByBoundaryGroupName(obj, boundaryGroupName)
             %Returns the impedance node of the active physics node that is
