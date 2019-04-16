@@ -6,18 +6,33 @@ classdef itaComsolResult < handle
     properties(Access = private)
         mModel;
         mResultDomain = 'freq'; %'freq' | 'time'
+        
+        mExport;
+    end
+    properties(Dependent = true)
+        export;     %Grants access to result data export (see itaComsolExport)
     end
     
+    %% Constructor
     methods
         function obj = itaComsolResult(comsolModel)
             %Expects an itaComsolModel as input
             assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel),...
                 'Input must be an itaComsolModel')
             obj.mModel = comsolModel;
+            
+            obj.mExport = itaComsolExport(comsolModel);
         end
     end
     
-    %% Results
+    %% Export node
+    methods
+        function out = get.export(obj)
+            out = obj.mExport;
+        end
+    end
+    
+    %% Evaluate results
     methods
         function p = Pressure(obj, evalPos)
             %Evaluates the pressure at the mesh nodes (no input) or for the
