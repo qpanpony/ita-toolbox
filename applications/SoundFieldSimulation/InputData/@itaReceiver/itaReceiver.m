@@ -26,6 +26,9 @@ classdef itaReceiver < itaSpatialSimulationInputItem
     methods
         function this = set.type(this, type)
             assert(isa(type, 'ReceiverType') && isscalar(type), 'Can only assign a single object of type ReceiverType');
+            if type == ReceiverType.DummyHead
+                this = this.readItaDummyHeadGeometryFile();
+            end
             this.mType = type;
         end
         
@@ -62,7 +65,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
                 case ReceiverType.Monaural
                     out = '';
                 case ReceiverType.DummyHead
-                    out = 'D:\CAD data\Kunstkopf\ITA_Kunstkopf.mphbin'; %TODO: Read from ini
+                    out = this.mGeometryFilename;
                 case ReceiverType.UserDefined
                     out = this.mGeometryFilename;
             end
@@ -74,7 +77,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
                     out = itaCoordinates([0 0 0]);
                 case ReceiverType.DummyHead
                     %out = itaCoordinates([0 0.07022 0]);
-                    out = itaCoordinates([0 0.071 0]); %TODO: Read from ini
+                    out = itaCoordinates([0 0.071 0]);
                 case ReceiverType.UserDefined
                     out = this.mRelativeLeftEarMicPosition;
             end
@@ -85,7 +88,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
                     out = itaCoordinates([0 0 0]);
                 case ReceiverType.DummyHead
                     %out =  itaCoordinates([0 -0.07147 0]);
-                    out =  itaCoordinates([0 -0.072 0]); %TODO: Read from ini
+                    out =  itaCoordinates([0 -0.072 0]);
                 case ReceiverType.UserDefined
                     out = this.mRelativeLeftEarMicPosition;
             end
@@ -134,6 +137,64 @@ classdef itaReceiver < itaSpatialSimulationInputItem
             %crossfade is necessary
             warning('itaReceiver has no frequency dependent data. So this function does nothing.')
             obj = this;
+        end
+    end
+    
+    %% Ini-File
+    properties(Constant = true, Access = private)
+        iniSectionDummyHead = 'ITADummyHead';
+        iniTagDummyHeadGeometryFile = 'GeometryFile';
+    end
+    
+    methods(Static = true, Hidden = true)
+        function OpenIniFile()
+            %Opens the ini-file of the itaReceiver class in a text editor.
+            winopen(itaReceiver.getIniFilname());
+        end
+    end
+    methods(Access = private)
+        function obj = readItaDummyHeadGeometryFile(obj)
+            dummyHeadGeometryFile = obj.readIniFile();
+            if isempty(dummyHeadGeometryFile) || ~exist(dummyHeadGeometryFile, 'file')
+                errorHeader = ['[' class(obj) '] - Cannot set type to ITA Dummy Head:\n'];
+                [selectedFile, selectedPath] = uigetfile('*.mphbin','No valid geometry file for ITA Dummy Head specified! Please select path to ITA_Kustkopf.mphbin', 'D:\');
+                assert(ischar(selectedFile) && ~isempty(selectedFile), sprintf([errorHeader 'No geometry file was specified!']))
+                
+                dummyHeadGeometryFile = fullfile(selectedPath, selectedFile);
+                assert(logical(exist(dummyHeadGeometryFile, 'file')), sprintf([errorHeader 'Specified geometry file does not exist!']))
+                
+                if ~contains(selectedFile, '.mphbin')
+                    warning('The dummy head geometry file should be an .mphbin file. Did you select the correct file?')
+                end
+                obj.mGeometryFilename = dummyHeadGeometryFile;
+                obj.writeIniFile();
+            else
+                obj.mGeometryFilename = dummyHeadGeometryFile;
+            end
+        end
+        function dummyHeadGeometryFile = readIniFile(obj)
+            receiverIni = IniConfig();
+            iniFilename = obj.getIniFilname();
+            receiverIni.ReadFile(iniFilename);
+            dummyHeadGeometryFile = receiverIni.GetValues(obj.iniSectionDummyHead, obj.iniTagDummyHeadGeometryFile, '');
+        end
+        function writeIniFile(obj)
+            iniFilename = obj.getIniFilname();
+            receiverIni = IniConfig();
+            receiverIni.ReadFile(iniFilename);
+            if ~exist(iniFilename, 'file')
+                receiverIni.AddSections({obj.iniSectionDummyHead});
+                receiverIni.AddKeys(obj.iniSectionDummyHead, {obj.iniTagDummyHeadGeometryFile}, {obj.mGeometryFilename});
+            else
+                receiverIni.SetValues(obj.iniSectionDummyHead, {obj.iniTagDummyHeadGeometryFile}, {obj.mGeometryFilename});
+            end
+            receiverIni.WriteFile(iniFilename);
+        end
+    end
+    methods(Access = private, Static = true)
+        function iniFilename = getIniFilname()
+            itaReceiverPath = fileparts( mfilename('fullpath') );
+            iniFilename = fullfile(itaReceiverPath, 'itaReceiver.ini');
         end
     end
 end
