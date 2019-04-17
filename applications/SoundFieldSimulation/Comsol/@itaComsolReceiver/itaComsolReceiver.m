@@ -63,8 +63,8 @@ classdef itaComsolReceiver < handle
             %an itaReceiver. Geometry of the receiver depends on the
             %ReceiverType.
             %   Inputs:
-            %   comsolModel     Comsol model, the source is created for [itaComsolModel]
-            %   receiver        Object with source data [single itaReceiver]
+            %   comsolModel     Comsol model, the receiver is created for [itaComsolModel]
+            %   receiver        Object with receiver data [single itaReceiver]
             %
             %   Supported receiver types: Monaural, DummyHead
             assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel), 'First input must be a single itaComsolModel')
@@ -83,6 +83,10 @@ classdef itaComsolReceiver < handle
             %Creates a dummy head geometry given an itaSource for the given
             %comsol model
             %   In Comsol internally, ...
+            %
+            %   Inputs:
+            %   comsolModel     Comsol model, the receiver is created for [itaComsolModel]
+            %   receiver        Object with receiver data [single itaReceiver]
             assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel), 'First input must be a single itaComsolModel')
             itaComsolReceiver.checkInputForValidItaReceiver(receiver);
             assert(receiver.type == ReceiverType.DummyHead,'ReceiverType of given source must be DummyHead')
@@ -90,9 +94,7 @@ classdef itaComsolReceiver < handle
             baseTag = strrep(receiver.name, ' ', '_');
             receiverGeometryBaseTag = [baseTag itaComsolReceiver.dummyHeadGeometryTagSuffix];
             meshSizeTag = [baseTag itaComsolReceiver.dummyHeadMeshTagSuffix];
-            %soundHardTag = [baseTag '_pistonSourceSoundHardBoundary'];
             
-            %physicsNode = comsolModel.physics.activeNode;
             geometry = comsolModel.geometry;
             [dummyHeadGeometryNodes, selectionTag] = geometry.CreateDummyHeadGeometry(receiverGeometryBaseTag, receiver);
             
@@ -101,8 +103,6 @@ classdef itaComsolReceiver < handle
             meshNode.SetPositionOfFeature(meshSizeTag, 1);
             meshNode.SetMinimumSizeProperties(sizeNode, ...
                 'hmax', 0.04, 'hmin', 0.004, 'hgrad', 1.3, 'hcurve', 0.2, 'hnarrow', 1)
-            
-            %soundHardBoundaryNode = comsolModel.physics.CreateSoundHardBoundary(soundHardTag, selectionTag);
                         
             obj = itaComsolReceiver(comsolModel, dummyHeadGeometryNodes, selectionTag, sizeNode);
             obj.Enable();
