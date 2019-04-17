@@ -26,10 +26,15 @@ warning( 'ita_propagation_diffraction not implemented yet, returning neutral tra
 % @todo generate diffraction filter from input values and generate
 % according to requested model
 
+
 specrefl_tf = itaAudio;
 specrefl_tf.samplingRate = fs;
 specrefl_tf.fftDegree = fft_degree;
 specrefl_tf.freqData = ones( 1, specrefl_tf.nBins );
+
+% @todo filbert: assemble wedge from anchor infos
+
+aperture_point = anchor.interaction_point;
 
 switch( diffraction_model )
     case 'utd'

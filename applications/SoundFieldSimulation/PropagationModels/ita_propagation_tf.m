@@ -1,6 +1,6 @@
 function [ freq_data_linear ] = ita_propagation_tf( propagation_path, fs, fft_degree )
-%ITA_PROPAGATION_PATH_TRANSFER_FUNCTION Calculates the transfer function
-%of a (geometrical) propagation path calculated in frequency domain for a
+%ITA_PROPAGATION_PATH_TF Calculates the transfer function (tf)
+%of a (geometrical) propagation path in frequency domain for a
 %given sampling rate and fft degree (defaults to fs = 44100 and fft_degree = 15)
 %
 
@@ -74,14 +74,15 @@ for m = 1 : N
                 error( 'Detected a diffraction at beginning or end of propagation path.' )
             end
             
-            % @todo assemble wedge from anchor infos
-            
             source_pos = propagation_path.propagation_anchors{ m - 1 }.interaction_point;
             target_pos = propagation_path.propagation_anchors{ m + 1 }.interaction_point;
             
-            effective_source_position =  anchor.interaction_point - source_pos; % @todo backtrack effective emitting point via reflections!
-            target_position =  target_pos - anchor.interaction_point;
+            source_direction = source_pos - anchor.interaction_point;
             
+            effective_distance = ita_propagation_effective_source_distance( propagation_path, m );
+            effective_source_position = anchor.interaction_point + source_direction * effective_distance; % @todo backtrack effective emitting point via reflections!
+            target_position =  target_pos - anchor.interaction_point;
+                        
             prop_tfs.freqData( :, m ) = ita_propagation_diffraction( anchor, effective_source_position, target_position, fs, fft_degree  );
             
         otherwise
