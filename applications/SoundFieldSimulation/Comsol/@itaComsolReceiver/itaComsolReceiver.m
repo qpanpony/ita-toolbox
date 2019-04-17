@@ -66,13 +66,13 @@ classdef itaComsolReceiver < handle
             %   comsolModel     Comsol model, the receiver is created for [itaComsolModel]
             %   receiver        Object with receiver data [single itaReceiver]
             %
-            %   Supported receiver types: Monaural, DummyHead
+            %   Supported receiver types: Monaural, ITADummyHead
             assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel), 'First input must be a single itaComsolModel')
             itaComsolReceiver.checkInputForValidItaReceiver(receiver);
             switch receiver.type
                 case ReceiverType.Monaural
                     obj = itaComsolReceiver();
-                case ReceiverType.DummyHead
+                case ReceiverType.ITADummyHead
                     obj = itaComsolReceiver.CreateDummyHead(comsolModel, receiver);
                 otherwise
                     error('Unknown receiver type. No receiver was created')
@@ -89,14 +89,14 @@ classdef itaComsolReceiver < handle
             %   receiver        Object with receiver data [single itaReceiver]
             assert(isa(comsolModel, 'itaComsolModel') && isscalar(comsolModel), 'First input must be a single itaComsolModel')
             itaComsolReceiver.checkInputForValidItaReceiver(receiver);
-            assert(receiver.type == ReceiverType.DummyHead,'ReceiverType of given source must be DummyHead')
+            assert(receiver.type == ReceiverType.ITADummyHead, 'ReceiverType of given source must be DummyHead')
             
             baseTag = strrep(receiver.name, ' ', '_');
             receiverGeometryBaseTag = [baseTag itaComsolReceiver.dummyHeadGeometryTagSuffix];
             meshSizeTag = [baseTag itaComsolReceiver.dummyHeadMeshTagSuffix];
             
             geometry = comsolModel.geometry;
-            [dummyHeadGeometryNodes, selectionTag] = geometry.CreateDummyHeadGeometry(receiverGeometryBaseTag, receiver);
+            [dummyHeadGeometryNodes, selectionTag] = geometry.ImportReceiverGeometry(receiverGeometryBaseTag, receiver);
             
             meshNode = comsolModel.mesh;
             sizeNode = meshNode.CreateSize(meshSizeTag, selectionTag);

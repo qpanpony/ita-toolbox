@@ -4,7 +4,7 @@ classdef ReceiverType
     %   ...
     
     enumeration
-        Monaural, DummyHead, UserDefined
+        Monaural, ITADummyHead, UserDefined
     end
     
     methods
@@ -13,6 +13,10 @@ classdef ReceiverType
         end
         function bool = IsBinaural(this)
             bool = ~this.IsMonaural();
+        end
+        function bool = NeedsGeometryFile(this)
+            bool = this == ReceiverType.ITADummyHead ||...
+                this == ReceiverType.UserDefined;
         end
     end
     

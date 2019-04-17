@@ -26,7 +26,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
     methods
         function this = set.type(this, type)
             assert(isa(type, 'ReceiverType') && isscalar(type), 'Can only assign a single object of type ReceiverType');
-            if type == ReceiverType.DummyHead
+            if type == ReceiverType.ITADummyHead
                 this = this.readItaDummyHeadGeometryFile();
             end
             this.mType = type;
@@ -64,7 +64,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
             switch(this.mType)
                 case ReceiverType.Monaural
                     out = '';
-                case ReceiverType.DummyHead
+                case ReceiverType.ITADummyHead
                     out = this.mGeometryFilename;
                 case ReceiverType.UserDefined
                     out = this.mGeometryFilename;
@@ -75,7 +75,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
             switch(this.mType)
                 case ReceiverType.Monaural
                     out = itaCoordinates([0 0 0]);
-                case ReceiverType.DummyHead
+                case ReceiverType.ITADummyHead
                     %out = itaCoordinates([0 0.07022 0]);
                     out = itaCoordinates([0 0.071 0]);
                 case ReceiverType.UserDefined
@@ -86,7 +86,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
             switch(this.mType)
                 case ReceiverType.Monaural
                     out = itaCoordinates([0 0 0]);
-                case ReceiverType.DummyHead
+                case ReceiverType.ITADummyHead
                     %out =  itaCoordinates([0 -0.07147 0]);
                     out =  itaCoordinates([0 -0.072 0]);
                 case ReceiverType.UserDefined

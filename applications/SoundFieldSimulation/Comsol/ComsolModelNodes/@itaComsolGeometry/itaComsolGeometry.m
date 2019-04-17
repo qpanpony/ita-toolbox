@@ -108,14 +108,14 @@ classdef itaComsolGeometry < itaComsolNode
     
     %% 3D - Volumes
     methods
-        function [geometryNodes, selectionTag] = CreateDummyHeadGeometry(obj, geometryBaseTag, receiver)
-            %Creates a geometry for a dummy head based on an itaReceiver object
+        function [geometryNodes, selectionTag] = ImportReceiverGeometry(obj, geometryBaseTag, receiver)
+            %Creates a geometry for a receiver based on an itaReceiver object
             %   Inputs:
             %   geometryBaseTag:    Base tag for naming created elements
-            %   receiver:           itaReceiver object of type DummyHead
+            %   receiver:           itaReceiver object of a type that works with a geometry file
             assert(ischar(geometryBaseTag) && isrow(geometryBaseTag), 'First input must be a char row vector')
             assert(isa(receiver, 'itaReceiver') && isscalar(receiver), 'Second input must be a single itaReceiver object')
-            assert(receiver.type == ReceiverType.DummyHead,'ReceiverType of given receiver must be DummyHead')
+            assert(receiver.type.NeedsGeometryFile(),'ReceiverType of given receiver must work with geometry files')
             
             %---Import---
             importTag = [geometryBaseTag '_import'];
