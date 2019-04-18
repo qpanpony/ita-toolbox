@@ -13,7 +13,7 @@ k = 2 * pi * freq ./ c;
 
 
 %% Filter
-att = ita_diffraction_utd( w, src, rcv, freq );
+att = ita_diffraction_utd( w, src, rcv, freq, c );
 
 % % E_dir = ( 1 / r_dir * exp( -1i .* k * r_dir ) )';
 % % if ~ita_diffraction_shadow_zone(w, src, rcv)

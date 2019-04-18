@@ -35,38 +35,38 @@ function ap = get_aperture_point( obj, source_pos, receiver_pos )
         S = source_pos;
         R = receiver_pos;
     end
+    
+    if( size( S, 2 ) ~= 3 )
+        S = S';
+    end
+    if( size( R, 2 ) ~= 3 )
+        R = R';
+    end
+    
+    assert( size( S, 2 ) == 3 )
+    assert( size( R, 2 ) == 3 )
 
     %% Variables
-    L = repmat( obj.location, dim_n, 1 );
-    Apex_Dir = repmat( obj.aperture_direction, dim_n, 1 );
+    L = obj.location;
+    Apex_Dir = obj.aperture_direction;
+    assert( numel( Apex_Dir ) == 3 )
+    assert( numel( L ) == 3 )
     
     %% Calculations
     SR = R - S;
-    norm_of_SR = Norm( SR );
-    mask = norm_of_SR ~= 0;
-    SR_dir = SR(mask, :) ./ norm_of_SR(mask);
+    SR_dir = SR ./ norm( SR );
     
-    % initialize result vector
-    ap = zeros( dim_n, 3 );
+    assert( norm( SR ) > 0 ); % @todo Auxiliar plane must be created differently if S and R are equal
     
     % Auxilary plane spanned by SR and aux_plane_dir
-    aux_plane_dir = cross( SR_dir, Apex_Dir(mask, :), 2 ) ./ Norm( cross( SR_dir, Apex_Dir(mask, :), 2 ) );
-    aux_plane_normal = cross( SR_dir, aux_plane_dir, 2 ) ./ Norm( cross( SR_dir, aux_plane_dir, 2 ) );
+    aux_plane_dir = cross( SR_dir, Apex_Dir ) ./ norm( cross( SR_dir, Apex_Dir ) );
+    aux_plane_normal = cross( SR_dir, aux_plane_dir ) ./ norm( cross( SR_dir, aux_plane_dir ) );
 
     % Distance of intersection of auxiliary plane and aperture direction
     % from aperture location
     % aux plane: dot( (x - source_point), aux_plane_normal) = 0
     % aperture line: x = location + dist * aperture_direction
-    dist = dot( S(mask, :) - L(mask, :), aux_plane_normal, 2 ) ./ dot( Apex_Dir(mask, :), aux_plane_normal, 2 );
-    ap(mask, :) = L(mask, :) + dist .* Apex_Dir(mask, :);
+    dist = dot( S - L, aux_plane_normal ) ./ dot( Apex_Dir, aux_plane_normal );
+    ap = L + dist .* Apex_Dir;
 
-    % In case receiver and source have same position
-    if any( norm_of_SR == 0 )
-        dist = dot( R(~mask, :) - L(~mask, :), Apex_Dir(~mask, :), 2 );
-        ap(~mask, :) = L(~mask, :) + dist * Apex_Dir(~mask, :);
-    end
-end
-
-function res = Norm( A )
-    res = sqrt( sum( A.^2, 2 ) );
 end
