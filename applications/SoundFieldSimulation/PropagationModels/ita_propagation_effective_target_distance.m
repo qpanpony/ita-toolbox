@@ -9,7 +9,7 @@ if nargin < 2
    error 'You are missing the arguments "propagation_path" and "anchor_idx"'
 end
 
-if anchor_idx > 1
+if anchor_idx < 1
     error 'Invalid anchor id, was zero or negative'
 end
 

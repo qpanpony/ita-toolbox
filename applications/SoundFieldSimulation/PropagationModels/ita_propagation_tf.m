@@ -4,12 +4,7 @@ function [ freq_data_linear ] = ita_propagation_tf( propagation_path, fs, fft_de
 %given sampling rate and fft degree (defaults to fs = 44100 and fft_degree = 15)
 %
 
-if nargin < 2
-    fs = 44100;
-end
-if nargin < 3
-    fft_degree = 15;
-end
+global ita_speed_of_sound
 
 if ~isfield( propagation_path, 'propagation_anchors' )
     error( 'The propagation_path argument does not contain a field "propagation_anchors"' )
@@ -26,8 +21,16 @@ prop_tfs.samplingRate = fs;
 prop_tfs.fftDegree = fft_degree;
 prop_tfs.freqData = ones( prop_tfs.nBins, N );
 
-freq_data_linear = ones( prop_tfs.nBins, 1 );
+lambda = ita_speed_of_sound ./ prop_tfs.freqVector( 2:end ); % Wavelength
+k = (2 * pi) ./ lambda; % Wavenumber
 
+r = ita_propagation_path_length( propagation_path );
+
+if r / ita_speed_of_sound > prop_tfs.trackLength
+    error 'Propagation path length too long, increase fft degree to generate transfer function for this propagation path'
+end
+
+freq_data_linear = [ 0 exp( 1i .* k .* r ) ]' ./ r; % 1/r spherical spreading / distance law & propagation delay
 
 for m = 1 : N
 
@@ -78,25 +81,25 @@ for m = 1 : N
             target_pos = propagation_path.propagation_anchors{ m + 1 }.interaction_point;
             
             source_direction = source_pos - anchor.interaction_point;
-            target_direction = anchor.interaction_point - target_pos
+            target_direction = anchor.interaction_point - target_pos;
             
             effective_source_distance = ita_propagation_effective_source_distance( propagation_path, m );
             effective_target_distance = ita_propagation_effective_target_distance( propagation_path, m );
             effective_source_position = anchor.interaction_point + source_direction * effective_source_distance;
             effective_target_position = anchor.interaction_point + target_direction * effective_target_distance;
                         
-            prop_tfs.freqData( :, m ) = ita_propagation_diffraction( anchor, effective_source_position, effective_target_position, fs, fft_degree  );
+            prop_tfs.freqData( :, m ) = ita_propagation_diffraction( anchor, effective_source_position, effective_target_position, 'utd', fs, fft_degree  );
             
         otherwise
             
             sprintf( 'Detected unrecognized anchor type "%s", attempting to continue', anchor.anchor_type )
         
     end
-
+    
     freq_data_linear = freq_data_linear .* prop_tfs.freqData( :, m );
 
-end
 
+end
 
 end
 
