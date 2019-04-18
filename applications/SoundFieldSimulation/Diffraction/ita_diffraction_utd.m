@@ -1,4 +1,4 @@
-function diffr_field = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequency_vec, speed_of_sound )
+function [ diffr_field, D ] = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequency_vec, speed_of_sound )
 %ITA_DIFFRACTION_UTD Calculates the diffraction filter based on uniform
 %theory of diffraction (with Kawai approximation)
 %
@@ -67,8 +67,8 @@ else
     end
 end
 Apex_Point = wedge.get_aperture_point( source_pos, receiver_pos );
-rho = Norm( Apex_Point - S ); % Distance of source to aperture point
-r = Norm( R - Apex_Point ); % Distance of receiver to aperture point
+rho = norm( Apex_Point - S ); % Distance of source to aperture point
+r = norm( R - Apex_Point ); % Distance of receiver to aperture point
 c = speed_of_sound;
 
 face = wedge.point_facing_main_side( S );
@@ -84,9 +84,7 @@ k = (2 * pi) ./ lambda; % Wavenumber
 
 % Diffraction coefficient D
 assert( all( rho + r ~= 0 ) && all( r ~= 0 )  );
-A = repmat( sqrt( rho ./ ( r .* ( rho + r ) ) ), 1, numel( frequency_vec ) );
 L = repmat( ( ( rho .* r ) ./ ( rho + r ) ) .* ( sin( theta_i ) ).^2, 1, numel( frequency_vec ) );
-H_i = 1 ./ rho .* exp( -1i * k .* rho ); % Consideration of transfer path from source to apex point
 
 D_factor = -exp( -1i * pi / 4 ) ./ ( 2 * n * sqrt( 2* pi * k ) .* sin( theta_i ) );
 
@@ -156,17 +154,19 @@ end
 
 D = D_factor .* ( term1 + term2 + s * ( term3 + term4 ) );
 
-% Combined diffracted sound field filter at receiver
+
+%% Combined diffracted sound field filter at receiver
+
+H_i = 1 ./ rho .* exp( -1i * k .* rho ); % Consideration of transfer path from source to apex point
+A = repmat( sqrt( rho ./ ( r .* ( rho + r ) ) ), 1, numel( frequency_vec ) ); % Amplitude
+
 diffr_field = (  H_i .* D .* A .* exp( -1i .* k .* r ) )';
+
 
 end
 
 
 %% Auxiliary functions
-% euclidean norm row wise
-function res = Norm( A )
-    res = sqrt( sum( A.^2, 2 ) );
-end
 
 % N+ function
 function N = N_p( n, beta )
