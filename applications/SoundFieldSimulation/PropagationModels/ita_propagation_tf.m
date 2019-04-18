@@ -66,8 +66,8 @@ for m = 1 : N
             emitting_direction_vec = target_position / norm( target_position );
             
             prop_tfs.freqData( :, m ) = ita_propagation_specular_reflection( anchor, incident_direction_vec, emitting_direction_vec, fs, fft_degree  );
-        
-            
+
+
         case { 'outer_edge_diffraction', 'inner_edge_diffraction' }
             
             if m == 1 || m == N
@@ -78,12 +78,14 @@ for m = 1 : N
             target_pos = propagation_path.propagation_anchors{ m + 1 }.interaction_point;
             
             source_direction = source_pos - anchor.interaction_point;
+            target_direction = anchor.interaction_point - target_pos
             
-            effective_distance = ita_propagation_effective_source_distance( propagation_path, m );
-            effective_source_position = anchor.interaction_point + source_direction * effective_distance; % @todo backtrack effective emitting point via reflections!
-            target_position =  target_pos - anchor.interaction_point;
+            effective_source_distance = ita_propagation_effective_source_distance( propagation_path, m );
+            effective_target_distance = ita_propagation_effective_target_distance( propagation_path, m );
+            effective_source_position = anchor.interaction_point + source_direction * effective_source_distance;
+            effective_target_position = anchor.interaction_point + target_direction * effective_target_distance;
                         
-            prop_tfs.freqData( :, m ) = ita_propagation_diffraction( anchor, effective_source_position, target_position, fs, fft_degree  );
+            prop_tfs.freqData( :, m ) = ita_propagation_diffraction( anchor, effective_source_position, effective_target_position, fs, fft_degree  );
             
         otherwise
             

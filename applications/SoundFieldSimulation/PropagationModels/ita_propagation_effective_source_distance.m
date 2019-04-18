@@ -1,7 +1,8 @@
 function [ distance ] = ita_propagation_effective_source_distance( propagation_path, anchor_idx )
-%ITA_PROPAGATION_SPECULAR_REFLECTION Returns the attenuation transfer function
-%of the specular reflection e.g. based on reflection factor in frequency domain for a
-%given in/out direction sampling rate and fft degree (defaults to fs = 44100 and fft_degree = 15)
+%ITA_PROPAGATION_EFFECTIVE_SOURCE_DISTANCE Returns the backwards distance from given anchor index to
+% the previous anchor type that provides a field value, e.g. a sensor or
+% diffraction item. Integrates distance when one or multiple specular
+% reflections are ahead.
 %
 
 if nargin < 2
@@ -11,9 +12,6 @@ end
 if anchor_idx < 2
     error 'Invalid anchor id, effective source distance calculation requires at least one previous propagation anchor'
 end
-
-warning( 'ita_propagation_effective_source_distance not implemented yet, returning neutral transfer function values' )
-% @todo backtrace effective source distance
 
 assert( numel( propagation_path.propagation_anchors ) >= anchor_idx );
 
