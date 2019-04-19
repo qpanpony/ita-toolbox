@@ -24,13 +24,15 @@ prop_tfs.freqData = ones( prop_tfs.nBins, N );
 lambda = ita_speed_of_sound ./ prop_tfs.freqVector( 2:end ); % Wavelength
 k = (2 * pi) ./ lambda; % Wavenumber
 
-r = ita_propagation_path_length( propagation_path );
-
-if r / ita_speed_of_sound > prop_tfs.trackLength
+distance = ita_propagation_path_length( propagation_path );
+if distance / ita_speed_of_sound > prop_tfs.trackLength
     error 'Propagation path length too long, increase fft degree to generate transfer function for this propagation path'
 end
 
-freq_data_linear = [ 0 exp( 1i .* k .* r ) ]' ./ r; % 1/r spherical spreading / distance law & propagation delay
+phase_by_delay = ita_propagation_delay( distance, ita_speed_of_sound, fs, fft_degree );
+spreading_loss = ita_propagation_spreading_loss( distance, 'spherical' );
+
+freq_data_linear = phase_by_delay .* spreading_loss; % oder quadratisch?!
 
 for m = 1 : N
 

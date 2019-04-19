@@ -137,9 +137,9 @@ classdef itaInfiniteWedge
         
         function b = validate_normals( obj )
             % Returns true, if the normals of the faces are both normalized
-            b = true;
-            if norm( obj.main_face_normal ) ~= 1 || norm( obj.opposite_face_normal ) ~= 1
-               b = false;
+            b = false;
+            if ( norm( obj.main_face_normal ) - 1 ) < eps && ( norm( obj.opposite_face_normal ) -1 ) < eps
+               b = true;
             end
         end
         

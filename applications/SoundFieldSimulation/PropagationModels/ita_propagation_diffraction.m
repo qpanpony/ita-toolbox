@@ -46,7 +46,7 @@ w = itaInfiniteWedge( n1, n2, loc );
 
 switch( diffraction_model )
     case 'utd'
-        [ H, D ] = ita_diffraction_utd( w, effective_source_position( 1:3 )', effective_receiver_position( 1:3 )', specrefl_tf.freqVector( 2:end ), c ); 
+        [ ~, D, ~ ] = ita_diffraction_utd( w, effective_source_position( 1:3 )', effective_receiver_position( 1:3 )', specrefl_tf.freqVector( 2:end ), c ); 
         specrefl_tf.freqData = [ 0 D ]';
         
     case 'maekawa'

@@ -1,11 +1,11 @@
-function [ diffr_field, D ] = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequency_vec, speed_of_sound )
+function [ diffr_field, D, A ] = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequency_vec, speed_of_sound )
 %ITA_DIFFRACTION_UTD Calculates the diffraction filter based on uniform
 %theory of diffraction (with Kawai approximation)
 %
 % Literature:
 %   [1] Tsingos, Funkhouser et al. - Modeling Acoustics in Virtual Environments using the Uniform Theory of Diffraction
 %   [2] Kouyoumjian and Pathak - A Uniform Geometrical Theory of Diffraction for an Edge in a Perfectly Conducting Surface
-% 
+%
 % Example:
 %   att = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequenc_vec )
 %
@@ -71,9 +71,9 @@ rho = norm( Apex_Point - S ); % Distance of source to aperture point
 r = norm( R - Apex_Point ); % Distance of receiver to aperture point
 c = speed_of_sound;
 
-face = wedge.point_facing_main_side( S );
-alpha_i = wedge.get_angle_from_point_to_wedge_face( S, face );
-alpha_d = wedge.get_angle_from_point_to_wedge_face( R, face );
+main_face = wedge.point_facing_main_side( S );
+alpha_i = wedge.get_angle_from_point_to_wedge_face( S, main_face );
+alpha_d = wedge.get_angle_from_point_to_wedge_face( R, main_face );
 theta_i = wedge.get_angle_from_point_to_aperture( S, Apex_Point );
 
 n = wedge.opening_angle / pi; % Variable dependend on opening angle of the wedge
@@ -84,24 +84,25 @@ k = (2 * pi) ./ lambda; % Wavenumber
 
 % Diffraction coefficient D
 assert( all( rho + r ~= 0 ) && all( r ~= 0 )  );
-L = repmat( ( ( rho .* r ) ./ ( rho + r ) ) .* ( sin( theta_i ) ).^2, 1, numel( frequency_vec ) );
+L = ( ( rho .* r ) ./ ( rho + r ) ) .* ( sin( theta_i ) ).^2; % -> distance dependency
 
 D_factor = -exp( -1i * pi / 4 ) ./ ( 2 * n * sqrt( 2* pi * k ) .* sin( theta_i ) );
 
-Cot1 = repmat( cot( ( pi + ( alpha_d - alpha_i ) ) ./ ( 2 * n ) ), 1, numel( frequency_vec ) );
-Cot2 = repmat( cot( ( pi - ( alpha_d - alpha_i ) ) ./ ( 2 * n ) ), 1, numel( frequency_vec ) );
-Cot3 = repmat( cot( ( pi + ( alpha_d + alpha_i ) ) ./ ( 2 * n ) ), 1, numel( frequency_vec ) );
-Cot4 = repmat( cot( ( pi - ( alpha_d + alpha_i ) ) ./ ( 2 * n ) ), 1, numel( frequency_vec ) );
+Cot1 = cot( ( pi + ( alpha_d - alpha_i ) ) ./ ( 2 * n ) );
+Cot2 = cot( ( pi - ( alpha_d - alpha_i ) ) ./ ( 2 * n ) );
+Cot3 = cot( ( pi + ( alpha_d + alpha_i ) ) ./ ( 2 * n ) );
+Cot4 = cot( ( pi - ( alpha_d + alpha_i ) ) ./ ( 2 * n ) );
 
 a1 = 2 * ( cos( ( 2 * pi * n * N_p( n, alpha_d - alpha_i ) - ( alpha_d - alpha_i ) ) / 2 ) ).^2;
 a2 = 2 * ( cos( ( 2 * pi * n * N_n( n, alpha_d - alpha_i ) - ( alpha_d - alpha_i ) ) / 2 ) ).^2;
 a3 = 2 * ( cos( ( 2 * pi * n * N_p( n, alpha_d + alpha_i ) - ( alpha_d + alpha_i ) ) / 2 ) ).^2;
 a4 = 2 * ( cos( ( 2 * pi * n * N_n( n, alpha_d + alpha_i ) - ( alpha_d + alpha_i ) ) / 2 ) ).^2;
 
-F1 = kawai_approx_fresnel( k .* L .* a1 );
+F1 = kawai_approx_fresnel( k .* L .* a1 ); % -> frequency dependent
 F2 = kawai_approx_fresnel( k .* L .* a2 );
 F3 = kawai_approx_fresnel( k .* L .* a3 );
 F4 = kawai_approx_fresnel( k .* L .* a4 );
+
 
 % Avoid eventual singularities of the cot terms at the shadow or reflection boundary with a approximation by
 % Kouyoumjian and Pathak
@@ -141,7 +142,7 @@ if any( singularities )
     term4(mask4, :) = n * exp( 1i * pi/4 ) * ( sqrt( 2 * pi .* k .* L(mask4, :) ) .* sgn( eps4 ) - 2 .* k .* L(mask4, :) .* eps4 * exp( 1i * pi/4 ) );
 end
 
-term1(~mask1, :) = Cot1(~mask1, :) .* F1(~mask1, :);
+term1(~mask1, :) = Cot1(~mask1, :) .* F1(~mask1, :); % -> frequency dependent
 term2(~mask2, :) = Cot2(~mask2, :) .* F2(~mask2, :);
 term3(~mask3, :) = Cot3(~mask3, :) .* F3(~mask3, :);
 term4(~mask4, :) = Cot4(~mask4, :) .* F4(~mask4, :);
@@ -152,15 +153,15 @@ else
     s = -1;
 end
 
-D = D_factor .* ( term1 + term2 + s * ( term3 + term4 ) );
+D = ( D_factor .* ( term1 + term2 + s * ( term3 + term4 ) ) )'; % -> frequency dependent
 
 
 %% Combined diffracted sound field filter at receiver
 
-H_i = 1 ./ rho .* exp( -1i * k .* rho ); % Consideration of transfer path from source to apex point
-A = repmat( sqrt( rho ./ ( r .* ( rho + r ) ) ), 1, numel( frequency_vec ) ); % Amplitude
+H_i = 1 ./ rho .* exp( -1i * k .* rho )'; % Consideration of transfer path from source to apex point
+A = repmat( sqrt( rho ./ ( r .* ( rho + r ) ) ), 1, numel( frequency_vec ) )'; % Amplitude
 
-diffr_field = (  H_i .* D .* A .* exp( -1i .* k .* r ) )';
+diffr_field = (  H_i .* D .* A .* exp( -1i .* k' .* r ) );
 
 
 end
@@ -168,20 +169,20 @@ end
 
 %% Auxiliary functions
 
-% N+ function
+% N+ function (plus)
 function N = N_p( n, beta )
     N = zeros( numel( beta ), 1 );
     N( beta >  pi * ( 1 - n ) ) = 1;
 end
 
-% N- function
+% N- function (minus)
 function N = N_n( n, beta )
     N = zeros( numel( beta ), 1 );
     N( beta < pi * ( 1 - n ) ) = -1;
     N( beta > pi * ( 1 + n ) ) = 1;
 end
 
-% signum function
+% Signum function
 function res = sgn(x)
     if all( size(x) == 0 )
         res = 1;
@@ -191,6 +192,7 @@ function res = sgn(x)
     res( x <= 0 ) = -1;
 end
 
+% Approximation of the Fresnel integral by Kawaii et al.
 function Y = kawai_approx_fresnel( X )
     if any( X < 0 )
         error( 'No negative values for Kawai approximation of Fresnel integral allowed' )
