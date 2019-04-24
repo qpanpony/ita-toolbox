@@ -1,6 +1,18 @@
 classdef itaReceiver < itaSpatialSimulationInputItem
-    %itaReceiver Summary of this class goes here
-    %   Detailed explanation goes here
+    %itaReceiver represents a receiver and its acoustic properties which are
+    %used for GA-based and wave-based simulations
+    %   Properties:
+    %   Receiver-type, position, orientation, left and right ear position
+    %   
+    %   See also itaSpatialSimulationInputItem, ReceiverType
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaReceiver">doc itaReceiver</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     properties(Access = private)
         %mFemGroup;

@@ -3,6 +3,16 @@ classdef itaComsolBatch < itaComsolNode
     %to run models in batch mode
     %   Note, that this class also provides static functions to create and
     %   execute windows command lines to simulate Comsol models from batch.
+    %   
+    %   See also itaComsolModel, itaComsolNode
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolBatch">doc itaComsolBatch</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
 
         %% Constructor
     methods

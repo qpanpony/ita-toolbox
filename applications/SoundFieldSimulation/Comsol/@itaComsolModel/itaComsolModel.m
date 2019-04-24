@@ -1,10 +1,12 @@
 classdef itaComsolModel < handle
-    %itaComsolModel Interface to adjust work with comsol model
-    %   This class takes an existing comsol model and provides interfaces
-    %   to adjust certain parameters such as boundary conditions
-    %   (impedances) and sources. Also provides the function to run a
-    %   simulation and gather results in ita-formats.
-    %
+    %itaComsolModel Interface to adjust and work with Comsol models
+    %   This class represents a model tree similar to the one within
+    %   Comsol. Each child node of a model is represented by a particular
+    %   class (e.g. the physics node is represented by itaComsolPhysics). 
+    %   Through these sub-classes it provides interfaces to adjust certain
+    %   parameters or access data. An overview is given below. More details
+    %   can be found in the documentation of the respective classes.
+    %   
     %   Note, that it is crucial to define the basis of the comsol model in
     %   Comsol itself. This includes:
     %   -Geometry
@@ -15,7 +17,7 @@ classdef itaComsolModel < handle
     %   -Mesh
     %   -Study
     %
-    %   This class is able to create/adjust:
+    %   Using an itaComsolModel and its related classes, it is possible to create/adjust:
     %   -Global Definitions
     %       -Interpolations
     %   -Geometry
@@ -26,11 +28,22 @@ classdef itaComsolModel < handle
     %       -frequency dependent values for boundary impedances
     %       -frequency dependent source parameters (velocity / pressure)
     %   -Mesh
-    %       -... ()
+    %       -mesh size
+    %   -Result
+    %       -retrieve results in ita-formats
     %   -Study
     %       -frequency vector
+    %       -run simulation
     %   -Batch
-    %       -...
+    %       -create batch commands to run simulation
+    %   
+    %   See also itaComsolServer, itaComsolBatch, itaComsolExport,
+    %   itaComsolFunction, itaComsolGeometry, itaComsolMaterial,
+    %   itaComsolMesh, itaComsolParameters, itaComsolPhysics,
+    %   itaComsolResult, itaComsolSelection, itaComsolStudy
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolModel">doc itaComsolModel</a>
     
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.

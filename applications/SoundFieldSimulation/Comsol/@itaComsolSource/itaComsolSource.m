@@ -5,6 +5,17 @@ classdef itaComsolSource < handle
     %   on the source type, suitable physics, geometry and interpolation
     %   nodes are created and linked apropriately. All comsol nodes
     %   representing this source are stored for later modification.
+    %   
+    %   See also itaComsolModel, itaComsolServer, itaComsolReceiver,
+    %   itaComsolImpedance
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolSource">doc itaComsolSource</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     properties(Access = private)
         mModel;

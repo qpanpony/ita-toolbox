@@ -4,6 +4,16 @@ classdef (Abstract)itaAbstract3DModelVisualizer < handle
     %   Parameters for the plot are defined using class properties.
     %   Adjusting these leads to a real-time update the plot (if
     %   autoRefresh is set to true).
+    %   
+    %   See also itaAc3dVisualizer, itaComsolModelVisualizer
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaAbstract3DModelVisualizer">doc itaAbstract3DModelVisualizer</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     properties(Access = protected)
         mModel;                 %Stores the model which is to be visualized

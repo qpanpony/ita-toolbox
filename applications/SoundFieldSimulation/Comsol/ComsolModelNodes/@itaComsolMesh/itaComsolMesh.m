@@ -1,6 +1,16 @@
 classdef itaComsolMesh < itaComsolNode
     %itaComsolMesh Interface to the mesh nodes of an itaComsolModel
-    %   ...
+    %   Can be used to access and adjust the size nodes of a mesh.
+    %   
+    %   See also itaComsolModel, itaComsolNode
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolMesh">doc itaComsolMesh</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     %% Constructor
     methods

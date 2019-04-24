@@ -4,6 +4,17 @@ classdef itaComsolReceiver < handle
     %   for a given itaComsolModel using an itaReceiver. Therefore depending
     %   on the receiver type, suitable geometry nodes are created. All comsol
     %   nodes representing this receiver are stored for later modification.
+    %   
+    %   See also itaComsolModel, itaComsolServer, itaComsolSource,
+    %   itaComsolImpedance
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolReceiver">doc itaComsolReceiver</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     properties(Access = private)
         mModel;

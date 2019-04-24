@@ -1,8 +1,18 @@
 classdef itaAc3dVisualizer < itaAbstract3DModelVisualizer
-    %itaAc3dVisualizer This class is used to visualize an AC3D model.
+    %itaAc3dVisualizer This class is used to visualize an itaAc3dModel.
     %   Parameters for the plot are defined using class properties.
     %   Adjusting these leads to a real-time update the plot (if
     %   autoRefresh is set to true).
+    %   
+    %   See also itaAc3dVisualizer, itaAc3dModel
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaAc3dVisualizer">doc itaAc3dVisualizer</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     properties(Hidden = true)
         axesMapping = [1 -3 2];  %Maps data from .ac3d file to fit to the plot (default is no transform)

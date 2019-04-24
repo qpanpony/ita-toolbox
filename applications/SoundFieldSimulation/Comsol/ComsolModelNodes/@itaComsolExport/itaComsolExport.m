@@ -1,6 +1,16 @@
 classdef itaComsolExport < itaComsolNode
     %itaComsolExport Interface to the result.export nodes of an itaComsolModel
-    %   ...
+    %   Can run child nodes to export Comsol data to files (e.g. csv)
+    %   
+    %   See also itaComsolModel, itaComsolNode, ita_read_comsol_csv
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolExport">doc itaComsolExport</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     %% Constructor
     methods

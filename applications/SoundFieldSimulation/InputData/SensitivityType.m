@@ -1,6 +1,6 @@
 classdef SensitivityType
-    %SensitivityType Summary of this class goes here
-    %   Detailed explanation goes here
+    %SensitivityType Used to distinguish between general and special cases
+    %of source sensitivities
     
     enumeration 
         UserDefined, Flat;

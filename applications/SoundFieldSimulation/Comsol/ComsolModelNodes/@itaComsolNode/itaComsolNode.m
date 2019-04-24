@@ -15,6 +15,16 @@ classdef (Abstract)itaComsolNode < handle
     %   -Batch
     %   -Results
     %   Use mphnavigator() on a comsol model for more information
+    %   
+    %   See also itaComsolModel
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolNode">doc itaComsolNode</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     properties(Access = protected)
         mModel;             %itaComsolModel object

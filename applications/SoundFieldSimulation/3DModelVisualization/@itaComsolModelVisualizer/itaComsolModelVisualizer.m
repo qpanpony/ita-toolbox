@@ -1,6 +1,19 @@
 classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
-    %itaComsolModelVisualizer Summary of this class goes here
-    %   Detailed explanation goes here
+    %itaComsolModelVisualizer This class is used to visualize an itaComsolModel.
+    %   Parameters for the plot are defined using class properties.
+    %   Adjusting these leads to a real-time update the plot (if
+    %   autoRefresh is set to true).
+    %
+    %   
+    %   See also itaAc3dVisualizer, itaComsolModel, itaComsolServer
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolModelVisualizer">doc itaComsolModelVisualizer</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     properties(Access = private)
         mMeshPlotHandles;

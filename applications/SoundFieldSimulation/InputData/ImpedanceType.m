@@ -1,6 +1,6 @@
 classdef ImpedanceType
-    %ImpedanceType Summary of this class goes here
-    %   Detailed explanation goes here
+    %ImpedanceType Used to distinguish between general and special cases of
+    %impedances at boundaries
     
     enumeration 
         UserDefined, SoundHard;

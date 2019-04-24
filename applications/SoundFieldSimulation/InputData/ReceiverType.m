@@ -1,7 +1,6 @@
 classdef ReceiverType
     %ReceiverType Used to specify the geometry of an itaReceiver for
     %wave-based simulations
-    %   ...
     
     enumeration
         Monaural, ITADummyHead, UserDefined

@@ -7,6 +7,11 @@ classdef itaSource < itaSpatialSimulationInputItem
     %   The wave TF can either represent a point source, a piston or a
     %   distribution over a surface and is specified in one itaSource's
     %   subclasses.
+    %   
+    %   See also itaSpatialSimulationInputItem, SourceType, SensitivityType
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaSource">doc itaSource</a>
     
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.
@@ -29,17 +34,17 @@ classdef itaSource < itaSpatialSimulationInputItem
         velocityCoordinates;%Returns the coordinates of the velocity TF for a surface distribution source
     end
     properties(Dependent = true)
-        type;     %Iindicates what the wave TF represents - PointSource, Piston, SurfaceDistribution (see SourceType)
-        sensitivityType; %Switch between a flat frequency response and a user-defined one.
+        type;               %Iindicates what the wave TF represents - PointSource, Piston, SurfaceDistribution (see SourceType)
+        sensitivityType;    %Switch between a flat frequency response and a user-defined one.
         
-        volumeFlowTf; %volume flow transfer function of the point source used for wave-based simulations
+        volumeFlowTf;       %volume flow transfer function of the point source used for wave-based simulations
         velocityTf;
         
-        pressureTf;     %pressure transfer function - itaSuper
+        pressureTf;         %pressure transfer function - itaSuper
 %         directivity;    %The directivity loaded from the .daff file - itaSuper
-        directivityFile;%Name of directivity .daff file
+        directivityFile;    %Name of directivity .daff file
         
-        pistonRadius;   %Radius used for sources of type Piston
+        pistonRadius;       %Radius used for sources of type Piston
     end
     
     %% Source Type

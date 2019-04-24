@@ -14,8 +14,6 @@ function audioObj = ita_result2audio_spk(resultObj, samplingRate, fftDegree, var
 %
 %   Reference page in Help browser
 %        <a href="matlab:doc ita_result2audio_spk">doc ita_result2audio_spk</a>
-%
-%   Autor: Philipp Schäfer -- Email: psc@akustik.rwth-aachen.de
 
 % <ITA-Toolbox>
 % This file is part of the ITA-Toolbox. Some rights reserved.

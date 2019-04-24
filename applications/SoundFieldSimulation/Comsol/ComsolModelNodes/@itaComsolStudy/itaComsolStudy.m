@@ -1,6 +1,23 @@
 classdef itaComsolStudy < itaComsolNode
     %itaComsolStudy Interface to the study nodes of an itaComsolModel
-    %   ...
+    %   Allows to run simulations from Matlab and adjust certain study
+    %   parameters such as the frequency vector.
+    %   
+    %   Furthermore it is possible to run a parametric sweep from Matlab:
+    %   Therefore, a series of simulations where a Comsol parameter is a
+    %   changed for each simulation is executed independently. The results
+    %   are stored in different files. This reduces the amount of memory
+    %   compared to running a parametric sweep from Comsol.
+    %   
+    %   See also itaComsolModel, itaComsolNode
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolStudy">doc itaComsolStudy</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     %% Constructor
     methods

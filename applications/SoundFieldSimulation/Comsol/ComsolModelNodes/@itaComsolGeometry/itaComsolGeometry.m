@@ -1,6 +1,21 @@
 classdef itaComsolGeometry < itaComsolNode
     %itaComsolGeometry Interface to the geom (=geometry) nodes of an itaComsolModel
-    %   ...
+    %   Can be used to create certain types of geometry that refer to
+    %   objects such as itaSource or itaReceiver. This is done using the
+    %   Create...-functions of this class.
+    %   These functions are given a unique tag. Existing geometries can be
+    %   adjusted by the same function that created them using the same tag.
+    %   
+    %   See also itaComsolModel, itaComsolNode, itaComsolSource,
+    %   itaComsolReceiver
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolGeometry">doc itaComsolGeometry</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     %% Constructor
     methods

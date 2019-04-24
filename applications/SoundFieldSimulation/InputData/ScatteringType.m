@@ -1,6 +1,6 @@
 classdef ScatteringType
-    %ScatteringType Summary of this class goes here
-    %   Detailed explanation goes here
+    %ScatteringType Used to distinguish between general and special cases
+    %of scattering at boundaries
     
     enumeration 
         UserDefined, Zero; %, Constant;

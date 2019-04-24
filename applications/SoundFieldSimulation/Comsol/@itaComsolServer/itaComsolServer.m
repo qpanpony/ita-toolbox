@@ -1,7 +1,15 @@
 classdef itaComsolServer < handle
     %itaComsolServer Interface to start/stop and connect/disconnect
     %Comsol Server via Matlab LiveLink
-    %   Also allows to remove comsol models from the server
+    %   Also allows to remove comsol models from the server.
+    %   
+    %   Information on the server and LiveLink path are stored in an ini-file.
+    %   This file is created the first time a connection is established.
+    %   
+    %   See also itaComsolModel
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolServer">doc itaComsolServer</a>
     
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.

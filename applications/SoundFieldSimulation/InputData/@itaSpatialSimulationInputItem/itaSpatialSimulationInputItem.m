@@ -1,11 +1,18 @@
 classdef (Abstract) itaSpatialSimulationInputItem < itaSimulationInputItem
     %itaSpatialSimulationInputItem Base class for simulation input data
     %that has spatial information (position & orientation)
+    %   Extension of itaSimulationInputItem.
+    %   
+    %   See also itaSimulationInputItem, itaSource, itaReceiver
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaSpatialSimulationInputItem">doc itaSpatialSimulationInputItem</a>
     
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.
     % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
     % </ITA-Toolbox>
+    
     properties(Access = protected, Hidden = true)
         mPosition;                              %itaCoordinates
         mOrientation;                           %itaOrientation

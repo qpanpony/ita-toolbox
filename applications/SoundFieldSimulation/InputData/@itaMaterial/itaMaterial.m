@@ -3,6 +3,11 @@ classdef itaMaterial < itaSimulationInputItem
     %used for GA-based and wave-based simulations
     %   Properties:
     %   Impedance, absorption, scattering
+    %   
+    %   See also itaSimulationInputItem, ImpedanceType, ScatteringType
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaMaterial">doc itaMaterial</a>
     
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.

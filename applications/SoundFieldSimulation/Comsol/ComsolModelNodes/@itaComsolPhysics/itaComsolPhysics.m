@@ -1,6 +1,22 @@
 classdef itaComsolPhysics < itaComsolNode
     %itaComsolPhysics Interface to the physics node of an itaComsolModel
-    %   ...
+    %   Allows to adjust parameters of a comsol physics node. Also allows
+    %   to create new nodes that represent certain acoustic properties
+    %   (e.g. for sources or boundaries).
+    %   This is done using the Create...-functions of this class. These
+    %   functions are given a unique tag. Existing physic nodes can be
+    %   adjusted by the same function that created them using the same tag.
+    %   
+    %   See also itaComsolModel, itaComsolNode, itaComsolSource,
+    %   itaComsolImpedance
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolPhysics">doc itaComsolPhysics</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     %% Constructor
     methods

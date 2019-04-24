@@ -1,7 +1,24 @@
 classdef itaComsolResult < handle
     %itaComsolResult Interface to access simulation results of an
     %itaComsolModel object
-    %   Detailed explanation goes here
+    %   Allows to evaluate the results of a study at the mesh nodes or
+    %   given coordintas. The result are then returned as an itaResult
+    %   object with one channel per given coordinate.
+    %
+    %   Note:
+    %   The direct data import only works for FEM simulation. For BEM,
+    %   simulations data has to be exported to .csv files and before being
+    %   imported into Matlab (see itaComsolExport & ita_read_comsol_csv).
+    %   
+    %   See also itaComsolModel, itaComsolNode
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolResult">doc itaComsolResult</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     properties(Access = private)
         mModel;

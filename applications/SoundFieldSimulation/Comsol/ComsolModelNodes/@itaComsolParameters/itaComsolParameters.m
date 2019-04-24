@@ -1,6 +1,17 @@
 classdef itaComsolParameters < itaComsolNode
     %itaComsolParameters Interface to the param (=parameter) nodes of an itaComsolModel
-    %   ...
+    %   Allows to list the parameters of the Comsol model and adjust their
+    %   values.
+    %   
+    %   See also itaComsolModel, itaComsolNode
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolParameters">doc itaComsolParameters</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     
     %% Constructor

@@ -4,8 +4,11 @@ classdef itaMaterialVisualizer < handle
     %   This class can plot the impedance, absorption or scattering of all
     %   given materials in a single plot. Plotting is based on ita_plot_freq()
     %   function and uses same syntax for input arguments.
-    %
-    %   See also ita_plot_freq.
+    %   
+    %   See also itaMaterial, ita_plot_freq
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaMaterialVisualizer">doc itaMaterialVisualizer</a>
     
     % <ITA-Toolbox>
     % This file is part of the ITA-Toolbox. Some rights reserved.

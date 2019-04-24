@@ -1,6 +1,6 @@
 classdef SourceType
-    %SourceType Summary of this class goes here
-    %   Detailed explanation goes here
+    %SourceType Used to specify the representing geometry of an itaSource
+    %and expected acoustic data for wave-based simulations
     
     enumeration 
         PointSource, Piston, SurfaceDistribution

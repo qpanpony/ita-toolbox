@@ -1,6 +1,19 @@
 classdef itaComsolFunction < itaComsolNode
     %itaComsolFunction Interface to the func (=function) nodes of an itaComsolModel
-    %   ...
+    %   Can be used to create interpolation nodes in Comsol that represent
+    %   frequency dependent functions. Can also represent complex-valued
+    %   functions using one interpolation for the real and one for the
+    %   imaginary part.
+    %   
+    %   See also itaComsolModel, itaComsolNode
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolFunction">doc itaComsolFunction</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     %% Constructor
     methods
@@ -86,6 +99,9 @@ classdef itaComsolFunction < itaComsolNode
     end
     methods(Static = true)
         function expression = GetComplexFunctionExpression(realInterpolationNode, imagInterpolationNode)
+            %Returns a function expression giving two interpolation nodes
+            %   The expression will look like this:
+            %   tagReal(freq) + i*tagImag(freq)
             realFuncName = char(realInterpolationNode.tag);
             imagFuncName = char(imagInterpolationNode.tag);
             expression = [realFuncName '(freq) + i*' imagFuncName '(freq)'];

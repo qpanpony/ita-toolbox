@@ -21,8 +21,6 @@ function [ varargout ] = ita_interpolate_spk_result(varargin)
 %
 %   Reference page in Help browser
 %        <a href="matlab:doc ita_interpolate_spk_result">doc ita_interpolate_spk_result</a>
-%
-%   Autor: Philipp Schäfer -- Email: psc@akustik.rwth-aachen.de
 
 % <ITA-Toolbox>
 % This file is part of the ITA-Toolbox. Some rights reserved.

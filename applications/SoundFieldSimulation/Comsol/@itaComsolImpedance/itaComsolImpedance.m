@@ -6,6 +6,17 @@ classdef itaComsolImpedance < handle
     %   itaMaterial or itaSuper.Therefore. suitable physics and interpolation
     %   nodes are created and linked apropriately. All comsol nodes
     %   representing this impedance are stored for later modification.
+    %   
+    %   See also itaComsolModel, itaComsolServer, itaComsolSource,
+    %   itaComsolReceiver
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolImpedance">doc itaComsolImpedance</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
  
     properties(Access = private)
         mModel;

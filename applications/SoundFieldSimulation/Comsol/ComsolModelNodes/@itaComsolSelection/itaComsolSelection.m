@@ -1,6 +1,20 @@
 classdef itaComsolSelection < itaComsolNode
     %itaComsolSelection Interface to the selection nodes of an itaComsolModel
-    %   ...
+    %   Can be used to quickly access all Comsol selection nodes of certain
+    %   dimension (0D, 1D, ..., 3D). Furthermore, it allows to use filters
+    %   to further specify which selections are to be returned (see
+    %   itaComsolSelection.filters). Also allows to access a selection node
+    %   using its name.
+    %   
+    %   See also itaComsolModel, itaComsolNode
+    %   
+    %   Reference page in Help browser
+    %       <a href="matlab:doc itaComsolSelection">doc itaComsolSelection</a>
+    
+    % <ITA-Toolbox>
+    % This file is part of the ITA-Toolbox. Some rights reserved.
+    % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
+    % </ITA-Toolbox>
     
     %% Constructor
     methods
