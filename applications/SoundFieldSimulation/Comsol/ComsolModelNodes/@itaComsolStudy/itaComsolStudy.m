@@ -92,7 +92,7 @@ classdef itaComsolStudy < itaComsolNode
             study = obj.activeNode;
             assert(~isempty(study), 'No active study is set yet')
             assert(obj.mModel.parameter.Exists(parameterName), 'Given parameter is not part of the Comsol model')
-            assert(~isempty(obj.modelNode.name), 'Specify a model name first (e.g. by saving it)')
+            assert(~isempty(obj.modelNode.getFilePath), 'No filepath associated with this model. Save it first.')
             
             com.comsol.model.util.ModelUtil.showProgress(showProgress);
             
@@ -100,7 +100,7 @@ classdef itaComsolStudy < itaComsolNode
             if ~isempty(parameterUnit); unitParameterExt = [ '[' parameterUnit ']']; end
             
             %---init folder and filenames---
-            [folder, name] = fileparts(char(obj.modelNode.modelPath));
+            [folder, name] = fileparts(char(obj.modelNode.getFilePath));
             if isempty(resultFolder); resultFolder = folder; end
             baseModelName = [name '_' parameterName '_'];
             baseModelPath = fullfile(resultFolder, baseModelName);
