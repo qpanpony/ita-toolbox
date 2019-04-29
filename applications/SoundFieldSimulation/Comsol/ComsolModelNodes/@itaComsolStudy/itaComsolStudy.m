@@ -62,13 +62,6 @@ classdef itaComsolStudy < itaComsolNode
             %   The simulation results are stored in .mph files with
             %   filenames based on the original filename and the parameter
             %   values (e.g. C:\modelPath\modelName_parameterName_-3[s]_result.mph).
-            %   WARNING:
-            %   There is a bug in Comsol where the model path which is
-            %   provided by the Matlab Livelink classes does not match the
-            %   real filepath. This occurs when copying a Comsol model to
-            %   another directory, renaming it or also using "Save As" in
-            %   Comsol. The model path in Matlab will still be the original
-            %   one and so the results will be stored there!
             
             %---Parse Options---
             sArgs = struct('parameterUnit','','resultFolder',[],'showProgress', false);
