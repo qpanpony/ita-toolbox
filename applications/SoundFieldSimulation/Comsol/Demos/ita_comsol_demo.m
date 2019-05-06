@@ -23,6 +23,10 @@ ita_comsol_demo_init();
 ita_comsol_demo_simulation();
 
 
+%% Visualize model in Matlab
+ita_comsol_demo_visualizer();
+
+
 %% Create sources
 ita_comsol_demo_sources();
 
