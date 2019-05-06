@@ -25,6 +25,7 @@ classdef itaSource < itaSpatialSimulationInputItem
         mDirectivityFile;                               %Char vector
         mType = SourceType.PointSource;                 %SourceType
         mSensitivityType = SensitivityType.UserDefined  %SensitivityType
+        mDirectivityType = DirectivityType.UserDefined  %DirectivityType
         mPistonRadius;                                  %Double scalar
     end
     
@@ -36,6 +37,7 @@ classdef itaSource < itaSpatialSimulationInputItem
     properties(Dependent = true)
         type;               %Iindicates what the wave TF represents - PointSource, Piston, SurfaceDistribution (see SourceType)
         sensitivityType;    %Switch between a flat frequency response and a user-defined one.
+        directivityType;    %Switch between a omnidirectional directivity and a user-defined one.
         
         volumeFlowTf;       %volume flow transfer function of the point source used for wave-based simulations
         velocityTf;
@@ -71,6 +73,19 @@ classdef itaSource < itaSpatialSimulationInputItem
         end
         function out = get.sensitivityType(this)
             out = char(this.mSensitivityType);
+        end
+    end
+    
+    %% Sensitivity Type
+    methods
+        function this = set.directivityType(this, directivityType)
+            assert(isa(directivityType, 'DirectivityType') && isscalar(directivityType), 'Can only assign a single object of type DirectivityType')
+            if this.mDirectivityType == directivityType; return; end
+            
+            this.mDirectivityType = directivityType;
+        end
+        function out = get.directivityType(this)
+            out = char(this.mDirectivityType);
         end
     end
     
@@ -258,7 +273,7 @@ classdef itaSource < itaSpatialSimulationInputItem
             bool = arrayfun(@(x) ~isempty(x.mWaveTf), this) | this.tfDefinedByType();
         end
         function bool = HasDirectivity(this)
-            bool = arrayfun(@(x) ~isempty(x.mDirectivityFile), this);
+            bool = arrayfun(@(x) ~isempty(x.mDirectivityFile), this) | this.directivityDefinedByType();
         end
         
         function bool = HasGaData(this)
@@ -291,6 +306,9 @@ classdef itaSource < itaSpatialSimulationInputItem
         function bool = tfDefinedByType(this)
             bool = arrayfun(@(x) isequal(x.mSensitivityType, SensitivityType.Flat), this);
         end
+        function bool = directivityDefinedByType(this)
+            bool = arrayfun(@(x) isequal(x.mDirectivityType, DirectivityType.Omnidirectional), this);
+        end
     end
     methods(Access = private, Static = true)
         function bool = itaSuperHasCoordinates(obj)
@@ -299,7 +317,7 @@ classdef itaSource < itaSpatialSimulationInputItem
     end
     
     %% Public functions
-    methods
+    methods(Hidden = true)
         function obj = CrossfadeWaveAndGaData(this, crossfadeFreq)
             %Cross-fades the wave-based source properties with the
             %geometrical ones at a given frequency. Data is returned in as

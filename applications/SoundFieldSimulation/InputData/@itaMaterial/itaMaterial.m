@@ -263,7 +263,7 @@ classdef itaMaterial < itaSimulationInputItem
     end
     
     %% Public functions
-    methods
+    methods(Hidden = true)
         function obj = CrossfadeWaveAndGaData(this, crossfadeFreq)
             %Cross-fades the wave-based material properties with the
             %geometrical ones at a given frequency. Data is returned in as

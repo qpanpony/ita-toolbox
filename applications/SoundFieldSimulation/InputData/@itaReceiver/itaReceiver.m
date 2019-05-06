@@ -143,7 +143,7 @@ classdef itaReceiver < itaSpatialSimulationInputItem
     end
     
     %% Public functions    
-    methods
+    methods(Hidden = true)
         function obj = CrossfadeWaveAndGaData(this, crossfadeFreq)
             %Since the receiver has no frequency dependent data yet, no
             %crossfade is necessary
