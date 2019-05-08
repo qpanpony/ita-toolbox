@@ -1150,6 +1150,12 @@ classdef itaRavenProject < handle
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
         
+        function setPathMaterials(obj, pathMaterials)
+            obj.pathMaterials = pathMaterials;
+            obj.rpf_ini.SetValues('Global', 'ProjectPath_MaterialDB', pathMaterials);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
         %------------------------------------------------------------------
         function setSimulationTypeIS(obj, typeIS)
             obj.simulationTypeIS = typeIS;
