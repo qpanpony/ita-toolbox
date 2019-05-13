@@ -36,12 +36,11 @@ diffr_tf_btms.timeData = ita_diffraction_btms(finScreen, src, rcv, fs, diffr_tf_
 
 diffr_tf = ita_merge(diffr_tf_maekawa, diffr_tf_utd, diffr_tf_btms);
 diffr_tf_norm = ita_normalize_spk(diffr_tf, 'allchannels');
+diffr_tf_norm.channelNames = [{'normalized maekawa'}; {'normalized utd'}; {'normalized btms'}];
+
+diffr_tf = ita_merge(diffr_tf, diffr_tf_norm);
 
 %% plot
 diffr_tf.pf;
-title('diffraction filters unnormalized');
-legend('maekawa', 'utd', 'btms');
-
-diffr_tf_norm.pf;
-title('diffraction filters normalized');
-legend('maekawa', 'utd', 'btms');
+title('diffraction filters at simple screen');
+ylim auto
