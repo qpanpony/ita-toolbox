@@ -26,8 +26,11 @@ diffr_tf = itaAudio();
 diffr_tf.fftDegree = fftDegree;
 diffr_tf.samplingRate = fs;
 diffr_tf_maekawa = diffr_tf;
+diffr_tf_maekawa.channelNames = {'maekawa'};
 diffr_tf_utd = diffr_tf;
+diffr_tf_utd.channelNames = {'utd'};
 diffr_tf_btms = diffr_tf;
+diffr_tf_btms.channelNames = {'btms'};
 
 %% diffraction
 diffr_tf_maekawa.freqData = ita_diffraction_maekawa(infScreen, src, rcv, diffr_tf_maekawa.freqVector, c);
