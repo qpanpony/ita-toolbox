@@ -72,13 +72,13 @@ end
 
 %% Extrapolation
 if ~isempty(extrapLow)
-    idxOverwriteLow = ceil(newFreqs) < data.freqVector(1);
+    idxOverwriteLow = newFreqs < data.freqVector(1);
     if any(idxOverwriteLow)
         newFreqData(idxOverwriteLow, :) = repmat(extrapLow, sum(idxOverwriteLow), 1);
     end
 end
 if ~isempty(extrapHigh)
-    idxOverwriteHigh = floor(newFreqs) > data.freqVector(end);
+    idxOverwriteHigh = newFreqs > data.freqVector(end);
     if any(idxOverwriteHigh)
         newFreqData(idxOverwriteHigh, :) = repmat(extrapHigh, sum(idxOverwriteHigh), 1);
     end
