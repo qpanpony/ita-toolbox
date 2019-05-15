@@ -485,6 +485,9 @@ classdef itaRavenProject < handle
         
         %------------------------------------------------------------------
         function run(obj)
+            if numel(obj.projectName) > 70
+                warning('Long project name. This might cause an error while writing output files. Consider resetting your project name!')
+            end
             
             obj.simulationDone = false;
             
@@ -2249,6 +2252,7 @@ classdef itaRavenProject < handle
                     binauralIRitaAudio(iSrc,iRec).timeData = obj.binauralIR{iSrc,iRec};
                     binauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
                     binauralIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    if isempty(binauralIRitaAudio(iSrc,iRec)); continue; end
                     binauralIRitaAudio(iSrc,iRec).channelNames{1} = [obj.receiverNames{iRec} '_Left'];
                     binauralIRitaAudio(iSrc,iRec).channelNames{2} = [obj.receiverNames{iRec} '_Right'];
                 end
@@ -2281,6 +2285,7 @@ classdef itaRavenProject < handle
                     binauralIRitaAudio(iSrc,iRec).timeData = obj.binauralIR_IS{iSrc,iRec};
                     binauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
                     binauralIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    if isempty(binauralIRitaAudio(iSrc,iRec)); continue; end
                     binauralIRitaAudio(iSrc,iRec).channelNames{1} = [obj.receiverNames{iRec} '_Left'];
                     binauralIRitaAudio(iSrc,iRec).channelNames{2} = [obj.receiverNames{iRec} '_Right'];
                 end
@@ -2313,6 +2318,7 @@ classdef itaRavenProject < handle
                     binauralIRitaAudio(iSrc,iRec).timeData = obj.binauralIR_RT{iSrc,iRec};
                     binauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
                     binauralIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    if isempty(binauralIRitaAudio(iSrc,iRec)); continue; end
                     binauralIRitaAudio(iSrc,iRec).channelNames{1} = [obj.receiverNames{iRec} '_Left'];
                     binauralIRitaAudio(iSrc,iRec).channelNames{2} = [obj.receiverNames{iRec} '_Right'];
                 end
@@ -2328,6 +2334,7 @@ classdef itaRavenProject < handle
             binauralPoissonSequenceitaAudio.samplingRate = obj.sampleRate;
             binauralPoissonSequenceitaAudio.signalType = 'energy';
             binauralPoissonSequenceitaAudio.timeData = data;
+            if isempty(binauralPoissonSequenceitaAudio); return; end
             binauralPoissonSequenceitaAudio.channelNames{1} = [obj.receiverNames{end} '_Left'];
             binauralPoissonSequenceitaAudio.channelNames{2} = [obj.receiverNames{end} '_Right'];
         end
