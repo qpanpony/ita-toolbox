@@ -408,6 +408,7 @@ classdef  itaHRTF < itaAudio
                 end
                 
                 metadata = DAFFv17('getMetadata', handleDaff);
+                DAFFv17('close', handleDaff);
                 
             catch
                 disp( 'Could not read DAFF file right away, falling back to old version and retrying ...' );
@@ -448,6 +449,8 @@ classdef  itaHRTF < itaAudio
                     coordDaff(iDir,:) = DAFFv15( 'getRecordCoords', handleDaff, 'data', iDir )';
                     counter= counter+2;
                 end
+                
+                DAFFv15('close', handleDaff);
             end
             
             % Proceed (version independent)
