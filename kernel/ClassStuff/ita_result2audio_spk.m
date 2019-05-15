@@ -1,10 +1,10 @@
-function audioObj = ita_result2audio_spk(resultObj, samplingRate, fftDegree, varargin)
+function audioObj = ita_result2audio_spk(resultObj, samplingRate, nBins, varargin)
 %ita_result2audio_spk - Converts an itaResult with frequency data into
 %itaAudio using interpolation and extrapolation in the frequency domain
 % Data outside of the valid frequency range is extrapolated with zeros.
 % Optionally, a filter can be applied.
 %
-%   Syntax: itaResult = ita_result2audio_spk(itaResult, samplingRate, fftDegree, Options)
+%   Syntax: itaResult = ita_result2audio_spk(itaResult, samplingRate, nBins, Options)
 %
 %       Options (default):
 %           filter ('none'):    'none', 'lowpass', 'highpass', 'bandpass'
@@ -24,8 +24,8 @@ function audioObj = ita_result2audio_spk(resultObj, samplingRate, fftDegree, var
 thisFuncStr  = [upper(mfilename) ':'];
 
 %% Initialization and Input Parsing
-sArgs = struct('pos1_data','itaResult','pos2_samplingRate','integer', 'pos3_fftDegree','numeric');
-ita_parse_arguments(sArgs,{resultObj, samplingRate, fftDegree});
+sArgs = struct('pos1_data','itaResult','pos2_samplingRate','integer', 'pos3_nBins','integer');
+ita_parse_arguments(sArgs,{resultObj, samplingRate, nBins});
 assert(logical(resultObj.isFreq), [thisFuncStr 'Data must be in frequency domain.'])
 
 sArgs  = struct('filter', 'none', 'filterorder', 20);
@@ -34,7 +34,6 @@ doLowPass = isequal(sArgs.filter, 'bandpass') || isequal(sArgs.filter, 'lowpass'
 doHighPass = isequal(sArgs.filter, 'bandpass') || isequal(sArgs.filter, 'highpass');
 doBandPass = isequal(sArgs.filter, 'bandpass');
 
-[~, nBins] = ita_get_nSamples(fftDegree);
 fMin = resultObj.freqVector(1);
 fMax = resultObj.freqVector(end);
 
