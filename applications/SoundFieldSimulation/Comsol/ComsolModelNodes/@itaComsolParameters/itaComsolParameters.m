@@ -30,7 +30,7 @@ classdef itaComsolParameters < itaComsolNode
             %   makes sense for the value since usually a unit should be
             %   specified
             assert(ischar(parameterName) && isrow(parameterName), 'parameterName must be a char row vector')
-            assert(ischar(parameterName) && isrow(parameterName), 'value must be a char row vector')
+            assert(ischar(value) && isrow(value), 'value must be a char row vector')
             
             parameterNodeNames = obj.All;
             for idxNode = 1:numel(parameterNodeNames)
