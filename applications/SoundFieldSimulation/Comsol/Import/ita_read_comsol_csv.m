@@ -156,7 +156,13 @@ for iHeader = 1:numel(splitHeadersExpressionAndParameters)
     parameters = cellfun(@(x) x{1}, splitParametersAndValue,'UniformOutput',0);
     values = cellfun(@(x) str2double(x{2}), splitParametersAndValue);
     
-    idxFreqParam = contains(parameters, sArgs.freqParameter);
+    if ~strcmp(sArgs.freqParameter, 'freq')
+        idxObsoleteFreqParam = strcmp(parameters, 'freq');
+        parameters(idxObsoleteFreqParam) = [];
+        values(idxObsoleteFreqParam) = [];
+    end
+    
+    idxFreqParam = strcmp(parameters, sArgs.freqParameter);
     currentFreq = values(idxFreqParam);
     if ~ismember(currentFreq,freqVector)
         freqVector = [freqVector,currentFreq];
