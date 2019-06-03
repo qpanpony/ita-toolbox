@@ -20,6 +20,7 @@ prop_tfs = itaAudio;
 prop_tfs.samplingRate = fs;
 prop_tfs.fftDegree = fft_degree;
 prop_tfs.freqData = ones( prop_tfs.nBins, N );
+prop_tfs.signalType = 'energy';
 
 lambda = ita_speed_of_sound ./ prop_tfs.freqVector( 2:end ); % Wavelength
 k = (2 * pi) ./ lambda; % Wavenumber
@@ -32,7 +33,7 @@ end
 phase_by_delay = ita_propagation_delay( distance, ita_speed_of_sound, fs, fft_degree );
 spreading_loss = ita_propagation_spreading_loss( distance, 'spherical' );
 
-freq_data_linear = phase_by_delay .* spreading_loss; % oder quadratisch?!
+freq_data_linear = phase_by_delay .* spreading_loss;
 
 for m = 1 : N
 
@@ -82,8 +83,8 @@ for m = 1 : N
             source_pos = propagation_path.propagation_anchors{ m - 1 }.interaction_point;
             target_pos = propagation_path.propagation_anchors{ m + 1 }.interaction_point;
             
-            source_direction = source_pos - anchor.interaction_point;
-            target_direction = anchor.interaction_point - target_pos;
+            source_direction = ( source_pos - anchor.interaction_point ) / norm( source_pos - anchor.interaction_point );
+            target_direction = ( target_pos - anchor.interaction_point ) / norm( target_pos - anchor.interaction_point );
             
             effective_source_distance = ita_propagation_effective_source_distance( propagation_path, m );
             effective_target_distance = ita_propagation_effective_target_distance( propagation_path, m );

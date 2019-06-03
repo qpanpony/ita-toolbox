@@ -30,10 +30,11 @@ else
     c = 341; % m/s, speed of sound
 end
 
-specrefl_tf = itaAudio;
-specrefl_tf.samplingRate = fs;
-specrefl_tf.fftDegree = fft_degree;
-specrefl_tf.freqData = ones( specrefl_tf.nBins, 1 );
+diffraction_tf = itaAudio();
+diffraction_tf.samplingRate = fs;
+diffraction_tf.fftDegree = fft_degree;
+diffraction_tf.freqData = ones( diffraction_tf.nBins, 1 );
+diffraction_tf.signalType = 'energy';
 
 % @todo filbert: assemble wedge from anchor infos
 
@@ -41,19 +42,50 @@ specrefl_tf.freqData = ones( specrefl_tf.nBins, 1 );
 n1 = anchor.main_wedge_face_normal( 1:3 )';
 n2 = anchor.opposite_wedge_face_normal( 1:3 )';
 loc = anchor.vertex_start( 1:3 )';
+endPt = anchor.vertex_end( 1:3 )';
+len = norm( endPt - loc );
 
-w = itaInfiniteWedge( n1, n2, loc );
+% check if wedge is a screen
+if( abs( cross(n1, n2) ) < itaInfiniteWedge.set_get_geo_eps )
+    aperture_dir = ( anchor.vertex_end( 1:3 )' - anchor.vertex_start( 1:3 )' ) / len;
+    w = itaSemiInfinitePlane( n1, loc, aperture_dir );
+    finWedge = itaFiniteWedge( n1, n2, loc, len );
+    finWedge.aperture_direction = aperture_dir;
+    finWedge.aperture_end_point = endPt;
+else
+    w = itaInfiniteWedge( n1, n2, loc );
+end
 
 switch( diffraction_model )
     case 'utd'
-        [ ~, D, ~ ] = ita_diffraction_utd( w, effective_source_position( 1:3 )', effective_receiver_position( 1:3 )', specrefl_tf.freqVector( 2:end ), c ); 
-        specrefl_tf.freqData = [ 0 D ]';
+        [ utd_tf, ~, ~ ] = ita_diffraction_utd( w, effective_source_position( 1:3 )', effective_receiver_position( 1:3 )', diffraction_tf.freqVector( 2:end ), c ); 
+        diffraction_tf.freqData = [ 0; utd_tf ];
+        
+        apex_point = w.get_aperture_point( effective_source_position( 1:3 )', effective_receiver_position( 1:3 )' );
+        distance = norm( apex_point - effective_source_position ) + norm( effective_receiver_position - apex_point );
+        spreading_loss = ita_propagation_spreading_loss( distance );
+        phase_delay = ita_propagation_delay( distance, ita_speed_of_sound, fs, fft_degree );
+        
+        normilization_porpagation = spreading_loss * phase_delay;
+        
+        diffraction_tf.freqData = diffraction_tf.freqData ./ normilization_porpagation;
         
     case 'maekawa'
     case 'btms'
+        btms_tf = ita_diffraction_btms( finWedge, effective_source_position( 1:3 )', effective_receiver_position( 1:3 )', diffraction_tf.samplingRate, diffraction_tf.nBins, c );
+        diffraction_tf.freqData = btms_tf;
+        
+        apex_point = w.get_aperture_point( effective_source_position( 1:3 )', effective_receiver_position( 1:3 )' );
+        distance = norm( apex_point - effective_source_position ) + norm( effective_receiver_position - apex_point );
+        spreading_loss = ita_propagation_spreading_loss( distance );
+        phase_delay = ita_propagation_delay( distance, ita_speed_of_sound, fs, fft_degree );
+        
+        normilization_porpagation = spreading_loss * phase_delay;
+        
+        diffraction_tf.freqData = diffraction_tf.freqData ./ normilization_porpagation;
 end
 
-freq_data_linear = specrefl_tf.freqData;
+freq_data_linear = diffraction_tf.freqData;
 
 end
 

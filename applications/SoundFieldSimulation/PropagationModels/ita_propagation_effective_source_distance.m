@@ -21,7 +21,7 @@ distance = norm( last_segment_vec );
 for m = anchor_idx : -1 : 2
     anchor = propagation_path.propagation_anchors{ m - 1 };
     if strcmpi( anchor.anchor_type, 'specular_reflection' )
-        current_segment_vec = propagation_path.propagation_anchors{ m - 1 }.interaction_point - propagation_path.propagation_anchors{ m }.interaction_point;
+        current_segment_vec = propagation_path.propagation_anchors{ m - 2 }.interaction_point - anchor.interaction_point;
         distance = distance + norm( current_segment_vec );
     else
         break

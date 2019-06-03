@@ -25,7 +25,7 @@ warning( 'ita_propagation_directivity not implemented yet, returning neutral tra
 directivity_tf = itaAudio();
 directivity_tf.samplingRate = fs;
 directivity_tf.fftDegree = fft_degree;
-directivity_tf.freqData = ones( 1, directivity_tf.nBins );
+directivity_tf.freqData = ones( directivity_tf.nBins, 1 );
 freq_data_linear = directivity_tf.freqData;
 
 end

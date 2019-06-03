@@ -35,7 +35,6 @@ classdef itaFiniteWedge < itaInfiniteWedge
                 obj.ep = obj.sp + length * obj.aperture_direction;
             end
         end
-        
 
         function obj = set.aperture_end_point( obj, length_of_aperture )
             % Sets aperture direction manually (in case of linear

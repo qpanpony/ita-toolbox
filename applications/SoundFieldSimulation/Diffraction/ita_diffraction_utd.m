@@ -8,7 +8,6 @@ function [ diffr_field, D, A ] = ita_diffraction_utd( wedge, source_pos, receive
 %
 % Example:
 %   att = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequenc_vec )
-%
 
 %% Assertions
 dim_freq = size( frequency_vec );
@@ -106,9 +105,9 @@ F4 = kawai_approx_fresnel( k .* L .* a4 );
 
 % Avoid eventual singularities of the cot terms at the shadow or reflection boundary with a approximation by
 % Kouyoumjian and Pathak
-mask1 = ( alpha_d - alpha_i ) - 2 * pi * n * N_p( n, alpha_d - alpha_i ) + pi == 0;
+mask1 =   ( alpha_d - alpha_i ) - 2 * pi * n * N_p( n, alpha_d - alpha_i ) + pi == 0;
 mask2 = - ( alpha_d - alpha_i ) + 2 * pi * n * N_n( n, alpha_d - alpha_i ) + pi == 0;
-mask3 = ( alpha_d + alpha_i ) - 2 * pi * n * N_p( n, alpha_d + alpha_i ) + pi == 0;
+mask3 =   ( alpha_d + alpha_i ) - 2 * pi * n * N_p( n, alpha_d + alpha_i ) + pi == 0;
 mask4 = - ( alpha_d + alpha_i ) + 2 * pi * n * N_n( n, alpha_d + alpha_i ) + pi == 0;
   
 singularities = [ any( mask1 ~= 0 ), any( mask2 ~= 0 ), any( mask3 ~= 0 ), any( mask4 ~= 0 ) ];
