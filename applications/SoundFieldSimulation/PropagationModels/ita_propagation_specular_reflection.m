@@ -26,7 +26,7 @@ warning( 'ita_propagation_directivity not implemented yet, returning neutral tra
 specrefl_tf = itaAudio;
 specrefl_tf.samplingRate = fs;
 specrefl_tf.fftDegree = fft_degree;
-specrefl_tf.freqData = ones( 1, specrefl_tf.nBins );
+specrefl_tf.freqData = ones( specrefl_tf.nBins, 1 );
 freq_data_linear = specrefl_tf.freqData;
 
 end
