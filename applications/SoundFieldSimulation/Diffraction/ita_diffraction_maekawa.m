@@ -1,4 +1,4 @@
-function H_diffr = ita_diffraction_maekawa( wedge, source_pos, receiver_pos, frequencies, speed_of_sound )
+function [ H_diffr, detour ] = ita_diffraction_maekawa( wedge, source_pos, receiver_pos, frequencies, speed_of_sound )
 % Calculates the attenuation filter(s) at a diffraction wedge for source
 % and receiver location(s) at given frequencies
 %

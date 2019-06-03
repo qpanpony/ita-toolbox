@@ -79,7 +79,7 @@ theta_i = wedge.get_angle_from_point_to_aperture( S, Apex_Point );
 n = wedge.opening_angle / pi; % Variable dependend on opening angle of the wedge
 
 lambda = c ./ frequency_vec; % Wavelength
-k = (2 * pi) ./ lambda; % Wavenumber
+k = 2 * pi ./ lambda; % Wavenumber
 
 
 % Diffraction coefficient D
@@ -158,10 +158,10 @@ D = ( D_factor .* ( term1 + term2 + s * ( term3 + term4 ) ) )'; % -> frequency d
 
 %% Combined diffracted sound field filter at receiver
 
-H_i = 1 ./ rho .* exp( -1i * k .* rho )'; % Consideration of transfer path from source to apex point
-A = repmat( sqrt( rho ./ ( r .* ( rho + r ) ) ), 1, numel( frequency_vec ) )'; % Amplitude
-
-diffr_field = (  H_i .* D .* A .* exp( -1i .* k' .* r ) );
+H_i = exp( -1i * k' .* rho ) ./ rho; % Transfer path from spherical sound source to apex point
+A = sqrt( rho ./ ( r .* ( rho + r ) ) ); % Amplitude divergion factor of modified sphere wavefront (apex->receiver)
+H_o = exp( -1i .* k' .* r ); % Phase modification from apex point to receiver
+diffr_field =  H_i .* D .* A .* H_o;
 
 
 end
