@@ -20,7 +20,6 @@ prop_tfs = itaAudio;
 prop_tfs.samplingRate = fs;
 prop_tfs.fftDegree = fft_degree;
 prop_tfs.freqData = ones( prop_tfs.nBins, N );
-prop_tfs.signalType = 'energy';
 
 lambda = ita_speed_of_sound ./ prop_tfs.freqVector( 2:end ); % Wavelength
 k = (2 * pi) ./ lambda; % Wavenumber

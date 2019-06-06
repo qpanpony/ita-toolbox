@@ -34,7 +34,6 @@ diffraction_tf = itaAudio();
 diffraction_tf.samplingRate = fs;
 diffraction_tf.fftDegree = fft_degree;
 diffraction_tf.freqData = ones( diffraction_tf.nBins, 1 );
-diffraction_tf.signalType = 'energy';
 
 % @todo filbert: assemble wedge from anchor infos
 
@@ -56,12 +55,20 @@ else
     w = itaInfiniteWedge( n1, n2, loc );
 end
 
+% Legacy
+if size( effective_source_position, 1 ) == 4
+    effective_source_position = effective_source_position( 1:3 )';
+end
+if size( effective_receiver_position, 1 ) == 4
+    effective_receiver_position = effective_receiver_position( 1:3 )';
+end
+
 switch( diffraction_model )
     case 'utd'
-        [ utd_tf, ~, ~ ] = ita_diffraction_utd( w, effective_source_position( 1:3 )', effective_receiver_position( 1:3 )', diffraction_tf.freqVector( 2:end ), c ); 
+        [ utd_tf, ~, ~ ] = ita_diffraction_utd( w, effective_source_position, effective_receiver_position, diffraction_tf.freqVector( 2:end ), c ); 
         diffraction_tf.freqData = [ 0; utd_tf ];
         
-        apex_point = w.get_aperture_point( effective_source_position( 1:3 )', effective_receiver_position( 1:3 )' );
+        apex_point = w.get_aperture_point( effective_source_position, effective_receiver_position );
         distance = norm( apex_point - effective_source_position ) + norm( effective_receiver_position - apex_point );
         spreading_loss = ita_propagation_spreading_loss( distance );
         phase_delay = ita_propagation_delay( distance, ita_speed_of_sound, fs, fft_degree );
