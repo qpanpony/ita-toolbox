@@ -8,11 +8,17 @@ function diffr_field = ita_diffraction_utd_approximated( wedge, source_pos, rece
 %   [1] Tsingos, Funkhouser et al. - Modeling Acoustics in Virtual Environments using the Uniform Theory of Diffraction
 %
 % Example:
-%   att = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequency_vec )
+%   att = ita_diffraction_utd_approximated( wedge, source_pos, receiver_pos, frequency_vec )
 %
 %% Assertions
 if nargin < 6
     transition_const = 0.1;
+end
+
+in_shadow_zone = ita_diffraction_shadow_zone( wedge, source_pos, receiver_pos );
+if ~in_shadow_zone
+    diffr_field = zeros( 1, numel( f ) );
+    return
 end
 
 %% Variables
@@ -25,8 +31,11 @@ receiver_SB = source_pos + Src_Apex_Dir .* ( r + rho ); % Virtual position of re
 c = speed_of_sound;
 k_vec = 2 * pi * frequency_vec ./ c; % Wavenumber
 
-in_shadow_zone = ita_diffraction_shadow_zone( wedge, source_pos, receiver_pos );
-in_shadow_zone_SB = ita_diffraction_shadow_zone( wedge, source_pos, receiver_SB );
+if ~wedge.point_outside_wedge( receiver_SB )
+    diffr_field = zeros( 1, numel( f ) );
+    return
+end
+
 phi = repmat( acos( dot( Apex_Rcv_Dir( in_shadow_zone, : ), Src_Apex_Dir( in_shadow_zone, : ), 2 ) ), 1, numel( frequency_vec ) ); % angle between receiver and shadow boundary
 phi( phi > pi/4 ) = pi/4;
 phi_0 = transition_const;
@@ -34,12 +43,9 @@ phi_0 = transition_const;
 % Incident field at shadow boundary
 E_incident_SB = ( 1 ./ Norm( receiver_SB - source_pos ) .* exp( -1i .* k_vec .* ( r + rho ) ) )';
 
-if ~in_shadow_zone_SB
 % Diffracted field at shadow boundary
-    E_diff_SB = ita_diffraction_utd( wedge, source_pos, receiver_SB, frequency_vec, c );
-else
-    E_diff_SB = ones( 1, numel( frequency_vec ) ); % disable
-end
+E_diff_SB = ita_diffraction_utd( wedge, source_pos, receiver_SB, frequency_vec, c );
+
 
 %% Filter Calculation
 % Normalization factor
