@@ -22,13 +22,14 @@ end
 
 %% Begin
 % define cartesian coordinate system
-e_z = obj.aperture_direction;
 if use_main_face
     e_y = obj.main_face_normal;
+    e_z = obj.aperture_direction;
 else
     e_y = obj.opposite_face_normal;
+    e_z = - obj.aperture_direction;
 end
-e_x = cross( e_z, e_y );
+e_x = cross( e_y, e_z );
 
 % Determine coordinates of point in new coordinate system
 x_new = dot( point - obj.location, e_x );  
