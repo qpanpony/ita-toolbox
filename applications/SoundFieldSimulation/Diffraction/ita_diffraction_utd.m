@@ -1,4 +1,4 @@
-function [ diffr_field, D, A ] = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequency_vec, speed_of_sound )
+function [ diffr_field, D, A ] = ita_diffraction_utd( wedge, sourcePos, receiverPos, frequencyVec, speedOfSound )
 %ITA_DIFFRACTION_UTD Calculates the diffraction filter based on uniform
 %theory of diffraction (with Kawai approximation)
 %
@@ -10,80 +10,38 @@ function [ diffr_field, D, A ] = ita_diffraction_utd( wedge, source_pos, receive
 %   att = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequenc_vec )
 
 %% Assertions
-dim_freq = size( frequency_vec );
-dim_src = size( source_pos );
-dim_rcv = size( receiver_pos );
-if dim_freq(1) ~= 1
-    if dim_freq(2) ~= 1
-        error( 'Invalid frequency vector' );
-    end
-    frequency_vec = frequency_vec';
+if ~ita_diffraction_point_is_of_dim3( sourcePos )
+    error( 'Source point must be of dimension 3' )
 end
-if dim_src(2) ~= 3
-    if dim_src(1) ~= 3
-        error( 'Source point(s) must be of dimension 3')
-    end
-    source_pos = source_pos';
-    dim_src = size( source_pos );
+if ~ita_diffraction_point_is_of_dim3( receiverPos )
+    error( 'Receiver point must be of dimension 3' )
 end
-if dim_src(1) == 0
-    error( 'no source found' );
+if ~ita_diffraction_point_is_row_vector( sourcePos )
+    sourcePos = sourcePos';
 end
-if dim_rcv(2) ~= 3
-    if dim_rcv(1) ~= 3
-        error( 'Receiver point(s) must be of dimension 3')
-    end
-    receiver_pos = receiver_pos';
-    dim_rcv = size( receiver_pos );
-end
-if dim_rcv(1) == 0
-    error( 'no receiver found' );
-end
-if dim_src(1) ~= 1 && dim_rcv(1) ~= 1 && dim_src(1) ~= dim_rcv(1)
-    error( 'Number of receiver and source positions do not match' )
-end
-switch dim_src(1) >= dim_rcv(1)
-    case true
-        dim_n = dim_src(1);
-    case false
-        dim_n = dim_rcv(1);
+if ~ita_diffraction_point_is_row_vector( receiverPos )
+    receiverPos = receiverPos';
 end
 
 %% Variables
-if dim_src(1) == dim_n
-    S = source_pos;
-    if dim_rcv(1) == dim_n
-        R = receiver_pos;
-    else
-        R = repmat( receiver_pos, dim_n, 1 );
-    end
-else
-    R = receiver_pos;
-    if dim_src(1) == dim_n
-        S = source_pos;
-    else
-        S = repmat( source_pos, dim_n, 1 );
-    end
-end
-Apex_Point = wedge.get_aperture_point( source_pos, receiver_pos );
-rho = norm( Apex_Point - S ); % Distance of source to aperture point
-r = norm( R - Apex_Point ); % Distance of receiver to aperture point
-c = speed_of_sound;
+apexPoint = wedge.get_aperture_point( sourcePos, receiverPos );
+distFromSrc2ApexPoint = norm( apexPoint - sourcePos ); % Distance of source to aperture point
+distFromRcv2ApexPoint = norm( receiverPos - apexPoint ); % Distance of receiver to aperture point
 
-main_face = wedge.point_facing_main_side( S );
-alpha_i = wedge.get_angle_from_point_to_wedge_face( S, main_face );
-alpha_d = wedge.get_angle_from_point_to_wedge_face( R, main_face );
-theta_i = wedge.get_angle_from_point_to_aperture( S, Apex_Point );
+sourceFacingMainSide = wedge.point_facing_main_side( sourcePos );
+alpha_i = wedge.get_angle_from_point_to_wedge_face( sourcePos, sourceFacingMainSide );
+alpha_d = wedge.get_angle_from_point_to_wedge_face( receiverPos, sourceFacingMainSide );
+theta_i = wedge.get_angle_from_point_to_aperture( sourcePos, apexPoint );
 
 n = wedge.opening_angle / pi; % Variable dependend on opening angle of the wedge
 
-lambda = c ./ frequency_vec; % Wavelength
+lambda = speedOfSound ./ frequencyVec; % Wavelength
 k = 2 * pi ./ lambda; % Wavenumber
 
 
 % Diffraction coefficient D
-assert( all( rho + r ~= 0 ) && all( r ~= 0 )  );
-L = ( ( rho .* r ) ./ ( rho + r ) ) .* ( sin( theta_i ) ).^2; % -> distance dependency
+assert( all( distFromSrc2ApexPoint + distFromRcv2ApexPoint ~= 0 ) && all( distFromRcv2ApexPoint ~= 0 )  );
+L = ( ( distFromSrc2ApexPoint .* distFromRcv2ApexPoint ) ./ ( distFromSrc2ApexPoint + distFromRcv2ApexPoint ) ) .* ( sin( theta_i ) ).^2; % -> distance dependency
 
 D_factor = -exp( -1i * pi / 4 ) ./ ( 2 * n * sqrt( 2* pi * k ) .* sin( theta_i ) );
 
@@ -147,19 +105,19 @@ term3(~mask3, :) = Cot3(~mask3, :) .* F3(~mask3, :);
 term4(~mask4, :) = Cot4(~mask4, :) .* F4(~mask4, :);
 
 if wedge.is_boundary_condition_hard
-    s = 1;
+    switchSign = 1;
 else
-    s = -1;
+    switchSign = -1;
 end
 
-D = ( D_factor .* ( term1 + term2 + s * ( term3 + term4 ) ) )'; % -> frequency dependent
+D = ( D_factor .* ( term1 + term2 + switchSign * ( term3 + term4 ) ) )'; % -> frequency dependent
 
 
 %% Combined diffracted sound field filter at receiver
 
-H_i = exp( -1i * k' .* rho ) ./ rho; % Transfer path from spherical sound source to apex point
-A = sqrt( rho ./ ( r .* ( rho + r ) ) ); % Amplitude divergion factor of modified sphere wavefront (apex->receiver)
-H_o = exp( -1i .* k' .* r ); % Phase modification from apex point to receiver
+H_i = exp( -1i * k' .* distFromSrc2ApexPoint ) ./ distFromSrc2ApexPoint; % Transfer path from spherical sound source to apex point
+A = sqrt( distFromSrc2ApexPoint ./ ( distFromRcv2ApexPoint .* ( distFromSrc2ApexPoint + distFromRcv2ApexPoint ) ) ); % Amplitude divergion factor of modified sphere wavefront (apex->receiver)
+H_o = exp( -1i .* k' .* distFromRcv2ApexPoint ); % Phase modification from apex point to receiver
 diffr_field =  H_i .* D .* A .* H_o;
 
 
