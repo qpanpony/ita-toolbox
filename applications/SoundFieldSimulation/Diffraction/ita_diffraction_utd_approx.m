@@ -1,4 +1,4 @@
-function diffr_field = ita_diffraction_utd_approximated( wedge, source_pos, receiver_pos, frequency_vec, speed_of_sound, transition_const )
+function diffr_field = ita_diffraction_utd_approx( wedge, source_pos, receiver_pos, f, speed_of_sound, transition_const )
 %ITA_DIFFRACTION_UTD Calculates the diffraction filter based on uniform
 %theory off diffraction (with Kawai approximation) only in shadow regions.
 %To preserve continuity of the total sound field in e.g. shadow boundaries,
@@ -29,7 +29,7 @@ rho = Norm( Apex_Point - source_pos );  % Distance Source to Apex point
 r = Norm( receiver_pos - Apex_Point );  % Distance Apex point to Receiver
 receiver_SB = source_pos + Src_Apex_Dir .* ( r + rho ); % Virtual position of receiver at shadow boundary
 c = speed_of_sound;
-k_vec = 2 * pi * frequency_vec ./ c; % Wavenumber
+k_vec = 2 * pi * f ./ c; % Wavenumber
 
 if ~wedge.point_outside_wedge( receiver_SB )
     diffr_field = zeros( 1, numel( f ) );

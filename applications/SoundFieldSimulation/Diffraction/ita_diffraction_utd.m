@@ -1,96 +1,138 @@
-function [ diffr_field, D, A ] = ita_diffraction_utd( wedge, sourcePos, receiverPos, frequencyVec, speedOfSound )
+function [ diffr_field, D, A ] = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequency_vec, speed_of_sound )
 %ITA_DIFFRACTION_UTD Calculates the diffraction filter based on uniform
 %theory of diffraction (with Kawai approximation)
 %
 % Literature:
 %   [1] Tsingos, Funkhouser et al. - Modeling Acoustics in Virtual Environments using the Uniform Theory of Diffraction
 %   [2] Kouyoumjian and Pathak - A Uniform Geometrical Theory of Diffraction for an Edge in a Perfectly Conducting Surface
-%
+% 
 % Example:
 %   att = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequenc_vec )
+%
 
 %% Assertions
-if ~ita_diffraction_point_is_of_dim3( sourcePos )
-    error( 'Source point must be of dimension 3' )
+dim_freq = size( frequency_vec );
+dim_src = size( source_pos );
+dim_rcv = size( receiver_pos );
+if dim_freq(1) ~= 1
+    if dim_freq(2) ~= 1
+        error( 'Invalid frequency vector' );
+    end
+    frequency_vec = frequency_vec';
 end
-if ~ita_diffraction_point_is_of_dim3( receiverPos )
-    error( 'Receiver point must be of dimension 3' )
+if dim_src(2) ~= 3
+    if dim_src(1) ~= 3
+        error( 'Source point(s) must be of dimension 3')
+    end
+    source_pos = source_pos';
+    dim_src = size( source_pos );
 end
-if ~ita_diffraction_point_is_row_vector( sourcePos )
-    sourcePos = sourcePos';
+if dim_src(1) == 0
+    error( 'no source found' );
 end
-if ~ita_diffraction_point_is_row_vector( receiverPos )
-    receiverPos = receiverPos';
+if dim_rcv(2) ~= 3
+    if dim_rcv(1) ~= 3
+        error( 'Receiver point(s) must be of dimension 3')
+    end
+    receiver_pos = receiver_pos';
+    dim_rcv = size( receiver_pos );
+end
+if dim_rcv(1) == 0
+    error( 'no receiver found' );
+end
+if dim_src(1) ~= 1 && dim_rcv(1) ~= 1 && dim_src(1) ~= dim_rcv(1)
+    error( 'Number of receiver and source positions do not match' )
+end
+switch dim_src(1) >= dim_rcv(1)
+    case true
+        dim_n = dim_src(1);
+    case false
+        dim_n = dim_rcv(1);
 end
 
 %% Variables
-apexPoint = wedge.get_aperture_point( sourcePos, receiverPos );
-distFromSrc2ApexPoint = norm( apexPoint - sourcePos ); % Distance of source to aperture point
-distFromRcv2ApexPoint = norm( receiverPos - apexPoint ); % Distance of receiver to aperture point
+if dim_src(1) == dim_n
+    S = source_pos;
+    if dim_rcv(1) == dim_n
+        R = receiver_pos;
+    else
+        R = repmat( receiver_pos, dim_n, 1 );
+    end
+else
+    R = receiver_pos;
+    if dim_src(1) == dim_n
+        S = source_pos;
+    else
+        S = repmat( source_pos, dim_n, 1 );
+    end
+end
+Apex_Point = wedge.get_aperture_point( source_pos, receiver_pos );
+rho = Norm( Apex_Point - S ); % Distance of source to aperture point
+r = Norm( R - Apex_Point ); % Distance of receiver to aperture point
+c = speed_of_sound;
 
-sourceFacingMainSide = wedge.point_facing_main_side( sourcePos );
-alpha_i = wedge.get_angle_from_point_to_wedge_face( sourcePos, sourceFacingMainSide );
-alpha_d = wedge.get_angle_from_point_to_wedge_face( receiverPos, sourceFacingMainSide );
-theta_i = wedge.get_angle_from_point_to_aperture( sourcePos, apexPoint );
+face = wedge.point_facing_main_side( S );
+alpha_i = wedge.get_angle_from_point_to_wedge_face( S, face );
+alpha_d = wedge.get_angle_from_point_to_wedge_face( R, face );
+theta_i = wedge.get_angle_from_point_to_aperture( S, Apex_Point );
 
 n = wedge.opening_angle / pi; % Variable dependend on opening angle of the wedge
 
-lambda = speedOfSound ./ frequencyVec; % Wavelength
-k = 2 * pi ./ lambda; % Wavenumber
+lambda = c ./ frequency_vec; % Wavelength
+k = (2 * pi) ./ lambda; % Wavenumber
 
 
 % Diffraction coefficient D
-assert( distFromSrc2ApexPoint + distFromRcv2ApexPoint ~= 0  && distFromRcv2ApexPoint ~= 0 );
-L = ( ( distFromSrc2ApexPoint .* distFromRcv2ApexPoint ) ./ ( distFromSrc2ApexPoint + distFromRcv2ApexPoint ) ) .* ( sin( theta_i ) ).^2; % -> distance dependency
-alpha_diff = alpha_d - alpha_i;
-alpha_sum = alpha_d + alpha_i;
+assert( all( rho + r ~= 0 ) && all( r ~= 0 )  );
+A = repmat( sqrt( rho ./ ( r .* ( rho + r ) ) ), 1, numel( frequency_vec ) );
+L = repmat( ( ( rho .* r ) ./ ( rho + r ) ) .* ( sin( theta_i ) ).^2, 1, numel( frequency_vec ) );
+H_i = 1 ./ rho .* exp( -1i * k .* rho ); % Consideration of transfer path from source to apex point
 
 D_factor = -exp( -1i * pi / 4 ) ./ ( 2 * n * sqrt( 2* pi * k ) .* sin( theta_i ) );
 
-Cot1 = cot( ( pi + alpha_diff ) ./ ( 2 * n ) );
-Cot2 = cot( ( pi - alpha_diff ) ./ ( 2 * n ) );
-Cot3 = cot( ( pi + alpha_sum ) ./ ( 2 * n ) );
-Cot4 = cot( ( pi - alpha_sum ) ./ ( 2 * n ) );
+Cot1 = repmat( cot( ( pi + ( alpha_d - alpha_i ) ) ./ ( 2 * n ) ), 1, numel( frequency_vec ) );
+Cot2 = repmat( cot( ( pi - ( alpha_d - alpha_i ) ) ./ ( 2 * n ) ), 1, numel( frequency_vec ) );
+Cot3 = repmat( cot( ( pi + ( alpha_d + alpha_i ) ) ./ ( 2 * n ) ), 1, numel( frequency_vec ) );
+Cot4 = repmat( cot( ( pi - ( alpha_d + alpha_i ) ) ./ ( 2 * n ) ), 1, numel( frequency_vec ) );
 
-a1 = 2 * ( cos( ( 2 * pi * n * N_p( n, alpha_diff ) - alpha_diff ) / 2 ) ).^2;
-a2 = 2 * ( cos( ( 2 * pi * n * N_n( n, alpha_diff ) - alpha_diff ) / 2 ) ).^2;
-a3 = 2 * ( cos( ( 2 * pi * n * N_p( n, alpha_sum ) - alpha_sum ) / 2 ) ).^2;
-a4 = 2 * ( cos( ( 2 * pi * n * N_n( n, alpha_sum ) - alpha_sum ) / 2 ) ).^2;
+a1 = 2 * ( cos( ( 2 * pi * n * N_p( n, alpha_d - alpha_i ) - ( alpha_d - alpha_i ) ) / 2 ) ).^2;
+a2 = 2 * ( cos( ( 2 * pi * n * N_n( n, alpha_d - alpha_i ) - ( alpha_d - alpha_i ) ) / 2 ) ).^2;
+a3 = 2 * ( cos( ( 2 * pi * n * N_p( n, alpha_d + alpha_i ) - ( alpha_d + alpha_i ) ) / 2 ) ).^2;
+a4 = 2 * ( cos( ( 2 * pi * n * N_n( n, alpha_d + alpha_i ) - ( alpha_d + alpha_i ) ) / 2 ) ).^2;
 
-F1 = kawai_approx_fresnel( k .* L .* a1 ); % -> frequency dependent
+F1 = kawai_approx_fresnel( k .* L .* a1 );
 F2 = kawai_approx_fresnel( k .* L .* a2 );
 F3 = kawai_approx_fresnel( k .* L .* a3 );
 F4 = kawai_approx_fresnel( k .* L .* a4 );
 
-
 % Avoid eventual singularities of the cot terms at the shadow or reflection boundary with a approximation by
 % Kouyoumjian and Pathak
-mask1 =   alpha_diff - 2 * pi * n * N_p( n, alpha_diff ) + pi == 0;
-mask2 = - alpha_diff + 2 * pi * n * N_n( n, alpha_diff ) + pi == 0;
-mask3 =   alpha_sum - 2 * pi * n * N_p( n, alpha_sum ) + pi == 0;
-mask4 = - alpha_sum + 2 * pi * n * N_n( n, alpha_sum ) + pi == 0;
+mask1 = ( alpha_d - alpha_i ) - 2 * pi * n * N_p( n, alpha_d - alpha_i ) + pi == 0;
+mask2 = - ( alpha_d - alpha_i ) + 2 * pi * n * N_n( n, alpha_d - alpha_i ) + pi == 0;
+mask3 = ( alpha_d + alpha_i ) - 2 * pi * n * N_p( n, alpha_d + alpha_i ) + pi == 0;
+mask4 = - ( alpha_d + alpha_i ) + 2 * pi * n * N_n( n, alpha_d + alpha_i ) + pi == 0;
   
 singularities = [ any( mask1 ~= 0 ), any( mask2 ~= 0 ), any( mask3 ~= 0 ), any( mask4 ~= 0 ) ];
 
 
 if any( singularities )
     if singularities(1)
-        eps1 =   alpha_diff(mask1) - 2 * pi * n * N_p( n, alpha_diff(mask1) ) + pi;
+        eps1 =   ( alpha_d(mask1) - alpha_i(mask1) ) - 2 * pi * n * N_p( n, alpha_d(mask1) - alpha_i(mask1) ) + pi;
     else
         eps1 = 0;
     end
     if singularities(2)
-        eps2 = - alpha_diff(mask2) + 2 * pi * n * N_n( n, alpha_diff(mask2) ) + pi;
+        eps2 = - ( alpha_d(mask2) - alpha_i(mask2) ) + 2 * pi * n * N_n( n, alpha_d(mask2) - alpha_i(mask2) ) + pi;
     else
         eps2 = 0;
     end
     if singularities(3)
-        eps3 =   ( alpha_sum(mask3) ) - 2 * pi * n * N_p( n, alpha_sum(mask3) ) + pi;
+        eps3 =   ( alpha_d(mask3) + alpha_i(mask3) ) - 2 * pi * n * N_p( n, alpha_d(mask3) + alpha_i(mask3) ) + pi;
     else
         eps3 = 0;
     end
     if singularities(4)
-        eps4 = - ( alpha_sum(mask4) ) + 2 * pi * n * N_n( n, alpha_sum(mask4) ) + pi;
+        eps4 = - ( alpha_d(mask4) + alpha_i(mask4) ) + 2 * pi * n * N_n( n, alpha_d(mask4) + alpha_i(mask4) ) + pi;
     else
         eps4 = 0;
     end
@@ -101,47 +143,46 @@ if any( singularities )
     term4(mask4, :) = n * exp( 1i * pi/4 ) * ( sqrt( 2 * pi .* k .* L(mask4, :) ) .* sgn( eps4 ) - 2 .* k .* L(mask4, :) .* eps4 * exp( 1i * pi/4 ) );
 end
 
-term1(~mask1, :) = Cot1(~mask1, :) .* F1(~mask1, :); % -> frequency dependent
+term1(~mask1, :) = Cot1(~mask1, :) .* F1(~mask1, :);
 term2(~mask2, :) = Cot2(~mask2, :) .* F2(~mask2, :);
 term3(~mask3, :) = Cot3(~mask3, :) .* F3(~mask3, :);
 term4(~mask4, :) = Cot4(~mask4, :) .* F4(~mask4, :);
 
 if wedge.is_boundary_condition_hard
-    switchSign = 1;
+    s = 1;
 else
-    switchSign = -1;
+    s = -1;
 end
 
-D = ( D_factor .* ( term1 + term2 + switchSign * ( term3 + term4 ) ) )'; % -> frequency dependent
+D = D_factor .* ( term1 + term2 + s * ( term3 + term4 ) );
 
-
-%% Combined diffracted sound field filter at receiver
-
-H_i = exp( -1i * k' .* distFromSrc2ApexPoint ) ./ distFromSrc2ApexPoint; % Transfer path from spherical sound source to apex point
-A = sqrt( distFromSrc2ApexPoint ./ ( distFromRcv2ApexPoint .* ( distFromSrc2ApexPoint + distFromRcv2ApexPoint ) ) ); % Amplitude divergion factor of modified sphere wavefront (apex->receiver)
-H_o = exp( -1i .* k' .* distFromRcv2ApexPoint ); % Phase modification from apex point to receiver
-diffr_field =  H_i .* D .* A .* H_o;
-
+% Combined diffracted sound field filter at receiver
+diffr_field = (  H_i .* D .* A .* exp( -1i .* k .* r ) )';
+diffr_field = conj(diffr_field);
 
 end
 
 
 %% Auxiliary functions
+% euclidean norm row wise
+function res = Norm( A )
+    res = sqrt( sum( A.^2, 2 ) );
+end
 
-% N+ function (plus)
+% N+ function
 function N = N_p( n, beta )
     N = zeros( numel( beta ), 1 );
     N( beta >  pi * ( 1 - n ) ) = 1;
 end
 
-% N- function (minus)
+% N- function
 function N = N_n( n, beta )
     N = zeros( numel( beta ), 1 );
     N( beta < pi * ( 1 - n ) ) = -1;
     N( beta > pi * ( 1 + n ) ) = 1;
 end
 
-% Signum function
+% signum function
 function res = sgn(x)
     if all( size(x) == 0 )
         res = 1;
@@ -151,7 +192,6 @@ function res = sgn(x)
     res( x <= 0 ) = -1;
 end
 
-% Approximation of the Fresnel integral by Kawaii et al.
 function Y = kawai_approx_fresnel( X )
     if any( X < 0 )
         error( 'No negative values for Kawai approximation of Fresnel integral allowed' )

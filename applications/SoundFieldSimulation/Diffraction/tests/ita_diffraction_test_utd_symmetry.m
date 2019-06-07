@@ -20,13 +20,13 @@ c = 341;
 
 [ H1, D1, A1 ] = ita_diffraction_utd( w, s, r, f, c );
 utd_tf.freqData( :, 1 ) = [ 0; H1 ];
-utd_tf.freqData( :, 3 ) = [ 0; D1 ];
+utd_tf.freqData( :, 3 ) = [ 0; D1' ];
 [ H2, D2, A2 ] = ita_diffraction_utd( w, r, s, f, c );
 utd_tf.freqData( :, 2) = [ 0; H2 ];
-utd_tf.freqData( :, 4 ) = [ 0; D2 ];
+utd_tf.freqData( :, 4 ) = [ 0; D2' ];
 
 utd_tf.channelNames = { 'H1', 'H2', 'D1', 'D2' };
 
-assert( A1 - A2 < eps )
+assert( sum( A1 - A2 ) < eps )
 
-%utd_tf.pf
+utd_tf.pf
