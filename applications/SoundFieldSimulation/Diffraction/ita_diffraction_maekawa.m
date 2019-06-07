@@ -41,8 +41,8 @@ end
 % att.freqVector = frequencies';
 
 Apex_Point = wedge.get_aperture_point( source_pos, receiver_pos );
-r_dir = Norm( receiver_pos - source_pos );
-detour = Norm( Apex_Point - source_pos ) + Norm( receiver_pos - Apex_Point ) - Norm( receiver_pos - source_pos );
+r_dir = norm( receiver_pos - source_pos );
+detour = norm( Apex_Point - source_pos ) + norm( receiver_pos - Apex_Point ) - norm( receiver_pos - source_pos );
 c = speed_of_sound; % Speed of sound in air with a temprature of 20°C
 lambda = c ./ frequencies;
 
@@ -55,13 +55,9 @@ in_shadow_zone = ita_diffraction_shadow_zone( wedge, source_pos, receiver_pos );
 %% Transfer function
 H_dir = repmat( 1 ./ r_dir, 1, numel(frequencies) );
 H_diffr( :, ~in_shadow_zone' ) = zeros( numel( frequencies ), sum( ~in_shadow_zone ) );
-% From Handbook of Acoustics page 117 eq. 4.13
-H_diffr( :, in_shadow_zone' ) = ( ( 10^(5/20) * sqrt( 2 * pi * N(in_shadow_zone, :) ) ./ tanh( sqrt( 2*pi*N(in_shadow_zone, :) ) ) ).^(-1) .* H_dir(in_shadow_zone, :) )';
+% From Handbook of Acoustics page 117 eq. 4.13 + inverted phase (pressure
+% release first)
+H_diffr( :, in_shadow_zone' ) = ( -1 ) * ( ( 10^(5/20) * sqrt( 2 * pi * N(in_shadow_zone, :) ) ./ tanh( sqrt( 2*pi*N(in_shadow_zone, :) ) ) ).^(-1) .* H_dir(in_shadow_zone, :) )';
 
-% att.freqData = 1 ./ ( 10^(5/20) * sqrt( 2*pi * N ) ./ tanh( sqrt( 2*pi * N ) ) )';
 
-end
-
-function res = Norm( A )
-    res = sqrt( sum( A.^2, 2 ) );
 end

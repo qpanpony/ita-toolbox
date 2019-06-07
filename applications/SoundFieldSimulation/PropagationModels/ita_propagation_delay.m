@@ -16,9 +16,9 @@ delay_tf.samplingRate = fs;
 delay_tf.fftDegree = fft_degree;
 
 f = delay_tf.freqVector;
-lambda = c ./ f; % Wavelength
+lambda = c ./ f( 2:end ); % Wavelength
 k = 2 * pi ./ lambda; % Wavenumber
 
-phase_by_delay = exp( -1i .* k .* distance ); % Note: DC value set to 1
+phase_by_delay = [ 0; exp( -1i .* k .* distance ) ]; % Note: DC value set to ZERO
 
 end
