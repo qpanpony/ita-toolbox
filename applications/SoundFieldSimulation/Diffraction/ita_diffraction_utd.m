@@ -82,20 +82,22 @@ k = 2 * pi ./ lambda; % Wavenumber
 
 
 % Diffraction coefficient D
+alpha_diff = alpha_d - alpha_i;
+alpha_sum = alpha_d + alpha_i;
 assert( all( rho + r ~= 0 ) && all( r ~= 0 )  );
 L = ( ( rho .* r ) ./ ( rho + r ) ) .* ( sin( theta_i ) ).^2; % -> distance dependency
 
 D_factor = -exp( -1i * pi / 4 ) ./ ( 2 * n * sqrt( 2* pi * k ) .* sin( theta_i ) );
 
-Cot1 = cot( ( pi + ( alpha_d - alpha_i ) ) ./ ( 2 * n ) );
-Cot2 = cot( ( pi - ( alpha_d - alpha_i ) ) ./ ( 2 * n ) );
-Cot3 = cot( ( pi + ( alpha_d + alpha_i ) ) ./ ( 2 * n ) );
-Cot4 = cot( ( pi - ( alpha_d + alpha_i ) ) ./ ( 2 * n ) );
+Cot1 = cot( ( pi + alpha_diff ) ./ ( 2 * n ) );
+Cot2 = cot( ( pi - alpha_diff ) ./ ( 2 * n ) );
+Cot3 = cot( ( pi + alpha_sum ) ./ ( 2 * n ) );
+Cot4 = cot( ( pi - alpha_sum ) ./ ( 2 * n ) );
 
-a1 = 2 * ( cos( ( 2 * pi * n * N_p( n, alpha_d - alpha_i ) - ( alpha_d - alpha_i ) ) / 2 ) ).^2;
-a2 = 2 * ( cos( ( 2 * pi * n * N_n( n, alpha_d - alpha_i ) - ( alpha_d - alpha_i ) ) / 2 ) ).^2;
-a3 = 2 * ( cos( ( 2 * pi * n * N_p( n, alpha_d + alpha_i ) - ( alpha_d + alpha_i ) ) / 2 ) ).^2;
-a4 = 2 * ( cos( ( 2 * pi * n * N_n( n, alpha_d + alpha_i ) - ( alpha_d + alpha_i ) ) / 2 ) ).^2;
+a1 = 2 * ( cos( ( 2 * pi * n * N_p( n, alpha_diff ) - alpha_diff ) / 2 ) ).^2;
+a2 = 2 * ( cos( ( 2 * pi * n * N_n( n, alpha_diff ) - alpha_diff ) / 2 ) ).^2;
+a3 = 2 * ( cos( ( 2 * pi * n * N_p( n, alpha_sum ) - alpha_sum ) / 2 ) ).^2;
+a4 = 2 * ( cos( ( 2 * pi * n * N_n( n, alpha_sum ) - alpha_sum ) / 2 ) ).^2;
 
 F1 = kawai_approx_fresnel( k .* L .* a1 ); % -> frequency dependent
 F2 = kawai_approx_fresnel( k .* L .* a2 );
@@ -105,32 +107,32 @@ F4 = kawai_approx_fresnel( k .* L .* a4 );
 
 % Avoid eventual singularities of the cot terms at the shadow or reflection boundary with a approximation by
 % Kouyoumjian and Pathak
-mask1 =   ( alpha_d - alpha_i ) - 2 * pi * n * N_p( n, alpha_d - alpha_i ) + pi == 0;
-mask2 = - ( alpha_d - alpha_i ) + 2 * pi * n * N_n( n, alpha_d - alpha_i ) + pi == 0;
-mask3 =   ( alpha_d + alpha_i ) - 2 * pi * n * N_p( n, alpha_d + alpha_i ) + pi == 0;
-mask4 = - ( alpha_d + alpha_i ) + 2 * pi * n * N_n( n, alpha_d + alpha_i ) + pi == 0;
+mask1 =   alpha_diff - 2 * pi * n * N_p( n, alpha_diff ) + pi == 0;
+mask2 = - alpha_diff + 2 * pi * n * N_n( n, alpha_diff ) + pi == 0;
+mask3 =   alpha_sum - 2 * pi * n * N_p( n, alpha_sum ) + pi == 0;
+mask4 = - alpha_sum + 2 * pi * n * N_n( n, alpha_sum ) + pi == 0;
   
 singularities = [ any( mask1 ~= 0 ), any( mask2 ~= 0 ), any( mask3 ~= 0 ), any( mask4 ~= 0 ) ];
 
 
 if any( singularities )
     if singularities(1)
-        eps1 =   ( alpha_d(mask1) - alpha_i(mask1) ) - 2 * pi * n * N_p( n, alpha_d(mask1) - alpha_i(mask1) ) + pi;
+        eps1 =   alpha_diff(mask1) - 2 * pi * n * N_p( n, alpha_diff(mask1) ) + pi;
     else
         eps1 = 0;
     end
     if singularities(2)
-        eps2 = - ( alpha_d(mask2) - alpha_i(mask2) ) + 2 * pi * n * N_n( n, alpha_d(mask2) - alpha_i(mask2) ) + pi;
+        eps2 = - alpha_diff(mask2) + 2 * pi * n * N_n( n, alpha_diff(mask2) ) + pi;
     else
         eps2 = 0;
     end
     if singularities(3)
-        eps3 =   ( alpha_d(mask3) + alpha_i(mask3) ) - 2 * pi * n * N_p( n, alpha_d(mask3) + alpha_i(mask3) ) + pi;
+        eps3 =   ( alpha_sum(mask3) ) - 2 * pi * n * N_p( n, alpha_sum(mask3) ) + pi;
     else
         eps3 = 0;
     end
     if singularities(4)
-        eps4 = - ( alpha_d(mask4) + alpha_i(mask4) ) + 2 * pi * n * N_n( n, alpha_d(mask4) + alpha_i(mask4) ) + pi;
+        eps4 = - ( alpha_sum(mask4) ) + 2 * pi * n * N_n( n, alpha_sum(mask4) ) + pi;
     else
         eps4 = 0;
     end
