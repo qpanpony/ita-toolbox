@@ -90,11 +90,11 @@ end
 if sArgs.createPlot
     if strcmpi(sArgs.type,'astm')
         refCurve = refCurve + 110 - impactInsulationClass;
-        plotResult = itaResult([nan(sum(freqVector<min(freq)),1); 10.^((refCurve)./20); nan(sum(freqVector>max(freq)),1)],freqVector,'freq');
     else
         refCurve = refCurve + impactInsulationClass;
-        plotResult = itaResult([[nan(sum(freqVector<min(freq)),1); 10.^((refCurve)./20); nan(sum(freqVector>max(freq)),1)], [ones(sum(freqVector<=500),1)*10.^(refCurve(freq == 500)./20); nan(sum(freqVector>500),1)]],freqVector,'freq');
+        
     end
+    plotResult = itaResult([[nan(sum(freqVector<min(freq)),1); 10.^((refCurve)./20); nan(sum(freqVector>max(freq)),1)], [ones(sum(freqVector<=500),1)*10.^(refCurve(freq == 500)./20); nan(sum(freqVector>500),1)]],freqVector,'freq');
     fgh = ita_plot_freq(data);
     ita_plot_freq(plotResult,'figure_handle',fgh,'axes_handle',gca,'hold');
     bar(gca,deficiencies.freqVector,deficiencies.freq,'hist');

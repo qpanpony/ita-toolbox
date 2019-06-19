@@ -24,5 +24,9 @@ Thumbs.db
 svnaccess
 *.lib
 *.exp
-itaRaven.ini
 *.daff
+*.mph
+sh.exe.stackdump
+itaRaven.ini
+itaComsol.ini
+itaReceiver.ini

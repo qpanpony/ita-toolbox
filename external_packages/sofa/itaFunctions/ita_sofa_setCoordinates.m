@@ -42,28 +42,20 @@ if isa(data,'itaHRTF')
 else
     coordinates = data.channelCoordinates;
 end
-cartData = coordinates.cart;
 
-sofaObj.(coordinateType) = cartData;
-sofaObj.(sprintf('%s_Type',coordinateType)) = 'cartesian';
-sofaObj.(sprintf('%s_Units',coordinateType)) = 'meter';
-
+switch coordinateType
+    case 'ReceiverPosition'
+        cartData = coordinates.cart;
+        sofaObj.(coordinateType) = cartData;
+        sofaObj.(sprintf('%s_Type',coordinateType)) = 'cartesian';
+        sofaObj.(sprintf('%s_Units',coordinateType)) = 'meter';
+    case 'SourcePosition'
+        sphericalData = [coordinates.azimuth,coordinates.elevation,coordinates.r];
+        sofaObj.(coordinateType) = sphericalData;
+        sofaObj.(sprintf('%s_Type',coordinateType)) = 'spherical';
+        sofaObj.(sprintf('%s_Units',coordinateType)) = 'degree, degree, meter';
+end
 warning('ITA_WRITE_SOFA: Only the main coordinates are saved. Orientation etc is discarded');
-% % object coordinates
-% 
-% % switch the coordinate destination
-% if strcmp(coordinateType,'SourcePosition')
-%     coordinateType = 'ReceiverPosition';
-% else
-%     coordinateType = 'SourcePosition';
-% end
-% 
-% coordinates = data.chanelCoordinaes;
-% cartData = coordinates.cart;
-% 
-% sofaObj.(coordinateType) = cartData;
-% sofaObj.(sprintf('%s_Type',coordinateType)) = 'cartesian';
-% sofaObj.(sprintf('%s_Units',coordinateType)) = 'meter';
 
 end
 

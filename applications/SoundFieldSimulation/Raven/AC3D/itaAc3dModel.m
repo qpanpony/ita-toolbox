@@ -463,7 +463,14 @@ classdef itaAc3dModel
             
             % check if path model has absolute or relative path (if ':" is
             % in path, path is absolute)
-            if ~isempty(strfind(obj.modelFilename, ':'))
+            
+            if ispc
+                isAbsolutePath = ~isempty(strfind(obj.modelFilename, ':'));
+            else
+                isAbsolutePath = ~isempty(obj.modelFilename) && strcmp(obj.modelFilename(1), filesep);
+            end
+            
+            if isAbsolutePath
                 pathToModel = obj.modelFilename;
             else
                 pathToModel = fullfile(pwd, obj.modelFilename);

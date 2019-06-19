@@ -489,6 +489,9 @@ classdef itaRavenProject < handle
         
         %------------------------------------------------------------------
         function run(obj)
+            if numel(obj.projectName) > 70
+                warning('Long project name. This might cause an error while writing output files. Consider resetting your project name!')
+            end
             
             obj.simulationDone = false;
             
@@ -1151,6 +1154,12 @@ classdef itaRavenProject < handle
         function setProjectName(obj, projectName)
             obj.projectName = projectName;
             obj.rpf_ini.SetValues('Global', 'ProjectName', projectName);
+            obj.rpf_ini.WriteFile(obj.ravenProjectFile);
+        end
+        
+        function setPathMaterials(obj, pathMaterials)
+            obj.pathMaterials = pathMaterials;
+            obj.rpf_ini.SetValues('Global', 'ProjectPath_MaterialDB', pathMaterials);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
         
@@ -2155,6 +2164,10 @@ classdef itaRavenProject < handle
                     monauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
                     monauralIRitaAudio(iSrc,iRec).signalType = 'energy';
                     monauralIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
+                    %Make sure number of samples is even
+                    if mod(monauralIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        monauralIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    end
                 end
             end
         end
@@ -2199,6 +2212,10 @@ classdef itaRavenProject < handle
                     monauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
                     monauralIRitaAudio(iSrc,iRec).signalType = 'energy';
                     monauralIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
+                    %Make sure number of samples is even
+                    if mod(monauralIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        monauralIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    end
                 end
             end
         end
@@ -2217,6 +2234,10 @@ classdef itaRavenProject < handle
                     monauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
                     monauralIRitaAudio(iSrc,iRec).signalType = 'energy';
                     monauralIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
+                    %Make sure number of samples is even
+                    if mod(monauralIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        monauralIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    end
                 end
             end
         end
@@ -2247,8 +2268,13 @@ classdef itaRavenProject < handle
                     binauralIRitaAudio(iSrc,iRec).timeData = obj.binauralIR{iSrc,iRec};
                     binauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
                     binauralIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    if isempty(binauralIRitaAudio(iSrc,iRec)); continue; end
                     binauralIRitaAudio(iSrc,iRec).channelNames{1} = [obj.receiverNames{iRec} '_Left'];
                     binauralIRitaAudio(iSrc,iRec).channelNames{2} = [obj.receiverNames{iRec} '_Right'];
+                    %Make sure number of samples is even
+                    if mod(binauralIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        binauralIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    end
                 end
             end
         end
@@ -2279,8 +2305,13 @@ classdef itaRavenProject < handle
                     binauralIRitaAudio(iSrc,iRec).timeData = obj.binauralIR_IS{iSrc,iRec};
                     binauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
                     binauralIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    if isempty(binauralIRitaAudio(iSrc,iRec)); continue; end
                     binauralIRitaAudio(iSrc,iRec).channelNames{1} = [obj.receiverNames{iRec} '_Left'];
                     binauralIRitaAudio(iSrc,iRec).channelNames{2} = [obj.receiverNames{iRec} '_Right'];
+                    %Make sure number of samples is even
+                    if mod(binauralIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        binauralIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    end
                 end
             end
         end
@@ -2311,8 +2342,13 @@ classdef itaRavenProject < handle
                     binauralIRitaAudio(iSrc,iRec).timeData = obj.binauralIR_RT{iSrc,iRec};
                     binauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
                     binauralIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    if isempty(binauralIRitaAudio(iSrc,iRec)); continue; end
                     binauralIRitaAudio(iSrc,iRec).channelNames{1} = [obj.receiverNames{iRec} '_Left'];
                     binauralIRitaAudio(iSrc,iRec).channelNames{2} = [obj.receiverNames{iRec} '_Right'];
+                    %Make sure number of samples is even
+                    if mod(binauralIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        binauralIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    end
                 end
             end
         end
@@ -2326,8 +2362,13 @@ classdef itaRavenProject < handle
             binauralPoissonSequenceitaAudio.samplingRate = obj.sampleRate;
             binauralPoissonSequenceitaAudio.signalType = 'energy';
             binauralPoissonSequenceitaAudio.timeData = data;
+            if isempty(binauralPoissonSequenceitaAudio); return; end
             binauralPoissonSequenceitaAudio.channelNames{1} = [obj.receiverNames{end} '_Left'];
             binauralPoissonSequenceitaAudio.channelNames{2} = [obj.receiverNames{end} '_Right'];
+            %Make sure number of samples is even
+            if mod(binauralPoissonSequenceitaAudio.nSamples,2)==1
+                binauralPoissonSequenceitaAudio.timeData(end, :) = [];
+            end
         end
         
         %------------------------------------------------------------------
@@ -2430,6 +2471,10 @@ classdef itaRavenProject < handle
                         [deg, ord] = ita_sph_linear2degreeorder(linInd);
                         ambisonicsIRita(iSrc,iRec).channelNames{linInd} = [obj.receiverNames{iRec} '_Degree(' num2str(deg) ')_Order(' num2str(ord) ')'];
                     end
+                    %Make sure number of samples is even
+                    if mod(ambisonicsIRita(iSrc,iRec).nSamples,2)==1
+                        ambisonicsIRita(iSrc,iRec).timeData(end, :) = [];
+                    end
                 end
             end
         end
@@ -2463,6 +2508,10 @@ classdef itaRavenProject < handle
                     for linInd = 1 : ambisonicsIRita(iSrc,iRec).nChannels
                         [deg, ord] = ita_sph_linear2degreeorder(linInd);
                         ambisonicsIRita(iSrc,iRec).channelNames{linInd} = [obj.receiverNames{iRec} '_Degree(' num2str(deg) ')_Order(' num2str(ord) ')'];
+                    end
+                    %Make sure number of samples is even
+                    if mod(ambisonicsIRita(iSrc,iRec).nSamples,2)==1
+                        ambisonicsIRita(iSrc,iRec).timeData(end, :) = [];
                     end
                 end
             end
@@ -2498,6 +2547,10 @@ classdef itaRavenProject < handle
                         [deg, ord] = ita_sph_linear2degreeorder(linInd);
                         ambisonicsIRita(iSrc,iRec).channelNames{linInd} = [obj.receiverNames{iRec} '_Degree(' num2str(deg) ')_Order(' num2str(ord) ')'];
                     end
+                    %Make sure number of samples is even
+                    if mod(ambisonicsIRita(iSrc,iRec).nSamples,2)==1
+                        ambisonicsIRita(iSrc,iRec).timeData(end, :) = [];
+                    end
                 end
             end
             
@@ -2532,6 +2585,10 @@ classdef itaRavenProject < handle
                     for linInd = 1 : vbapIRita(iSrc,iRec).nChannels
                         vbapIRita(iSrc,iRec).channelNames{linInd} = [obj.receiverNames{iRec} '_Speaker_' num2str(linInd)];
                     end
+                    %Make sure number of samples is even
+                    if mod(vbapIRita(iSrc,iRec).nSamples,2)==1
+                        vbapIRita(iSrc,iRec).timeData(end, :) = [];
+                    end
                 end
             end
         end
@@ -2565,6 +2622,10 @@ classdef itaRavenProject < handle
                     for linInd = 1 : vbapIRita(iSrc,iRec).nChannels
                         vbapIRita(iSrc,iRec).channelNames{linInd} = [obj.receiverNames{iRec} '_Speaker_' num2str(linInd)];
                     end
+                    %Make sure number of samples is even
+                    if mod(vbapIRita(iSrc,iRec).nSamples,2)==1
+                        vbapIRita(iSrc,iRec).timeData(end, :) = [];
+                    end
                 end
             end
         end
@@ -2597,6 +2658,10 @@ classdef itaRavenProject < handle
                     vbapIRita(iSrc,iRec).signalType = 'energy';
                     for linInd = 1 : vbapIRita(iSrc,iRec).nChannels
                         vbapIRita(iSrc,iRec).channelNames{linInd} = [obj.receiverNames{iRec} '_Speaker_' num2str(linInd)];
+                    end
+                    %Make sure number of samples is even
+                    if mod(vbapIRita(iSrc,iRec).nSamples,2)==1
+                        vbapIRita(iSrc,iRec).timeData(end, :) = [];
                     end
                 end
             end
