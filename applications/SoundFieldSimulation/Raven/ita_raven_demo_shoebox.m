@@ -2,6 +2,12 @@
 
 % Author: las@akustik.rwth-aachen.de
 % date:     2019/04/10
+%
+% <ITA-Toolbox>
+% This file is part of the application Raven for the ITA-Toolbox. All rights reserved.
+% You can find the license for this m-file in the application folder.
+% </ITA-Toolbox>
+
 
 %% project settings
 myLength=10;
@@ -15,21 +21,21 @@ rpf.copyProjectToNewRPFFile(['C:\ITASoftware\Raven\RavenInput\' projectName '.rp
 rpf.setProjectName(projectName);
 rpf.setModelToShoebox(myLength,myWidth,myHeight);
 
-% set values of six surfaces: 
+% set values of six surfaces:
 % 10% absorption and 10% scattering for floor and ceiling
 % Identical material with 5% absorption and 20% scattering for walls
 
 for iMat=1:2
-   myAbsorp = 0.1 * ones(1,31);
-   myScatter = 0.1 * ones(1,31);
-   rpf.setMaterial(rpf.getRoomMaterialNames{iMat},myAbsorp,myScatter);
+    myAbsorp = 0.1 * ones(1,31);
+    myScatter = 0.1 * ones(1,31);
+    rpf.setMaterial(rpf.getRoomMaterialNames{iMat},myAbsorp,myScatter);
 end
 
 
 for iMat=3:6
-   myAbsorp = 0.05 * ones(1,31);
-   myScatter = 0.2 * ones(1,31);
-   rpf.setMaterial(rpf.getRoomMaterialNames{iMat},myAbsorp,myScatter);
+    myAbsorp = 0.05 * ones(1,31);
+    myScatter = 0.2 * ones(1,31);
+    rpf.setMaterial(rpf.getRoomMaterialNames{iMat},myAbsorp,myScatter);
 end
 
 % uncomment to see plot of room and absorption coefficient

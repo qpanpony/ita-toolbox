@@ -303,6 +303,10 @@ classdef itaRavenProject < handle
             obj.deleteResultsInRavenFolder();
         end
         
+                %------------------------------------------------------------------
+        function setRavenIniPath(obj, newPath)
+                obj.ravenIniFile = newPath;
+           end
         
         %------------------------------------------------------------------
         function copyProjectToNewRPFFile(obj, newPath)
@@ -731,7 +735,7 @@ classdef itaRavenProject < handle
             % (4) smaller wall (width x height; front)
             % (5) larger wall (length x height; right)
             % (6) smaller wall (width x height; back)
-            
+            %
             % Using:
             %   outputFileName = rpf.setModelToShoebox(myLength,myWidth,myHeight);
             %
@@ -907,7 +911,7 @@ classdef itaRavenProject < handle
             quiver3(spos(:,1),spos(:,2),spos(:,3),sview(:,1),sview(:,2),sview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
             % plot view/up vectors (red) of receivers
-            quiver3(rpos(:,1),rpos(:,2),rpos(:,3),rview(:,1),rview(:,2),rview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
+%             quiver3(rpos(:,1),rpos(:,2),rpos(:,3),rview(:,1),rview(:,2),rview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
             
             % plot up vectors (green) of sources and receivers (currently
