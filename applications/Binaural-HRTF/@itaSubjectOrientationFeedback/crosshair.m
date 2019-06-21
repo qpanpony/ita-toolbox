@@ -844,11 +844,11 @@ function show_some_smileys(ot, thatDiff, thatDiffName, tolerance, colour, subplo
         case {'xxxDiff', 'yyyDiff', 'zzzDiff'}
             unit = 'cm';
             if strcmp(thatDiffName, 'xxxDiff')
-                posOrientNames = 'x';
+                posOrientNames = 'left-right'; % 2DO: check whether that does still fit into the smileys' frames
             elseif strcmp(thatDiffName, 'yyyDiff')
-                posOrientNames = 'y';
+                posOrientNames = 'up-down'; % 2DO: check whether that does still fit into the smileys' frames
             elseif strcmp(thatDiffName, 'zzzDiff')
-                posOrientNames = 'z';
+                posOrientNames = 'front-back'; % 2DO: check whether that does still fit into the smileys' frames
             else
                 error('[crosshair>show_some_smileys] should not see this');
             end
@@ -932,8 +932,8 @@ function prepare_images(otf, subplotIndex)
     otf.(otf.figName).smiley_sad = imread(fullfile(folder,'pic\smileys\smiley_sad.png'));
     
     varPrefix = ['sp_'; 'sm_';];
-
-    for indx = 1 : 6
+    nDOF = 6;
+    for indx = 1 : nDOF
         otf.(otf.figName).([(varPrefix(1,:)), num2str(subplotIndex(indx))]) = subplot(6,6,subplotIndex(indx,1));
         tmp_hap = imshow(otf.(otf.figName).smiley_hap); % rgb2gray(.)
         set(otf.(otf.figName).([(varPrefix(1,:)), num2str(subplotIndex(indx))]), 'NextPlot', 'add');
@@ -954,8 +954,10 @@ function prepare_images(otf, subplotIndex)
 end
 
 function [subplotIndex] = generate_figure_properties(ot) %#ok
-% generate all figure properties that are needed for the real-time plot
-
+% generate all figure properties that are needed for the real-time plot 
+% thus, no need to reload them on the fly for every position/orientation
+% update
+    nDOF = 6;
     % reference position
     varName_ref = ['crss_ref'; 'circ_ref';];
     for index = 1 : size(varName_ref,1)
@@ -1010,14 +1012,16 @@ function [subplotIndex] = generate_figure_properties(ot) %#ok
     % subplots for smileys
     varName = ['hap'; 'wor'; 'sad';]; %#ok
     subplotIndex = [31;  32;  33;  34; 35; 36;];
-    for index = 1 : 6
+    for index = 1 : nDOF
         eval('if ~isprop(ot.(ot.figName), [''sp_'', num2str(subplotIndex(index))]) addprop(ot.(ot.figName), [''sp_'', num2str(subplotIndex(index))]); end');
     end
 
 end
 
 function showExplanation(ot, grey)
-    
+% this function is called during the training procedure. 
+% for every DoF, a short training has to be conducted. explanations of what
+% to do are displayed here.
     [folder, ~, ~] = fileparts(which(mfilename));
     
     % load images
@@ -1030,16 +1034,6 @@ function showExplanation(ot, grey)
     rolPic              = imread(fullfile(folder,'pic\introPictures\rolOri.png'));
     pitPic              = imread(fullfile(folder,'pic\introPictures\pitOri.png'));
     yawPic              = imread(fullfile(folder,'pic\introPictures\yawOri.png'));
-    
-%     whatIsACrosshairPic = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\introPictures\crosshair.png');
-%     twoCrosshairsPic    = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\introPictures\crosshairs.png');
-%     discrepancyPic      = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\introPictures\discrepancy.png');
-%     xPic                = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\introPictures\xPos.png');
-%     yPic                = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\introPictures\yPos.png');
-%     zPic                = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\introPictures\zPos.png');
-%     rolPic              = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\introPictures\rolOri.png');
-%     pitPic              = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\introPictures\pitOri.png');
-%     yawPic              = imread('\\verdi\home\wepner\MA\continuous\@myitaOptitrack\pic\introPictures\yawOri.png');
     
     % welcome to training
     set(ot.txtField{1},'string',ot.txtPart{1}, 'visible', 'on');

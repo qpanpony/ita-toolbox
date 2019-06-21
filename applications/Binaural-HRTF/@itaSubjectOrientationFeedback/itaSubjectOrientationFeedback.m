@@ -183,7 +183,7 @@ classdef itaSubjectOrientationFeedback < handle
         function connectOptiTrack(this)
             %connect optitrack object to Motive NetNat Server
             if isempty(this.optiTrackObject)
-                ita_verbose_info('ITASUBJECTORIENTATIONFEEDBACK: no Optitrack Object fount, initialising with autoconnect ...')
+                ita_verbose_info('ITASUBJECTORIENTATIONFEEDBACK: no Optitrack object found, initialising with autoconnect ...')
                 this.optiTrackObject = itaOptitrack('autoconnect',1);
             end
             if ~this.optiTrackObject.isConnected
@@ -208,6 +208,7 @@ classdef itaSubjectOrientationFeedback < handle
             initialDataFrame.qx = initialData.orientation.qx;
             initialDataFrame.qy = initialData.orientation.qy;
             initialDataFrame.qz = initialData.orientation.qz;
+            % update of GUI according to current orientation in crosshair()
             crosshair(this,initialDataFrame,'initial')
         end
         
