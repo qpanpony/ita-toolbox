@@ -24,12 +24,12 @@ source_directivity_filename =  [ ravenBasePath 'RavenDatabase\DirectivityDatabas
 receiver_directivity_filename = [ ravenBasePath 'RavenDatabase\HRTF\2017_FABIAN_HATO-0_HRIR_LAS_D170_1x1_128_norm_sampleShift10.v15.daff'];
 out_file_prefix = 'Classroom';
 source_position = [7.0000    1.7000   -4.0000]; %NOTE, make sure these are inside the room!
-receiver_position = [3 1.7 -4];
+receiver_position = [3 1.7 -4]; %NOTE: in openGL coordinated (used by RAVEN) the "up/down" direction is the second element, and the third element is different from matlab coordinates by a factor of -1
 
 % NOTE: A simulation with azimuthResolution=3 and elevationResolution=45
 % takes about 20 minutes on a regular computer
-azimuthResolution=3; %in degrees. NOTE, small values here may result in large simulation times
-elevationResolution=90;
+azimuthResolution=45; %in degrees. NOTE, small values here may result in large simulation times
+elevationResolution=45;
 simulate_room = true; %do simulation, or just load results from current workspace?
 automatic_rotate_sim = true; %set to true to automatically rotate the room, or false to manually rotate with a slider
 
@@ -71,7 +71,7 @@ if( simulate_room )
     for iRec=1:mySphereView.nPoints
         
         % set RAVEN receiver names, position and orientations
-        rpf.setReceiverNames([ 'receiver' num2str(iRec-1) ]); %THOUGHT: could you do this in one iteration with lots of receivers?
+        rpf.setReceiverNames([ 'receiver' num2str(iRec-1) ]);
         
         rpf.setReceiverPositions(receiver_position);
         
@@ -113,7 +113,7 @@ if( simulate_room )
         beta = dataset.records{iDataSet}.beta;
         
         %find the calculated data for this angle combination (alpha/ beta)
-        currentData = 0.9*myBRIRs((alpha/dataset.alphares)*dataset.betapoints+(beta/dataset.betares)+1).timeData;
+        currentData = 10*myBRIRs((alpha/dataset.alphares)*dataset.betapoints+(beta/dataset.betares)+1).timeData;
         
         dataset.records{iDataSet}.data = currentData(1:44100,:)'; %copy data over to DAFF dataset, only first second
         
@@ -132,14 +132,14 @@ end
 %% Connect to VA server
 va = itaVA;
 
-va_connect( va ); %function called to connect to automatically open VA and connect to it
+va_connect( va ); %function called to automatically open VA and connect to it
 % va.connect( 'localhost' ) %connect to a va server which is already running
 
 %% Auralise simulated data
 va.reset()
 
 % Control output gain
-va.set_output_gain( .5 )
+va.set_output_gain( 0.5 )
 
 % Add the current absolute folder path to VA application
 va.add_search_path( pwd );
@@ -157,7 +157,7 @@ va.set_sound_source_position( S, [ 1 0 0 ] ) % Note: This position is only impor
 L = va.create_sound_receiver( 'itaVA_Listener' );
 va.set_sound_receiver_position( L, [ 0 0 0 ] )
 
-in_daff_filename = [out_file_prefix num2str(azimuthResolution) 'x' num2str(elevationResolution) '.v17.daff']; %CHANGE to better output name than test
+in_daff_filename = [out_file_prefix num2str(azimuthResolution) 'x' num2str(elevationResolution) '.v17.daff'];
 H = va.create_directivity( in_daff_filename );
 
 va.set_sound_receiver_directivity( L, H );
@@ -179,7 +179,7 @@ arrow = plot3(a, [receiver_position(1),receiver_position(1)+1], [-receiver_posit
 %---------------------------------plot look directions------------------------------
 if( automatic_rotate_sim )
     for iAngle=0:5:360
-        disp(['CurrentAngle: ' num2str(iAngle) ]);
+        %disp(['CurrentAngle: ' num2str(iAngle) ]);
         
         va.set_sound_receiver_orientation_view_up(L,[cosd(iAngle) 0 sind(iAngle)],[0 1 0]);
         
