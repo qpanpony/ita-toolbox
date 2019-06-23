@@ -158,7 +158,7 @@ D = D_factor .* ( term1 + term2 + s * ( term3 + term4 ) );
 
 % Combined diffracted sound field filter at receiver
 diffr_field = (  H_i .* D .* A .* exp( -1i .* k .* r ) )';
-diffr_field = conj(diffr_field);
+diffr_field = -conj( diffr_field );
 
 end
 
