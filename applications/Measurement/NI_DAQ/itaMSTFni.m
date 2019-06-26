@@ -119,7 +119,7 @@ classdef itaMSTFni < itaMSTF
             if isempty(this.niSession) || isempty(this.niSession.Channels)
                 this.niSession = init_NI_card(this);
             end
-            % has the samplingRate been changed (NI rate is no exact)
+            % has the samplingRate been changed (NI rate is not exact)
             if abs(this.niSession.Rate - this.samplingRate) > 1
                 this.niSession = init_NI_card(this);
             end
@@ -171,13 +171,23 @@ classdef itaMSTFni < itaMSTF
                 imcIdx(chIdx) = find(this.inputMeasurementChain.hw_ch == inputChannels(chIdx));
             end
             tmpChain = this.inputMeasurementChain(imcIdx);
+            % save IEPE settings for later
+            inputIDs = [];
+            isIEPE   = [];
+            for iTmp = 1:numel(this.niSession.Channels)
+                if contains(this.niSession.Channels(iTmp).ID,'ai')
+                    inputIDs = [inputIDs str2double(this.niSession.Channels(iTmp).ID(3:end))+1]; %#ok<AGROW>
+                    isIEPE   = [isIEPE contains(lower(this.niSession.Channels(iTmp).MeasurementType),'iepe')]; %#ok<AGROW>
+                end
+            end
+            [inputIDs,sortIDs] = sort(inputIDs);
+            isIEPE = isIEPE(sortIDs);
             % we need this to have the correct dimensions for the zeros at the output
             outputChannels = this.outputChannels;
             this.outputChannels = outputChannels(1);
             % element by element
             for iElement = elementIds
                 for iCh = 1:numel(imcIdx)
-                    this.inputChannels = inputChannels(iCh);
                     if numel(tmpChain(iCh).elements) >= iElement
                         hw_ch = tmpChain(iCh).hardware_channel;
                         disp(['Calibration of sound card channel ' num2str(hw_ch)])
@@ -185,6 +195,9 @@ classdef itaMSTFni < itaMSTF
                         if tmpChain(iCh).elements(iElement).calibrated ~= -1 % only calibratable devices
                             disp(['   Calibration of ' upper(tmpChain(iCh).elements(iElement).type) '  ' tmpChain(iCh).elements(iElement).name])
                             this.inputChannels = inputChannels(iCh);
+                            if strcmpi(tmpChain(iCh).elements(iElement).type,'sensor') && isIEPE(hw_ch)
+                                this.set_IEPE_channels(hw_ch);
+                            end
                             [tmpChain(iCh).elements(iElement).sensitivity] = measurement_chain_elements_calibration_ni(this.niSession,tmpChain(iCh),iElement); %calibrate each element
                         end
                     end
@@ -193,6 +206,7 @@ classdef itaMSTFni < itaMSTF
             this.inputMeasurementChain(imcIdx) = tmpChain;
             this.inputChannels = inputChannels;
             this.outputChannels = outputChannels;
+            this.set_IEPE_channels(inputIDs(logical(isIEPE)));
             disp('****************************** FINISHED *********************************')
         end
         
@@ -320,17 +334,22 @@ classdef itaMSTFni < itaMSTF
             if isempty(channelIds)
                 error('Nothing to do, maybe your channels are not active?');
             end
-            inputChannels.mapping = inputChannels.mapping(channelIds);
-            inputChannels.name = inputChannels.name(channelIds);
-            inputChannels.type = inputChannels.type(channelIds);
-            inputChannels.sensitivity = inputChannels.sensitivity(channelIds);
-            inputChannels.isActive = inputChannels.isActive(channelIds);
             
-            % Add analog input channels with IEPE supply
-            for iChannel = 1:numel(channelIds)
+            channelIdsAll = [channelIds setdiff(this.inputChannels,channelIds)];
+            isIEPE = [ones(numel(channelIds),1); zeros(numel(channelIdsAll)-numel(channelIds),1)];
+            [channelIdsAll,channelSort] = sort(channelIdsAll);
+            isIEPE = isIEPE(channelSort);
+%             inputChannels.mapping = inputChannels.mapping(channelIds);
+%             inputChannels.name = inputChannels.name(channelIds);
+%             inputChannels.type = inputChannels.type(channelIds);
+%             inputChannels.sensitivity = inputChannels.sensitivity(channelIds);
+%             inputChannels.isActive = inputChannels.isActive(channelIds);
+            
+            % First remove all input channels
+            for iChannel = 1:numel(channelIdsAll)
                 devIdx = [];
                 for iCh = 1:numel(this.niSession.Channels)
-                    if strcmpi(inputChannels.name{iChannel},this.niSession.Channels(iCh).Name)
+                    if strcmpi(inputChannels.name{channelIdsAll(iChannel)},this.niSession.Channels(iCh).Name)
                         devIdx = iCh;
                     end
                 end
@@ -339,11 +358,18 @@ classdef itaMSTFni < itaMSTF
                 else
                     error('Could not find your channel');
                 end
+            end
+            % Then add all input channels, and turn on IEPE supply where desired
+            for iChannel = 1:numel(channelIdsAll)
                 % then add again
-                iDevice = inputChannels.mapping{iChannel}(1);
-                iDeviceChannel = inputChannels.mapping{iChannel}(2);
-                this.niSession.addAnalogInputChannel(get(niDevices(iDevice),'ID'),iDeviceChannel-1,'IEPE');
-                this.niSession.Channels(end).Name = inputChannels.name{iChannel};
+                iDevice = inputChannels.mapping{channelIdsAll(iChannel)}(1);
+                iDeviceChannel = inputChannels.mapping{channelIdsAll(iChannel)}(2);
+                if isIEPE(iChannel)
+                    this.niSession.addAnalogInputChannel(get(niDevices(iDevice),'ID'),iDeviceChannel-1,'IEPE');
+                else
+                    this.niSession.addAnalogInputChannel(get(niDevices(iDevice),'ID'),iDeviceChannel-1,inputChannels.type{channelIdsAll(iChannel)});
+                end
+                this.niSession.Channels(end).Name = inputChannels.name{channelIdsAll(iChannel)};
             end
         end % function
         
