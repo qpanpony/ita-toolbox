@@ -8,7 +8,7 @@ assert( numel( f ) > 0 )
 
 if nargin < 3
     ita_propagation_load_defaults
-    Z = ita_popagation_defaults.wave_impedance;
+    Z = ita_popagation_defaults.air.wave_impedance;
 end
 
 if any( f == 0 )
