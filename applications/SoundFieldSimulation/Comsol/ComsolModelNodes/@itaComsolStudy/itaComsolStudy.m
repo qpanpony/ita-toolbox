@@ -124,9 +124,14 @@ classdef itaComsolStudy < itaComsolNode
     
     %% Frequency Vector
     methods
-        function SetAllFrequencyVectors(obj, freqVector)
+        function SetAllFrequencyVectors(obj, varargin)
             %Sets the frequency vector for all frequency domain studies.
-            assert(isnumeric(freqVector) && isrow(freqVector), 'Input must be a numeric row vector')
+            %   Possible inputs:
+            %   1) numeric vector with frequency data
+            %   2) char row vector with valid expression
+            %   3) Three frequencies fStart, fStep and fStop that will be
+            %   used to create a vector fStart:fStep:fStop
+            frequencies = obj.checkForValidFreqVectorInput(varargin{:});
             
             studies = obj.All();
             idxFreqStudies = false(size(studies));
@@ -137,27 +142,57 @@ classdef itaComsolStudy < itaComsolNode
             freqStudies = studies(idxFreqStudies);
             if isempty(freqStudies); warning([class(obj) ': No frequency domain study found']); end
             for idxFreqStudy = 1:numel(freqStudies)
-                obj.setFrequencyVectorOfGivenStudy(freqStudies{idxFreqStudy}, freqVector)
+                obj.setFrequencyVectorOfGivenStudy(freqStudies{idxFreqStudy}, frequencies)
             end
         end
-        function SetFrequencyVector(obj, freqVector)
+        function SetFrequencyVector(obj, varargin)
             %Sets the frequency vector for the active study. Throws an error
             %if this is not a frequency domain study.
+            %   Possible inputs:
+            %   1) numeric vector with frequency data
+            %   2) char row vector with valid expression
+            %   3) Three frequencies fStart, fStep and fStop that will be
+            %   used to create a vector fStart:fStep:fStop
             assert(~isempty(obj.activeNode), 'No active study found')
-            obj.setFrequencyVectorOfGivenStudy(obj.activeNode, freqVector);
+            frequencies = obj.checkForValidFreqVectorInput(varargin{:});
+            obj.setFrequencyVectorOfGivenStudy(obj.activeNode, frequencies);
         end
     end
     methods(Static = true, Access = private)
-        function setFrequencyVectorOfGivenStudy(study, freqVector)
+        function frequencies = checkForValidFreqVectorInput(varargin)
+            if nargin == 1
+                frequencies = varargin{1};
+                assert(isnumeric(frequencies) && isvector(frequencies) ||...
+                    ischar(frequencies) && isrow(frequencies),...
+                    'Input must be a numeric vector or a char row vector')
+            elseif nargin == 3
+                fStart = varargin{1};
+                fStep = varargin{2};
+                fStop = varargin{3};
+                assert(isnumeric(fStart) && isscalar(fStart) &&...
+                    isnumeric(fStep) && isscalar(fStep)&&...
+                    isnumeric(fStop) && isscalar(fStop), 'If there are three inputs, all must be numeric scalars')
+                frequencies =  itaComsolStudy.createFrequencyRangeStr(fStart, fStep, fStop);
+            else
+                error('Invalid number of input arguments')
+            end
+        end
+        function freqString = createFrequencyRangeStr(fStart, fStep, fStop)
+            freqString = ['range(' num2str(fStart) ','...
+                num2str(fStep) ',' num2str(fStop) ')'];
+        end
+        function setFrequencyVectorOfGivenStudy(study, frequencies)
             %Sets the frequency vector for the given study. Throws an error
             %if this is not a frequency domain study.
-            assert(isa(study, 'com.comsol.clientapi.impl.StudyClient'), 'First input must be a Comsol Study node')
-            assert(isnumeric(freqVector) && isrow(freqVector), 'Second input must be a numeric row vector')
-            
             [freqNodeDefined, freqNode] = itaComsolStudy.hasFeatureNode( study, 'freq' );
             if ~freqNodeDefined; error('Given Comsol study is no frequency study'); end
             
-            freqNode.set('plist', num2str(freqVector));
+            if isnumeric(frequencies)
+                if iscolumn(frequencies); frequencies=frequencies.'; end
+                frequencies = num2str(frequencies);
+            end
+            
+            freqNode.set('plist', frequencies);
         end
     end
     
