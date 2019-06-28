@@ -1,4 +1,4 @@
-function diffr_field = ita_diffraction_utd_approx( wedge, source_pos, receiver_pos, f, speed_of_sound, transition_const )
+function diffr_field = ita_diffraction_utd_approx( wedge, source_pos, receiver_pos, freq_vec, speed_of_sound, transition_constant )
 %ITA_DIFFRACTION_UTD Calculates the diffraction filter based on uniform
 %theory off diffraction (with Kawai approximation) only in shadow regions.
 %To preserve continuity of the total sound field in e.g. shadow boundaries,
@@ -12,57 +12,58 @@ function diffr_field = ita_diffraction_utd_approx( wedge, source_pos, receiver_p
 %
 %% Assertions
 if nargin < 6
-    transition_const = 0.1;
+    transition_constant = 0.1;
 end
 
 in_shadow_zone = ita_diffraction_shadow_zone( wedge, source_pos, receiver_pos );
 if ~in_shadow_zone
-    diffr_field = zeros( 1, numel( f ) );
+    diffr_field = zeros( size( freq_vec ) );
     return
 end
 
 %% Variables
-Apex_Point = wedge.get_aperture_point( source_pos, receiver_pos );
-Src_Apex_Dir = ( Apex_Point - source_pos ) ./ Norm( Apex_Point - source_pos );
-Apex_Rcv_Dir = ( receiver_pos - Apex_Point ) ./ Norm( receiver_pos - Apex_Point );
-rho = Norm( Apex_Point - source_pos );  % Distance Source to Apex point
-r = Norm( receiver_pos - Apex_Point );  % Distance Apex point to Receiver
-receiver_SB = source_pos + Src_Apex_Dir .* ( r + rho ); % Virtual position of receiver at shadow boundary
-c = speed_of_sound;
-k_vec = 2 * pi * f ./ c; % Wavenumber
+apex_point = wedge.get_aperture_point( source_pos, receiver_pos );
+dir_src_2_apex_pt = ( apex_point - source_pos ) ./ norm( apex_point - source_pos );
+dir_apex_pt_2_rcv = ( receiver_pos - apex_point ) ./ norm( receiver_pos - apex_point );
+dist_src_2_apex_pt = norm( apex_point - source_pos );  % Distance Source to Apex point
+dist_apex_pt_2_rcv = norm( receiver_pos - apex_point );  % Distance Apex point to Receiver
+dist_src_2_rcv_via_apex = dist_src_2_apex_pt + dist_apex_pt_2_rcv;
 
-if ~wedge.point_outside_wedge( receiver_SB )
+% consider a virtual receiver located at the shadow boundary
+virt_rcv_at_shadow_boundary = source_pos + dir_src_2_apex_pt .* dist_src_2_rcv_via_apex; % Virtual position of receiver at shadow boundary
+if ~wedge.point_outside_wedge( virt_rcv_at_shadow_boundary )
     diffr_field = zeros( 1, numel( f ) );
     return
 end
 
-phi = repmat( acos( dot( Apex_Rcv_Dir( in_shadow_zone, : ), Src_Apex_Dir( in_shadow_zone, : ), 2 ) ), 1, numel( frequency_vec ) ); % angle between receiver and shadow boundary
-phi( phi > pi/4 ) = pi/4;
-phi_0 = transition_const;
-
-% Incident field at shadow boundary
-E_incident_SB = ( 1 ./ Norm( receiver_SB - source_pos ) .* exp( -1i .* k_vec .* ( r + rho ) ) )';
-
-% Diffracted field at shadow boundary
-E_diff_SB = ita_diffraction_utd( wedge, source_pos, receiver_SB, frequency_vec, c );
-
-
-%% Filter Calculation
-% Normalization factor
-C_norm = E_incident_SB( :, in_shadow_zone ) ./ E_diff_SB( :, in_shadow_zone );
-% Considering Interpolation to standard UTD form
-C_total = 1 + ( C_norm - 1 ) .* ( exp( -phi/phi_0 ) )';
-
-% if any( any( receiver_pos( in_shadow_zone, : ) ) )
-    att_shadow_zone = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequency_vec, c );
-    att_shadow_zone = C_total .* att_shadow_zone; % Normalization and interpolation
-    diffr_field( :, in_shadow_zone ) = att_shadow_zone;
-% end
-
-diffr_field( :, ~in_shadow_zone ) = zeros( numel( frequency_vec ), sum( ~in_shadow_zone ) );
-
+angle_rcv_2_shadow_boundary = acos( dot( dir_apex_pt_2_rcv, dir_src_2_apex_pt ) ); % angle between receiver and shadow boundary
+if angle_rcv_2_shadow_boundary > pi/4 
+    angle_rcv_2_shadow_boundary = pi/4;
 end
 
-function res = Norm( A )
-    res = sqrt( sum( A.^2, 2 ) );
+% Incident field at shadow boundary
+magn_of_virt_inc_field_at_SB = 1 ./ norm( virt_rcv_at_shadow_boundary - source_pos ); % discard phase: .* exp( -1i .* k .* distFromSrc2RcvViaApex ) )';
+
+% virutal diffracted field at shadow boundary
+virt_diffr_field_at_SB = ita_diffraction_utd( wedge, source_pos, virt_rcv_at_shadow_boundary, freq_vec, speed_of_sound );
+magn_of_virt_diffr_field_at_SB = abs( virt_diffr_field_at_SB );
+
+% diffracted field at receiver position in shadow zone
+diffr_field_at_rcv_pos = ita_diffraction_utd( wedge, source_pos, receiver_pos, freq_vec, speed_of_sound );
+magn_of_diffr_field_at_rcv = abs( diffr_field_at_rcv_pos );
+phase_of_diffr_field_at_rcv = angle( diffr_field_at_rcv_pos );
+
+%% Filter Calculation
+% Normalize diffracted field at receiver position in shadow zone
+norm_factor = magn_of_virt_inc_field_at_SB ./ magn_of_virt_diffr_field_at_SB;
+norm_diffr_field = norm_factor .* magn_of_diffr_field_at_rcv;
+
+% Interpolate magnitude between orig diffracted field at receiver and normalized
+% diffracted field
+exp_term = exp( - angle_rcv_2_shadow_boundary / transition_constant );
+magn_of_interpolated_diffr_field = norm_diffr_field * exp_term + magn_of_diffr_field_at_rcv * ( 1 - exp_term );
+
+% Use phase of diffracted field at receiver position for final result
+diffr_field = magn_of_interpolated_diffr_field .* phase_of_diffr_field_at_rcv;
+
 end
