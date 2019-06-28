@@ -41,7 +41,7 @@ end
 att_sum = itaAudio;
 k = 2 * pi * freq ./ c;
 
-% UTD total wave field
+% BTM total wave field
 for j = 1 : numel(rcv_positions(:, 1))
     r_dir = norm( rcv_positions(j, :) - src );
     E_dir = ( 1 / r_dir * exp( -1i .* k * r_dir ) )';

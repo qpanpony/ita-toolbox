@@ -36,6 +36,9 @@ alpha_d = linspace( alpha_start, alpha_end, alpha_res );
 
 % Set Receiver Positions
 rcv_positions = ita_align_points_around_aperture( wdg, rcv_start_pos, alpha_d, apex_point, ref_face );
+for i = 1:size(rcv_positions, 1)
+    in_shadow_zone = ita_diffraction_shadow_zone( wdg, src, rcv_positions(i, :) );
+end
 
 % Direct field component for normalization of total field
 f = linspace( 0, f_sampling/2, filter_length/2 + 1 );
@@ -45,8 +48,6 @@ E_dir = 1 ./ R_dir .* exp( -1i .* k .* R_dir );
 
 
 %% Calculations
-in_shadow_zone = ita_diffraction_shadow_zone( wdg, src, rcv_positions );
-
 %%% BTM infinite wedge %%%-------------------------
 att_sum_btm_inf = ita_diffraction_btm_infinite_wedge( infw, src, rcv_positions, f_sampling, filter_length );
 

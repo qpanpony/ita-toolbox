@@ -5,6 +5,7 @@ X = logspace( -3, 1 );
 Y = ita_diffraction_kawai_approx_fresnel( X );
 
 % Plot
+figure(); clf;
 title( 'Kawai approximation of Fresnel integral' )
 yyaxis left
 semilogx( X, abs( Y ) )

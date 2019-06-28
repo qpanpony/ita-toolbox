@@ -47,7 +47,7 @@ for j = 1 : numel(rcv_positions(:, 1))
         E_approx.freqVector = freq;
         E_approx.freqData = ones( numel( freq ), 1 );
     else
-        E_approx = ita_diffraction_normalized_utd(w, src, rcv_positions(j, :), freq ) ./ E_dir;
+        E_approx = ita_diffraction_utd_approx(w, src, rcv_positions(j, :), freq ) ./ E_dir;
     end
     att_sum = ita_merge( att_sum, E_approx );
 end
