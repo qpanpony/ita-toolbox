@@ -18,35 +18,40 @@ function positions = ita_align_points_around_aperture( wedge, field_point, angle
 if ~( isa( wedge, 'itaInfiniteWedge' ) )
     error( 'wedge must an instance of class itaInfiniteWedge' );
 end
-dim_fp = size( field_point );
-dim_pr = size( point_of_rotation );
-dim_an = size( angles );
-if dim_fp(1) ~= 1
-    if dim_fp(2) ~= 1 || dim_fp(1) ~= 3
-        error( 'field point must be of dimension 3' );
-    end
+
+if ~ita_diffraction_point_is_of_dim3(field_point)
+    error( 'field point must be of dimension 3' );
+end
+
+if ~ita_diffraction_point_is_row_vector(field_point)
     field_point = field_point';
 end
+
+if ~ita_diffraction_point_is_of_dim3(point_of_rotation)
+    error( 'point of rotation must be of dimension 3' );
+end
+
+if ~ita_diffraction_point_is_row_vector(point_of_rotation)
+    point_of_rotation = point_of_rotation';
+end
+
 if ~wedge.point_outside_wedge( field_point )
     error( 'field_point must be outside the wedge!' );
 end
-if dim_pr(1) ~= 1
-    if dim_pr(2) ~= 1 || dim_pr(1) ~= 3
-        error( 'point of rotation must be of dimension 3' );
-    end
-    point_of_rotation = point_of_rotation';
+
+if ~wedge.point_outside_wedge( point_of_rotation )
+    error( 'field_point must be outside the wedge!' );
 end
-if ~wedge.point_on_aperture( point_of_rotation )
-    error( 'point of rotation must be on aperture of the wedge!' );
+
+if any( angles > wedge.opening_angle )
+    error( 'angles must be of smaller value than the opening angle of the wedge' );
 end
-if dim_an(1) ~= 1
-    if dim_an(2) ~= 1
+
+if size( angles, 1 ) ~= 1
+    if size( angles, 2 ) ~= 1
         error( 'angles have to be of dimension n x 1 or 1 x n!' );
     end
     angles = angles';
-end
-if any( angles > wedge.opening_angle )
-    error( 'angles must be of smaller value than the opening angle of the wedge' );
 end
 
 %% Calculations
