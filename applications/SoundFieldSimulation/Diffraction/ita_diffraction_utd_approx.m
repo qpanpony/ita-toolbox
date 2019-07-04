@@ -30,6 +30,7 @@ dist_apex_pt_2_rcv = norm( receiver_pos - apex_point );  % Distance Apex point t
 dist_src_2_rcv_via_apex = dist_src_2_apex_pt + dist_apex_pt_2_rcv;
 
 % consider a virtual receiver located at the shadow boundary
+<<<<<<< HEAD
 virt_rcv_at_SB = source_pos + dir_src_2_apex_pt .* dist_src_2_rcv_via_apex; % Virtual position of receiver at shadow boundary
 if ~wedge.point_outside_wedge( virt_rcv_at_SB )
     diffr_field = zeros( size( f ) );
@@ -59,9 +60,6 @@ norm_diffr_field = norm_factor .* diffr_field_at_rcv_pos;
 % Interpolate magnitude between orig diffracted field at receiver and normalized
 % diffracted field
 exp_term = exp( - angle_rcv_to_SB / transition_constant );
-magn_of_interpolated_diffr_field = norm_diffr_field * exp_term + diffr_field_at_rcv_pos * ( 1 - exp_term );
-
-% Use phase of diffracted field at receiver position for final result
-diffr_field = magn_of_interpolated_diffr_field; % .* phase_of_diffr_field_at_rcv;
+diffr_field = norm_diffr_field * exp_term + diffr_field_at_rcv_pos * ( 1 - exp_term );
 
 end

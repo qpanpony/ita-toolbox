@@ -46,21 +46,6 @@ E_dir = 1 ./ R_dir .* exp( -1i .* k .* R_dir );
 
 
 %% Calculations
-%%% BTM infinite wedge %%%-------------------------
-% att_sum_btm_inf = ita_diffraction_btm_infinite_wedge( infw, src, rcv_positions, f_sampling, filter_length );
-
-% f = att_sum_btm_inf.freqVector';
-% k = 2 * pi * f ./ c;
-
-% R_dir = repmat( sqrt( sum( ( rcv_positions - src ).^2, 2 ) ), 1, numel(f) );
-% E_dir = 1 ./ R_dir .* exp( -1i .* k .* R_dir );
-
-% normalization
-% att_sum_btm_inf.freqData( :, ~in_shadow_zone ) = att_sum_btm_inf.freqData( :, ~in_shadow_zone ) + ( E_dir( ~in_shadow_zone, : ) )';
-% att_sum_btm_inf.freqData = att_sum_btm_inf.freqData ./ E_dir';
-%---------------------------------------------------
-
-
 %%% BTM finite wedge %%%----------------------------
 R0 = norm( apex_point - src ) + norm( rcv_start_pos - apex_point );
 tau0 = R0 / c;
@@ -90,20 +75,6 @@ end
 att_sum_btm_fin1.freqData( :, ~in_shadow_zone ) = att_sum_btm_fin1.freqData( :, ~in_shadow_zone ) + E_dir( :, ~in_shadow_zone );
 att_sum_btm_fin1.freqData = att_sum_btm_fin1.freqData ./ E_dir;
 %---------------------------------------------------
-
-%%% UTD %%%-----------------------------------------
-% att_sum_utd = itaResult;
-% att_sum_utd.freqVector = freq;
-% att_sum_utd.freqData = ita_diffraction_utd( infw, src, rcv_positions, freq, c );
-% % normalization
-% att_sum_utd.freqData( :, ~in_shadow_zone' ) = att_sum_utd.freqData( :, ~in_shadow_zone' ) + ( E_dir( ~in_shadow_zone, : ) )';
-% att_sum_utd.freqData = att_sum_utd.freqData ./ E_dir';
-%---------------------------------------------------
-
-%%% deviation between utd and btm %%%-------------------
-% att_deviation = itaAudio;
-% att_deviation.freqData = att_sum_utd.freqData ./ att_sum_btm_fin.freqData;
-%-------------------------------------------------------
 
 
 %% Plot

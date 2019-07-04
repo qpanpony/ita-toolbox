@@ -71,6 +71,7 @@ function D = get_diffr_coeff( wedge, k, alpha_d, alpha_i, rho, r, theta_i, n )
     
     if any( singularities_present )
         [term1, term2, term3, term4] = approx_for_singularities( n, k, L, alpha_i, alpha_d, singularities_present );
+
     else
         term1 = Cot1 .* F1;
         term2 = Cot2 .* F2;
