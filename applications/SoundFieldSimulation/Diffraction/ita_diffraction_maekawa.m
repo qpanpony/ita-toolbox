@@ -9,55 +9,37 @@ function [ H_diffr, detour ] = ita_diffraction_maekawa( wedge, source_pos, recei
 
 %% Assertions
 assert( isa( wedge, 'itaInfiniteWedge' ) )
-dim_src = size( source_pos );
-dim_rcv = size( receiver_pos );
-dim_f = size( frequencies );
-if dim_src(2) ~= 3
-    if dim_src(1) ~= 3
-        error( 'Source point(s) must be of dimension 3' )
-    end
+
+if ~ita_diffraction_point_is_of_dim3( source_pos )
+    error( 'Source point must be of dimension 3' )
+end
+if ~ita_diffraction_point_is_of_dim3( receiver_pos )
+    error( 'Receiver point must be of dimension 3' )
+end
+if ~ita_diffraction_point_is_row_vector( source_pos )
     source_pos = source_pos';
-    dim_src = size( source_pos );
 end
-if dim_rcv(2) ~= 3
-    if dim_rcv(1) ~= 3
-        error( 'Receiver point(s) must be of dimension 3' )
-    end
+if ~ita_diffraction_point_is_row_vector( receiver_pos )
     receiver_pos = receiver_pos';
-    dim_rcv = size( receiver_pos );
-end
-if dim_src(1) ~= 1 && dim_rcv(1) ~= 1 && dim_src(1) ~= dim_rcv(1)
-    error( 'Number of receiver and source positions do not match' )
-end
-if dim_f(1) ~= 1
-    if dim_f(2) ~= 1
-        error( 'Invalid frequency. Use row or column vector' );
-    end
-    frequencies = frequencies';
 end
 
-%% Variables
-% att = itaResult();
-% att.freqVector = frequencies';
 
-Apex_Point = wedge.get_aperture_point( source_pos, receiver_pos );
+%% Calculation
+apex_Point = wedge.get_aperture_point( source_pos, receiver_pos );
 r_dir = norm( receiver_pos - source_pos );
-detour = norm( Apex_Point - source_pos ) + norm( receiver_pos - Apex_Point ) - norm( receiver_pos - source_pos );
-c = speed_of_sound; % Speed of sound in air with a temprature of 20°C
-lambda = c ./ frequencies;
+detour = norm( apex_Point - source_pos ) + norm( receiver_pos - apex_Point ) - norm( receiver_pos - source_pos );
+lambda = speed_of_sound ./ frequencies;
 
 N = 2 * detour ./ lambda; % Fresnel number N
 
 in_shadow_zone = ita_diffraction_shadow_zone( wedge, source_pos, receiver_pos );
 
-% N( ~in_shadow_zone, : ) = - N( ~in_shadow_zone, : );
-
-%% Transfer function
-H_dir = repmat( 1 ./ r_dir, 1, numel(frequencies) );
-H_diffr( :, ~in_shadow_zone' ) = zeros( numel( frequencies ), sum( ~in_shadow_zone ) );
-% From Handbook of Acoustics page 117 eq. 4.13 + inverted phase (pressure
-% release first)
-H_diffr( :, in_shadow_zone' ) = ( -1 ) * ( ( 10^(5/20) * sqrt( 2 * pi * N(in_shadow_zone, :) ) ./ tanh( sqrt( 2*pi*N(in_shadow_zone, :) ) ) ).^(-1) .* H_dir(in_shadow_zone, :) )';
-
+H_dir = 1 ./ r_dir;
+if in_shadow_zone
+    % From Handbook of Acoustics page 117 eq. 4.13 + inverted phase (pressure release first)
+    H_diffr = ( -1 ) * ( ( 10^(5/20) * sqrt( 2 * pi * N ) ./ tanh( sqrt( 2 * pi * N ) ) ).^(-1) .* H_dir );
+else
+    H_diffr = zeros( size(frequencies) ); % diffraction field outside the shadow zone is not considered with Maekawa's method
+end
 
 end
