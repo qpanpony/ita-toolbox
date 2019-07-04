@@ -1,59 +1,42 @@
-function [res, offs] = ita_diffraction_btms( wedge, source_pos, receiver_pos, f_s, N, speed_of_sound, approx )
+function [res, offs] = ita_diffraction_btms( fin_wedge, source_pos, receiver_pos, sample_rate, filter_length, speed_of_sound, use_approx )
 %ITA_DIFFRACTION_BTM_FINITE_WEDGE Summary of this function goes here
 %   Detailed explanation goes here
 
-% if nargin < 4
-%     sampling_rate = 44100;
-% end
-% if nargin < 5
-%     filter_length_samples = 1024;
-% end
-% if nargin < 6
-%     boundary_condition = 'hard';
-% end
-% if ~( isequal(boundary_condition, 'hard') || isequal(boundary_condition, 'soft') )
-%     error('invalid boundary condition. Use hard or soft.');
-% end
+%% Assertions
 if nargin < 7
-    approx = true;
+    use_approx = true;
 end
-if ~isa( wedge, 'itaFiniteWedge')
+if ~isa( fin_wedge, 'itaFiniteWedge')
     error( 'Wedge must be object from class itaFiniteWedge' );
 end
-dim_src = size( source_pos );
-dim_rcv = size( receiver_pos );
-if dim_src(2) ~= 3
-    if sim_src(1) ~= 3
-        error( 'Source point(s) must be of dimension 3' )
-    end
+if ~ita_diffraction_point_is_of_dim3( source_pos )
+    error( 'Source point must be of dimension 3' )
+end
+if ~ita_diffraction_point_is_of_dim3( receiver_pos )
+    error( 'Receiver point must be of dimension 3' )
+end
+if ~ita_diffraction_point_is_row_vector( source_pos )
     source_pos = source_pos';
-    dim_src = size( source_pos );
 end
-if dim_rcv(2) ~= 3
-    if dim_rcv(1) ~= 3
-        error( 'Reciever point(s) must be of dimension 3' )
-    end
+if ~ita_diffraction_point_is_row_vector( receiver_pos )
     receiver_pos = receiver_pos';
-    dim_rcv = size( receiver_pos );
-end
-if dim_src(1) ~= 1 && dim_rcv(1) ~= 1 && dim_src(1) ~= dim_rcv(1)
-    error( 'Number of receiver and source positions do not match' )
 end
 
+
 %% Variables
-Apex_Point = wedge.get_aperture_point( source_pos, receiver_pos );
-Apex_Dir = wedge.aperture_direction;
-ref_face = wedge.point_facing_main_side( source_pos );
-theta_S = wedge.get_angle_from_point_to_wedge_face( source_pos, ref_face );
-theta_R = wedge.get_angle_from_point_to_wedge_face( receiver_pos, ref_face );
-theta_i = wedge.get_angle_from_point_to_aperture( source_pos, Apex_Point );
-theta_w = wedge.opening_angle;
-SA = norm( Apex_Point - source_pos );
-AR = norm( receiver_pos - Apex_Point );
+apex_point = fin_wedge.get_aperture_point( source_pos, receiver_pos );
+apex_dir = fin_wedge.aperture_direction;
+ref_face = fin_wedge.point_facing_main_side( source_pos );
+theta_S = fin_wedge.get_angle_from_point_to_wedge_face( source_pos, ref_face );
+theta_R = fin_wedge.get_angle_from_point_to_wedge_face( receiver_pos, ref_face );
+theta_i = fin_wedge.get_angle_from_point_to_aperture( source_pos, apex_point );
+theta_w = fin_wedge.opening_angle;
+SA = norm( apex_point - source_pos );
+AR = norm( receiver_pos - apex_point );
 r_S = SA .* sin( theta_i );
 r_R = AR .* sin( theta_i );
-z_S = dot( source_pos - wedge.aperture_start_point, Apex_Dir );
-z_R = dot( receiver_pos - wedge.aperture_start_point, Apex_Dir );
+z_S = dot( source_pos - fin_wedge.aperture_start_point, apex_dir );
+z_R = dot( receiver_pos - fin_wedge.aperture_start_point, apex_dir );
 % z_apex = dot( Apex_Point - wedge.aperture_start_point, Apex_Dir );
 
 ny = pi / theta_w;
@@ -65,11 +48,11 @@ c = speed_of_sound;
 % res.samplingRate = sampling_rate;
 % res.nSamples = filter_length_samples;
 
-T = 1 / f_s;
+T = 1 / sample_rate;
 tau_0 = R_0 / c;
 % tau = ( tau_0 ) : T : ( tau_0 + T * (N - 1) );
 
-tau = 0 : T : T*(N-1);
+tau = 0 : T : T*(filter_length-1);
 
 tau_offset = tau_0 / T;
 
@@ -86,8 +69,8 @@ dZ = secondary_source_coordinates_on_aperture( r_S, z_S, r_R, z_R, tau + 0.5*T, 
      secondary_source_coordinates_on_aperture( r_S, z_S, r_R, z_R, tau - 0.5*T, c );
 
 
-tau_end_upper_branch = ( norm( wedge.aperture_end_point - source_pos ) + norm( receiver_pos - wedge.aperture_end_point) ) / c;
-tau_end_lower_branch = ( norm( wedge.aperture_start_point - source_pos ) + norm( receiver_pos - wedge.aperture_start_point) ) / c;
+tau_end_upper_branch = ( norm( fin_wedge.aperture_end_point - source_pos ) + norm( receiver_pos - fin_wedge.aperture_end_point) ) / c;
+tau_end_lower_branch = ( norm( fin_wedge.aperture_start_point - source_pos ) + norm( receiver_pos - fin_wedge.aperture_start_point) ) / c;
 
 mask_u = ( tau <= tau_end_upper_branch );
 mask_l = ( tau <= tau_end_lower_branch );
@@ -105,10 +88,10 @@ else % lower branch
     dz = ( dz(mask_l) )';
 end
 
-Apex_Start = repmat( wedge.aperture_start_point, numel( z_n ), 1 );
+Apex_Start = repmat( fin_wedge.aperture_start_point, numel( z_n ), 1 );
 Z_n = repmat( z_n, 1, 3 );
-Apex_Dir = repmat( wedge.aperture_direction, numel( z_n ), 1 );
-Sec_Source_Pos_On_Apex_n = Apex_Start + ( Z_n .* Apex_Dir );
+apex_dir = repmat( fin_wedge.aperture_direction, numel( z_n ), 1 );
+Sec_Source_Pos_On_Apex_n = Apex_Start + ( Z_n .* apex_dir );
 
 %% Filter variables
 % alpha_n = pi/2 - wedge.get_angle_from_point_to_aperture( source_pos, Sec_Source_Pos_On_Apex_n );
@@ -234,7 +217,7 @@ else
 end
 
 %% Filter Results
-switch wedge.is_boundary_condition_hard
+switch fin_wedge.is_boundary_condition_hard
     case true
         beta = ( beta_pp + beta_pm + beta_mp + beta_mm ); % factor 2 from Svensson - An analytic secondary source model... eq (17)
         h_0 = h1_0 + h2_0 + h3_0 + h4_0;
@@ -248,7 +231,7 @@ integrand = ( (scaling(mask_n) .* beta) ./ (m_n .* l_n) );
 
 h_diffr = zeros( numel(tau), 1 );
 h_diffr(mask_n) = - ( ny / (4*pi) ) * integrand .* dz;
-if approx
+if use_approx
     h_diffr(1) = h_0;
 end
 % res.timeData = h_diffr;
