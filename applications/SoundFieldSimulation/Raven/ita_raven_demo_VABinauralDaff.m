@@ -28,7 +28,7 @@ receiver_position = [3 1.7 -4]; %NOTE: in openGL coordinated (used by RAVEN) the
 
 % NOTE: A simulation with azimuthResolution=3 and elevationResolution=45
 % takes about 20 minutes on a regular computer
-azimuthResolution=45; %in degrees. NOTE, small values here may result in large simulation times
+azimuthResolution=3; %in degrees. NOTE, small values here may result in large simulation times
 elevationResolution=45;
 simulate_room = true; %do simulation, or just load results from current workspace?
 automatic_rotate_sim = true; %set to true to automatically rotate the room, or false to manually rotate with a slider
@@ -145,7 +145,7 @@ va.set_output_gain( 0.5 )
 va.add_search_path( pwd );
 
 % Create a signal source and start playback
-X = va.create_signal_source_buffer_from_file( [ ravenBasePath '\RavenDatabase\SoundDatabase\Conga_ITA.wav']); % make sure that this path is correct
+X = va.create_signal_source_buffer_from_file( [ ravenBasePath '\RavenDatabase\SoundDatabase\Conga_ITA.wav']);
 va.set_signal_source_buffer_playback_action( X, 'play' )
 va.set_signal_source_buffer_looping( X, true );
 
