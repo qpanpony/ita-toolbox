@@ -89,7 +89,7 @@ classdef itaMaterial < itaSimulationInputItem
             this.mAbsorptionType = absorptionType;
         end
         function this = set.scatteringType(this, scatterType)
-            assert(isa(scatterType, 'ScatteringType'), 'The scatteringType property must be an object of the class ImpedanceType.')
+            assert(isa(scatterType, 'ScatteringType'), 'The scatteringType property must be an object of the class ScatteringType.')
             this.mScatteringType = scatterType;
         end
         
