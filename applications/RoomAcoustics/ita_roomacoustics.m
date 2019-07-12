@@ -38,11 +38,12 @@ function varargout = ita_roomacoustics(varargin)
 %
 %
 %    Currently available parameters [ output from ita_roomacoustics_parameters('getAvailableParameters') ]:
-%                   EDT, T10, T15, T20, T30, T40, T50, T60                  % reverberation times
+%                   EDT, LDT, T10, T15, T20, T30, T40, T50, T60             % reverberation times
+%                                                                             LDT: Late Decay Time (see [6])
 %                   C50, C80, D50, D80, Center_Time                         % energy parameters
 %                   T_Huszty                                                % reverberation time with Huszty method [2] (not in public BSD version)
 %                   T_Lundeby, PSNR_Lundeby, Intersection_Time_Lundeby      % Lundeby et al. method [1]
-%                   EDC                                                     % engergy decay curve
+%                   EDC                                                     % energy decay curve
 %
 %
 %    Select the parameters to be calculated:
@@ -64,6 +65,7 @@ function varargout = ita_roomacoustics(varargin)
 %  [3] ISO EN DIN 3382 - Measurement of the reverberation time of rooms with reference to other acoustical parameters
 %  [4] Chu - Comparison of reverberation measurements using Schroeder's impulse method and decay-curve averaging method - JASA 1978
 %  [5] Guski - Measurement Uncertainties of Reverberation Time caused by Noise - AIA-DAGA 2013
+%  [6] Bradley and Wang - Quantifying the Double Slope Effect in Coupled Volume Room Systems, 2009, https://doi.org/10.1260/135101009788913275
 
 % <ITA-Toolbox>
 % This file is part of the application RoomAcoustics for the ITA-Toolbox. All rights reserved.
@@ -71,6 +73,7 @@ function varargout = ita_roomacoustics(varargin)
 % </ITA-Toolbox>
 
 % Author: Martin Guski -- Email: mgu@akustik.rwth-aachen.de
+%         Lukas Aspöck -- Email: las@akustik.rwth-aachen.de
 % Created: 08-Jan-2009
 
 
