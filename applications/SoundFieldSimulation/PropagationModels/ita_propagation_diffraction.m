@@ -1,10 +1,8 @@
-function [ freq_data_linear ] = ita_propagation_diffraction( anchor, effective_source_position, effective_receiver_position, diffraction_model, fs, fft_degree )
+function [ freq_data_linear ] = ita_propagation_diffraction( anchor, effective_source_position, effective_receiver_position, diffraction_model, fs, fft_degree, c )
 %ITA_PROPAGATION_DIFFRACTION Returns the attenuation transfer function
 %of the edge diffraction for certain model and given effective in/out positions 
 %sampling rate and fft degree (defaults to fs = 44100 and fft_degree = 15)
 %
-
-global ita_speed_of_sound
 
 if nargin < 3
    error 'You are missing several input argument'
@@ -19,16 +17,14 @@ end
 if nargin < 6
     fft_degree = 15;
 end
+if nargin < 7
+    c = 341;
+end
 
 if ~isfield( anchor, 'anchor_type' )
     error( 'The anchor argument does not contain a field "anchor_type"' )
 end
 
-if exist( 'ita_speed_of_sound', 'var' )
-    c = ita_speed_of_sound; % m/s, speed of sound
-else
-    c = 341; % m/s, speed of sound
-end
 
 diffraction_tf = itaAudio();
 diffraction_tf.samplingRate = fs;
@@ -65,13 +61,13 @@ end
 
 switch( diffraction_model )
     case 'utd'
-        [ utd_tf, ~, ~ ] = ita_diffraction_utd( w, effective_source_position, effective_receiver_position, diffraction_tf.freqVector( 2:end ), c ); 
+        [ utd_tf, ~, ~ ] = ita_diffraction_utd( w, effective_source_position, effective_receiver_position, diffraction_tf.freqVector( 2:end )', c ); 
         diffraction_tf.freqData = [ 0; utd_tf ];
         
         apex_point = w.get_aperture_point( effective_source_position, effective_receiver_position );
         distance = norm( apex_point - effective_source_position ) + norm( effective_receiver_position - apex_point );
         spreading_loss = ita_propagation_spreading_loss( distance );
-        phase_delay = ita_propagation_delay( distance, ita_speed_of_sound, fs, fft_degree );
+        phase_delay = ita_propagation_delay( distance, c, fs, fft_degree );
         
         normilization_porpagation = spreading_loss * phase_delay;
         
@@ -85,7 +81,7 @@ switch( diffraction_model )
         apex_point = w.get_aperture_point( effective_source_position( 1:3 )', effective_receiver_position( 1:3 )' );
         distance = norm( apex_point - effective_source_position ) + norm( effective_receiver_position - apex_point );
         spreading_loss = ita_propagation_spreading_loss( distance );
-        phase_delay = ita_propagation_delay( distance, ita_speed_of_sound, fs, fft_degree );
+        phase_delay = ita_propagation_delay( distance, c, fs, fft_degree );
         
         normilization_porpagation = spreading_loss * phase_delay;
         

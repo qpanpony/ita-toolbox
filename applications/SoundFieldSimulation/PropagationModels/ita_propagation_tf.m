@@ -1,10 +1,8 @@
-function [ freq_data_linear ] = ita_propagation_tf( propagation_path, fs, fft_degree )
+function [ freq_data_linear ] = ita_propagation_tf( propagation_path, fs, fft_degree, c )
 %ITA_PROPAGATION_PATH_TF Calculates the transfer function (tf)
 %of a (geometrical) propagation path in frequency domain for a
 %given sampling rate and fft degree (defaults to fs = 44100 and fft_degree = 15)
 %
-
-global ita_speed_of_sound
 
 if ~isfield( propagation_path, 'propagation_anchors' )
     error( 'The propagation_path argument does not contain a field "propagation_anchors"' )
@@ -21,15 +19,15 @@ prop_tfs.samplingRate = fs;
 prop_tfs.fftDegree = fft_degree;
 prop_tfs.freqData = ones( prop_tfs.nBins, N );
 
-lambda = ita_speed_of_sound ./ prop_tfs.freqVector( 2:end ); % Wavelength
+lambda = c ./ prop_tfs.freqVector( 2:end )'; % Wavelength
 k = (2 * pi) ./ lambda; % Wavenumber
 
 distance = ita_propagation_path_length( propagation_path );
-if distance / ita_speed_of_sound > prop_tfs.trackLength
+if distance / c > prop_tfs.trackLength
     error 'Propagation path length too long, increase fft degree to generate transfer function for this propagation path'
 end
 
-phase_by_delay = ita_propagation_delay( distance, ita_speed_of_sound, fs, fft_degree );
+phase_by_delay = ita_propagation_delay( distance, c, fs, fft_degree );
 spreading_loss = ita_propagation_spreading_loss( distance, 'spherical' );
 
 freq_data_linear = phase_by_delay .* spreading_loss;
@@ -90,7 +88,7 @@ for m = 1 : N
             effective_source_position = anchor.interaction_point + source_direction * effective_source_distance;
             effective_target_position = anchor.interaction_point + target_direction * effective_target_distance;
                         
-            prop_tfs.freqData( :, m ) = ita_propagation_diffraction( anchor, effective_source_position, effective_target_position, 'utd', fs, fft_degree  );
+            prop_tfs.freqData( :, m ) = ita_propagation_diffraction( anchor, effective_source_position, effective_target_position, 'utd', fs, fft_degree );
             
         otherwise
             
