@@ -1,4 +1,4 @@
-function positions = ita_align_points_around_aperture( wedge, field_point, angles, point_of_rotation, ref_face  )
+function positions = ita_diffraction_align_points_around_aperture( wedge, field_point, angles, point_of_rotation, ref_face  )
 % ITA_ALIGN_POINTS_AROUND_APERTURE rotates field point around the aperture
 % of the wedge around the point of rotation with the vector of angles respective to the reference face.
 % Returns a set of 3-dim vectors, corresponding to the number of angles, in
