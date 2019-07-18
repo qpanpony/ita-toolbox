@@ -27,3 +27,4 @@ svnaccess
 itaRaven.ini
 *.daff
 /external_packages/sofa
+/applications/Hardware/Tracking/Optitrack/NatNetSDK
