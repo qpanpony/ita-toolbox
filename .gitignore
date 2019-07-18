@@ -26,3 +26,4 @@ svnaccess
 *.exp
 itaRaven.ini
 *.daff
+/external_packages/sofa
