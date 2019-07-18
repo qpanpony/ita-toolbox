@@ -5,6 +5,12 @@ classdef itaSubjectOrientationFeedback < handle
     % orientation for a person in motion, e.g. during HRTF measurements
     % where no movement is desired.
     % Needs position and orientation data provided by a tracking system.
+    % Usage:
+    % ot = itaOptitrack('autoconnect', 1); % creates tracking object and
+    % connects to localhost (127.0.0.1)
+    % sof = itaSubjectOrientationFeedback(ot);
+    % sof.startFeedback;
+    % sof.stopFeedback;
     %
     % Author:  Saskia Wepner, swe@akustik.rwth-aachen.de
     %          Hark Baren - adaptations of Saskias code
@@ -136,11 +142,15 @@ classdef itaSubjectOrientationFeedback < handle
             if ~this.isRunning
                 return
             end
+            % close figure -- produces closereq error. need to be fixed.
+%             fig = this.(this.figName);
+%             if ishandle(fig)
+%                 close(fig)
+%             end
+
             % stop Matlab timer
             stop(this.timerObject);
             this.optiTrackObject.stopLogging;
-            
-            
         end
         
         function showGUI(this)
