@@ -1,4 +1,4 @@
-function propagation_path_list = ita_load_propagation_paths( json_file_path )
+function propagation_path_list = ita_propagation_load_paths( json_file_path )
 %
 % ita_load_propagation_paths Loads a JSON formatted propagation path list
 % from a text file
