@@ -18,10 +18,10 @@ if ~ita_diffraction_point_is_of_dim3( receiver_pos )
     error( 'Receiver point must be of dimension 3' )
 end
 if ~ita_diffraction_point_is_row_vector( source_pos )
-    source_pos = source_pos';
+    %source_pos = source_pos';
 end
 if ~ita_diffraction_point_is_row_vector( receiver_pos )
-    receiver_pos = receiver_pos';
+   % receiver_pos = receiver_pos';
 end
 
 %% Variables

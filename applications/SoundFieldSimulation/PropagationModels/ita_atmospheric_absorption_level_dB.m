@@ -8,8 +8,9 @@ function dAirAbsorptionDecibel = ita_atmospheric_absorption_level_dB( dFrequency
         dHumidity = vargin{2};
         dStaticPressure = vargin{3};
     elseif( nargin == 2 )
-        default_values = ita_propagation_load_defaults;
-        dTemperature = default_values.temperature;
+        ita_propagation_load_defaults
+        default_values = ita_propagation_defaults;
+        dTemperature = default_values.air.temperature;
         dHumidity = default_values.humidity;
         dStaticPressure = default_values.static_pressure;
     else
@@ -48,17 +49,17 @@ function dAirAbsorptionDecibel = ita_atmospheric_absorption_level_dB( dFrequency
 	f_r_n = ( p_a / p_r ) * ( T / T_0).^(-1.0 / 2.0) * ( 9.0 + 280.0*h*exp( -4.710 * ( ( T / T_0).^( -( 1 / 3.0 ) ) - 1.0 ) ) );
 
 	% Parts of Equation (5) for the calculation of the attenuation coefficient [dB/m]
-	dAlpha1 = 8.686 * dFrequency.^ 2.0;
+	dAlpha1 = 8.686 .* dFrequency.^ 2.0;
 	dAlpha2 = 1.84e-11 * ( p_a / p_r).^ -1.0 * ( T / T_0).^(1.0 / 2.0);
 	dAlpha3 = ( T / T_0).^(-5.0 / 2.0);
-	dAlpha4 = 0.01275 * exp( -2239.1 / T ) * ( f_r_o + pow( dFrequency, 2.0 ) / f_r_o).^(-1.0);
-	dAlpha5 = 0.10680 * exp( -3352.0 / T ) * ( f_r_n + pow( dFrequency, 2.0 ) / f_r_n).^(-1.0);
+	dAlpha4 = 0.01275 .* exp( -2239.1 / T ) .* ( f_r_o + ( dFrequency.^ 2.0 ) ./ f_r_o).^(-1.0);
+	dAlpha5 = 0.10680 .* exp( -3352.0 / T ) .* ( f_r_n + ( dFrequency.^ 2.0 ) ./ f_r_n).^(-1.0);
 
 	% Attenuation coefficient [dB/m], ~f, as assembly of Equation (5) parts
-	dAlpha = dAlpha1 * ( dAlpha2 + dAlpha3 * ( dAlpha4 + dAlpha5 ) );
+	dAlpha = dAlpha1 .* ( dAlpha2 + dAlpha3 .* ( dAlpha4 + dAlpha5 ) );
 
 	% Resulting atmospheric absorption [dB], ~alpha (~f) 
 	% Equation (2)
     % Attenuation factor in decibel
-	dAirAbsorptionDecibel = dAlpha * dDistance;
+	dAirAbsorptionDecibel = dAlpha .* dDistance;
 end

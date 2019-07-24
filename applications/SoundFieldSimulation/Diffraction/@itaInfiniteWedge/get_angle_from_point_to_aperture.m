@@ -10,14 +10,14 @@ if dim_fp(2) ~= 3
     if dim_fp(1) ~= 3
         error( 'Field point must be a row vector of dimension 3' );
     end
-    field_point = field_point';
+    %field_point = field_point';
     dim_fp = size(field_point);
 end
 if dim_pa(2) ~= 3
     if dim_pa(1) ~= 3
         error( 'Point on Aperture must be a row vector of dimension 3.' );
     end
-    point_on_aperture = point_on_aperture';
+    %point_on_aperture = point_on_aperture';
     dim_pa = size(point_on_aperture);
 end
 if dim_fp(1) ~= 1 && dim_pa(1) ~= 1
