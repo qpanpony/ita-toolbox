@@ -3,50 +3,54 @@ function ap = get_aperture_point( obj, source_pos, receiver_pos )
     % between source and receiver)
     
     %% Verification
-    dim_src = size( source_pos );
-    dim_rcv = size( receiver_pos );
-    if dim_src(2) ~= 3
-        if dim_src(1) ~= 3
-            error( 'Source point(s) must be of dimension 3')
-        end
-        source_pos = source_pos';
-        dim_src = size( source_pos );
-    end
-    if dim_rcv(2) ~= 3
-        if dim_rcv(1) ~= 3
-            error( 'Receiver point(s) must be of dimension 3')
-        end
-        receiver_pos = receiver_pos';
-        dim_rcv = size( receiver_pos );
-    end
-    if dim_src(1) ~= 1 && dim_rcv(1) ~= 1 && dim_src(1) ~= dim_rcv(1)
-        error( 'Number of receiver and source positions do not match' )
-    end
-    if dim_src(1) > dim_rcv(1)
-        dim_n = dim_src(1);
-        S = source_pos;
-        R = repmat( receiver_pos, dim_n, 1 );
-    elseif dim_src(1) < dim_rcv(1)
-        dim_n = dim_rcv(1);
-        S = repmat( source_pos, dim_n, 1 );
-        R = receiver_pos;
-    else
-        dim_n = dim_src(1);
-        S = source_pos;
-        R = receiver_pos;
-    end
-    
-    if( size( S, 2 ) ~= 3 )
-        S = S';
-    end
-    if( size( R, 2 ) ~= 3 )
-        R = R';
-    end
-    
-    assert( size( S, 2 ) == 3 )
-    assert( size( R, 2 ) == 3 )
+%     dim_src = size( source_pos );
+%     dim_rcv = size( receiver_pos );
+%     if dim_src(2) ~= 3
+%         if dim_src(1) ~= 3
+%             error( 'Source point(s) must be of dimension 3')
+%         end
+%         source_pos = source_pos';
+%         dim_src = size( source_pos );
+%     end
+%     if dim_rcv(2) ~= 3
+%         if dim_rcv(1) ~= 3
+%             error( 'Receiver point(s) must be of dimension 3')
+%         end
+%         receiver_pos = receiver_pos';
+%         dim_rcv = size( receiver_pos );
+%     end
+%     if dim_src(1) ~= 1 && dim_rcv(1) ~= 1 && dim_src(1) ~= dim_rcv(1)
+%         error( 'Number of receiver and source positions do not match' )
+%     end
+%     if dim_src(1) > dim_rcv(1)
+%         dim_n = dim_src(1);
+%         S = source_pos;
+%         R = repmat( receiver_pos, dim_n, 1 );
+%     elseif dim_src(1) < dim_rcv(1)
+%         dim_n = dim_rcv(1);
+%         S = repmat( source_pos, dim_n, 1 );
+%         R = receiver_pos;
+%     else
+%         dim_n = dim_src(1);
+%         S = source_pos;
+%         R = receiver_pos;
+%     end
+%     
+%     if( size( S, 2 ) ~= 3 )
+%         S = S';
+%     end
+%     if( size( R, 2 ) ~= 3 )
+%         R = R';
+%     end
+%     
+%     assert( size( S, 2 ) == 3 )
+%     assert( size( R, 2 ) == 3 )
 
     %% Variables
+    
+    S = source_pos;
+    R = receiver_pos;
+    
     L = obj.location;
     Apex_Dir = obj.aperture_direction;
     assert( numel( Apex_Dir ) == 3 )
