@@ -25,7 +25,7 @@ if ~ita_diffraction_point_is_row_vector( receiver_pos )
 end
 
 %% Variables
-apex_point = wedge.get_aperture_point( source_pos, receiver_pos );
+apex_point = wedge.get_aperture_point2( source_pos, receiver_pos ); %changed to new fn to find apereture point with matlab optimisation routine
 rho = norm( apex_point - source_pos ); % Distance of source to aperture point
 r = norm( receiver_pos - apex_point ); % Distance of receiver to aperture point
 assert( rho + r ~= 0 && r ~= 0 );

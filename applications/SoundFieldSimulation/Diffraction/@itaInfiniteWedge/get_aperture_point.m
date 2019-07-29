@@ -48,9 +48,27 @@ function ap = get_aperture_point( obj, source_pos, receiver_pos )
 
     %% Variables
     
+    aperture_start = obj.aperture_start_point;
+    aperture_direction = obj.aperture_direction;
+    %dot_prod_source = dot(aperture_direction, source_pos - aperture_start);
+    %dot_prod_receiver = dot(aperture_direction, receiver_pos - aperture_start);
+    
+    SR_direction = (receiver_pos - source_pos) ./ norm(receiver_pos - source_pos);
+    Norm = cross( SR_direction, aperture_direction );
+    plane_norm = cross( Norm, SR_direction );
+    
+    l = dot(source_pos - aperture_start,plane_norm) ./ dot(aperture_direction,plane_norm);
+    ap = aperture_start + (l*aperture_direction);
+    %{
+    global S R start dir;
+
+    start = obj.aperture_start_point;
+    dir = obj.aperture_direction;
+    
+    ap = fmincon(@total_path_distance, start, );
+    
     S = source_pos;
     R = receiver_pos;
-    
     L = obj.location;
     Apex_Dir = obj.aperture_direction;
     assert( numel( Apex_Dir ) == 3 )
@@ -72,5 +90,10 @@ function ap = get_aperture_point( obj, source_pos, receiver_pos )
     % aperture line: x = location + dist * aperture_direction
     dist = dot( S - L, aux_plane_normal ) ./ dot( Apex_Dir, aux_plane_normal );
     ap = L + dist .* Apex_Dir;
+%}
+end
 
+function dist = total_path_distance(t)
+    P = start + (t*dir); %P = point on the aperture
+    dist = norm(P - S) + norm(R - P); %given point on aperture, source and receiver positions, calculate the distance traveled
 end
