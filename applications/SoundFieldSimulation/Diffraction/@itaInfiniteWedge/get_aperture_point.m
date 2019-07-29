@@ -1,5 +1,5 @@
 function aperture_point = get_aperture_point( obj, source_pos, receiver_pos )
-% Returns aperture point on wedge (closest point on wedge
+% get_aperture_point Returns aperture point on wedge (closest point on wedge
 % between source and receiver)
     
 assert( numel( source_pos ) == 3 )
