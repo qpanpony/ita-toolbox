@@ -3,6 +3,12 @@ function ita_propagation_store_paths( pps_struct, json_file_path, auto_overwrite
 % ita_store_propagation_paths Exports propagation path list
 % from a Matlab struct into a JSON formatted text file
 %
+% Example:  ita_propagation_store_paths( pps_struct, json_file_path )
+%           ita_propagation_store_paths( pps_struct, json_file_path, false ) % error if file exists.
+%
+% Will automatically overwrite target file, set 3rd parameter to false to
+% raise an error.
+%
 %
     if ~isfield( pps_struct, 'class' )
         error( 'Could not export propagation path list, struct is missing field "class"' )
