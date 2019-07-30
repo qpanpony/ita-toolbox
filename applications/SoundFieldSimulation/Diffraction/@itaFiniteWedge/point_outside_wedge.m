@@ -1,21 +1,20 @@
 function b = point_outside_wedge( obj, point )
-    % Returns true if the point is outside the solid structure of
+    % point_outside_wedge Returns true if the point is outside the solid structure of
     % the finite wedge
+    %
+    % Example: b = w.point_outside_wedge( point )
+    %
     
-    dim = size( point );
-    if dim(2) ~= 3
-        if dim(1) ~= 3
-            error( 'Point(s) must be of dimension 3')
-        end
-        point = point';
-        dim = size( point );
-    end
+    assert( all( size( point ) == size( obj.location ) ) )
+    assert( abs( norm( obj.main_face_normal ) - 1 ) < obj.set_get_geo_eps )
+    assert( abs( norm( obj.opposite_face_normal ) - 1 ) < obj.set_get_geo_eps )
+
+    % Use Hesse normal form
+    d1 = dot( point - obj.location, obj.main_face_normal );
+    d2 = dot( point - obj.location, obj.opposite_face_normal );
     
-    dist_from_main_face = sum( (point - obj.location) .* obj.main_face_normal, 2 );
-    dist_from_opposite_face = sum( (point - obj.location) .* obj.opposite_face_normal, 2 );
-    
-    b = zeros( dim(1), 1 );
-    mask = ( dist_from_main_face < -obj.set_get_geo_eps ) & ( dist_from_opposite_face < -obj.set_get_geo_eps );   
-    b(~mask) = true;
+    % Bad error propagation for face normals ... use a very soft resolution
+    % for a point beeing inside or outside a wedge.
+    b = any( [ d1 d2 ] > (-2) * obj.set_get_geo_eps);
     
 end

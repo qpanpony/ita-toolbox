@@ -1,19 +1,10 @@
-function res = point_facing_main_side( obj, point  )
+function res_t = point_facing_main_side( obj, point  )
 % Returns string including the face normal of source
 %   facing wedge side
 %   output: 'n1' -> source is facing main face of wedge
 %           'n2' -> source is facing opposite face of wedge
 
-%% Assertions
-dim = size( point );
-if dim(2) ~= 3
-    if dim(1) ~= 3
-        error( 'Position vectors must be of dimension 3!' );
-    end
-    %point = point';
-    dim = size( point );
-end
-if any( ~obj.point_outside_wedge( point ) )
+if ~obj.point_outside_wedge( point )
     error( 'Source position(s) must be outside the wedge!' );
 end
 
@@ -44,8 +35,10 @@ y_i2 = dot( point - obj.location, e_y2, 2 );
 temp2 = atan2( y_i2, x_i2 );
 temp2( temp2 < 0 ) = temp2( temp2 < 0 ) + 2*pi;
 
-res = true( dim(1), 1 );
-res( temp2 < temp1 ) = false;
+res_t = true( 3, 1 );
+res_t( temp2 < temp1 ) = false;
+
+res = any( res_t );
 
 end
 
