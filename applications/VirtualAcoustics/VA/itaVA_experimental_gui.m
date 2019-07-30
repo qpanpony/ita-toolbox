@@ -100,7 +100,7 @@ handles.va.reset;
 gpg_renderer_list = [];
 for n=1:numel( handles.va.get_rendering_modules )
     if strcmp( handles.va.get_rendering_modules( n ).class, 'PrototypeGenericPath' )
-        gpg_renderer_list = [ gpg_renderer_list handles.va.get_renderers( n ) ];
+        gpg_renderer_list = [ gpg_renderer_list handles.va.get_rendering_modules( n ) ];
     end
 end
 
@@ -117,11 +117,13 @@ disp( [ 'Using channel prototype generic path renderer with identifier: ' gpg_re
 
 % Classic VA module call with input and output arguments
 handles.module_id = [ gpg_renderer.class ':' gpg_renderer.id ];
+handles.renderer_id = gpg_renderer.id;
+
 in_args.info = true;
-out_args = handles.va.call_module( handles.module_id, in_args );
+out_args = handles.va.get_rendering_module_parameters( gpg_renderer.id, in_args );
 handles.module_channels = out_args.numchannels;
 handles.module_filter_length_samples = out_args.irfilterlengthsamples;
-disp( [ 'Your experimental renderer "' handles.module_id '" has ' num2str( handles.module_channels ) ' channels and an FIR filter length of ' num2str( out_args.irfilterlengthsamples ) ' samples' ] )
+disp( [ 'Your experimental renderer "'  gpg_renderer.id '" has ' num2str( handles.module_channels ) ' channels and an FIR filter length of ' num2str( out_args.irfilterlengthsamples ) ' samples' ] )
 
 handles.edit_va_channels.String = handles.module_channels;
 handles.edit_va_fir_taps.String = handles.module_filter_length_samples;
@@ -138,13 +140,13 @@ if ~exist( 'ita_all_silence', 'var' )
 end
 
 % Very simple scene with one path
-handles.va_listener_id = handles.va.createListener( 'itaVA_ExperimentalListener' );
-handles.va_source_id = handles.va.createSoundSource( 'itaVA_ExperimentalSource' );
+handles.va_listener_id = handles.va.create_sound_receiver( 'itaVA_ExperimentalListener' );
+handles.va_source_id = handles.va.create_sound_source( 'itaVA_ExperimentalSource' );
 handles.va_signal_id = '';
 
 % VA control
-handles.va.setOutputMuted( handles.checkbox_global_muted.Value );
-handles.va.setOutputGain( handles.slider_volume.Value );
+handles.va.set_output_muted( handles.checkbox_global_muted.Value );
+handles.va.set_output_muted( handles.slider_volume.Value );
 
 refresh_sourcesignals( hObject, handles );
 refresh_workspace_vars( hObject, handles );
@@ -177,12 +179,12 @@ filter_list = handles.listbox_filters.String;
 filter_selected = filter_list{ index_selected };
 
 
-if handles.va.isConnected
+if handles.va.get_connected
     
     num_channels = str2double( handles.edit_va_channels.String );
 
     mStruct = struct;
-    mStruct.listener = handles.va_listener_id;
+    mStruct.receiver = handles.va_listener_id;
     mStruct.source = handles.va_source_id;
     mStruct.verbose = true;
     
@@ -193,8 +195,7 @@ if handles.va.isConnected
         mStruct.( idx_channel_name ) = double( newfilter.ch( n ).timeData )';
     end
     
-    mRes = handles.va.callModule( handles.module_id, mStruct );
-    %disp( mRes )
+    handles.va.set_rendering_module_parameters( handles.renderer_id, mStruct );
 end
 
 % --- Executes during object creation, after setting all properties.
@@ -242,16 +243,16 @@ if handles.va.get_connected
         % new selected, remove old?
         if last_index ~= -1
             va_signal_id = handles.va.get_sound_source_signal_source( handles.va_source_id );
-            handles.va.get_sound_source_signal_source( handles.va_source_id, '' );
-            handles.va.delete_si( va_signal_id );
+            handles.va.set_sound_source_signal_source( handles.va_source_id, '' );
+            handles.va.delete_signal_source( va_signal_id );
         end
         
         % create new
-        handles.va_signal_id = handles.va.createAudiofileSignalSource( filepath_selected, filename_selected );
-        handles.va.setSoundSourceSignalSource( handles.va_source_id, handles.va_signal_id );
-        handles.va.setAudiofileSignalSourcePlaybackAction( handles.va_signal_id, 'play' );
+        handles.va_signal_id = handles.va.create_signal_source_buffer_from_file( filepath_selected, filename_selected );
+        handles.va.set_sound_source_signal_source( handles.va_source_id, handles.va_signal_id );
+        handles.va.set_signal_source_buffer_playback_action( handles.va_signal_id, 'play' );
         is_looping = handles.checkbox_loop.Value;
-        handles.va.setAudiofileSignalSourceIsLooping( handles.va_signal_id, is_looping );
+        handles.va.set_signal_source_buffer_looping( handles.va_signal_id, is_looping );
         
         handles.listbox_sourcesignals_last_index = index_selected;
 
@@ -406,7 +407,7 @@ function checkbox_loop_Callback(hObject, eventdata, handles)
 % hObject    handle to checkbox_loop (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if handles.va.isConnected && ~isempty( handles.va_signal_id )
+if handles.va.get_connected && ~isempty( handles.va_signal_id )
     handles.va.setAudiofileSignalSourceIsLooping( handles.va_signal_id, get( hObject, 'Value' ) );
 end
 
@@ -416,8 +417,8 @@ function pushbutton_stop_Callback(hObject, eventdata, handles)
 % hObject    handle to pushbutton_stop (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if handles.va.isConnected && ~isempty( handles.va_signal_id )
-    handles.va.setAudiofileSignalSourcePlaybackAction( handles.va_signal_id, 'stop' );
+if handles.va.get_connected && ~isempty( handles.va_signal_id )
+    handles.va.set_signal_source_buffer_playback_action( handles.va_signal_id, 'stop' );
 end
 
 
@@ -426,8 +427,8 @@ function checkbox_global_muted_Callback(hObject, eventdata, handles)
 % hObject    handle to checkbox_global_muted (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if handles.va.isConnected
-    handles.va.setOutputMuted( get( hObject, 'Value' ) );
+if handles.va.get_connected
+    handles.va.set_output_muted( get( hObject, 'Value' ) );
 end
 
 
@@ -436,8 +437,8 @@ function slider_volume_Callback(hObject, ~, handles)
 % hObject    handle to slider_volume (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if handles.va.isConnected
-    handles.va.setOutputGain( get( hObject, 'Value' ) );
+if handles.va.get_connected
+    handles.va.set_output_gain( get( hObject, 'Value' ) );
 end
 handles.edit_output_volume.String = num2str( get( hObject, 'Value' ) );
 
