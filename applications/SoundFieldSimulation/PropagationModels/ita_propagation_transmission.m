@@ -17,3 +17,5 @@ end
 
 omega = 2 * pi * f;
 T = 1i .* omega .* m_dash ./ ( 2 .* Z + 1i .* omega .* m_dash ) - 1;
+
+% R = 10 log20( 1 + ( omega m' / ( 2 rh0_0 c ) ^2 )

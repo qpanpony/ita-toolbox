@@ -1,6 +1,7 @@
-function [ diffr_field, D, A ] = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequency_vec, speed_of_sound )
+function [ diffr_field, D, A ] = ita_diffraction_utd( wedge, source_pos, receiver_pos, frequency_vec, speed_of_sound, apex_point )
 %ITA_DIFFRACTION_UTD Calculates the diffraction filter based on uniform
-%theory of diffraction (with Kawai approximation)
+%theory of diffraction (with Kawai approximation). Apex point is optional
+%and can
 %
 % Literature:
 %   [1] Tsingos, Funkhouser et al. - Modeling Acoustics in Virtual Environments using the Uniform Theory of Diffraction
@@ -18,14 +19,18 @@ if ~ita_diffraction_point_is_of_dim3( receiver_pos )
     error( 'Receiver point must be of dimension 3' )
 end
 if ~ita_diffraction_point_is_row_vector( source_pos )
-    source_pos = source_pos';
+    %source_pos = source_pos';
 end
 if ~ita_diffraction_point_is_row_vector( receiver_pos )
-    receiver_pos = receiver_pos';
+   % receiver_pos = receiver_pos';
+end
+
+if nargin < 6
+    apex_point = wedge.get_aperture_point2( source_pos, receiver_pos );
 end
 
 %% Variables
-apex_point = wedge.get_aperture_point( source_pos, receiver_pos );
+
 rho = norm( apex_point - source_pos ); % Distance of source to aperture point
 r = norm( receiver_pos - apex_point ); % Distance of receiver to aperture point
 assert( rho + r ~= 0 && r ~= 0 );

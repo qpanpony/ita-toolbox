@@ -10,14 +10,14 @@ if dim_fp(2) ~= 3
     if dim_fp(1) ~= 3
         error( 'Field point must be a row vector of dimension 3' );
     end
-    field_point = field_point';
+    %field_point = field_point';
     dim_fp = size(field_point);
 end
 if dim_pa(2) ~= 3
     if dim_pa(1) ~= 3
         error( 'Point on Aperture must be a row vector of dimension 3.' );
     end
-    point_on_aperture = point_on_aperture';
+    %point_on_aperture = point_on_aperture';
     dim_pa = size(point_on_aperture);
 end
 if dim_fp(1) ~= 1 && dim_pa(1) ~= 1
@@ -25,10 +25,10 @@ if dim_fp(1) ~= 1 && dim_pa(1) ~= 1
         error( 'Use same number of field points and points on aperture' );
     end
 end
-if any( ~obj.point_outside_wedge( field_point ) )
+if ~obj.point_outside_wedge( field_point )
     error( 'Field point must be outside wedge' );
 end
-if any( ~obj.point_on_aperture( point_on_aperture ) )
+if ~obj.point_on_aperture( point_on_aperture )
     error( 'No point on aperture found' )
 end
 
