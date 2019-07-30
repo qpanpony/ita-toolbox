@@ -37,7 +37,7 @@ in_shadow_zone = ita_diffraction_shadow_zone( wedge, source_pos, receiver_pos );
 H_dir = 1 ./ r_dir;
 if in_shadow_zone
     % From Handbook of Acoustics page 117 eq. 4.13 + inverted phase (pressure release first)
-    H_diffr = ( -1 ) * ( ( 10^(5/20) * sqrt( 2 * pi * N ) ./ tanh( sqrt( 2 * pi * N ) ) ).^(-1) .* H_dir );
+    H_diffr = ( +1 ) * ( ( 10^(5/20) * sqrt( 2 * pi * N ) ./ tanh( sqrt( 2 * pi * N ) ) ).^(-1) .* H_dir );
 else
     H_diffr = zeros( size(frequencies) ); % diffraction field outside the shadow zone is not considered with Maekawa's method
 end
