@@ -11,7 +11,7 @@ segment_1 = ( point - obj.aperture_start_point );
 segment_2 = ( obj.aperture_end_point - point );
 
 diff_norm = obj.length - norm( segment_1 ) - norm( segment_2 );
-if diff_norm < obj.set_get_geo_eps
+if abs( diff_norm ) > obj.set_get_geo_eps %changed frm < to >, as if point is on aperture, diff_norm should == 0
     b = false;
 else
     b = true;
