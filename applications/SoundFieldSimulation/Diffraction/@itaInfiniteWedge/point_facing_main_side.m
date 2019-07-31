@@ -5,9 +5,10 @@ function res = point_facing_main_side( obj, point  )
 %           'n2' -> source is facing opposite face of wedge
 
 if ~obj.point_outside_wedge( point )
+
     error( 'Source position(s) must be outside the wedge!' );
 end
-
+%}
 %% begin
 % Coordinate transformation with aperture location as origin
 % e_z = repmat( obj.aperture_direction, dim(1), 1 );
