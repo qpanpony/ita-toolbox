@@ -144,7 +144,7 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
                 continue
             end     
 
-            if norm( eff_receiver_pos' - aperture_point ) < w.set_get_geo_eps
+            if norm( eff_receiver_pos - aperture_point ) < w.set_get_geo_eps
                 warning('Skipping a path where aperture point and receiver point coincide');
                 continue
             end
