@@ -4,13 +4,13 @@ function [frequency_mags, gain, delay] = ita_propagation_path_get_data( path_str
     frequency_mags = ones(1,length(f));
     total_distance = 0;
     is_diff = 0; %set to 1 whenever a diffraction is encountered
-    
+    %{
     figure
     for i = 1:numel(path_data)-1
         plot3([path_data{i}.interaction_point(1),path_data{i+1}.interaction_point(1)],[path_data{i}.interaction_point(2),path_data{i+1}.interaction_point(2)],[path_data{i}.interaction_point(3),path_data{i+1}.interaction_point(3)])
         hold on
     end
-    
+    %}
     for i = 2:numel(path_data)-1 %start from 2, first entry is always source, -1 as receiver always the last
         anchor_type = path_data{i}.anchor_type;
         segment_distance = norm(path_data{ i }.interaction_point(1:3) - path_data{ i-1 }.interaction_point(1:3));
@@ -25,7 +25,7 @@ function [frequency_mags, gain, delay] = ita_propagation_path_get_data( path_str
                 vertex_length(1,:) = norm( path_data{i}.vertex_start(1:3) - path_data{i}.vertex_end(1:3) );
                 %wedge_type = path_struct{i}.anchor_type; %FOR NOW ALWAYS USE THE DEFAULT WEDGE TYPE
                 
-                w = itaFiniteWedge( main_face_normal, opposite_face_normal, aperture_start, vertex_length, 'wedge' );
+                w = itaFiniteWedge( main_face_normal, opposite_face_normal, aperture_start, vertex_length, 'outer_edge' );
                 w.set_get_geo_eps( 1e-6 );
                 
                 source_pos(1,:) = path_data{i-1}.interaction_point(1:3);
@@ -36,11 +36,11 @@ function [frequency_mags, gain, delay] = ita_propagation_path_get_data( path_str
                 r = ita_propagation_effective_target_distance( path_struct, i ); %effective distance from aperture point to receiver
                 next_pos_dirn(1,:) = path_data{i+1}.interaction_point(1:3) - path_data{i}.interaction_point(1:3); %"receiver"
                 eff_receiver_pos(1,:) = ( next_pos_dirn .* r ./ norm(next_pos_dirn) ) + path_data{i}.interaction_point(1:3)';
-                
+                %{
                 plot3([w.aperture_start_point(1),w.aperture_end_point(1)],[w.aperture_start_point(2),w.aperture_end_point(2)],[w.aperture_start_point(3),w.aperture_end_point(3)])
                 plot3([eff_source_pos(1),path_data{i}.interaction_point(1)],[eff_source_pos(2),path_data{i}.interaction_point(2)],[eff_source_pos(3),path_data{i}.interaction_point(3)])
                 plot3([eff_receiver_pos(1),path_data{i}.interaction_point(1)],[eff_receiver_pos(2),path_data{i}.interaction_point(2)],[eff_receiver_pos(3),path_data{i}.interaction_point(3)])
-                
+                %}
                 %{
                 smallest_dist = 1000000;
                 n0 = 10000; %number of iterations
@@ -56,14 +56,14 @@ function [frequency_mags, gain, delay] = ita_propagation_path_get_data( path_str
                     end
                 end
                 plot3(ap_point(1),ap_point(2),ap_point(3),'.k') %true closest point
-                %}
+                
                 ap_point2 = w.get_aperture_point( source_pos, receiver_pos );
                 ap_point3 = w.get_aperture_point( eff_source_pos, eff_receiver_pos );
                 ap_point4 = w.get_aperture_point2( source_pos, receiver_pos );
                 plot3(ap_point2(1),ap_point2(2),ap_point2(3),'.r') %point which should be predicted from aperture point method
                 plot3(ap_point3(1),ap_point3(2),ap_point3(3),'.b') %point which should be predicted from aperture point method
                 plot3(ap_point4(1),ap_point4(2),ap_point4(3),'.g') %point which should be predicted from aperture point method
-                
+                %}
                 aperture_point = w.get_aperture_point2( source_pos, receiver_pos );
                 if( w.point_on_aperture( aperture_point ) == 0 )
                     warning('Skipping path, aperture point calculated not on the aperture');
@@ -90,7 +90,7 @@ function [frequency_mags, gain, delay] = ita_propagation_path_get_data( path_str
                 vertex_length(1,:) = norm( path_data{i}.vertex_start(1:3) - path_data{i}.vertex_end(1:3) );
                 %wedge_type = path_struct{i}.anchor_type; %FOR NOW ALWAYS USE THE DEFAULT WEDGE TYPE
                 
-                w = itaFiniteWedge( main_face_normal, opposite_face_normal, aperture_start, vertex_length, 'corner' );     
+                w = itaFiniteWedge( main_face_normal, opposite_face_normal, aperture_start, vertex_length, 'inner_edge' );     
                 w.set_get_geo_eps( 1e-6 );
                 
                 rho = ita_propagation_effective_source_distance( path_struct, i ); %effective distance from aperture point to source
