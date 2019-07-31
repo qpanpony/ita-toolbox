@@ -114,7 +114,7 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
             else
                 gain = gain * A;
             end
-            frequency_mags = frequency_mags .* abs(D);
+            frequency_mags = frequency_mags .* D;
 
             
         case 'inner_edge_diffraction'
@@ -157,7 +157,7 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
             else
                 gain = gain * A;
             end
-            frequency_mags = frequency_mags .* abs(D);               
+            frequency_mags = frequency_mags .* D;               
         case 'specular_reflection' %case for specular reflection
             %path = 'C:\ITASoftware\Raven\RavenDatabase\MaterialDatabase';
             %data = load(fullfile(path,'brickwall'));

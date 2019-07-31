@@ -47,7 +47,7 @@ for n = 1:numel( pps )
     end
     
 
-    path_id_hashed = mlreportgen.utils.hash( path_id_clear );
+    path_id_hashed = char( mlreportgen.utils.hash( path_id_clear ) );
     
     % store in output variables
     pps_with_ids( n ).identifier = path_id_hashed;
