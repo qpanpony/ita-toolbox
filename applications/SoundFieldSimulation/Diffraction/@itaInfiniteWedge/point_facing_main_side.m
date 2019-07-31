@@ -1,4 +1,4 @@
-function res_t = point_facing_main_side( obj, point  )
+function res = point_facing_main_side( obj, point  )
 % Returns string including the face normal of source
 %   facing wedge side
 %   output: 'n1' -> source is facing main face of wedge
