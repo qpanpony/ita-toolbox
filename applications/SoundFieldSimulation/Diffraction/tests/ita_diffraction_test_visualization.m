@@ -8,8 +8,10 @@ w = itaInfiniteWedge( n1 / norm( n1 ), n2 / norm( n2 ), loc );
 s = [  3.1 0 0 ];
 r = [ -3.1 0 -0.1 ];
 
+figure
 ita_diffraction_visualize_scene( w, s, r )
 
 w_inner = itaInfiniteWedge( n1 / norm( n1 ), n2 / norm( n2 ), loc, 'inner_edge' );
 
+figure
 ita_diffraction_visualize_scene( w_inner, s, r )
