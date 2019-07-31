@@ -36,6 +36,11 @@ function [frequency_mags, gain, delay] = ita_propagation_path_get_data( path_str
                 r = ita_propagation_effective_target_distance( path_struct, i ); %effective distance from aperture point to receiver
                 next_pos_dirn(1,:) = path_data{i+1}.interaction_point(1:3) - path_data{i}.interaction_point(1:3); %"receiver"
                 eff_receiver_pos(1,:) = ( next_pos_dirn .* r ./ norm(next_pos_dirn) ) + path_data{i}.interaction_point(1:3)';
+                
+                if( w.point_outside_wedge( eff_source_pos ) == 0 ) %catch error if source is inside wedge
+                    delay = -1;
+                    return
+                end
                 %{
                 plot3([w.aperture_start_point(1),w.aperture_end_point(1)],[w.aperture_start_point(2),w.aperture_end_point(2)],[w.aperture_start_point(3),w.aperture_end_point(3)])
                 plot3([eff_source_pos(1),path_data{i}.interaction_point(1)],[eff_source_pos(2),path_data{i}.interaction_point(2)],[eff_source_pos(3),path_data{i}.interaction_point(3)])
@@ -100,6 +105,11 @@ function [frequency_mags, gain, delay] = ita_propagation_path_get_data( path_str
                 next_pos_dirn(1,:) = path_data{i+1}.interaction_point(1:3) - path_data{i}.interaction_point(1:3); %"receiver"
                 eff_receiver_pos(1,:) = ( next_pos_dirn .* r ./ norm(next_pos_dirn) ) + path_data{i}.interaction_point(1:3)';
 
+                if( w.point_outside_wedge( eff_source_pos ) == 0 ) %catch error if source is inside wedge
+                    delay = -1;
+                    return
+                end
+                
                 aperture_point = w.get_aperture_point2( source_pos, receiver_pos );
                 if( w.point_on_aperture( aperture_point ) == 0 )
                     warning('Skipping path, aperture point calculated not on the aperture');
