@@ -5,7 +5,7 @@ classdef itaInfiniteWedge
         n2 % 3-dim normal vector of opposite face (internal)
         ad % 3-dim aperture direction vector (internal)
         l % Internal location variable
-        wt % type of wedge (internal)
+        et % type of edge (internal)
         bc_hard % Internal boundary condition (hard = true)
     end
     
@@ -16,27 +16,28 @@ classdef itaInfiniteWedge
         location % Location of wedge (somewhere along aperture)
         opening_angle % Angle from main to opposite face in propagation medium / air (radiants)
         wedge_angle % Angle from main to opposite face in solid medium of wedge (radiants)
+        edge_type % 'wedge' for opening angles > pi or 'corner' for opening angles < pi
         wedge_type % 'wedge' for opening angles > pi or 'corner' for opening angles < pi
         boundary_condition % boundary condition of the wedge faces (hard or soft)
     end
     
     methods
-        function obj = itaInfiniteWedge( main_face_normal, opposite_face_normal, location, wedge_type )
+        function obj = itaInfiniteWedge( main_face_normal, opposite_face_normal, location, edge_type )
             % Create a wedge by a main face normal and an opposite face
             % normal
             %   main_face_normal:       Main face normal (3-dim)
             %   opposite_face_normal:   Opposite face normal (3-dim)
             %   location:               Point on aperture which defines
             %                           location of the wedge in 3_dim sapce
-            %   wedge_type:             use 'wedge' for opening angles > pi (default) and
-            %                           'corner' for opening angles < pi
+            %   edge_type:              use 'outer_edge' for opening angles > pi (default) and
+            %                           'inner_edge' for opening angles < pi
             % Note: 3-dim direction vectors will be normalized automatically
             % 
             if nargin < 4
-                wedge_type = 'wedge';
+                edge_type = 'outer_edge';
             end
-            if ~isequal( wedge_type, 'wedge' ) && ~isequal( wedge_type, 'corner' )
-                error( 'Invalid wedge type. Use either wedge or corner' )
+            if ~isequal( edge_type, 'inner_edge' ) && ~isequal( edge_type, 'outer_edge' )
+                error( 'Invalid edge type. Use either ''inner_edge'' or ''outer_edge''' )
             end
             if numel( main_face_normal ) ~= 3
                 error 'Main face normal has to be a 3-dim vector'
@@ -51,7 +52,7 @@ classdef itaInfiniteWedge
             obj.n1 = main_face_normal;
             obj.n2 = opposite_face_normal;
             obj.l = location;
-            obj.wt = wedge_type;
+            obj.et = edge_type;
             obj.bc_hard = true;
             
             if ~obj.validate_normals
@@ -107,9 +108,9 @@ classdef itaInfiniteWedge
         function beta = get.wedge_angle( obj )
             % Returns angle from main to opposite face through solid medium
             % of the wedge (radiant)
-            if isequal( obj.wt, 'wedge' )
+            if isequal( obj.et, 'outer_edge' )
                 s = 1;
-            elseif isequal( obj.wt, 'corner' )
+            elseif isequal( obj.et, 'inner_edge' )
                 s = -1;
             end
             beta = pi - s * acos(dot(obj.main_face_normal, obj.opposite_face_normal));
@@ -143,8 +144,13 @@ classdef itaInfiniteWedge
             end
         end
         
-        function wt = get.wedge_type( obj )
-            wt = obj.wt;
+        function et = get.wedge_type( obj )
+            et = obj.edge_type;
+            warning( 'Function ''wedge_type'' is deprecated, use ''edge_type'' instead.' )
+        end
+        
+        function et = get.edge_type( obj )
+            et = obj.et;
         end
         
         function bc = get.boundary_condition( obj )
