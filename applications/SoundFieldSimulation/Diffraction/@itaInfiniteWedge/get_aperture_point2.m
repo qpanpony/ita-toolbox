@@ -1,5 +1,5 @@
 function ap = get_aperture_point2( obj, source_pos, receiver_pos )
-    start = obj.aperture_start_point;
+    start = obj.location;
     dir = obj.aperture_direction;
     
     S_on_ap = orthogonal_projection( start, dir, source_pos ); %project the source to the aperture
