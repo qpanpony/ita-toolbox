@@ -11,11 +11,11 @@ function theta = get_angle_from_point_to_wedge_face( obj, point, use_main_face )
 if ~ita_diffraction_point_is_of_dim3( point )
     error( 'Point has to be of dimension 3' );
 end
-
-if any( ~obj.point_outside_wedge( point ) )
+%{
+if any( ~obj.point_outside_wedge( point ) ) commented out!
     error('Point(s) must be outside the wedge');
 end
-
+%}
 if nargin < 3
     use_main_face = true;
 end
