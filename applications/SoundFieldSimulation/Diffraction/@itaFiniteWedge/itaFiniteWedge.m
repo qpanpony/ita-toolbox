@@ -13,15 +13,15 @@ classdef itaFiniteWedge < itaInfiniteWedge
     end
     
     methods
-        function obj = itaFiniteWedge( main_face_normal, opposite_face_normal, location, length, wedge_type )
+        function obj = itaFiniteWedge( main_face_normal, opposite_face_normal, location, length, edge_type )
             % Creates an finite wedge with a location in 3-dim space
             % Starting point of wedge aperture is the wedge location, end
             % point is defined by length and direction of aperture
             % Length must be a scalar value greater zero
             if nargin < 5
-                wedge_type = 'wedge';
+                edge_type = 'outer_edge';
             end
-            obj@itaInfiniteWedge( main_face_normal, opposite_face_normal, location, wedge_type );
+            obj@itaInfiniteWedge( main_face_normal, opposite_face_normal, location, edge_type );
             if numel( length ) > 1 || length <= 0
                 error 'Length must be a scalar value greater zero'
             end
