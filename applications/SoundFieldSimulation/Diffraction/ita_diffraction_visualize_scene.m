@@ -32,11 +32,12 @@ else
 
     p1 = w.location - face_scaling * w.aperture_direction;
     p2 = w.location + face_scaling * w.aperture_direction;
-    v_aux = edge_type_sign * cross( w.main_face_normal, w.aperture_direction );
-    p3 = v_aux * face_scaling + p2;
-    p4 = v_aux * face_scaling + p1;
 
 end
+
+v_aux = edge_type_sign * cross( w.main_face_normal, w.aperture_direction );
+p3 = v_aux * face_scaling + p2;
+p4 = v_aux * face_scaling + p1;
 
 X = [ p1( 1 ); p2( 1 ); p3( 1 ); p4( 1 ) ];
 Y = [ p1( 2 ); p2( 2 ); p3( 2 ); p4( 2 ) ];

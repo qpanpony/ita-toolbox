@@ -3,11 +3,10 @@ function in_shadow = ita_diffraction_shadow_zone( wedge, sourcePos, receiverPos 
 %point of view, covered by the wedge and therefor inside the shadow region
 
 %% assertions
-if ~ita_diffraction_point_is_of_dim3( sourcePos )
+if ~numel( sourcePos ) == 3
     error( 'Source point must be of dimension 3')
 end
-
-if ~ita_diffraction_point_is_of_dim3( receiverPos )
+if ~numel( receiverPos )
     error( 'Receiver point must be of dimension 3')
 end
 
@@ -21,7 +20,7 @@ end
 
 %% Set variables
 apexPoint = wedge.get_aperture_point( sourcePos, receiverPos ); % point on aperture which is on shortest connection of source and receiver across the aperture
-referenceFaceIsMainFace = wedge.point_facing_main_side( sourcePos ); % true if main wedge face is starting point for every angle measure from face into the room
+referenceFaceIsMainFace = ~wedge.point_facing_main_side( sourcePos ); % true if main wedge face is starting point for every angle measure from face into the room
 
 % choose coordinate system of face normals and aperture direction according
 % to source facing wedge face resulting in a clockwise rotation system
@@ -40,7 +39,7 @@ end
 sourceApexDirection = ( apexPoint - sourcePos ) ./ norm( apexPoint - sourcePos ) ;
 
 % Define shadow plane normal always pointing away from the wedge
-shadowPlaneNormal = cross( sourceApexDirection, apexDir ) ./ norm( cross( sourceApexDirection, apexDir ) );
+shadowPlaneNormal = -cross( sourceApexDirection, apexDir ) ./ norm( cross( sourceApexDirection, apexDir ) );
 
 % Distances from source position to each wedge face
 distFromSrc2MainFace = dot( sourcePos - apexPoint, mainWedgeFaceNormal );

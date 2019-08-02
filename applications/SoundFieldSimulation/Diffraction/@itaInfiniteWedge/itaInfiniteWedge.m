@@ -146,7 +146,7 @@ classdef itaInfiniteWedge
         
         function et = get.wedge_type( obj )
             et = obj.edge_type;
-            warning( 'Function ''wedge_type'' is deprecated, use ''edge_type'' instead.' )
+            warning 'Function ''wedge_type'' is deprecated, use ''edge_type'' instead.'
         end
         
         function et = get.edge_type( obj )
