@@ -29,9 +29,8 @@ rho = norm( apex_point - source_pos ); % Distance of source to aperture point
 r = norm( receiver_pos - apex_point ); % Distance of receiver to aperture point
 assert( rho + r ~= 0 && r ~= 0 );
 
-%src_facing_main_side = wedge.point_facing_main_side( source_pos );
-alpha_i = wedge.get_angle_from_point_to_wedge_face( source_pos, true );
-alpha_d = wedge.get_angle_from_point_to_wedge_face( receiver_pos, true );
+alpha_i = wedge.angle_main_face( source_pos );
+alpha_d = wedge.angle_main_face( receiver_pos );
 theta_i = wedge.get_angle_from_point_to_aperture( source_pos, apex_point );
 
 n = wedge.opening_angle / pi; % Variable dependend on opening angle of the wedge
