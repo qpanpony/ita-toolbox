@@ -12,17 +12,11 @@ function [ diffr_field, D, A ] = ita_diffraction_utd( wedge, source_pos, receive
 %
 
 %% Assertions
-if ~ita_diffraction_point_is_of_dim3( source_pos )
+if numel( source_pos ) ~= 3
     error( 'Source point must be of dimension 3' )
 end
-if ~ita_diffraction_point_is_of_dim3( receiver_pos )
+if numel( receiver_pos ) ~= 3
     error( 'Receiver point must be of dimension 3' )
-end
-if ~ita_diffraction_point_is_row_vector( source_pos )
-    %source_pos = source_pos';
-end
-if ~ita_diffraction_point_is_row_vector( receiver_pos )
-   % receiver_pos = receiver_pos';
 end
 
 if nargin < 6
@@ -35,9 +29,9 @@ rho = norm( apex_point - source_pos ); % Distance of source to aperture point
 r = norm( receiver_pos - apex_point ); % Distance of receiver to aperture point
 assert( rho + r ~= 0 && r ~= 0 );
 
-src_facing_main_side = wedge.point_facing_main_side( source_pos );
-alpha_i = wedge.get_angle_from_point_to_wedge_face( source_pos, src_facing_main_side );
-alpha_d = wedge.get_angle_from_point_to_wedge_face( receiver_pos, src_facing_main_side );
+%src_facing_main_side = wedge.point_facing_main_side( source_pos );
+alpha_i = wedge.get_angle_from_point_to_wedge_face( source_pos, true );
+alpha_d = wedge.get_angle_from_point_to_wedge_face( receiver_pos, true );
 theta_i = wedge.get_angle_from_point_to_aperture( source_pos, apex_point );
 
 n = wedge.opening_angle / pi; % Variable dependend on opening angle of the wedge
