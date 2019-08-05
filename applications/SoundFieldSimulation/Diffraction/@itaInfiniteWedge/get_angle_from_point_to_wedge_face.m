@@ -1,5 +1,5 @@
 function theta = get_angle_from_point_to_wedge_face( obj, point, use_main_face )
-%GET_ANGLE_FROM_SOURCE_TO_WEDGE_FACE    Returns angle (radiant) between
+%get_angle_from_point_to_wedge_face    Returns angle (radiant) between
 %   given point and a wedge face.
 %   input:  point           arbitrary field point outside the wedge.
 %           use_main_face   True for main face, otherwise opposite face
