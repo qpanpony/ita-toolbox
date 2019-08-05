@@ -1,8 +1,12 @@
-function ita_diffraction_visualize_scene( w, source_pos, target_pos )
+function ita_diffraction_visualize_scene( w, source_pos, target_pos, is_opengl_cs )
 %% ita_diffraction_visualize_scene Visualises a source-receiver-wedge scene
 %
 % Example: ita_diffraction_visualize_scene( wedge, source_pos, target_pos )
 %
+
+if nargin < 4
+    is_opengl_cs = false;
+end
 
 apx = w.get_aperture_point2( source_pos, target_pos );
 d1 = norm( source_pos - apx );
@@ -110,7 +114,25 @@ Z3 = [ source_pos( 3 ); apx( 3 ); target_pos( 3 ) ];
 
 %% Polygon 3D plot
 
-fill3( X, Y, Z, 'red', X2, Y2, Z2, 'yellow', X3, Y3, Z3, 'green', X4, Y4, Z4, 'blue' )
+M1 = [ X, Y, Z ];
+M2 = [ X2, Y2, Z2 ];
+M3 = [ X3, Y3, Z3 ];
+M41 = [ X4(:,1), Y4(:,1), Z4(:,1) ];
+M42 = [ X4(:,2), Y4(:,2), Z4(:,2) ];
+if is_opengl_cs
+    M1 = ita_openGL2Matlab( M1 );
+    M2 = ita_openGL2Matlab( M2 );
+    M3 = ita_openGL2Matlab( M3 );
+    M41 = ita_openGL2Matlab( M41 );
+    M42 = ita_openGL2Matlab( M42 );
+end
+
+figure
+fill3( M1(:,1), M1(:,2), M1(:,3), 'red', ...
+       M2(:,1), M2(:,2), M2(:,3), 'yellow', ...
+       M3(:,1), M3(:,2), M3(:,3), 'green', ...
+       M41(:,1), M41(:,2), M41(:,3), 'blue', ...
+       M42(:,1), M42(:,2), M42(:,3), 'blue' )
 
 
 end
