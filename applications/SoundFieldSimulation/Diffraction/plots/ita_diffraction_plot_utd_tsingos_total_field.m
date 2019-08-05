@@ -2,13 +2,12 @@
 n1 = [  1  1  0 ] / sqrt( 2 );
 n2 = [ -1  1  0 ] / sqrt( 2 );
 loc = [ 0 0 0 ];
-source_pos = 5 * [ -1  0  0] / sqrt( 2 );
+source_pos = 5 * [ -1  0  0];
 receiver_start_pos = 5 * [ -1  -1  0 ] / sqrt( 2 );
 w = itaInfiniteWedge( n1, n2, loc );
 
 apex_point = w.get_aperture_point( source_pos, receiver_start_pos );
 apex_dir = w.aperture_direction;
-%delta = 0.05;
 c = 344; % Speed of sound
 
 freq = [ 20, 50, 100, 200, 400, 800, 1600, 3200, 6400, 12800, 24000 ]';
