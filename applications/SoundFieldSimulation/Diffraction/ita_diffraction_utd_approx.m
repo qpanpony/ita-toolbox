@@ -25,13 +25,12 @@ end
 apex_point = wedge.get_aperture_point( source_pos, receiver_pos );
 dir_src_2_apex_pt = ( apex_point - source_pos ) ./ norm( apex_point - source_pos );
 dir_apex_pt_2_rcv = ( receiver_pos - apex_point ) ./ norm( receiver_pos - apex_point );
-dist_src_2_apex_pt = norm( apex_point - source_pos );  % Distance Source to Apex point
-dist_apex_pt_2_rcv = norm( receiver_pos - apex_point );  % Distance Apex point to Receiver
-dist_src_2_rcv_via_apex = dist_src_2_apex_pt + dist_apex_pt_2_rcv;
+r = norm( apex_point - source_pos );  % Distance Source to Apex point
+rho = norm( receiver_pos - apex_point );  % Distance Apex point to Receiver
+detour = r + rho;
 
 % consider a virtual receiver located at the shadow boundary
-<<<<<<< HEAD
-virt_rcv_at_SB = source_pos + dir_src_2_apex_pt .* dist_src_2_rcv_via_apex; % Virtual position of receiver at shadow boundary
+virt_rcv_at_SB = source_pos + dir_src_2_apex_pt .* detour; % Virtual position of receiver at shadow boundary
 if ~wedge.point_outside_wedge( virt_rcv_at_SB )
     diffr_field = zeros( size( f ) );
     return
@@ -44,7 +43,7 @@ end
 
 % Incident field at shadow boundary
 k = 2 * pi * freq_vec / speed_of_sound;
-virt_inc_field_at_SB = 1 ./ norm( virt_rcv_at_SB - source_pos ) .* exp( -1i .* k .* dist_src_2_rcv_via_apex );
+virt_inc_field_at_SB = 1 ./ norm( virt_rcv_at_SB - source_pos ) .* exp( -1i .* k .* detour );
 
 % virutal diffracted field at shadow boundary
 virt_diffr_field_at_SB = ita_diffraction_utd( wedge, source_pos, virt_rcv_at_SB, freq_vec, speed_of_sound );
