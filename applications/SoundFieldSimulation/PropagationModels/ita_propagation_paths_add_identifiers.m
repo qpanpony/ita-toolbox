@@ -28,7 +28,11 @@ for n = 1:numel( pps )
 
     path_id_clear = '';
     for a = 1:numel( pp.propagation_anchors )
-        anchor = pp.propagation_anchors{ a };
+        if( isa(pp.propagation_anchors, 'struct' ) )
+            anchor = pp.propagation_anchors( a );
+        else
+            anchor = pp.propagation_anchors{ a };
+        end
         switch anchor.anchor_type
             case { 'source', 'emitter' }
                 anchor_id_seg = strcat( 'S-', anchor.name );
