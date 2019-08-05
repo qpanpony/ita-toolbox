@@ -11,24 +11,21 @@ delta = 0.05;
 c = 344; % Speed of sound
 
 freq = [100, 200, 400, 800, 1600, 3200, 6400, 12800, 24000]';
-ref_face = inf_wdg.point_facing_main_side( src );
-alpha_d = linspace( inf_wdg.get_angle_from_point_to_wedge_face(rcv_start_pos, ref_face), inf_wdg.opening_angle, 1000 );
+alpha_d = linspace( 0, inf_wdg.opening_angle, 100 );
 
 % Set different receiver positions rotated around the aperture
-rcv_positions = ita_align_points_around_aperture( inf_wdg, rcv_start_pos, alpha_d, apex_point, ref_face );
+rcv_positions = ita_diffraction_align_points_around_aperture( inf_wdg, rcv_start_pos, alpha_d, apex_point, ref_face );
 rcv_positions = rcv_positions(2 : end-1, :);
 
 % wavenumber
 k = 2 * pi * freq ./ c;
 
 % store results in ita audio format
-res_data = itaResult();
-res_data.resultType = 'signal';
-res_data.freqVector = freq;
+res_data_template = itaResult();
+res_data_template.resultType = 'signal';
+res_data_template.freqVector = freq;
 
 %% Calculations
-
-att_sum_all = itaAudio();
 
 N = size( rcv_positions, 1 );
 for n = 1 : N
@@ -41,7 +38,7 @@ for n = 1 : N
     rcv_in_shadow_zone = ita_diffraction_shadow_zone( inf_wdg, src, current_rcv_pos );
 
     % UTD total wave field
-    att_sum = res_data;
+    att_sum = res_data_template;
     att_sum.freqData = ita_diffraction_utd( inf_wdg, src, current_rcv_pos, freq, c );
     if ~rcv_in_shadow_zone
         att_sum.freqData = att_sum.freqData + dir_field_comp;
@@ -49,18 +46,19 @@ for n = 1 : N
     att_sum.freqData = att_sum.freqData ./ dir_field_comp;
     
     % UTD combined with Approximation by Tsingos et. al.
-    att_sum_approx = res_data;
-    att_sum_approx.freqData = ita_diffraction_utd_approx( inf_wdg, src, current_rcv_pos, freq, c );
+    att_sum_approx = res_data_template;
+    [ H ] = ita_diffraction_utd_approx( inf_wdg, src, current_rcv_pos, freq, c );
+    att_sum_approx.freqData = H;
     if ~rcv_in_shadow_zone
         att_sum_approx.freqData = att_sum_approx.freqData + dir_field_comp;
     end
     att_sum_approx.freqData = att_sum_approx.freqData ./ dir_field_comp;
 
     % Error caused by approximation
-    att_sum_error = res_data;
+    att_sum_error = res_data_template;
     att_sum_error.freqData = att_sum_approx.freqData ./ att_sum.freqData;
 
-    att_sum_diffr = res_data;
+    att_sum_diffr = res_data_template;
     att_sum_diffr.freqData = ita_diffraction_utd( inf_wdg, src, current_rcv_pos, freq, c );
     att_sum_diffr.freqData = att_sum_diffr.freqData ./ dir_field_comp;
     

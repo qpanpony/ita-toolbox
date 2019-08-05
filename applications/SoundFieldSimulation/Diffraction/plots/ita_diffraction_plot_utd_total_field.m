@@ -15,13 +15,13 @@ speed_of_sound = 344;
 
 %% Calculations
 % Set receiver positions alligned around the aperture
-apex_point = inf_wdg.get_aperture_point(src_pos, rcv_start_pos);
-src_is_facing_main_face = inf_wdg.point_facing_main_side( src_pos );
-alpha_start = inf_wdg.get_angle_from_point_to_wedge_face(rcv_start_pos, src_is_facing_main_face);
+%apex_point = inf_wdg.get_aperture_point(src_pos, rcv_start_pos);
+%src_is_facing_main_face = ~inf_wdg.point_facing_main_side( src_pos );
+alpha_start = inf_wdg.get_angle_from_point_to_wedge_face(rcv_start_pos, src_is_facing_main_face); % implement without "facing" anything
 alpha_end = inf_wdg.get_angle_from_point_to_wedge_face(rcv_end_pos, src_is_facing_main_face);
 alpha_d = linspace( alpha_start, alpha_end, angle_resolution );
 
-rcv_positions = ita_align_points_around_aperture( inf_wdg, rcv_start_pos, alpha_d, apex_point, src_is_facing_main_face );
+rcv_positions = ita_diffraction_align_points_around_aperture( inf_wdg, rcv_start_pos, alpha_d, apex_point, src_is_facing_main_face );
 rcv_in_shadow_zone = zeros(size(rcv_positions, 1), 1);
 for i = 1:size(rcv_positions, 1)
     rcv_in_shadow_zone(i) = ita_diffraction_shadow_zone( inf_wdg, src_pos, rcv_positions(i, :) );
