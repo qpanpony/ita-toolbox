@@ -38,7 +38,7 @@ utd_tf.channelNames = { 'Diffracted field (shadow)', 'Diffracted field (illumina
 %utd_tf.pf
 
 
-%% Trajectories
+%% Trajectory rotational movement
 
 receiver_start_pos = 5 * [ -1  -1  0 ] / sqrt( 2 );
 
@@ -66,11 +66,66 @@ for n = 1 : N
     r_dir = norm( receiver_pos  - source_pos );
     H_direct_field = 1 ./ r_dir .* exp( -1i .* k .* r_dir );
 
-    rcv_in_shadow_zone = ita_diffraction_shadow_zone( w, source_pos, receiver_pos );
+    shadow_zone = ita_diffraction_shadow_zone( w, source_pos, receiver_pos );
 
     % UTD total wave field
     H_diffracted_field = ita_diffraction_utd( w, source_pos, receiver_pos, freq, c );
-    if rcv_in_shadow_zone
+    if shadow_zone
+        H_total_field = H_diffracted_field;
+    else
+        H_total_field = H_diffracted_field + H_direct_field;
+    end
+    
+    H_diffracted_field_log = [ H_diffracted_field_log, H_total_field ./ H_direct_field ];
+    
+end
+
+figure
+plot( db( H_diffracted_field_log( :, : )' ) )
+
+
+
+%% Trajectory rotational vertical
+freq = [ 20, 200, 2000, 20000 ]';
+k = 2 * pi * freq ./ c;
+
+w = itaInfiniteWedge( [ 1 0 0 ], [ 0 1 0 ], [ 0 0 0 ] ); % OpenGL coordinates
+
+num_positions = 199;
+
+receiver_pos = [ -3, 3, 0 ];
+% Set different receiver positions rotated around the aperture
+source_positions = [ 3 * ones( num_positions, 1 ), 3 * linspace( 2, -2, num_positions )', zeros( num_positions, 1 ) ];
+
+H_diffracted_field_log = [];
+
+N = size( source_positions, 1 );
+for n = 1 : N
+    
+    source_pos = source_positions( n, : );
+    
+    r_dir = norm( receiver_pos  - source_pos );
+    H_direct_field = 1 ./ r_dir .* exp( -1i .* k .* r_dir );
+
+    shadow_zone = ita_diffraction_shadow_zone( w, source_pos, receiver_pos );
+    reflection_zone_main = ita_diffraction_reflection_zone( w, source_pos, receiver_pos, false );
+    
+    if n > 1
+        if shadow_zone_last ~= shadow_zone
+            fprintf( 'Shadow zone transition at frame %i\n', n )
+            %ita_diffraction_visualize_scene( w, source_pos, receiver_pos, true )
+        end
+        if reflection_zone_main_last ~= reflection_zone_main
+            fprintf( 'Opposite reflection zone transition at frame %i\n', n )
+            %ita_diffraction_visualize_scene( w, source_pos, receiver_pos, true )
+        end
+    end
+	shadow_zone_last = shadow_zone;
+    reflection_zone_main_last = reflection_zone_main;
+
+    % UTD total wave field
+    H_diffracted_field = ita_diffraction_utd( w, source_pos, receiver_pos, freq, c );
+    if shadow_zone
         H_total_field = H_diffracted_field;
     else
         H_total_field = H_diffracted_field + H_direct_field;
