@@ -56,7 +56,7 @@ alpha_d = linspace( alpha_d_start, alpha_d_end, num_angles );
 % Set different receiver positions rotated around the aperture
 recevier_positions = norm( receiver_start_pos ) * [ cos( alpha_d - pi/4 ); sin( alpha_d - pi/4 ); zeros( 1, numel( alpha_d ) ) ]';
 
-H_diffracted_field_log = [];
+IL_log = [];
 
 N = size( recevier_positions, 1 );
 for n = 1 : N
@@ -76,39 +76,38 @@ for n = 1 : N
         H_total_field = H_diffracted_field + H_direct_field;
     end
     
-    H_diffracted_field_log = [ H_diffracted_field_log, H_total_field ./ H_direct_field ];
+    IL_log = [ IL_log, H_total_field ./ H_direct_field ];
     
 end
 
 figure
-plot( db( H_diffracted_field_log( :, : )' ) )
+plot( db( IL_log( :, : )' ) )
 
 
 
 %% Trajectory rotational vertical
-freq = [ 20, 200, 2000, 20000 ]';
+freq = ita_ANSI_center_frequencies';
 k = 2 * pi * freq ./ c;
 
-w = itaInfiniteWedge( [ 1 0 0 ], [ 0 1 0 ], [ 0 0 0 ] ); % OpenGL coordinates
+w = itaInfiniteWedge( [ 1 0 0 ], [ 0 0 -1 ], [ 0 0 0 ] ); % OpenGL coordinates
 
-num_positions = 199;
+num_positions = 1000;
 
-receiver_pos = [ -3, 3, 0 ];
-% Set different receiver positions rotated around the aperture
-source_positions = [ 3 * ones( num_positions, 1 ), 3 * linspace( 2, -2, num_positions )', zeros( num_positions, 1 ) ];
+receiver_pos = [ 3, 0, 3 ];
+x = linspace( -1, 1, num_positions ) * 20;
 
-H_diffracted_field_log = [];
+IL_log = [];
 
-N = size( source_positions, 1 );
+N = num_positions;
 for n = 1 : N
     
-    source_pos = source_positions( n, : );
+    source_pos = [ x( n ) 0 -3 ];
     
     r_dir = norm( receiver_pos  - source_pos );
     H_direct_field = 1 ./ r_dir .* exp( -1i .* k .* r_dir );
 
     shadow_zone = ita_diffraction_shadow_zone( w, source_pos, receiver_pos );
-    reflection_zone_main = ita_diffraction_reflection_zone( w, source_pos, receiver_pos, false );
+    reflection_zone_main = ita_diffraction_reflection_zone( w, source_pos, receiver_pos, true );
     
     if n > 1
         if shadow_zone_last ~= shadow_zone
@@ -131,10 +130,10 @@ for n = 1 : N
         H_total_field = H_diffracted_field + H_direct_field;
     end
     
-    H_diffracted_field_log = [ H_diffracted_field_log, H_total_field ./ H_direct_field ];
+    IL_log = [ IL_log, H_total_field ./ H_direct_field ];
     
 end
 
 figure
-plot( db( H_diffracted_field_log( :, : )' ) )
+plot( db( IL_log( :, : )' ) )
 
