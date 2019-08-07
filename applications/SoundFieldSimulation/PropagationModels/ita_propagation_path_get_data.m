@@ -12,6 +12,7 @@ end
 gain = 1;
 frequency_mags = ones( 1, numel( f ) );
 total_distance = 0;
+delay = 0;
 
 pd = pp.propagation_anchors;
 N = numel( pd );
@@ -67,8 +68,8 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
             next_pos_dirn = a_next.interaction_point(1:3) - a_curr.interaction_point(1:3); %"receiver"
             eff_receiver_pos = ( next_pos_dirn .* r ./ norm(next_pos_dirn) ) + a_curr.interaction_point(1:3);
 
-            if ~w.point_outside_wedge( eff_source_pos ) %catch error if source is inside wedge
-                delay = -1; % @todo remove
+            if( ~w.point_outside_wedge( eff_source_pos ) || ~w.point_outside_wedge( eff_receiver_pos ))%catch error if source is inside wedge
+                delay = total_distance / c;
                 valid = false;
                 return
             end
@@ -132,8 +133,8 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
             next_pos_dirn = a_next.interaction_point(1:3) - a_curr.interaction_point(1:3); %"receiver"
             eff_receiver_pos = ( next_pos_dirn .* r ./ norm(next_pos_dirn) ) + a_curr.interaction_point(1:3);
 
-            if ~w.point_outside_wedge( eff_source_pos ) %catch error if source is inside wedge
-                delay = -1; % @todo remove
+            if( ~w.point_outside_wedge( eff_source_pos ) || ~w.point_outside_wedge( eff_receiver_pos ))%catch error if source is inside wedge
+                delay = total_distance / c;
                 valid = false;
                 return
             end
@@ -177,6 +178,6 @@ end
 
 delay = total_distance / c;
 
-drawnow % can be removed?
+%drawnow % can be removed?
 
 end

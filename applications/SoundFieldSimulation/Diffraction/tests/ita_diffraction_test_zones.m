@@ -33,3 +33,23 @@ assert( ~ita_diffraction_shadow_zone( screen, source, source ) )
 assert( ~ita_diffraction_shadow_zone( screen, receiver, receiver ) )
 
 disp 'Shadow zone test successfull'
+
+
+%% Reflection zone test
+
+source = [  1 0 0 ];
+receiver = [ +0.001 1 0 ];
+
+assert( ita_diffraction_reflection_zone_main( wedge, source, receiver ) )
+assert( ita_diffraction_reflection_zone_main( wedge, receiver, source ) )
+
+assert( ita_diffraction_reflection_zone_main( wedge, source, source ) )
+assert( ~ita_diffraction_reflection_zone_main( wedge, receiver, receiver ) )
+
+source = [  1 0 0 ];
+receiver = [ -0.001 1 0 ];
+
+assert( ~ita_diffraction_reflection_zone_main( wedge, source, receiver ) )
+assert( ~ita_diffraction_reflection_zone_main( wedge, receiver, source ) )
+
+disp 'Main reflection zone test successfull'
