@@ -22,7 +22,7 @@ classdef itaInfiniteWedge
     end
     
     methods
-        function obj = itaInfiniteWedge( main_face_normal, opposite_face_normal, location, edge_type )
+        function obj = itaInfiniteWedge( main_face_normal, opposite_face_normal, location, edge_type, aperture_direction )
             % Create a wedge by a main face normal and an opposite face
             % normal
             %   main_face_normal:       Main face normal (3-dim)
@@ -61,11 +61,15 @@ classdef itaInfiniteWedge
                 obj.n2 = opposite_face_normal ./ norm( opposite_face_normal );
             end
             
-            n_scaled = cross( obj.main_face_normal, obj.opposite_face_normal );
-            if ~norm( n_scaled )
-                warning 'Normals are linear dependent and aperture direction could not be determined. Please set aperture direction manually.'
+            if nargin < 5
+                n_scaled = cross( obj.main_face_normal, obj.opposite_face_normal );
+                if ~norm( n_scaled )
+                    warning 'Normals are linear dependent and aperture direction could not be determined. Please set aperture direction manually.'
+                else
+                    obj.ad = n_scaled ./ norm( n_scaled );
+                end
             else
-                obj.ad = n_scaled ./ norm( n_scaled );
+                obj.ad = aperture_direction;
             end
         end
         

@@ -44,9 +44,11 @@ len = norm( endPt - loc );
 if( abs( cross(n1, n2) ) < itaInfiniteWedge.set_get_geo_eps )
     aperture_dir = ( anchor.vertex_end( 1:3 )' - anchor.vertex_start( 1:3 )' ) / len;
     w = itaSemiInfinitePlane( n1, loc, aperture_dir );
-    finWedge = itaFiniteWedge( n1, n2, loc, len );
-    finWedge.aperture_direction = aperture_dir;
-    finWedge.aperture_end_point = endPt;
+    if strcmpi( diffraction_model, 'btms' )
+        finWedge = itaFiniteWedge( n1, n2, loc, len );
+        finWedge.aperture_direction = aperture_dir;
+        finWedge.aperture_end_point = endPt;
+    end
 else
     w = itaInfiniteWedge( n1, n2, loc );
 end
@@ -74,6 +76,8 @@ switch( diffraction_model )
         diffraction_tf.freqData = diffraction_tf.freqData ./ normilization_porpagation;
         
     case 'maekawa'
+        error 'not implemented'
+        
     case 'btms'
         btms_tf = ita_diffraction_btms( finWedge, effective_source_position( 1:3 )', effective_receiver_position( 1:3 )', diffraction_tf.samplingRate, diffraction_tf.nBins, c );
         diffraction_tf.freqData = btms_tf;
