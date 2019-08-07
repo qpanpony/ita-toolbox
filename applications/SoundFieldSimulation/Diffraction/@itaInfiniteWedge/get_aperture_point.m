@@ -1,6 +1,11 @@
 function aperture_point = get_aperture_point( obj, source_pos, receiver_pos )
 % get_aperture_point Returns aperture point on wedge (closest point on wedge
 % between source and receiver)
+
+aperture_point = obj.get_aperture_point2( source_pos, receiver_pos );
+return
+
+% ... the rest is faulty!
     
 assert( numel( source_pos ) == 3 )
 assert( numel( receiver_pos ) == 3 )

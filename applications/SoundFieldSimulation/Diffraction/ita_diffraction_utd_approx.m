@@ -8,7 +8,7 @@ function diffr_field = ita_diffraction_utd_approx( wedge, source_pos, receiver_p
 %   [1] Tsingos, Funkhouser et al. - Modeling Acoustics in Virtual Environments using the Uniform Theory of Diffraction
 %
 % Example:
-%   att = ita_diffraction_utd_approximated( wedge, source_pos, receiver_pos, frequency_vec )
+%   att = ita_diffraction_utd_approximated( wedge, source_pos, receiver_pos, frequency_vec, speed_of_sound )
 %
 %% Assertions
 if nargin < 6

@@ -14,7 +14,7 @@ freq = [100, 200, 400, 800, 1600, 3200, 6400, 12800, 24000]';
 alpha_d = linspace( 0, inf_wdg.opening_angle, 100 );
 
 % Set different receiver positions rotated around the aperture
-rcv_positions = ita_diffraction_align_points_around_aperture( inf_wdg, rcv_start_pos, alpha_d, apex_point, ref_face );
+rcv_positions = ita_diffraction_align_points_around_aperture( inf_wdg, rcv_start_pos, alpha_d, apex_point, 1 );
 rcv_positions = rcv_positions(2 : end-1, :);
 
 % wavenumber
