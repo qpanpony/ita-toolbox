@@ -1,4 +1,4 @@
-function [ frequency_mags, gain, delay, valid ] = ita_propagation_path_get_data( pp, f, c )
+function [ frequency_mags, gain, delay, valid, varargout ] = ita_propagation_path_get_data( pp, f, c, varargin )
 % ita_propagation_path_get_data Returns frequency magnitudes, gain and
 % delay for DSP processing. 4th return value is a validity flag.
 %
@@ -13,28 +13,40 @@ gain = 1;
 frequency_mags = ones( 1, numel( f ) );
 total_distance = 0;
 delay = 0;
+valid = true;
 
 pd = pp.propagation_anchors;
 N = numel( pd );
 
+record_paths = 0;
+if( nargin == 4 ) %if option is set, return path data
+    if( strcmp( varargin, 'record_paths' ) == 1 )
+        varargout{1} = zeros(N,3);
+        if( isa( pd, 'struct' ) )
+            varargout{1}(1,:) = pd(1).interaction_point(1:3);
+            varargout{1}(N,:) = pd(N).interaction_point(1:3);
+        else
+            varargout{1}(1,:) = pd{1}.interaction_point(1:3);
+            varargout{1}(N,:) = pd{N}.interaction_point(1:3);
+        end
+        record_paths = 1;
+    else
+        error(strcat('Unrecognised input argument: ', varargin));
+    end
+elseif( nargin > 4 )
+    error( 'Too many input arguments' );
+end
+
 if N < 1
-    
-    % No path constructable
-    valid = false;
-    return;
-    
+    error('Only one interaction point given') % No path constructable
 elseif N == 2
-    
     source = pd( 1 );
     receiver = pd( 2 );
-    total_distance = norm( receiver.interaction_point - source.interaction_point );
-       
+    total_distance = norm( receiver.interaction_point - source.interaction_point );    
 end
 
 is_diff = 0; %set to 1 whenever a diffraction is encountered
-
-valid = true;
-    
+ 
 for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always the last
     
     if isa( pd, 'struct' )
@@ -47,10 +59,17 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
         a_next = pd{ i+1 };
     end
     
-    anchor_type = a_curr.anchor_type;
     segment_distance = norm( a_curr.interaction_point - a_prev.interaction_point );
     total_distance = total_distance + segment_distance;
 
+    if( record_paths == 1 ) %if option is set, record the interaction points of the whole path
+        varargout{1}(i,:) = a_curr.interaction_point(1:3);
+    end
+    if( valid == false ) %if the path is invalid, continue so that the delay can be properly worked out
+        continue
+    end
+    
+    anchor_type = a_curr.anchor_type;
     switch anchor_type
 
         case 'outer_edge_diffraction' %case for diffraction
@@ -69,9 +88,9 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
             eff_receiver_pos = ( next_pos_dirn .* r ./ norm(next_pos_dirn) ) + a_curr.interaction_point(1:3);
 
             if( ~w.point_outside_wedge( eff_source_pos ) || ~w.point_outside_wedge( eff_receiver_pos ))%catch error if source is inside wedge
-                delay = total_distance / c;
+                warning('Invalid path, source or receiver inside wedge');
                 valid = false;
-                return
+                continue
             end
             %{
             plot3([w.aperture_start_point(1),w.aperture_end_point(1)],[w.aperture_start_point(2),w.aperture_end_point(2)],[w.aperture_start_point(3),w.aperture_end_point(3)])
@@ -103,10 +122,16 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
             %}
             aperture_point = w.get_aperture_point2( source_pos, target_pos );
             if ~w.point_on_aperture( aperture_point )
-                warning('Skipping path, aperture point calculated not on the aperture');
+                warning('Invalid path, aperture point calculated not on the aperture');
+                valid = false;
                 continue
             end
-
+            if norm( eff_receiver_pos - aperture_point ) < w.set_get_geo_eps
+                warning('Invalid path where aperture point and receiver point coincide');
+                valid = false;
+                continue
+            end
+            
             [~, D, A] = ita_diffraction_utd( w, eff_source_pos, eff_receiver_pos, f, c, aperture_point );    
 
             if( is_diff == 0 )
@@ -134,19 +159,21 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
             eff_receiver_pos = ( next_pos_dirn .* r ./ norm(next_pos_dirn) ) + a_curr.interaction_point(1:3);
 
             if( ~w.point_outside_wedge( eff_source_pos ) || ~w.point_outside_wedge( eff_receiver_pos ))%catch error if source is inside wedge
-                delay = total_distance / c;
+                warning('Invalid path, source or receiver inside wedge');
                 valid = false;
-                return
+                continue
             end
 
             aperture_point = w.get_aperture_point2( source_pos, target_pos );
             if ~w.point_on_aperture( aperture_point )
-                warning('Skipping path, aperture point calculated not on the aperture');
+                warning('Invalid path, aperture point calculated not on the aperture');
+                valid = false;
                 continue
             end     
 
             if norm( eff_receiver_pos - aperture_point ) < w.set_get_geo_eps
-                warning('Skipping a path where aperture point and receiver point coincide');
+                warning('Invalid path where aperture point and receiver point coincide');
+                valid = false;
                 continue
             end
             
@@ -171,11 +198,13 @@ end
 %% Determine DSP coefficients / path data
 
 frequency_mags = frequency_mags .* ita_atmospheric_absorption_factor( f, total_distance ); %flter contribution from atmospheric absorption
-
+    
 if( is_diff == 0 ) %if there was no diffraction in path, apply 1/r distance law for gain
     gain = 1 / total_distance;
 end
 
+segment_distance = norm( a_next.interaction_point - a_curr.interaction_point );
+total_distance = total_distance + segment_distance;
 delay = total_distance / c;
 
 %drawnow % can be removed?
