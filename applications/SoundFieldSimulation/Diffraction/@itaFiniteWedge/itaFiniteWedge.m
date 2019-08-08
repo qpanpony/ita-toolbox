@@ -30,7 +30,7 @@ classdef itaFiniteWedge < itaInfiniteWedge
             
             n_scaled = cross( obj.main_face_normal, obj.opposite_face_normal );
             if ~norm( n_scaled )
-                warning 'aperture enp point could not be determined since aperture direction is not defined. Please set aperture direction manually.'
+                warning 'Aperture end point could not be determined since aperture direction is not defined. Please set aperture direction manually.'
             else
                 obj.ep = obj.sp + length * obj.aperture_direction;
             end

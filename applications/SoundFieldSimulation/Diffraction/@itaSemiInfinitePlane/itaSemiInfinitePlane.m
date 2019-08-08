@@ -7,8 +7,7 @@ classdef itaSemiInfinitePlane < itaInfiniteWedge
     
     methods
         function obj = itaSemiInfinitePlane( main_face_normal, location, aperture_direction )
-            obj@itaInfiniteWedge( main_face_normal, -main_face_normal, location );
-            obj.aperture_direction = aperture_direction;
+            obj@itaInfiniteWedge( main_face_normal, -main_face_normal, location, 'outer_edge', aperture_direction );
         end
     end
 end
