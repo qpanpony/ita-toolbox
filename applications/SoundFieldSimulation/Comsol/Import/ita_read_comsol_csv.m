@@ -78,13 +78,13 @@ columnHeaders = char(metaData(end));
 columnHeaders = strsplit(columnHeaders(3:end),',');
 idxExtraParameter = ~contains(columnHeaders, '@') & ~strcmpi(columnHeaders, 'x') & ~strcmpi(columnHeaders, 'y') & ~strcmpi(columnHeaders, 'z');
 nMerges = 0;
-% for idxMerge = find(idxExtraParameter)
-%     idxSource = idxMerge-nMerges;
-%     idxTarget = idxSource-1;
-%     columnHeaders{idxTarget} = [columnHeaders{idxTarget} columnHeaders{idxSource}];
-%     columnHeaders(idxSource) = [];
-%     nMerges = nMerges+1;
-% end
+for idxMerge = find(idxExtraParameter)
+    idxSource = idxMerge-nMerges;
+    idxTarget = idxSource-1;
+    columnHeaders{idxTarget} = [columnHeaders{idxTarget} columnHeaders{idxSource}];
+    columnHeaders(idxSource) = [];
+    nMerges = nMerges+1;
+end
 
 %--Numeric Data---
 try
