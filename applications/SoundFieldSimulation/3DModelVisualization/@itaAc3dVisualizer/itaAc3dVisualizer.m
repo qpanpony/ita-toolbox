@@ -35,11 +35,11 @@ classdef itaAc3dVisualizer < itaAbstract3DModelVisualizer
                 if ~contains(input, '.ac')
                     error('Given filename does not point to an AC3D file')
                 end
-                obj.mModel = load_ac3d(input);
-            elseif isa(input, 'load_ac3d') && isscalar(input)
+                obj.mModel = itaAc3dModel(input);
+            elseif isa(input, 'itaAc3dModel') && isscalar(input)
                 obj.mModel = input;
             else
-                error('Input must be either a valid .ac filename or a AC3D object (load_ac3d).')
+                error('Input must be either a valid .ac filename or a AC3D object (itaAc3dModel).')
             end
             
             obj.clearPlotItems();
