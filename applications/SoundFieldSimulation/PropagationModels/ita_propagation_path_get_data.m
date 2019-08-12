@@ -39,13 +39,16 @@ end
 
 if N < 1
     error('Only one interaction point given') % No path constructable
-elseif N == 2
+elseif N == 2 %direct sound
     source = pd( 1 );
     receiver = pd( 2 );
-    total_distance = norm( receiver.interaction_point - source.interaction_point );    
+    total_distance = norm( receiver.interaction_point - source.interaction_point );  
+    gain = 1 / total_distance;
+    delay = total_distance / c;
+    return
 end
 
-is_diff = 0; %set to 1 whenever a diffraction is encountered
+number_of_diff = 0; %set to 1 whenever a diffraction is encountered
  
 for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always the last
     
@@ -133,10 +136,10 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
             end
             
             [~, D, A] = ita_diffraction_utd( w, eff_source_pos, eff_receiver_pos, f, c, aperture_point );    
-
-            if( is_diff == 0 )
-                gain = gain * (A / rho);
-                is_diff = 1;
+    
+            number_of_diff = number_of_diff + 1;
+            if( number_of_diff == 1 )
+                gain = gain * (A / rho);  
             else
                 gain = gain * A;
             end
@@ -178,10 +181,10 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
             end
             
             [~, D, A] = ita_diffraction_utd( w, eff_source_pos, eff_receiver_pos, f, c, aperture_point );    
-
-            if( is_diff == 0 )
+            
+            number_of_diff = number_of_diff + 1;
+            if( number_of_diff == 1 )
                 gain = gain * (A / rho);
-                is_diff = 1;
             else
                 gain = gain * A;
             end
@@ -197,10 +200,12 @@ end
 
 %% Determine DSP coefficients / path data
 
-frequency_mags = frequency_mags .* ita_atmospheric_absorption_factor( f, total_distance ); %flter contribution from atmospheric absorption
+frequency_mags = frequency_mags .* (1 - ita_atmospheric_absorption_factor( f, total_distance )); %flter contribution from atmospheric absorption
     
-if( is_diff == 0 ) %if there was no diffraction in path, apply 1/r distance law for gain
+if( number_of_diff == 0 ) %if there was no diffraction in path, apply 1/r distance law for gain
     gain = 1 / total_distance;
+elseif( mod(number_of_diff,2) == 1 ) %correct for phase of diffracted paths for an odd number of diffractions
+    gain = gain * -1;
 end
 
 segment_distance = norm( a_next.interaction_point - a_curr.interaction_point );
