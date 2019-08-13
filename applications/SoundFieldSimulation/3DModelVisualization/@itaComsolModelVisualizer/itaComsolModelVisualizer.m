@@ -166,9 +166,10 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
             this.mBoundaryPlotHandles = cell(1, numel(boundaryGroups));
             colors = get(groot,'DefaultAxesColorOrder');
             for groupID = 1:numel(boundaryGroups)
+                idxColor = mod(groupID-1, size(colors, 1))+1;
                 mphviewselection(this.mModel.modelNode, char(boundaryGroups{groupID}.tag),...
                     'Parent', this.mAxes, 'geommode', 'off', 'edgemode', 'off',...
-                    'facecolorselected', colors(mod(groupID-1, numel(colors))+1, :))
+                    'facecolorselected', colors(idxColor, :))
                 
                 this.mBoundaryPlotHandles{groupID} = this.mAxes.Children(1);
             end
