@@ -136,15 +136,16 @@ h.pb_cancel = uicontrol('style', 'pushbutton', defaultOptions{:}, 'position', [0
 gData.h = h;
 gData.tubeSetupData = tubeSetupData;
 
-
-
-
 guidata(h.fgh, gData)
 updateFields(gData.h.pu_tubeName)
 uiwait(h.fgh)
-gData = guidata(h.fgh);
-close(h.fgh)
-guioutput = gData.output;
+if ishandle(h.fgh)
+    gData = guidata(h.fgh);
+    close(h.fgh)
+    guioutput = gData.output;
+else
+    guioutput = [];
+end
 
 end
 

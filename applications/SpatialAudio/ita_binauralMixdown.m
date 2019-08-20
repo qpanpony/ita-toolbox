@@ -9,7 +9,7 @@ opts.LSPos = itaCoordinates; % itaCoordinates of the loudspeaker positions
 opts.distanceLoss=true;
 
 if nargin>1
-    opts=ita_parse_arguments(opts,varargin);
+    opts=ita_parse_arguments(opts,varargin{2:end});
 end
 if ~(isa(lsSignals, 'itaAudio')&&(lsSignals.nChannels>0))
     error('First input must be itaAudio with at least one channel')

@@ -1,4 +1,4 @@
-function ita_listeningtest_JND()
+function ita_listeningtest_JND(soundPath, soundPathTrain, fileType)
 
 
 % <ITA-Toolbox>
@@ -6,16 +6,24 @@ function ita_listeningtest_JND()
 % You can find the license for this m-file in the application folder.
 % </ITA-Toolbox>
 
- soundPath = 'Z:\Stimuli\EDT'; 
+
 % mkdir(soundPath)
 % morseNumbers = test_mgu_morseCode();
 % for iNumber = 1:10
 %     ita_write(morseNumbers(iNumber), fullfile(soundPath, sprintf('Morse Code Number %i.ita', rem(iNumber, 10))));
 % end
 
+% Usage:
+% ita_listeningtest_JND(soundPath, soundPathTrain, fileType)
+% soundPath is the path with your sound files are of file type fileType
+% soundPathTrain is the path containing your training files
+% BE AWARE that files will be taken pair wise; means that always two
+% subsequent files will be taken as a couple that is compared during the
+% experiment. 
+
 %%
 %%% INITIALIZATION OF GUI INPUT DATA
-br = sprintf('\n');
+br = newline;
 
 % General parameters
 ltData.testName         = 'JND Listening Test EDT';
@@ -27,56 +35,45 @@ ltData.introParameter         = [ br br 'Herzlich Willkommen zum Hörversuch' br 
                              'Viel Spaß!' 
                              ];
 
-ltData.introAufgabe         = [ br br 'Definition:' br br ' ÿNachhallÿ nennt sich der Schall der in einem Raum, der nach dem ein Ton' br ' plötzlich gestoppt hat, weiterhin besteht.' br br...
+ltData.introAufgabe         = [ br br 'Definition:' br br ' "Nachhall" nennt sich der Schall der in einem Raum, der nach dem ein Ton' br ' plötzlich gestoppt hat, weiterhin besteht.' br br...
                              'Je lebendiger und länger der Schall wirkt, desto größer ist der Nachhall.' br 'Je kürzer und trockener der Schall wirkt, desto geringer ist der Nachhall.' br  br br... 
                               'Frage:' br br ' In welchem der beiden Beispiele ist der Nachhall stärker ausgeprägt?' br br ...
                              ];
                          
 ltData.txtEndeTraining      = [ br 'Das Training ist beendet, der Versuch beginnt jetzt. ' br br ];
-                         
-ltData.trainingPath          =    soundPath;
-ltData.trainingFiles         = {'Var_EDT K03-R05-P12.ita' 'Var_EDT K04-R04-P01.ita'; ...%3
-                                'Var_EDT K02-R05-P02.ita' 'Var_EDT K04-R04-P01.ita'; ...%2
-                                'Var_EDT K02-R04-P05.ita' 'Var_EDT K04-R04-P01.ita'; ...%1
-                                'Var_EDT K03-R05-P12_Tr10.ita' 'Var_EDT K04-R04-P01_Tr10.ita'; ...%3
-                                'Var_EDT K02-R05-P02_Tr10.ita' 'Var_EDT K04-R04-P01_Tr10.ita'; ...%2
-                                'Var_EDT K02-R04-P05_Tr10.ita' 'Var_EDT K04-R04-P01_Tr10.ita'; ...%1
-                                };
-%ltData.trainingFiles      = {'female_1.wav' 'female_2.wav'; ...
-%                            'female_3.wav' 'female_4.wav'; ...
-%                            'female_6.wav' 'female_7.wav'; ...
-%                            'female_8.wav' 'female_9.wav'; ...
-%                            };            
+
+ltData.trainingPath  = soundPathTrain;
+folderContentTrain = dir(fullfile(ltData.trainingPath, ['*.', fileType])); % only .wav files are considered!
+fileNames = {folderContentTrain.name};
+
+ltData.trainingFiles = {fileNames{1} fileNames{2};
+                        fileNames{3} fileNames{4};
+                        };
+% ltData.trainingFiles         = {'Var_EDT K03-R05-P12.ita' 'Var_EDT K04-R04-P01.ita'; ...%3
+%                                 'Var_EDT K02-R05-P02.ita' 'Var_EDT K04-R04-P01.ita'; ...%2
+%                                 'Var_EDT K02-R04-P05.ita' 'Var_EDT K04-R04-P01.ita'; ...%1
+%                                 'Var_EDT K03-R05-P12_Tr10.ita' 'Var_EDT K04-R04-P01_Tr10.ita'; ...%3
+%                                 'Var_EDT K02-R05-P02_Tr10.ita' 'Var_EDT K04-R04-P01_Tr10.ita'; ...%2
+%                                 'Var_EDT K02-R04-P05_Tr10.ita' 'Var_EDT K04-R04-P01_Tr10.ita'; ...%1
+%                                 };
+
+
 ltData.trainingCorrectAnswer = [ 1 1 1 1 1 1 ];
 
 
 ltData.compareQuestion   = [ br 'In welchem der beiden Beispiele ist der Nachhall stärker ausgeprägt?'];              
 
+folderContent = dir(fullfile(ltData.trainingPath, '*.wav')); % only .wav files are considered! % 2do: select file type in "creating GUI"
+fileNames = {folderContent.name};
+ltData.testPath  =  soundPath;
+ltData.testFiles =  {fileNames{1} fileNames{2};
+                     fileNames{3} fileNames{4};
+                    };
 
-ltData.testPath  =    soundPath;
-ltData.testFiles =  {'Var_EDT K02-R05-P02.ita' 'Var_EDT K02-R05-P05.ita'; ...
-                     'Var_EDT K01-R05-P02.ita' 'Var_EDT K01-R05-P09.ita'; ...
-                     'Var_EDT K02-R04-P05.ita' 'Var_EDT K03-R05-P12.ita'; ...
-                     'Var_EDT K03-R05-P12.ita' 'Var_EDT K04-R04-P01.ita'; ...
-                     'Var_EDT K02-R05-P02.ita' 'Var_EDT K04-R04-P01.ita'; ...
-                     'Var_EDT K02-R04-P05.ita' 'Var_EDT K04-R04-P01.ita'; ...
-                     
-                     'Var_EDT K02-R05-P02_Tr10.ita' 'Var_EDT K02-R05-P05_Tr10.ita'; ...
-                     'Var_EDT K01-R05-P02_Tr10.ita' 'Var_EDT K01-R05-P09_Tr10.ita'; ...
-                     'Var_EDT K02-R04-P05_Tr10.ita' 'Var_EDT K03-R05-P12_Tr10.ita'; ...
-                     'Var_EDT K03-R05-P12_Tr10.ita' 'Var_EDT K04-R04-P01_Tr10.ita'; ...
-                     'Var_EDT K02-R05-P02_Tr10.ita' 'Var_EDT K04-R04-P01_Tr10.ita'; ...
-                     'Var_EDT K02-R04-P05_Tr10.ita' 'Var_EDT K04-R04-P01_Tr10.ita'; ...
-                     };
-%ltData.testFiles = {'female_1.wav' 'female_2.wav'; ...
-%                    'female_3.wav' 'female_4.wav'; ...
-%                   'female_6.wav' 'female_7.wav'; ...
-%                   'female_8.wav' 'female_9.wav'; ...
-%                    };                               
 % ltData.testFiles =  reshape(ita_sprintf('Morse Code Number %i.ita', 0:9), [], 2);
 
-ltData.pauseBefore = 2;
-ltData.pauseBetween = 0.5;
+ltData.pauseBefore = 2;  % 2do: as input parameter with default value
+ltData.pauseBetween = 0.5; % 2do: as input parameter with default value
 
 ltData.txtEndeTest  = [br 'Der Hörversuch endent hier, vielen Dank für Ihre Teilnahme.'];
 
@@ -260,19 +257,25 @@ switch gData.nextPhase
             end
             close(wbh)
             
-            
-%             % play A
-%             currSounds(1).play
-%             % pause
-%             pause(gData.ltData.pauseBetween)
-%             % play B
-%             currSounds(2).play
-                 
-            ita_portaudio_run(currSounds(1), 'OutputChannels', 1:2, 'Block')
-            ita_portaudio_run(currSounds(2), 'OutputChannels', 1:2, 'Block')
-            
-            set([gData.h.buttonA gData.h.buttonB  gData.h.text ] , 'visible', 'on');
+            % show text
             set( gData.h.text , 'string', gData.ltData.compareQuestion)
+            % show buttons and disable them
+            set([gData.h.buttonA gData.h.buttonB  gData.h.text ] , 'visible', 'on');
+            set([gData.h.buttonA gData.h.buttonB] , 'enable', 'off');
+            
+            % set colour of currently played sound to green
+            set(gData.h.buttonA, 'BackgroundColor', 'g');
+            % play stimulus
+            ita_portaudio_run(currSounds(1), 'OutputChannels', 1:2, 'Block')
+            % reset colour again
+            set(gData.h.buttonA, 'BackgroundColor', [0.94 0.94 0.94]);
+            
+            % ... and the same for the second stimulus / button
+            set(gData.h.buttonB, 'BackgroundColor', 'g');
+            ita_portaudio_run(currSounds(2), 'OutputChannels', 1:2, 'Block')
+            set(gData.h.buttonB, 'BackgroundColor', [0.94 0.94 0.94]);
+            % enable both buttons
+            set([gData.h.buttonA gData.h.buttonB] , 'enable', 'on');
 
             gData.currentSet  = gData.currentSet  + 1;
         end
@@ -348,19 +351,22 @@ switch gData.nextPhase
             close(wbh)
             
             
-%             % play A
-%             currSounds(1).play
-%             % pause
-%             pause(gData.ltData.pauseBetween)
-%             % play B
-%             currSounds(2).play
-            
-            ita_portaudio_run(currSounds(1), 'OutputChannels', 1:2, 'Block')
-            ita_portaudio_run(currSounds(2), 'OutputChannels', 1:2, 'Block')
-            
-            
-            set([gData.h.buttonA gData.h.buttonB  gData.h.text ] , 'visible', 'on');
             set( gData.h.text , 'string', gData.ltData.compareQuestion)
+            set([gData.h.buttonA gData.h.buttonB  gData.h.text ] , 'visible', 'on');
+            set([gData.h.buttonA gData.h.buttonB] , 'enable', 'off');
+            
+            % first stimulus
+            set(gData.h.buttonA, 'BackgroundColor', 'g');
+            ita_portaudio_run(currSounds(1), 'OutputChannels', 1:2, 'Block')
+            set(gData.h.buttonA, 'BackgroundColor', [0.94 0.94 0.94]);
+            
+            % second stimulus
+            set(gData.h.buttonB, 'BackgroundColor', 'g');
+            ita_portaudio_run(currSounds(2), 'OutputChannels', 1:2, 'Block')
+            set(gData.h.buttonB, 'BackgroundColor', [0.94 0.94 0.94]);
+            
+            % enable both buttons
+            set([gData.h.buttonA gData.h.buttonB] , 'enable', 'on');
 
             gData.currentSet  = gData.currentSet  + 1;
             

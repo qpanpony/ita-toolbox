@@ -14,7 +14,7 @@ function varargout = ita_roomacoustics_parameters(varargin)
 %   strCell =   ita_roomacoustics_parameters('getAvailableParameters')  % returns a cell with strings of all implemented  parameters
 %   strCell =   ita_roomacoustics_parameters('getAvailableParameters', 'Reverberation_Times') % only parameters of one category
 %
-%    Currently available parameters: EDT, T10, T15, T20, T30, T40, T50, T60, C50, C80, D50, D80, Center_Time, PSNR_Lundeby, PSPNR_Lundeby, Intersection_Time_Lundeby
+%    Currently available parameters: EDT, LDT, T10, T15, T20, T30, T40, T50, T60, C50, C80, D50, D80, Center_Time, PSNR_Lundeby, PSPNR_Lundeby, Intersection_Time_Lundeby
 %    Currently available categories: Reverberation_Times,  Clarity_and_Definition, Others
 %
 %
@@ -37,7 +37,7 @@ function varargout = ita_roomacoustics_parameters(varargin)
 
 %%
 
-defaultPar = struct( 'Reverberation_Times',      struct('EDT', true, 'T10', false, 'T15', false, 'T20', true, 'T25', false, 'T30', true, 'T40', false, 'T50', false, 'T60', false, 'T_Huszty', false, 'T_Lundeby', false),...
+defaultPar = struct( 'Reverberation_Times',      struct('EDT', true, 'LDT', false,'T10', false, 'T15', false, 'T20', true, 'T25', false, 'T30', true, 'T40', false, 'T50', false, 'T60', false, 'T_Huszty', false, 'T_Lundeby', false),...
     'Clarity_and_Definition',   struct('C50', false, 'C80',false,  'D50', false ,'D80', false, 'Center_Time', false ), ...
     'Others',                   struct( 'PSNR_Lundeby', false, 'PSPNR_Lundeby', false, 'Intersection_Time_Lundeby', false, 'EDC', false ));
 
