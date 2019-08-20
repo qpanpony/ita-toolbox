@@ -28,11 +28,13 @@ for n = 1:numel( pps )
 
     path_id_clear = '';
     for a = 1:numel( pp.propagation_anchors )
-        if( isa(pp.propagation_anchors, 'struct' ) )
+        
+        if( isa( pp.propagation_anchors, 'struct' ) )
             anchor = pp.propagation_anchors( a );
         else
             anchor = pp.propagation_anchors{ a };
         end
+        
         switch anchor.anchor_type
             case { 'source', 'emitter' }
                 anchor_id_seg = strcat( 'S-', anchor.name );
@@ -42,15 +44,19 @@ for n = 1:numel( pps )
                 anchor_id_seg = sprintf( 'SR-%i-%i', a-1, anchor.polygon_id );
             case { 'outer_edge_diffraction', 'inner_edge_diffraction' }
                 anchor_id_seg = sprintf( 'ED-%i-%i-%i', a-1, anchor.main_wedge_face_id, anchor.opposite_wedge_face_id );
+            otherwise
+                error 'Unrecognized anchor type, could not generate unique id for this path sequence'
         end
+        
         if a == 1
             path_id_clear = strcat( path_id_clear, anchor_id_seg );
         else
             path_id_clear = strcat( path_id_clear, '_', anchor_id_seg );
         end
+        
     end
     
-
+    assert( numel( path_id_clear ) > 0 )
     path_id_hashed = char( mlreportgen.utils.hash( path_id_clear ) );
     
     % store in output variables
