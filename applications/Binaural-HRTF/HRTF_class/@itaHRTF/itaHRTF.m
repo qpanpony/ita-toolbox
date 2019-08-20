@@ -957,7 +957,7 @@ classdef  itaHRTF < itaAudio
                             freqVector = thisC.freqVector;
                             t0_freq = bsxfun(@rdivide, phase,2*pi*freqVector(3:end));
                             t0_freq = t0_freq(~isnan(t0_freq(:,1)),:);
-                            t0_mean = mean(t0_freq(3+usedBins,:)); %mean is smoother than max; lower freq smooths also the result
+                            t0_mean = mean(t0_freq(usedBins-2,:)); %mean is smoother than max; lower freq smooths also the result
                             ITD =  t0_mean(thisC.EarSide == 'L') - t0_mean(thisC.EarSide == 'R');
                         end
                     case 'xcorr'
