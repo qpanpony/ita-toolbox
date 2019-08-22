@@ -196,10 +196,45 @@ classdef itaComsolStudy < itaComsolNode
         end
     end
     
+    %% Read parametric sweep data
+    methods
+        function [parameterNames, parameterUnits] = GetParametricSweepParameters(obj)
+            %Returns the parameter names used in the parametric sweep of
+            %the active study as cell array.
+            %   Returns empty cell array if no parametric sweep defined.
+            parameterNames = {};
+            parameterUnits = {};
+            if ~obj.IsParametric(); return; end
+            study = obj.activeNode;
+            paramSweepNode = study.feature('param');
+            parameterNames = cell(paramSweepNode.getStringArray('pname'));
+            parameterUnits = cell(paramSweepNode.getStringArray('punit'));
+        end
+    end
+    
     %% Booleans
+    methods
+        function bool = IsFreq(obj)
+            %Returns true if the active study is a frequency study
+            bool = false;
+            if isempty(obj.activeNode); return; end
+            
+            bool = obj.isFreqStudy(obj.activeNode);
+        end
+        function bool = IsParametric(obj)
+            %Returns true if the active study is a parametric study
+            bool = false;
+            if isempty(obj.activeNode); return; end
+            
+            bool = obj.isParametricStudy(obj.activeNode);
+        end
+    end
     methods(Static = true, Access = private)
         function bool = isFreqStudy(study)
             [bool, ~] = itaComsolStudy.hasFeatureNode( study, 'freq' );
+        end
+        function bool = isParametricStudy(study)
+            [bool, ~] = itaComsolStudy.hasFeatureNode( study, 'param' );
         end
     end
 end
