@@ -49,68 +49,169 @@ classdef itaComsolResult < handle
         end
     end
     
-    %% Evaluate results
+    %% Public result getters
     methods
-        function p = Pressure(obj, evalPos)
-            %Evaluates the pressure at the mesh nodes (no input) or for the
-            %given itaCoordinates / itaReceiver
+        function [p, metaData] = Pressure(obj, evalPos)
+            %For the active study, evaluates for the pressure at the mesh
+            %nodes (no input) or for the given itaCoordinates / itaReceiver.
+            %Also returns a metadata struct that contains information for
+            %parametric sweeps.
+            %   Inputs:
             %   evalPos (optional): itaCoordinates with coordinates for evaluation
             %                       or itaReceiver
+            %   
+            %   Outputs:
+            %   p:          itaResult with one entry per simulation
+            %   metaData:   Struct with info on parametric sweep
+            
+            %use active physics
+            pressureExpression = obj.getPressureExpression();
             if nargin == 1
-                p = obj.ByExpression('p');
+                [p, metaData] = obj.ByExpression(pressureExpression);
             else
                 assert(isa(evalPos, 'itaCoordinates') || isa(evalPos, 'itaReceiver'), 'Input must be of type itaCoordinates or itaReceiver')
-                p = obj.ByExpression('p', evalPos);
+                [p,metaData] = obj.ByExpression(pressureExpression, evalPos);
             end
         end
-        function res = ByExpression(obj, expression, evalPos)
-            %Evaluates the given expression either at the mesh nodes or at
-            %the given itaCoordinates
+        function [res, metaData] = ByExpression(obj, expression, evalPos)
+            %For the active study, evaluates the given expression either at
+            %the mesh nodes or at the given itaCoordinates. Also returns a
+            %metadata struct that contains information for parametric sweeps.
             %   Inputs:
             %   expression:             char row-vector with expression to be evaluated
             %   evalPos (optional):     itaCoordinates with coordinates for evaluation
             %                           or itaReceiver
+            %   
+            %   Outputs:
+            %   p:          itaResult with one entry per simulation
+            %   metaData:   struct with info on parametric sweep
             assert(ischar(expression) && isrow(expression), 'First input must be char row vector with the expression of the result')
             if nargin == 2
-                res = obj.getResultAtMeshNodes(expression);
+                [res, metaData] = obj.getResultAtMeshNodes(expression);
             else
                 if isa(evalPos, 'itaReceiver')
                     evalPos = obj.extractCoordsFromReceiver(evalPos);
                 end
                 assert(isa(evalPos, 'itaCoordinates'), 'Second input must be of type itaCoordinates or itaReceiver')
-                res = obj.getResultAtCoords(expression, evalPos);
+                [res, metaData] = obj.getResultAtCoords(expression, evalPos);
             end
         end
     end
+    
+    %% Extract results
     methods(Access = private)
-        function res = getResultAtMeshNodes(obj, expression, dim, selection)
-            if nargin == 2
-                data = mpheval(obj.mModel.modelNode, expression);
-            elseif nargin > 2
-                if nargin == 3; selection = 'all'; end
-                data = mpheval(obj.mModel.modelNode, expression, 'edim', dim, 'selection', selection);
+        function [res, metaData] = getResultAtMeshNodes(obj, expression)
+            datasetTag = obj.getDatasetTag(expression);
+            metaData = obj.createMetaDataStruct(datasetTag);
+            if ~isempty(metaData.parameterValues) %Param sweep
+                res = itaResult([1 metaData.nSimulations]);
+                for idxParam = 1:metaData.nSimulations
+                    %Note that 'outersolnum' = 'all' does not work if the
+                    %mesh is parameter dependent since then the number of
+                    %data points differs between parametric solutions.
+                    %Thus, we have to get the results one by one.
+                    data = mpheval(obj.mModel.modelNode, expression, 'dataset',datasetTag,'outersolnum',idxParam);
+                    itaCoords = itaCoordinates(data.p.');
+                    freqData = data.d1;
+                    freqVector = mphglobal(obj.mModel.modelNode,'freq','dataset',datasetTag,'outersolnum',idxParam);
+                    res(idxParam) = obj.createItaResult(freqData, freqVector, itaCoords);
+                end
+            else
+                data = mpheval(obj.mModel.modelNode, expression, 'dataset',datasetTag,'outersolnum','all');
+                itaCoords = itaCoordinates(data.p.');
+                freqData = data.d1;
+                freqVector = mphglobal(obj.mModel.modelNode,'freq','dataset',datasetTag,'outersolnum','all');
+                res = obj.createItaResult(freqData, freqVector, itaCoords);
             end
-            itaCoords = itaCoordinates(data.p.');
-            freqData = data.d1;
-            
-            res = obj.createItaResult(freqData, itaCoords);
         end
-        function res = getResultAtCoords(obj, expression, itaCoords, dim, selection)
-            if nargin == 3
-                freqData = mphinterp(obj.mModel.modelNode, expression, 'coord', itaCoords.cart.');
-            elseif nargin > 3
-                if nargin == 4; selection = 'all'; end
-                freqData = mphinterp(obj.mModel.modelNode, expression, 'coord', itaCoords.cart.', 'edim', dim, 'selection', selection);
+        function [res, metaData] = getResultAtCoords(obj, expression, itaCoords)
+            datasetTag = obj.getDatasetTag(expression);
+            freqData = mphinterp(obj.mModel.modelNode, expression, 'coord', itaCoords.cart.', 'dataset', datasetTag,'outersolnum','all');
+            freqVector = mphglobal(obj.mModel.modelNode,'freq','dataset',datasetTag,'outersolnum','all');
+            metaData = obj.createMetaDataStruct(datasetTag);
+            if numel(size(freqData))==3 %Param sweep
+                res = obj.createParametricItaResult(freqData, freqVector, itaCoords);
+            else
+                res = obj.createItaResult(freqData, freqVector, itaCoords);
             end
-            res = obj.createItaResult(freqData, itaCoords);
         end
-        function res = createItaResult(obj, freqData, itaCoords)
-            info = mphsolinfo(obj.mModel.modelNode);
-            freqVector = info.solvals;
+        function metaData = createMetaDataStruct(obj, datasetTag)
+            [parameterNames, parameterValues, parameterUnits] = obj.getParametricSweepData(datasetTag);
+            metaData.nSimulations = 1;
+            if ~isempty(parameterValues)
+                metaData.nSimulations = numel(parameterValues{1});
+            end
+            metaData.nParameters = numel(parameterNames);
+            metaData.parameterNames = parameterNames;
+            metaData.parameterValues = parameterValues;
+            metaData.parameterUnits = parameterUnits;
+        end
+        function [parameterNames, parameterValues, parameterUnits] = getParametricSweepData(obj, datasetTag)
+            [parameterNames, parameterUnits] = obj.mModel.study.GetParametricSweepParameters();
+            parameterValues = cell(size(parameterNames));
+            for idxParam = 1:numel(parameterNames)
+                paramValues = mphglobal(obj.mModel.modelNode,...
+                    parameterNames{idxParam}, 'dataset', datasetTag,'outersolnum','all');
+                %In case of a frequency study, param values contains one
+                %row per frequency bin but with the same values, so we only
+                %take the first row.
+                parameterValues{idxParam} = paramValues(1,:);
+            end
+        end
+    end
+    methods(Access = private, Static = true)
+        function res = createParametricItaResult(freqData, freqVector, itaCoords)
+            nParams = size(freqData, 3);
+            res = itaResult([1 nParams]);
+            for idxParam = 1:nParams
+                res(idxParam) = itaComsolResult.createItaResult(freqData(:,:,idxParam), freqVector(:, idxParam), itaCoords);
+            end
+        end
+        function res = createItaResult(freqData, freqVector, itaCoords)
             res = itaResult(freqData, freqVector, 'freq');
             res.channelCoordinates = itaCoords;
         end
     end
+    
+    %% Getting expression from physics
+    methods(Access = private)
+        function tag = getActivePhysicsTag(obj)
+            assert(~isempty(obj.mModel.physics.activeNode), 'No active physics detected')
+            tag = char(obj.mModel.physics.activeNode.tag);
+        end
+        function pressureExpression = getPressureExpression(obj)
+            pressureExpression = [obj.getActivePhysicsTag() '.p_t'];
+        end
+    end
+    
+    %% Getting dataset from study
+    methods(Access = private)
+        function datasetTag = getDatasetTag(obj, expression)
+            if contains(expression, 'pabe')
+                datasetTag = 'grid1';
+            else
+                if ~contains(expression, 'acpr')
+                    warning('Expression does not contain physics-tag. Assuming acpr physics.')
+                end
+                solTag = obj.getMainSolverTag();
+                info = mphsolinfo(obj.mModel.modelNode, 'soltag', solTag);
+                datasetTag = info.dataset;
+            end
+        end
+        function solTag = getMainSolverTag(obj)
+            study = obj.mModel.study.activeNode;
+            allSolvers = study.getSolverSequences('all');
+            solTag = '';
+            if isempty(allSolvers); return; end
+            if obj.mModel.study.IsParametric && numel(allSolvers)>= 2
+                solTag = char(allSolvers(2));
+            else
+                solTag = char(allSolvers(1));
+            end
+        end
+    end
+    
+    %% Preprocessing of coordinates
     methods(Access = private, Static = true)
         function coords = extractCoordsFromReceiver(receiver)
             numCoords = numel(receiver) * (receiver.type.IsBinaural() + 1);
