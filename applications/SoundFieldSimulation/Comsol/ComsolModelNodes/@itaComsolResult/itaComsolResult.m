@@ -25,9 +25,11 @@ classdef itaComsolResult < handle
         mResultDomain = 'freq'; %'freq' | 'time'
         
         mExport;
+        mDataset;
     end
     properties(Dependent = true)
         export;     %Grants access to result data export (see itaComsolExport)
+        dataset;    %Grants access to dataset nodes (see itaComsolDataset)
     end
     
     %% Constructor
@@ -39,6 +41,7 @@ classdef itaComsolResult < handle
             obj.mModel = comsolModel;
             
             obj.mExport = itaComsolExport(comsolModel);
+            obj.mDataset = itaComsolDataset(comsolModel);
         end
     end
     
@@ -46,6 +49,9 @@ classdef itaComsolResult < handle
     methods
         function out = get.export(obj)
             out = obj.mExport;
+        end
+        function out = get.dataset(obj)
+            out = obj.mDataset;
         end
     end
     
@@ -86,6 +92,15 @@ classdef itaComsolResult < handle
             %   p:          itaResult with one entry per simulation
             %   metaData:   struct with info on parametric sweep
             assert(ischar(expression) && isrow(expression), 'First input must be char row vector with the expression of the result')
+            
+            %NOTE - PSC:
+            %Since the Comsol functions mphinterp and mpheval work
+            %significantly different for the pabe physics, getting pabe
+            %results is disabled for now. I am waiting for the Comsol
+            %Support to help me with this.
+            if contains(expression, 'pabe')
+                error('Evaluating BEM (pabe) results is not supported at the moment');
+            end
             if nargin == 2
                 [res, metaData] = obj.getResultAtMeshNodes(expression);
             else
@@ -101,7 +116,9 @@ classdef itaComsolResult < handle
     %% Extract results
     methods(Access = private)
         function [res, metaData] = getResultAtMeshNodes(obj, expression)
-            datasetTag = obj.getDatasetTag(expression);
+            assert( ~contains(expression, 'pabe'), 'Cannot return expression' )
+            
+            datasetTag = obj.getDirectDatasetTag();
             metaData = obj.createMetaDataStruct(datasetTag);
             if ~isempty(metaData.parameterValues) %Param sweep
                 res = itaResult([1 metaData.nSimulations]);
@@ -188,15 +205,30 @@ classdef itaComsolResult < handle
     methods(Access = private)
         function datasetTag = getDatasetTag(obj, expression)
             if contains(expression, 'pabe')
-                datasetTag = 'grid1';
+                datasetTag = obj.getBemDatasetTag();
             else
                 if ~contains(expression, 'acpr')
                     warning('Expression does not contain physics-tag. Assuming acpr physics.')
                 end
-                solTag = obj.getMainSolverTag();
-                info = mphsolinfo(obj.mModel.modelNode, 'soltag', solTag);
-                datasetTag = info.dataset;
+                datasetTag = obj.getDirectDatasetTag();
             end
+        end
+        function datasetTag = getDirectDatasetTag(obj)
+            solTag = obj.getMainSolverTag();
+            info = mphsolinfo(obj.mModel.modelNode, 'soltag', solTag);
+            datasetTag = info.dataset;
+            if iscell(datasetTag)
+                datasetTag = datasetTag{1};
+            end
+        end
+        function datasetTag = getBemDatasetTag(obj)
+            %Uses the first grid dataset that is derived from the main
+            %solution of this study
+            directDataset = obj.getDirectDatasetTag();
+            gridDatasets = obj.dataset.Grids(directDataset);
+            datasetTag = '';
+            if isempty(gridDatasets); return; end
+            datasetTag = char(gridDatasets{1}.tag);
         end
         function solTag = getMainSolverTag(obj)
             study = obj.mModel.study.activeNode;
