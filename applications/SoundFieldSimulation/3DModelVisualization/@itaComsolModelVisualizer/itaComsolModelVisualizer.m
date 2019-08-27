@@ -95,6 +95,10 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
             
             this.mShowMesh = bool;
             if this.autoRefresh
+                if this.mShowMesh
+                    this.plotMesh();
+                    this.applyMeshColor();
+                end
                 this.applyMeshVisibility();
             end
         end
@@ -139,7 +143,7 @@ classdef itaComsolModelVisualizer < itaAbstract3DModelVisualizer
             if isempty(this.mBoundaryPlotHandles)
                 this.plotBoundaryGroups();
             end
-            if isempty(this.mMeshPlotHandles)
+            if isempty(this.mMeshPlotHandles) && this.mShowMesh
                 this.plotMesh();
             end
             if isempty(this.mEdgePlotHandles)
