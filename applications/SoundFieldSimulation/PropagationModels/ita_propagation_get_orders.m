@@ -22,6 +22,7 @@ for n = 1:N
     
     switch anchor.anchor_type
         case { 'outer_edge_diffraction', 'inner_edge_diffraction' }
+            diffraction_order = diffraction_order + 1;
         case 'specular_reflection'
             reflection_order = reflection_order + 1;
     end
