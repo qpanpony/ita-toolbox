@@ -292,7 +292,7 @@ classdef itaOptitrack < handle
             Optitrack_obj.port        = char(sArgs.port);
             
             % Check if NatNet dll's are existing
-            if ~exist(Optitrack_obj.dllPath,'dir')
+            if isempty( which( 'NatNetML.dll' ) )
                 
                 % download NatNet version
                 url = 'http://s3.amazonaws.com/naturalpoint/software/NatNetSDK/NatNet_SDK_2.10.zip';
@@ -325,11 +325,25 @@ classdef itaOptitrack < handle
                 delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10\NatNetSDK\Samples\Matlab\quaternion.m'))
                 delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10\NatNetSDK\Samples\Matlab\quaternion-license.txt'))
                 
+                if strcmpi( computer('arch'), 'win64' )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetML.dll') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetLib.lib') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetLibStatic.lib') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetLib.dll') )
+                    addpath( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64' ) )
+                else
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetML.dll') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetLib.lib') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetLibStatic.lib') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetLib.dll') )
+                    addpath( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib' ) )
+                end
+                
                 fprintf( '[itaOptitrack] NatNet SDK 2.10 has been successfully downloaded.\n' );
 
             end
             
-            NET.addAssembly(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetML.dll'));
+            NET.addAssembly( which( 'NatNetML.dll' ) );
             
             % Create an instance of a NatNet client
             Optitrack_obj.theClient     = NatNetML.NatNetClientML(0); % Input = iConnectionType: 0 = Multicast, 1 = Unicast
