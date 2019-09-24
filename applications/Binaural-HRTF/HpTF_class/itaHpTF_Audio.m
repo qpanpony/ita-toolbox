@@ -307,7 +307,7 @@ classdef itaHpTF_Audio < itaHpTF
         
         function result = propertiesLoad
             result = {'nameHP','nameMic','nameSubj','repeat','mic','savePath',...
-                'mTF','m_fUpper','m_fLower','mMethod','mNormalized','mSmoothing'};
+                'mTF','m_fLower','m_fUpper','mMethod','mNormalized','mSmoothing'};
         end
         
         function result = propertiesMethod
