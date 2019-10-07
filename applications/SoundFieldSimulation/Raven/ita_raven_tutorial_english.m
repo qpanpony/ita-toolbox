@@ -16,7 +16,7 @@ rpf = itaRavenProject(ravenProjectPath);
 %set order of image source
 rpf.setISOrder_PS(2); 
 %set number of particles
-rpf.setNumParticles(200);
+rpf.setNumParticles(20000);
 %N = rpf.getNumberOfParticlesRecommendation();
 %set filterlength
 rpf.setFilterLength(2800);
@@ -77,10 +77,10 @@ EDT = rpf.getEDT();
 %% plot Schroeder curve and historgram
 %Schroeder curve
 schroeder = rpf.getSchroederCurve_itaResult();
-schroeder.plot_time;
+schroeder.plot_time_dB;
 %histogram
 histo = rpf.getHistogram_itaResult();
-histo.plot_time;
+histo.plot_time_dB;
 
 
 %% EXERCISE2
