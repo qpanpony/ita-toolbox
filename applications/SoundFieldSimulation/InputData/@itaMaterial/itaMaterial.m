@@ -115,11 +115,14 @@ classdef itaMaterial < itaSimulationInputItem
         function this = set.scattering(this, scattering)
             if isnumeric(scattering) && isempty(scattering)
                 this.mScattering = [];
-                return;
+            elseif isnumeric(scattering) && isscalar(scattering)
+                assert(scattering >= 0 && scattering <= 1, 'When applying a constant scattering, the value must be between 0 and 1.')
+                freqData = scattering*ones( size(this.gaThirdOctavefreqs) );
+                this.mScattering = itaResult(freqData, this.gaThirdOctavefreqs, 'freq');
+            else
+                this.checkDataTypeForFreqData(scattering)
+                this.mScattering = scattering;
             end
-            
-            this.checkDataTypeForFreqData(scattering)
-            this.mScattering = scattering;
         end
         
         function this = set.rho0Air(this, rho0)
