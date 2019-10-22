@@ -63,7 +63,7 @@ end
 
 %% Create a custom startup file to set the correct path at startup
 str_to_startup = 'addpath(pathdef())';
-full_str_to_startup = strcat("disp('Loading ita_toolbox_path from local pathdef.')\n", str_to_startup);
+full_str_to_startup = strcat('disp(''Loading ita_toolbox_path from local pathdef.'')\n', str_to_startup);
 startup_file_user = fullfile(upath, 'startup.m');
 
 if exist(startup_file_user, 'file')
