@@ -81,8 +81,9 @@ classdef itaComsolResult < handle
         end
         function [res, metaData] = ByExpression(obj, expression, evalPos)
             %For the active study, evaluates the given expression either at
-            %the mesh nodes or at the given itaCoordinates. Also returns a
-            %metadata struct that contains information for parametric sweeps.
+            %the mesh nodes (FEM only) or at the given itaCoordinates. Also
+            %returns a metadata struct that contains information for#
+            %parametric sweeps.
             %   Inputs:
             %   expression:             char row-vector with expression to be evaluated
             %   evalPos (optional):     itaCoordinates with coordinates for evaluation
@@ -93,15 +94,12 @@ classdef itaComsolResult < handle
             %   metaData:   struct with info on parametric sweep
             assert(ischar(expression) && isrow(expression), 'First input must be char row vector with the expression of the result')
             
-            %NOTE - PSC:
-            %Since the Comsol functions mphinterp and mpheval work
-            %significantly different for the pabe physics, getting pabe
-            %results is disabled for now. I am waiting for the Comsol
-            %Support to help me with this.
-            if contains(expression, 'pabe')
-                error('Evaluating BEM (pabe) results is not supported at the moment');
-            end
             if nargin == 2
+                %NOTE - PSC:
+                %Since the Comsol function mpheval seems to have a bug if
+                %using the pabe physics, getting pabe results at the mesh
+                %nodes is disabled.
+                assert( ~contains(expression, 'pabe'), 'You have to specify coordinates if evaluating a BEM (pabe) result' )
                 [res, metaData] = obj.getResultAtMeshNodes(expression);
             else
                 if isa(evalPos, 'itaReceiver')
@@ -116,16 +114,15 @@ classdef itaComsolResult < handle
     %% Extract results
     methods(Access = private)
         function [res, metaData] = getResultAtMeshNodes(obj, expression)
-            assert( ~contains(expression, 'pabe'), 'Cannot return expression' )
-            
             datasetTag = obj.getDirectDatasetTag();
             metaData = obj.createMetaDataStruct(datasetTag);
             if ~isempty(metaData.parameterValues) %Param sweep
                 res = itaResult([1 metaData.nSimulations]);
                 for idxParam = 1:metaData.nSimulations
-                    %Note that 'outersolnum' = 'all' does not work if the
-                    %mesh is parameter dependent since then the number of
-                    %data points differs between parametric solutions.
+                    %NOTE - PSC:
+                    %'outersolnum' = 'all' does not work if the mesh is
+                    %parameter-dependent since then the number of data
+                    %points differs between parametric solutions.
                     %Thus, we have to get the results one by one.
                     data = mpheval(obj.mModel.modelNode, expression, 'dataset',datasetTag,'outersolnum',idxParam);
                     itaCoords = itaCoordinates(data.p.');
@@ -142,10 +139,14 @@ classdef itaComsolResult < handle
             end
         end
         function [res, metaData] = getResultAtCoords(obj, expression, itaCoords)
-            datasetTag = obj.getDatasetTag(expression);
-            freqData = mphinterp(obj.mModel.modelNode, expression, 'coord', itaCoords.cart.', 'dataset', datasetTag,'outersolnum','all');
-            freqVector = mphglobal(obj.mModel.modelNode,'freq','dataset',datasetTag,'outersolnum','all');
-            metaData = obj.createMetaDataStruct(datasetTag);
+            [datasetTag, baseDatasetTag] = obj.getDatasetTags(expression);
+            metaData = obj.createMetaDataStruct(baseDatasetTag);
+            %NOTE - PSC:
+            %Appearently, 'outersolnum' = 'all' does not work for pabe at
+            %the moment due to a bug. Thus, the solver range is set
+            %manually using the metaData struct.
+            freqData = mphinterp(obj.mModel.modelNode, expression, 'coord', itaCoords.cart.', 'dataset', datasetTag,'outersolnum',1:metaData.nSimulations);
+            freqVector = mphglobal(obj.mModel.modelNode,'freq','dataset',baseDatasetTag,'outersolnum',1:metaData.nSimulations);            
             if numel(size(freqData))==3 %Param sweep
                 res = obj.createParametricItaResult(freqData, freqVector, itaCoords);
             else
@@ -203,7 +204,12 @@ classdef itaComsolResult < handle
     
     %% Getting dataset from study
     methods(Access = private)
-        function datasetTag = getDatasetTag(obj, expression)
+        function [datasetTag, baseDatasetTag] = getDatasetTags(obj, expression)
+            %Returns the dataset used to extract frequency data and the tag
+            %of the solver's base dataset which contains the frequency
+            %values.
+            %   In case of acpr, both tags are the same but in case of
+            %   pabe, datasetTag refers to a grid dataset.
             if contains(expression, 'pabe')
                 datasetTag = obj.getBemDatasetTag();
             else
@@ -212,6 +218,7 @@ classdef itaComsolResult < handle
                 end
                 datasetTag = obj.getDirectDatasetTag();
             end
+            baseDatasetTag = obj.getDirectDatasetTag();
         end
         function datasetTag = getDirectDatasetTag(obj)
             solTag = obj.getMainSolverTag();
