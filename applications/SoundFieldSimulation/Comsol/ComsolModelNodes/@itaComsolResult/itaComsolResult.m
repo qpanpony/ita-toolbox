@@ -139,14 +139,24 @@ classdef itaComsolResult < handle
             end
         end
         function [res, metaData] = getResultAtCoords(obj, expression, itaCoords)
-            [datasetTag, baseDatasetTag] = obj.getDatasetTags(expression);
-            metaData = obj.createMetaDataStruct(baseDatasetTag);
+            freqDatasetTag = obj.getResultAtCoordsDatasetTag(expression);
+            directDatasetTag = obj.getDirectDatasetTag();
+            metaData = obj.createMetaDataStruct(directDatasetTag);
+            
+            if contains(expression, 'pabe')
+                disp('**ITA-COMSOL** Starting evaluating BEM result at user-defined coordinates.')
+                disp('               This might take a while...')
+            end
             %NOTE - PSC:
             %Appearently, 'outersolnum' = 'all' does not work for pabe at
             %the moment due to a bug. Thus, the solver range is set
             %manually using the metaData struct.
-            freqData = mphinterp(obj.mModel.modelNode, expression, 'coord', itaCoords.cart.', 'dataset', datasetTag,'outersolnum',1:metaData.nSimulations);
-            freqVector = mphglobal(obj.mModel.modelNode,'freq','dataset',baseDatasetTag,'outersolnum',1:metaData.nSimulations);            
+            freqData = mphinterp(obj.mModel.modelNode, expression, 'coord', itaCoords.cart.', 'dataset', freqDatasetTag,'outersolnum',1:metaData.nSimulations);
+            freqVector = mphglobal(obj.mModel.modelNode,'freq','dataset',directDatasetTag,'outersolnum',1:metaData.nSimulations);            
+            if contains(expression, 'pabe')
+                disp('**ITA-COMSOL** Done!')
+            end
+            
             if numel(size(freqData))==3 %Param sweep
                 res = obj.createParametricItaResult(freqData, freqVector, itaCoords);
             else
@@ -204,21 +214,20 @@ classdef itaComsolResult < handle
     
     %% Getting dataset from study
     methods(Access = private)
-        function [datasetTag, baseDatasetTag] = getDatasetTags(obj, expression)
-            %Returns the dataset used to extract frequency data and the tag
-            %of the solver's base dataset which contains the frequency
-            %values.
-            %   In case of acpr, both tags are the same but in case of
-            %   pabe, datasetTag refers to a grid dataset.
+        function datasetTag = getResultAtCoordsDatasetTag(obj, expression)
+            %Returns the dataset used to extract results at user-defined
+            %coordinates
+            %   In case of acpr, datasetTag is the same as for
+            %   getDirectDatasetTag() but in case of pabe, datasetTag
+            %   refers to a grid dataset.
             if contains(expression, 'pabe')
                 datasetTag = obj.getBemDatasetTag();
             else
                 if ~contains(expression, 'acpr')
-                    warning('Expression does not contain physics-tag. Assuming acpr physics.')
+                    warning('Expression does not contain a known physics-tag. Assuming acpr physics.')
                 end
                 datasetTag = obj.getDirectDatasetTag();
             end
-            baseDatasetTag = obj.getDirectDatasetTag();
         end
         function datasetTag = getDirectDatasetTag(obj)
             solTag = obj.getMainSolverTag();
@@ -243,6 +252,8 @@ classdef itaComsolResult < handle
             solTag = '';
             if isempty(allSolvers); return; end
             if obj.mModel.study.IsParametric && numel(allSolvers)>= 2
+                %For a parametric sweep, the first solver is the one for a
+                %single simulation, while the second contains all simulations.
                 solTag = char(allSolvers(2));
             else
                 solTag = char(allSolvers(1));
