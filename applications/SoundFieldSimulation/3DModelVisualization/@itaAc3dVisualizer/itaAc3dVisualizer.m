@@ -39,7 +39,7 @@ classdef itaAc3dVisualizer < itaAbstract3DModelVisualizer
             elseif isa(input, 'itaAc3dModel') && isscalar(input)
                 obj.mModel = input;
             else
-                error('Input must be either a valid .ac filename or a AC3D object (itaAc3dModel).')
+                error('Input must be either a valid .ac filename or an AC3D object (itaAc3dModel).')
             end
             
             obj.clearPlotItems();
