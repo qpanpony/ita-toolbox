@@ -451,6 +451,12 @@ if ~iscell(plot_type)
     plot_type = {plot_type};
 end
 
+if numel(plot_type) == 1 && Nplots > 1
+    plot_type = repmat(plot_type,[Nplots 1]);
+end
+
+errup = cell(Nplots,1);
+errdown = cell(Nplots,1);
 for i = 1:Nplots
     if strcmpi(plot_type{i},'bar')
         if size(x_data{i},1) > 1
@@ -461,17 +467,15 @@ for i = 1:Nplots
         end
     end
     
-    errup = cell(Nplots,1);
-    errdown = cell(Nplots,1);
     if strcmpi(plot_type{i},'errorbar')
-        errup   = get(chdr(i),'UData');
-        errdown = get(chdr(i),'LData');
-        if ~iscell(errup)
-            errup = {errup};
-        end
-        if ~iscell(errdown)
-            errdown = {errdown};
-        end
+        errup{i} = get(chdr(i),'UData');
+        errdown{i} = get(chdr(i),'LData');
+%         if ~iscell(errup)
+%             errup = {errup};
+%         end
+%         if ~iscell(errdown)
+%             errdown = {errdown};
+%         end
     end
 end
 
