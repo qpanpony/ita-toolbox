@@ -174,7 +174,7 @@ clipping = false;
 if record
     % determine clipping limit from NI session information
     clippingLimit = Inf;
-    for iChannel = numel(niSession.Channels)
+    for iChannel = 1:numel(niSession.Channels)
         isInput = ~isempty(strfind(niSession.Channels(iChannel).ID,'ai'));
         if isInput
             clippingLimit = min(clippingLimit,max(abs(double(niSession.Channels(iChannel).Range))));
