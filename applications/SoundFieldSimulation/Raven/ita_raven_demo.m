@@ -71,8 +71,8 @@ reverb_time = rpf.getT30();
 
 
 %% ITA-Toolbox......
-mono_ir.plot_time;      % plot monaural RIR in time domain
-binaural.plot_freq;     % plot binaural RIR in time domain
+mono_ir.plot_time_dB;      % plot monaural RIR in time domain
+binaural.plot_time_dB;     % plot binaural RIR in time domain
 
 %% Example: Include loudspeaer frequency response in RIR (for comparisons with measurements)
 pathFrequencyResponse = '..\RavenDatabase\FrequencyResponse\KH_O100_reference_holesclosed_final_at1V1m_fft14.ita';
