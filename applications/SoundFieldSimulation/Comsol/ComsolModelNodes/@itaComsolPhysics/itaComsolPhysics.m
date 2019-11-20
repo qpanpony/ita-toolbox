@@ -80,8 +80,8 @@ classdef itaComsolPhysics < itaComsolNode
             impedanceNodes = obj.getFeatureNodesByType(obj.mActiveNode, 'Impedance');
         end
         function impedanceNodeOfBoundary = ImpedanceNodeByBoundaryGroupName(obj, boundaryGroupName)
-            %Returns the impedance node of the active physics node that is
-            %connected to given boundary group (= Comsol selection). Returns
+            %Returns the first impedance node of the active physics node that
+            %is connected to given boundary group (= Comsol selection). Returns
             %an empty object if no impedance is connected to the given selection.
             assert(ischar(boundaryGroupName) && isrow(boundaryGroupName), 'Input must be a char row vector')
             impedanceNodeOfBoundary = [];
@@ -135,6 +135,50 @@ classdef itaComsolPhysics < itaComsolNode
             end
             soundHardNode = physics.feature(soundHardTag);
             soundHardNode.selection.named(selectionTag);
+        end
+    end
+    
+    %% Poroacoustics
+    methods
+        function poroacousticsNodes = PoroacousticsNodes(obj)
+            %Returns the poroacoustics nodes of the active physics node.
+            poroacousticsNodes = obj.getFeatureNodesByType(obj.mActiveNode, 'PoroacousticsModel');
+        end
+        function poroacousticsNodeOfDomain = PoroacousticsNodeByVolumeGroupName(obj, volumeGroupName)
+            %Returns the first poroacoustics node of the active physics node
+            %that is connected to given volume group (= Comsol domain selection).
+            %Returns an empty object if no poroacoustics model is connected
+            %to the given selection.
+            assert(ischar(volumeGroupName) && isrow(volumeGroupName), 'Input must be a char row vector')
+            poroacousticsNodeOfDomain = [];
+            
+            volumeGroup = obj.mModel.selection.VolumeGroup(volumeGroupName);
+            if isempty(volumeGroup); return; end
+            
+            poroacousticsNodes = obj.PoroacousticsNodes();
+            for idxPoroacoustics = 1:numel(poroacousticsNodes)
+                selectionTag = poroacousticsNodes{idxPoroacoustics}.selection.named;
+                if strcmp(selectionTag, volumeGroup.tag)
+                    poroacousticsNodeOfDomain = poroacousticsNodes{idxPoroacoustics};
+                    return
+                end
+            end
+        end
+        
+        function poroacousticsNode = CreatePoroacoustics(obj, poroacousticsTag, selectionTag)
+            %Creates a poroacoustics model for the active physics node
+            %   Inputs:
+            %   poroacousticsTag        Tag for poroacoustics node [char row vector]
+            %   selectionTag            Tag of the selection the poroacoustics model is linked to [char row vector]
+            assert(ischar(poroacousticsTag) && isrow(poroacousticsTag), 'First input must be a char row vector')
+            assert(ischar(selectionTag) && isrow(selectionTag), 'Second input must be a char row vector')
+            
+            physics = obj.activeNode;
+            if ~obj.hasFeatureNode(physics, poroacousticsTag)
+                physics.create(poroacousticsTag, 'PoroacousticsModel', 3);
+            end
+            poroacousticsNode = physics.feature(poroacousticsTag);
+            poroacousticsNode.selection.named(selectionTag);
         end
     end
     
