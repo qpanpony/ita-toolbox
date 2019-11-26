@@ -368,16 +368,29 @@ classdef itaMSTF < itaMSPlaybackRecord
         
         function sweepRate = sweepRate(this,value)
             % get the sweep rate of the excitation
-            
-            %% sweep rate from analytic calculation, only using sweep parameters / PDI
-            nSamples                = ita_nSamples( this.fftDegree );
-            % MMT: use nSamples-1 here to be conform with sweep calculation
-            % based on timeVector and chirp function
-            finalExcitationLength   = (nSamples-1)/this.samplingRate - this.stopMargin;
-            sweepRate(1)            = log2(this.finalFreqRange(2)/this.finalFreqRange(1))/finalExcitationLength;
-            
-            %% sweep rate of analysis of excitation signal
-            sweepRate(2)    = ita_sweep_rate(this.raw_excitation,[2000 this.samplingRate/3]);
+            sweepRate = nan(2,1);
+            switch this.type
+                case 'exp'
+                    % equation is: f(t) = f0*2^(sweeprate*t)
+                    % sweep rate from analytic calculation, only using sweep parameters
+                    nSamples                = ita_nSamples( this.fftDegree );
+                    % use nSamples-1 here to be conform with sweep calculation
+                    % based on timeVector and chirp function
+                    finalExcitationLength   = (nSamples-1)/this.samplingRate - this.stopMargin;
+                    sweepRate(1)            = log2(this.finalFreqRange(2)/this.finalFreqRange(1))/finalExcitationLength;
+                case 'lin'
+                    % equation is: f(t) = f0*(1 + sweeprate*t)
+                    % sweep rate from analytic calculation, only using sweep parameters
+                    nSamples                = ita_nSamples( this.fftDegree );
+                    % use nSamples-1 here to be conform with sweep calculation
+                    % based on timeVector and chirp function
+                    finalExcitationLength   = (nSamples-1)/this.samplingRate - this.stopMargin;
+                    sweepRate(1)            = (this.finalFreqRange(2)/this.finalFreqRange(1) - 1)/finalExcitationLength;
+                otherwise
+                    
+            end
+            sweepRate(2)            = ita_sweep_rate(this.raw_excitation,'freqRange',[max(this.finalFreqRange(1),2000) min(this.finalFreqRange(2),this.samplingRate/3)],'type',this.type,'f0',this.finalFreqRange(1));
+
             if exist('value','var')
                 sweepRate = sweepRate(value);
             end
