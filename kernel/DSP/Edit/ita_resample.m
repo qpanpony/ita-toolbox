@@ -41,13 +41,23 @@ end
 
 %% Initialization and Input Parsing
 sArgs           = struct('pos1_a','itaAudio');
-[Data, sArgs]   = ita_parse_arguments(sArgs,varargin(1)); %#ok<NASGU>
+[Data, sArgs] = ita_parse_arguments(sArgs,varargin(1)); %#ok<ASGLU>
 
 if nargin == 1 
     NewSamplingRate = 44100;
     ita_verbose_info('ITA_RESAMPLE:Sampling rate set to 44100.',1);
 else
     NewSamplingRate = varargin{2};
+end
+
+if numel(Data) > 1
+    ita_verbose_info('Calling for all instances.',1)
+    result = itaAudio(size(Data));
+    for idx = 1:numel(Data)
+        result(idx) = ita_resample(Data(idx),NewSamplingRate); 
+    end
+    varargout{1} = result;
+    return
 end
 
 OldSamplingRate = Data.samplingRate;
