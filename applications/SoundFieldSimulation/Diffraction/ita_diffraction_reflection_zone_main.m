@@ -1,4 +1,4 @@
-function reflection_zone = ita_reflection_zone( wedge, source_pos, receiver_pos )
+function reflection_zone = ita_diffraction_reflection_zone_main( wedge, source_pos, receiver_pos )
 %ITA_DIFFRACTION_REFLECTION_ZONE returns true if receiver is within range
 %of reflective waves by a wedge face
 reflection_zone = false;
@@ -7,7 +7,7 @@ if ~wedge.point_outside_wedge( source_pos ) || ~wedge.point_outside_wedge( recei
     error( 'invalid source or receiver location!' );
 end
 
-apex_point = wedge.get_aperture_point(source_pos, receiver_pos);
+apex_point = wedge.approx_aperture_point( source_pos, receiver_pos );
 source_apex_direction = ( apex_point - source_pos ) / norm( apex_point - source_pos );
 eps = wedge.set_get_geo_eps;
 
@@ -80,8 +80,8 @@ if d1 >= -eps && d2 >= -eps
 
         % Use of auxiliary planes describing the boundary of the
         % reflection zone
-        refl_boundary_main_face = ita_rotation_rodrigues( -source_apex_direction, -wedge.aperture_direction, 2*alpha );
-        refl_boundary_opposite_face = ita_rotation_rodrigues( -source_apex_direction, wedge.aperture_direction, 2*beta );
+        refl_boundary_main_face = ita_diffraction_rotate_vectors_around_axis( -source_apex_direction, -wedge.aperture_direction, 2*alpha );
+        refl_boundary_opposite_face = ita_diffraction_rotate_vectors_around_axis( -source_apex_direction, wedge.aperture_direction, 2*beta );
         refl_plane_normal_main_face = cross( -refl_boundary_main_face, wedge.aperture_direction );
         refl_plane_normal_opposite_face = cross( refl_boundary_opposite_face, wedge.aperture_direction );
 
@@ -102,7 +102,7 @@ elseif d1 >= -eps
 
         % Use of an auxiliary plane describing the boundary of the
         % reflection zone
-        refl_boundary = ita_rotation_rodrigues( -source_apex_direction, wedge.aperture_direction, 2*alpha );
+        refl_boundary = ita_diffraction_rotate_vectors_around_axis( -source_apex_direction, wedge.aperture_direction, 2*alpha );
         refl_plane_normal = cross( refl_boundary, wedge.aperture_direction );
 
         % Check if receiver is in reflection zone
@@ -130,7 +130,7 @@ else
 
         % Use of an auxiliary plane describing the boundary of the
         % reflection zone
-        refl_boundary = ita_rotation_rodrigues( -source_apex_direction, -wedge.aperture_direction, 2*alpha );
+        refl_boundary = ita_diffraction_rotate_vectors_around_axis( -source_apex_direction, -wedge.aperture_direction, 2*alpha );
         refl_plane_normal = cross( wedge.aperture_direction, refl_boundary );
 
         % Check if receiver is in reflection zone

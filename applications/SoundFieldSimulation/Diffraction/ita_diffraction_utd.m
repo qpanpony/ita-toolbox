@@ -20,7 +20,7 @@ if numel( receiver_pos ) ~= 3
 end
 
 if nargin < 6
-    apex_point = wedge.get_aperture_point2( source_pos, receiver_pos );
+    apex_point = wedge.approx_aperture_point( source_pos, receiver_pos );
 end
 
 %% Variables

@@ -17,7 +17,6 @@ classdef itaInfiniteWedge
         opening_angle % Angle from main to opposite face in propagation medium / air (radiants)
         wedge_angle % Angle from main to opposite face in solid medium of wedge (radiants)
         edge_type % 'wedge' for opening angles > pi or 'corner' for opening angles < pi
-        wedge_type % 'wedge' for opening angles > pi or 'corner' for opening angles < pi
         boundary_condition % boundary condition of the wedge faces (hard or soft)
     end
     
@@ -140,6 +139,13 @@ classdef itaInfiniteWedge
             l = obj.l;
         end
         
+        function obj =  set.location( obj, location )
+            if numel( location ) ~= 3
+                error( 'Location must be of dimension 3')
+            end
+            obj.l = location;
+        end
+        
         function b = validate_normals( obj )
             % Returns true, if the normals of the faces are both normalized
             b = false;
@@ -148,7 +154,7 @@ classdef itaInfiniteWedge
             end
         end
         
-        function et = get.wedge_type( obj )
+        function et = wedge_type( obj )
             et = obj.edge_type;
             warning 'Function ''wedge_type'' is deprecated, use ''edge_type'' instead.'
         end
@@ -163,6 +169,12 @@ classdef itaInfiniteWedge
             else
                 bc = 'soft';
             end
+        end
+        
+        function aperture_point = get_aperture_point( obj, source_pos, receiver_pos )
+            % GET_APERTURE_POINT Returns approximated aperture point on wedge
+            warning 'Aperture cannot be analytically determined, using approximation. See also get_aperture_point_far_field.'
+            aperture_point = obj.approx_aperture_point( source_pos, receiver_pos );
         end
         
         function obj = set.boundary_condition( obj, bc )

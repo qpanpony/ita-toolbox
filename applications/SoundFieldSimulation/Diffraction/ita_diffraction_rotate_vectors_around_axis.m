@@ -1,5 +1,5 @@
 function v_rot = ita_diffraction_rotate_vectors_around_axis( v, k, theta )
-%ITA_ROTATION_RODRIGUES rotates array of vectors by the angle theta
+%ita_diffraction_rotate_vectors_around_axis rotates array of vectors by the angle theta
 % around the axis k. Direction of the rotation is determined by a right
 % handed system.
 % v:        Array can be composed of N rows of 3D row vectors or N columns of 3D column vectors. 

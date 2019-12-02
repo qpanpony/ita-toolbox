@@ -8,7 +8,7 @@ if nargin < 4
     is_opengl_cs = false;
 end
 
-apx = w.get_aperture_point2( source_pos, target_pos );
+apx = w.approx_aperture_point( source_pos, target_pos );
 d1 = norm( source_pos - apx );
 d2 = norm( target_pos - apx );
 d3 = norm( w.location - source_pos );

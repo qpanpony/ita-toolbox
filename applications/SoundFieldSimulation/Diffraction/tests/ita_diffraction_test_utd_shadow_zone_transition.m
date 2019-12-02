@@ -42,7 +42,7 @@ utd_tf.channelNames = { 'Diffracted field (shadow)', 'Diffracted field (illumina
 
 receiver_start_pos = 5 * [ -1  -1  0 ] / sqrt( 2 );
 
-apex_point = w.get_aperture_point( source_pos, receiver_start_pos );
+apex_point = w.approx_aperture_point( source_pos, receiver_start_pos );
 apex_dir = w.aperture_direction;
 
 freq = [ 20, 50, 100, 200, 400, 800, 1600, 3200, 6400, 12800, 24000 ]';

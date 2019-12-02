@@ -1,7 +1,8 @@
 function [ freq_data_linear ] = ita_propagation_tf( propagation_path, fs, fft_degree, c )
 %ITA_PROPAGATION_PATH_TF Calculates the transfer function (tf)
 %of a (geometrical) propagation path in frequency domain for a
-%given sampling rate and fft degree (defaults to fs = 44100 and fft_degree = 15)
+%given sampling rate and fft degree. Provide speed of sound, see also
+%ita_propagation_load_defaults
 %
 
 if ~isfield( propagation_path, 'propagation_anchors' )
@@ -102,4 +103,3 @@ for m = 1 : N
 end
 
 end
-

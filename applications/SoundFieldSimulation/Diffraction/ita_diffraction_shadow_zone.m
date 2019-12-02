@@ -3,10 +3,10 @@ function in_shadow = ita_diffraction_shadow_zone( wedge, source_pos, receiver_po
 %point of view, covered by the wedge and therefor inside the shadow region
 
 %% assertions
-if ~numel( source_pos ) == 3
+if numel( source_pos ) ~= 3
     error( 'Source point must be of dimension 3')
 end
-if ~numel( receiver_pos )
+if numel( receiver_pos ) ~= 3
     error( 'Receiver point must be of dimension 3')
 end
 
