@@ -107,7 +107,7 @@ for n = 1:N
     in_shadow_zone = ita_diffraction_shadow_zone( w, source_pos, r_pos );
     if in_shadow_zone
         % Detour over aperture point
-        apex = w.get_aperture_point( source_pos, r_pos );
+        apex = w.approx_aperture_point( source_pos, r_pos );
         distance =  norm( source_pos - apex ) + ...
                     norm( r_pos - apex );
     else
