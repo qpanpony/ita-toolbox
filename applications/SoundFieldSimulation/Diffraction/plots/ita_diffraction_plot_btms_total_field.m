@@ -32,7 +32,7 @@ alpha_d = linspace( alpha_start, alpha_end, alpha_res );
 
 
 % Set Receiver Positions
-rcv_positions = ita_align_points_around_aperture( wdg, rcv_start_pos, alpha_d, apex_point, ref_face );
+rcv_positions = ita_diffraction_align_points_around_aperture( wdg, rcv_start_pos, alpha_d, apex_point, ref_face );
 in_shadow_zone = zeros( size(rcv_positions, 1), 1 );
 for i = 1:size(rcv_positions, 1)
     in_shadow_zone(i) = ita_diffraction_shadow_zone( wdg, src, rcv_positions(i, :) );
@@ -142,7 +142,7 @@ legend( [num2str( round( f_plot' ) ), str_hz], 'Location', 'southwest' );
 xlabel( 'theta_R [°]' );
 ylabel( 'p_{total} [dB]' );
 ylim( [-35, 10] );
-xlim( [rad2deg(alpha_d(1)), rad2deg(alpha_d(end))] );
+xlim( [rad2deg(alpha_d(end)), rad2deg(alpha_d(1))] );
 grid on;
 
 subplot( 2, 2, 2 );
@@ -153,6 +153,6 @@ legend( [num2str( round( f_plot' ) ), str_hz], 'Location', 'southwest' );
 xlabel( 'theta_R [°]' );
 ylabel( 'p_{total} [dB]' );
 ylim( [-35, 10] );
-xlim( [rad2deg(alpha_d(1)), rad2deg(alpha_d(end))] );
+xlim( [rad2deg(alpha_d(end)), rad2deg(alpha_d(1))] );
 grid on;
 

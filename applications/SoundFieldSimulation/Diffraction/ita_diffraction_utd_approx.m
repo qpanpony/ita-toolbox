@@ -22,7 +22,7 @@ if ~in_shadow_zone
 end
 
 %% Variables
-apex_point = wedge.get_aperture_point( source_pos, receiver_pos );
+apex_point = wedge.approx_aperture_point( source_pos, receiver_pos );
 dir_src_2_apex_pt = ( apex_point - source_pos ) ./ norm( apex_point - source_pos );
 dir_apex_pt_2_rcv = ( receiver_pos - apex_point ) ./ norm( receiver_pos - apex_point );
 r = norm( apex_point - source_pos );  % Distance Source to Apex point

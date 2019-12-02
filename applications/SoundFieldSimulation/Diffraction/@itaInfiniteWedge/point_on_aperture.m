@@ -5,6 +5,8 @@ if numel( point ) ~= 3
     error( 'Point must be of dimension 3' );
 end
 
+b = false;
+
 d = point - obj.location;
 if norm( d ) < obj.set_get_geo_eps
     b = true; % Point is indescriminably close to wedge location
@@ -12,7 +14,7 @@ else
     
     dir1 = d / norm( d );
     
-    d2 = bj.aperture_direction - obj.location;
+    d2 = obj.aperture_direction;
     dir2 = d2 / norm( d2 );
     
     % Point should have same (or opposite) direction as aperture

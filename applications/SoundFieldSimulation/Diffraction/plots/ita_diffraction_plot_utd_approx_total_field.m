@@ -15,7 +15,7 @@ transition_constant = 0.1; % Smoothening factor
 
 %% Calculations
 % Set receiver positions alligned around the aperture
-apex_point = inf_wdg.get_aperture_point(src_pos, rcv_start_pos);
+apex_point = inf_wdg.approx_aperture_point(src_pos, rcv_start_pos);
 src_is_facing_main_face = inf_wdg.point_facing_main_side( src_pos );
 alpha_start = inf_wdg.get_angle_from_point_to_wedge_face(rcv_start_pos, src_is_facing_main_face);
 alpha_end = inf_wdg.get_angle_from_point_to_wedge_face(rcv_end_pos, src_is_facing_main_face);
@@ -79,7 +79,7 @@ legend( legend_freqs, 'Location', 'southwest' );
 xlabel( 'theta_R [°]' );
 ylabel( 'p_{total} [dB]' );
 ylim( [-35, 10] );
-xlim( [rad2deg(alpha_d(1)), rad2deg(alpha_d(end))] );
+xlim( [rad2deg(alpha_d(end)), rad2deg(alpha_d(1))] );
 grid on
 
 subplot( 2, 1, 2 );
@@ -89,8 +89,5 @@ legend( legend_freqs, 'Location', 'southwest' );
 xlabel( 'theta_R [°]' );
 ylabel( 'p_{total} [dB]' );
 ylim( [-35, 10] );
-xlim( [rad2deg(alpha_d(1)), rad2deg(alpha_d(end))] );
+xlim( [rad2deg(alpha_d(end)), rad2deg(alpha_d(1))] );
 grid on
-
-
-

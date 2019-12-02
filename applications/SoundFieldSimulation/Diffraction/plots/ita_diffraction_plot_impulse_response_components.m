@@ -19,7 +19,7 @@ angle_resolution = 2000;
 %% Calculations
 ref_face = infw.point_facing_main_side( src );
 alpha_d = linspace( infw.get_angle_from_point_to_wedge_face(rcv_start_pos, ref_face), infw.opening_angle, angle_resolution );
-rcv_positions = ita_align_points_around_aperture( infw, rcv_start_pos, alpha_d, apex_point, ref_face );
+rcv_positions = ita_diffraction_align_points_around_aperture( infw, rcv_start_pos, alpha_d, apex_point, ref_face );
 
 h1_0 = zeros( 1, numel(alpha_d) );
 h2_0 = zeros( 1, numel(alpha_d) );

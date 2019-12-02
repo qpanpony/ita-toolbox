@@ -24,7 +24,7 @@ end
 
 
 %% Variables
-apex_point = fin_wedge.get_aperture_point( source_pos, receiver_pos );
+apex_point = fin_wedge.approx_aperture_point( source_pos, receiver_pos );
 apex_dir = fin_wedge.aperture_direction;
 ref_face = fin_wedge.point_facing_main_side( source_pos );
 theta_S = fin_wedge.get_angle_from_point_to_wedge_face( source_pos, ref_face );

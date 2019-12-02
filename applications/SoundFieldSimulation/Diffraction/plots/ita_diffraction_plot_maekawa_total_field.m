@@ -10,14 +10,14 @@ rcv_start_pos = 15/sqrt(2) * [ 1, 1, 0 ];
 rcv_end_pos = 15/sqrt(2) * [ 1, -1, 0 ];
 
 % Set receiver positions alligned around the aperture
-apex_point = infScreen.get_aperture_point(src_pos, rcv_start_pos);
+apex_point = infScreen.approx_aperture_point(src_pos, rcv_start_pos);
 src_is_facing_main_face = infScreen.point_facing_main_side( src_pos );
 alpha_start = infScreen.get_angle_from_point_to_wedge_face(rcv_start_pos, src_is_facing_main_face);
 alpha_end = infScreen.get_angle_from_point_to_wedge_face(rcv_end_pos, src_is_facing_main_face);
 alpha_res = 200;
 alpha_d = linspace( alpha_start, alpha_end, alpha_res );
 
-rcv_positions = ita_align_points_around_aperture( infScreen, rcv_start_pos, alpha_d, apex_point, src_is_facing_main_face );
+rcv_positions = ita_diffraction_align_points_around_aperture( infScreen, rcv_start_pos, alpha_d, apex_point, src_is_facing_main_face );
 rcv_in_shadow_zone = zeros(size(rcv_positions, 1), 1);
 for i = 1:size(rcv_positions, 1)
     rcv_in_shadow_zone(i) = ita_diffraction_shadow_zone( infScreen, src_pos, rcv_positions(i, :) );
@@ -85,7 +85,7 @@ legend( legend_freqs, 'Location', 'southwest' );
 xlabel( 'theta_R [°]' );
 ylabel( 'p_{total} [dB]' );
 ylim( [-35, 10] );
-xlim( [rad2deg(alpha_d(1)), rad2deg(alpha_d(end))] );
+xlim( [rad2deg(alpha_d(end)), rad2deg(alpha_d(1))] );
 grid on
 
 subplot( 2, 1, 2 );
@@ -95,7 +95,7 @@ legend( legend_freqs, 'Location', 'southwest' );
 xlabel( 'theta_R [°]' );
 ylabel( 'p_{total} [dB]' );
 ylim( [-35, 10] );
-xlim( [rad2deg(alpha_d(1)), rad2deg(alpha_d(end))] );
+xlim( [rad2deg(alpha_d(end)), rad2deg(alpha_d(1))] );
 grid on
 
 

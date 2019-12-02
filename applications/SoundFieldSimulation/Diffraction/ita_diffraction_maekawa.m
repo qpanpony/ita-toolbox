@@ -25,7 +25,7 @@ end
 
 
 %% Calculation
-apex_point = wedge.get_aperture_point( source_pos, receiver_pos );
+apex_point = wedge.approx_aperture_point( source_pos, receiver_pos );
 r_dir = norm( receiver_pos - source_pos );
 detour = norm( apex_point - source_pos ) + norm( receiver_pos - apex_point ) - norm( receiver_pos - source_pos );
 lambda = speed_of_sound ./ frequencies;

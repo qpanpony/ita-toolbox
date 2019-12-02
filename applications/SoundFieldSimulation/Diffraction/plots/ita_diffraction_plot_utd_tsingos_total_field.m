@@ -6,7 +6,7 @@ source_pos = 5 * [ -1  0  0];
 receiver_start_pos = 5 * [ -1  -1  0 ] / sqrt( 2 );
 w = itaInfiniteWedge( n1, n2, loc );
 
-apex_point = w.get_aperture_point( source_pos, receiver_start_pos );
+apex_point = w.approx_aperture_point( source_pos, receiver_start_pos );
 apex_dir = w.aperture_direction;
 c = 344; % Speed of sound
 

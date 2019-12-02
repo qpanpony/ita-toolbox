@@ -6,7 +6,7 @@ src = [-1 0 0];
 rcv = [1 1 0];
 
 w = itaInfiniteWedge(n1, n2, loc);
-apex_point = w.get_aperture_point(src, rcv);
+apex_point = w.approx_aperture_point(src, rcv);
 apex_dir = w.aperture_direction;
 
 % freq = [100, 200, 400, 800, 1600, 3200, 6400, 12800, 24000];

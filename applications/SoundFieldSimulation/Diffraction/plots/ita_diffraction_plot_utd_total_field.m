@@ -78,7 +78,7 @@ legend( legend_freqs, 'Location', 'southwest' );
 xlabel( 'theta_R [°]' );
 ylabel( 'p_{total} [dB]' );
 ylim( [-35, 10] );
-xlim( [rad2deg(alpha_d(1)), rad2deg(alpha_d(end))] );
+xlim( [rad2deg(alpha_d(end)), rad2deg(alpha_d(1))] );
 grid on
 
 subplot( 2, 1, 2 );
@@ -88,7 +88,7 @@ legend( legend_freqs, 'Location', 'southwest' );
 xlabel( 'theta_R [°]' );
 ylabel( 'p_{total} [dB]' );
 ylim( [-35, 10] );
-xlim( [rad2deg(alpha_d(1)), rad2deg(alpha_d(end))] );
+xlim( [rad2deg(alpha_d(end)), rad2deg(alpha_d(1))] );
 grid on
 
 

@@ -18,7 +18,7 @@ if nargin < 6
 end
 
 %% Variables
-apex_point = wedge.get_aperture_point( source_pos, receiver_pos );
+apex_point = wedge.approx_aperture_point( source_pos, receiver_pos );
 SA = ( apex_point - source_pos ) ./ norm( apex_point - source_pos );
 AR = ( receiver_pos - apex_point ) ./ norm( receiver_pos - apex_point );
 detour = norm( apex_point - source_pos ) + norm( receiver_pos - apex_point ) - norm( receiver_pos - source_pos );
@@ -29,14 +29,14 @@ r_dir = norm( receiver_pos - source_pos );
 
 in_shadow_zone = ita_diffraction_shadow_zone( wedge, source_pos, receiver_pos );
 
-phi = acos( AR, SA ); % angle between receiver and shadow boundary
+phi = acos( dot( AR, SA ) ); % angle between receiver and shadow boundary
 if phi > pi/4
     phi = pi/4;
 end
 phi_0 = transition_const;
 
 c_norm = 10^(5/20);
-c_approx = repmat( 1 + ( c_norm - 1 ) .* exp( -phi/phi_0 ), 1, numel(frequencies) );
+c_approx = repmat( 1 + ( c_norm - 1 ) .* exp( -phi/phi_0 ), 1, numel(frequencies) )';
 
 %% Transfer function
 if in_shadow_zone
