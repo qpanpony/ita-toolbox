@@ -15,7 +15,7 @@ sArgs = struct('pos1_data','anything','bandsperoctave',3,'freqVector',[],'create
 
 %% reference curves
 if strcmpi(sArgs.type,'iso') % Reference curve and frequencies according to ISO 717-2
-    outputStr = 'Ln_w (C_I)';
+    outputStr = 'Ln_w (C_I, C_{I50-2500})';
     roundingFactor = 0.1;
     deficiencyLimit = Inf;
     if sArgs.bandsperoctave == 1
@@ -81,7 +81,13 @@ end
 
 %% adaptation term for ISO
 if strcmpi(sArgs.type,'iso')
-    C = round(round((10.*log10(sum(10.^(NISPL./10))))/0.1)*0.1 - 15 - impactInsulationClass);
+    C = round(round((10.*log10(sum(data.freq2value(100,2500).^2))+93.98)/0.1)*0.1 - 15 - impactInsulationClass);
+    if min(data.freqVector) <= 50 % if we have data
+        C_50 = round(round((10.*log10(sum(data.freq2value(50,2500).^2))+93.98)/0.1)*0.1 - 15 - impactInsulationClass);
+    else
+        C_50 = nan;
+    end
+    C = [C C_50];
 else
     C = 0;
 end
@@ -100,7 +106,7 @@ if sArgs.createPlot
     bar(gca,deficiencies.freqVector,deficiencies.freq,'hist');
     [maxDef,maxIdx] = max(deficiencies.freq);
     if strcmpi(sArgs.type,'iso')
-        singleNumberString = [outputStr ' = ' num2str(impactInsulationClass) ' (' num2str(C) ') dB'];
+        singleNumberString = [outputStr ' = ' num2str(impactInsulationClass) ' (' num2str(C(1)) ',' num2str(C(2)) ') dB'];
     else
         singleNumberString = [outputStr ' = ' num2str(impactInsulationClass) 'dB'];
     end
