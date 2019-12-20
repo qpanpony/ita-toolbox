@@ -28,6 +28,9 @@ itaComsolModelObj.study.Run(showProgress);
 
 %% --- Read results ---
 %% at mesh nodes
+%IMPORTANT NOTE:
+%Evaluating at mesh nodes only works if using FEM (acpr). It does not work
+%if using BEM (pabe).
 resultAtMeshNodes = itaComsolModelObj.result.Pressure();
 
 %% at user defined points within mesh

@@ -207,6 +207,11 @@ classdef (Abstract)itaAbstract3DModelVisualizer < handle
             axis(this.mAxes, 'off');
             axis(this.mAxes, 'equal');
         end
+        
+        function ClearPlot(this)
+            %Clears all plot items
+            this.clearPlotItems();
+        end
     end
     
     
