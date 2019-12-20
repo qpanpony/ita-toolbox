@@ -303,7 +303,8 @@ classdef itaAc3dModel
 %                 alpha( gca, obj.transparency );
             end
             
-%              axis(ax, 'off');
+              axis(ax, 'off');
+
              axis(ax, 'equal');
             
         end
