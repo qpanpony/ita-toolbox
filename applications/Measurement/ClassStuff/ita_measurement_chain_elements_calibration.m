@@ -302,7 +302,7 @@ elseif strcmpi(calibrationDomain,'frequency')
     end
 end
 
-MC(1).elements(element_idx).sensitivity = SensValid;
+MC(1).elements(element_idx).sensitivity.value = SensValid.value;
 SensValid = ita_measurement_chain_elements_calibration(MC,element_idx,oldSens,pList{1});
 
 varargout(1) = {SensValid};
