@@ -302,6 +302,9 @@ elseif strcmpi(calibrationDomain,'frequency')
     end
 end
 
+if ~strcmpi(SensValid.unit, MC(1).elements(element_idx).sensitivity.unit)
+    ita_verbose_info('The resulting physical units for the sensitivity of your measurement chain do not match. You may want to check for wrong units or missing elements.', 0)
+end
 MC(1).elements(element_idx).sensitivity.value = SensValid.value;
 SensValid = ita_measurement_chain_elements_calibration(MC,element_idx,oldSens,pList{1});
 
