@@ -5382,6 +5382,17 @@ classdef itaRavenProject < handle
         end
     end % public methods
     
+    methods(Hidden = true)
+        function gatherResultsFromSpecificFolder(obj, path)
+            %Gathers the results from a specific folder.
+            %   Only use this if you know what you are doing.
+            oldPath = obj.pathResults;
+            obj.setOutputPath(path);
+            obj.gatherResults();
+            obj.setOutputPath(oldPath);
+        end
+    end
+    
     %---------------------- PRIVATE METHODS ------------------------------%
     methods (Access = 'private')
         %------------------------------------------------------------------
