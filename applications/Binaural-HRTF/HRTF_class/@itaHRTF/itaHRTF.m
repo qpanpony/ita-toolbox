@@ -943,22 +943,31 @@ classdef  itaHRTF < itaAudio
                         thisC = ita_time_shift(this,tau(idxMin)-this.trackLength/3,'time');
                         
                         if ischar(sArgs.filter) % frequency dependent
-                            p1 = thisC.freqData(:,1:2:thisC.dimensions);
-                            p2 = thisC.freqData(:,2:2:thisC.dimensions);
+                            pLeft = thisC.freqData(:,thisC.EarSide == 'L');
+                            pRight = thisC.freqData(:,thisC.EarSide == 'R');
                             
-                            phase1 = unwrap(angle(p1));
-                            phase2 = unwrap(angle(p2));
-                            phasenDiff = phase1 - phase2;
+                            phaseLeft = unwrap(angle(pLeft));
+                            phaseRight = unwrap(angle(pRight));
+                            phasenDiff = phaseLeft - phaseRight;
                             
-                            ITD = phasenDiff./(2*pi*repmat(thisC.freqVector,1,size(phase1,2)));
+                            ITD = phasenDiff./(2*pi*repmat(thisC.freqVector,1,size(phaseLeft,2)));
                         else % averaged
-                            usedBins = thisC.freq2index(sArgs.filter(1)):thisC.freq2index(sArgs.filter(2));
-                            phase = unwrap(angle(thisC.freqData(3:end,:)));
-                            freqVector = thisC.freqVector;
-                            t0_freq = bsxfun(@rdivide, phase,2*pi*freqVector(3:end));
-                            t0_freq = t0_freq(~isnan(t0_freq(:,1)),:);
-                            t0_mean = mean(t0_freq(usedBins-2,:)); %mean is smoother than max; lower freq smooths also the result
-                            ITD =  t0_mean(thisC.EarSide == 'L') - t0_mean(thisC.EarSide == 'R');
+                            usedBins = ( thisC.freq2index(sArgs.filter(1)):thisC.freq2index(sArgs.filter(2)) )';
+                            
+                            %Remove invalid indices including the one for f=0Hz
+                            if any( usedBins == 1 )
+                                ita_verbose_info('itaHRTF: Excluding invalid bin (f=0Hz) for ITD calculation (phase_delay method)', 2)
+                            end
+                            usedBins( usedBins <= 1 ) = [];
+                            
+                            phase = unwrap(angle(thisC.freqData(usedBins,:)));
+                            freqVector = thisC.freqVector(usedBins);
+                            
+                            phaseDelay = bsxfun(@rdivide, phase,2*pi*freqVector);
+                            phaseDelay = phaseDelay(~isnan(phaseDelay(:,1)),:);
+                            phaseDelayMean = mean(phaseDelay); %mean is smoother than max; lower freq smooths also the result
+                            
+                            ITD =  phaseDelayMean(thisC.EarSide == 'L') - phaseDelayMean(thisC.EarSide == 'R');
                         end
                     case 'xcorr'
                         % .....................................................
