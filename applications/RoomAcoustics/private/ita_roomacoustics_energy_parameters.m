@@ -28,12 +28,23 @@ function output = ita_roomacoustics_energy_parameters(varargin)
 
 
 %% Initialization
-sArgs          = struct('pos1_edc','itaAudioTime', 'freqRange', ita_preferences('freqRange'), 'bandsPerOctave', ita_preferences('bandsPerOctave'), 'centerTimeMat',[], 'C50', false, 'C80', false, 'D50', false, 'D80', false, 'Center_Time', false);
+sArgs          = struct('pos1_edc','itaAudioTime', 'freqRange', ita_preferences('freqRange'), 'bandsPerOctave', ita_preferences('bandsPerOctave'), 'centerTimeMat',[], 'C50', false, 'C80', false, 'D50', false, 'D80', false, 'STE', false, 'STL', false, 'Center_Time', false);
 [edc,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 
 %% Calculate Energy Parameters from EDC
 nChannels       = edc.nChannels;
+
+if sArgs.STE || sArgs.STL
+    idx10ms             = edc.time2index(0.01);
+    idx100ms             = edc.time2index(0.1);
+end
+if sArgs.STE
+    idx20ms             = edc.time2index(0.02);
+end
+if sArgs.STL
+    idx1000ms           = edc.time2index(1);    
+end
 
 if sArgs.C50 || sArgs.D50
     idx50ms             = edc.time2index(0.05);
@@ -93,7 +104,23 @@ if sArgs.Center_Time
     output.Center_Time.channelUnits       = repmat({'s'}, 1, nChannels);
 end
 
+%% stage support 
 
+% early stage support 
+if sArgs.STE
+    output.STE                    = resultTemplate;
+    output.STE.freqData           = 10*log10( (edc.timeData(idx20ms,:).' - edc.timeData(idx100ms,:).')./(1-edc.timeData(idx10ms,:).'));
+    output.STE.comment            = [edc.comment ' -> STE (dB)' ];
+    output.STE.plotAxesProperties = {'ylabel' 'ST_{Early} (in dB)'};
+end
+
+% late stage support 
+if sArgs.STL
+    output.STL                    = resultTemplate;
+    output.STL.freqData           = 10*log10( (edc.timeData(idx100ms,:).' - edc.timeData(idx1000ms,:).')./(1-edc.timeData(idx10ms,:).'));
+    output.STL.comment            = [edc.comment ' -> STL (dB)' ];
+    output.STL.plotAxesProperties = {'ylabel' 'ST_{Late} (in dB)'};
+end
 
 %end function
 end
