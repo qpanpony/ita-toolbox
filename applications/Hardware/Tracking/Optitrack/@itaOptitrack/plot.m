@@ -43,13 +43,13 @@ for idx=1:this.numRigidBodies
     xlabel('Time in [sec]')
     ylabel('Orientation in [deg]')
     grid on
-    legend('Roll','Pitch','Yaw')
     axis tight
     
     % plot time cursor
     minvalOri = min([this.data(idx).orientation.roll_deg; this.data(idx).orientation.pitch_deg; this.data(idx).orientation.yaw_deg]);
     maxvalOri = max([this.data(idx).orientation.roll_deg; this.data(idx).orientation.pitch_deg; this.data(idx).orientation.yaw_deg]);
     hl1(idx) = line([0 0],[minvalOri maxvalOri],'color',[.5 .5 .5]);
+    legend('Roll','Pitch','Yaw','Current Time Frame')
     
     % initial vu animation
     subplot(this.numRigidBodies,numColumns,numColumns*(idx-1)+2);
@@ -67,7 +67,7 @@ for idx=1:this.numRigidBodies
     
     axis([-r r -r r -r r])
     view([-1 1 1])
-    zoom(1.1)
+%     zoom(1.1)
     
     hold on
     
