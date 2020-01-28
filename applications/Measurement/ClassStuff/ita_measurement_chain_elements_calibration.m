@@ -13,7 +13,13 @@ thisFuncStr  = [upper(mfilename) ':'];     % Use to show warnings or infos in th
 %% Reference
 MCE = MC(1).elements(element_idx);
 if ~exist('oldSens','var')
-    oldSens = MCE.sensitivity_silent;
+    old_sens_str = '';
+else
+    if ~isnan(double(oldSens)) && isfinite(double(oldSens))
+        old_sens_str = [' {old: ' num2str(oldSens) '; change: ' num2str(round(20.*log10(double(MCE.sensitivity)/double(oldSens)),3)) 'dB}'];
+    else
+        old_sens_str = [' {old: ' num2str(oldSens) '; change: N/A}'];
+    end
 end
 
 hw_ch = MC(1).hardware_channel;
@@ -53,8 +59,6 @@ end
 if exist('oldReference','var')
     sInit.Reference = oldReference;
 end
-
-old_sens_str = [' {old: ' num2str(oldSens) '}'];
 
 %% GUI
 pList = [];
