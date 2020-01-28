@@ -224,6 +224,8 @@ classdef itaOptitrack < handle
     % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
     % </ITA-Toolbox>
     %
+    % Feel free to improve this class by solving the TODOs in the code.
+    %
     % See also: itaOrientation, itaCoordinates, quaternion, ita_quat2rpy, 
     %           ita_quat2vu, ita_rpy2quat, ita_rpy2vu, ita_vu2quat, ita_vu2rpy
     %           ita_plot_itaOptitrack_data
@@ -259,7 +261,7 @@ classdef itaOptitrack < handle
     properties(SetAccess = 'public', GetAccess = 'public')
         recMethod        = 0;     % recording method, 0: record data for recTime seconds (default), 1: record data without time limitation (stop via Optitrack_obj.stopTracking) [double]
         recTime          = 1;     % preferred logging time in sec (default: 1, only for recMethod 0) [double]
-        autoSave         = false;  % save tracked data to pwd or to 'savePath' if defined [logical]
+        autoSave         = false;  % save tracked data to pwd or to 'savePath' if set to true [logical]
         savePath         = [];    % path to save file containing logged data [string]
         saveName         = [];    % name of file containing logged data [string]
 
@@ -277,27 +279,31 @@ classdef itaOptitrack < handle
         saveNameCalibration = []; % name of saved .mat file (optional) [string]
         loadPathCalibration = []; % path to Optitrack_obj.calibrationData .mat file to be loaded [string]
         loadNameCalibration = []; % file name of .mat file to be loaded [string]
+        
     end
     
     properties(SetAccess = 'private', GetAccess = 'private')
-        dllPath          = fullfile(ita_toolbox_path,'applications/Hardware/Tracking/Optitrack/NatNetSDK'); % path to itaOptitrack
+        dllPath          = fullfile(ita_toolbox_path,'applications/Hardware/Tracking/Optitrack/NatNetSDK'); % path to itaOptitrack [string]
         timerData        = [];    % Matlab timer handle
-        singleShot       = 0;     % only log 1 frame of tracking data (e.g. for geometric measurement purposes)
-        correctRowIdx    = 1;     % idx to fill up Optitrack_obj.rigidBodyLogData.data ignoring duplicate frames
-        autoconnect      = 0;     % autoconnect after constructing class object
-        useCalibration   = [];    % apply calibration on tracking data of following measurements
+        singleShot       = 0;     % only log 1 frame of tracking data (e.g. for geometric measurement purposes) [logical]
+        correctRowIdx    = 1;     % idx to fill up Optitrack_obj.rigidBodyLogData.data ignoring duplicate frames [double]
+        autoconnect      = 0;     % autoconnect after constructing class object [logical]
+        useCalibration   = 0;    % apply calibration on tracking data of following measurements [logical]
         tempRigidBodyLogData = []; % temporal rigidBodyLogData
         lastFrameTime    = [];    % most recent frame of data time
         lastFrameID      = [];    % most recent frame of data ID
-        numFrames        = [];    % number of frames of tracking data to be saved according to recTime (only for recMethod 1)
+        numFrames        = [];    % number of frames of tracking data to be saved according to recTime (only for recMethod 1) [double]
         rigidBodyLogData = [];    % logged tracking data
         calibPenOffset   = 0.12;  % vector norm in meters measured from the volume center point of the marker set to the tip of the calibration pen [double]
-
+        measRodOffset  = 1.045;   % vector norm in meters measured from the volume center point of the marker set to the tip of the measurement rod [double]
+                                  % Note: Marker set / rigid body of measurement rod must be named 'MeasRod' in Motive
+        
 %         rigidBodyLogDataMLF = []; % logged tracking data decoded from MLF
     end
     
     properties(SetAccess = 'public', GetAccess = 'public', Hidden = true)
         debugInfo        = 0;     % print additional info (e.g. duplicate frames)
+        applyMeasRodOffset = true; % correct logged data of rigid body 'MeasRod' by multipling measRodOffset with negative up vector of measurement rod marker set (named 'MeasRod' in Motive)
     end
     
     %% Public methods
@@ -365,7 +371,7 @@ classdef itaOptitrack < handle
             
             NET.addAssembly( which( 'NatNetML.dll' ) );
             
-            % Create an instance of a NatNet client
+            % Create instance of NatNet client
             Optitrack_obj.theClient     = NatNetML.NatNetClientML(0); % Input = iConnectionType: 0 = Multicast, 1 = Unicast
             version                     = Optitrack_obj.theClient.NatNetVersion();
             fprintf( '[itaOptitrack] Initialization succeeded.\n' );
@@ -774,10 +780,18 @@ classdef itaOptitrack < handle
                                     Optitrack_obj.rigidBodyLogData.info.calibratedData = false;
                                 end
                             end
+                            
+                            % apply calibration rod translation offset measRodOffset on rigid body called 'MeasRod'
+                            if Optitrack_obj.applyMeasRodOffset
+                                if strcmp(Optitrack_obj.data(idx).rigidBodyName, 'MeasRod')                            
+                                    Optitrack_obj.data(idx).position.cart = Optitrack_obj.data(idx).position.cart + Optitrack_obj.measRodOffset*(-Optitrack_obj.data(idx).orientation.up);
+                                end
+                            end
 
                             % interpolate mean error
                             if ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
                                 try
+                                    % TODO: Use quaternion interpolation instead of PCHIP
                                     Optitrack_obj.data(idx).meanError   = interp1(1:sum(~isnan(Optitrack_obj.rigidBodyLogData.data(:,11,idx))),...
                                     Optitrack_obj.rigidBodyLogData.data(~isnan(Optitrack_obj.rigidBodyLogData.data(:,11,idx)),11,idx),1:Optitrack_obj.info.TotalFrames,'PCHIP');
                                 catch e
@@ -787,6 +801,11 @@ classdef itaOptitrack < handle
                             end
 
                             Optitrack_obj.data(idx).isTracked   = Optitrack_obj.rigidBodyLogData.data(:,12,idx);
+                            if Optitrack_obj.singleShot % check if frame was tracked during single shot measurement
+                                if ~Optitrack_obj.data(idx).isTracked && Optitrack_obj.singleShot
+                                    fprintf('[\b[itaOptitrack] Single shot frame of marker set ''%s'' was not tracked and potentially contains useless data.]\b\n',Optitrack_obj.data(idx).rigidBodyName);
+                                end
+                            end
                             Optitrack_obj.data(idx).nMarkers    = Optitrack_obj.rigidBodyLogData.data(:,13,idx);
 
                             if ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
@@ -1052,7 +1071,7 @@ classdef itaOptitrack < handle
                         Optitrack_obj.dataCalibration.headToEarAxisCenter.position = itaCoordinates(headToEarAxisCenter);
                         
                         % ask user if calibration data should be applied (if Optitrack_obj.useCalibration is not already set to true)
-                        if isempty(Optitrack_obj.useCalibration)
+                        if Optitrack_obj.useCalibration
                             calmsgbox2 = questdlg('Would you like to apply calibration data in following measurements?','[itaOptitrack]','Yes','No','No');
                             
                             if strcmp(calmsgbox2,'Yes')
@@ -1063,7 +1082,7 @@ classdef itaOptitrack < handle
                                 fprintf('[\b[itaOptitrack.calibrate] Calibration data will be ignored in following measurements.]\b\n')
                             end
                             
-                        elseif Optitrack_obj.useCalibration==true
+                        elseif Optitrack_obj.useCalibration
                             % Optitrack_obj.useCalibration is already set to true
                             fprintf('[\b[itaOptitrack.calibrate] Calibration data will be applied on tracking data in following measurements.]\b\n')
                         end
@@ -1263,10 +1282,6 @@ classdef itaOptitrack < handle
         end
         
     end
-    
-%     methods(Static)
-%         output = plot(Optitrack_obj,varargin);
-%     end
     
 end
 

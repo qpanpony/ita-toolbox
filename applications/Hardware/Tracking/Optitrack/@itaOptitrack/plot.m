@@ -3,9 +3,6 @@ function varargout = plot(this, varargin)
 % 
 % % options: 'stepSize' ... only display every stepSize frame during animation [double]
 %
-% Author:  Florian Pausch, fpa@akustik.rwth-aachen.d
-% Version: 2016-07-07
-%
 % <ITA-Toolbox>
 % This file is part of the ITA-Toolbox. Some rights reserved.
 % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
