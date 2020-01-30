@@ -227,7 +227,7 @@ for iAverage = 1:MS.averages  % loop through amount of measurements
                 sample_vec = lastSample + sample_idx(1) + (1:floor(MS.samplingRate)*sArgs.duration);
                 disp('The threshold is probably very low and the trigger was activated immediately');
             end
-            if max(sample_vec) > size(z,1);
+            if max(sample_vec) > size(z,1)
                 disp('Trigger event was really late. Returning all data recorded');
                 sample_vec = size(z,1) - sArgs.duration * MS.samplingRate;
             end
@@ -243,7 +243,7 @@ for iAverage = 1:MS.averages  % loop through amount of measurements
     
     if isempty(recordData)
         disp('No Trigger event found. Just returning the entire data')
-        recordData = hPlayRec('getRec',pageno).';
+        recordData = hPlayRec('getRec',pageno);
     end
     
     %% finished
