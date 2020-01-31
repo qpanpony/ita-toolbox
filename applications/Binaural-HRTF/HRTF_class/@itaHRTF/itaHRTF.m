@@ -909,6 +909,62 @@ classdef  itaHRTF < itaAudio
                 % end line
             end
             
+            %% ILD
+            
+            function varargout = ILD(this, varargin)
+                %Calculates the ILD either for each distinct frequency or
+                %by integrating between two frequencies.
+                %
+                %   Option (default):
+                %   filter ('wideband'):    'wideband', [fMin fMax], 'none'
+                %   
+                %   Reference:
+                %   Bosun Xie. Head-Related Transfer Function and Virtual
+                %   Auditory Display. J. Ross Publishing, USA, 2nd edition, 2013.
+                %   Equation 3.23, page 91
+                sArgs  = struct('filter' , 'wideband' );
+                sArgs   = ita_parse_arguments(sArgs,varargin);
+                
+                assert( isempty(sArgs.filter) || ischar(sArgs.filter) ||...
+                    isnumeric(sArgs.filter) && numel(sArgs.filter) == 2, ...
+                    'Invalid datatype for filter option.')
+                
+                if numel(this.theta_Unique)>1
+                    ita_verbose_info(' More than one elevation in this object!', 0);
+                    %this = this.sphericalSlice('theta_deg',90);
+                end
+                
+                if ischar(sArgs.filter) && strcmp(sArgs.filter, 'wideband') %wideband average
+                    sArgs.filter = [this.freqVector(2) this.freqVector(end)];
+                end
+                
+                pLeft = this.freqData(:,this.EarSide == 'L');
+                pRight = this.freqData(:,this.EarSide == 'R');
+                if isnumeric(sArgs.filter) %average
+                    usedBins = ( this.freq2index(sArgs.filter(1)):this.freq2index(sArgs.filter(2)) )';
+                    if any( usedBins == 1 )
+                        ita_verbose_info('itaHRTF: Excluding invalid bin (f=0Hz) for ITD calculation (phase_delay method)', 2)
+                    end
+                    usedBins( usedBins <= 1 ) = [];
+                    
+                    pLeftFiltered = pLeft(usedBins, :);
+                    pRightFiltered = pRight(usedBins, :);
+                    
+                    pLeftIntegral = sum( abs(pLeftFiltered).^2 );
+                    pRightIntegral = sum( abs(pRightFiltered).^2 );
+                    
+                    ILD = 10*log10( pLeftIntegral ./ pRightIntegral );
+                    
+                else % frequency dependent
+                    ILD = 20*log10(abs( pLeft ./ pRight ));
+                end
+                
+                varargout{1} = ILD;
+                if nargout == 2
+                    varargout{2} = rad2deg(this.phi_Unique('stable'));
+                end
+            end
+            
             %% Ramonas' Functions
             
             function varargout = ITD(varargin)
