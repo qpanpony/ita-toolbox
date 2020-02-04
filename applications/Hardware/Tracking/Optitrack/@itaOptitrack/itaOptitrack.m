@@ -357,12 +357,14 @@ classdef itaOptitrack < handle
                     delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetLib.lib') )
                     delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetLibStatic.lib') )
                     delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetLib.dll') )
+                    rmdir( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/Samples'),'s' )
                     addpath( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64' ) )
                 else
                     delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetML.dll') )
                     delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetLib.lib') )
                     delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetLibStatic.lib') )
                     delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetLib.dll') )
+                    rmdir( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/Samples'),'s' )
                     addpath( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib' ) )
                 end
                 
