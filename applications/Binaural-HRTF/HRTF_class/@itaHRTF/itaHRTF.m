@@ -204,7 +204,26 @@ classdef  itaHRTF < itaAudio
         end
         
         function dirCoord = get.dirCoord(this)
-            dirCoord = this.channelCoordinates.n(1:2:this.dimensions);
+            %get channel Coordinates from one ear, default L
+            earSideUsed = 'L';
+            
+            %check if HRTF has left and right ears
+            nLeftEarChannels = sum(this.EarSide == 'L');
+            nRightEarChannels = sum(this.EarSide == 'R');
+            
+            
+            if nLeftEarChannels ~= nRightEarChannels && all([nLeftEarChannels nRightEarChannels]~=0)
+                %unequal number of channels left and right but both present
+                % -> warn user 
+                ita_verbose_info('Unequal number of channels for left and right ear, using left.')  
+            end    
+            if nLeftEarChannels == 0
+                % when HRTF only has right ear channels -> use right
+                earSideUsed = 'R';
+            end
+                        
+            %get Coordinates for specified ear side
+            dirCoord = this.channelCoordinates.n(this.EarSide==earSideUsed);
         end
         
         function EarSide = get.EarSide(this)
