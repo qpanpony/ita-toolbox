@@ -1,9 +1,9 @@
-function [ freqs, mags, metadata ] = dfLowPass3dBMS( ~, ~, lp_ms_config )
+function [ freqs, mags, metadata ] = dfHighPass3dBMS( ~, ~, hp_ms_config )
 % Omnidirectional magnitude spectrum
            
-    if ~isempty( fieldnames( lp_ms_config ) )
-        freqs = lp_ms_config.freqs;
-        channels = lp_ms_config.channels;
+    if ~isempty( fieldnames( hp_ms_config ) )
+        freqs = hp_ms_config.freqs;
+        channels = hp_ms_config.channels;
     else
         % Third-octave resolution
         freqs = [20 25 31.5 40 50 63 80 100 125 160 ...
@@ -15,10 +15,9 @@ function [ freqs, mags, metadata ] = dfLowPass3dBMS( ~, ~, lp_ms_config )
     
     mags = zeros( channels, numel( freqs ) );
     metadata = [];
-    
     for c=1:channels
         for f=1:length(freqs)
-            mags(c,f) = 1/2^(f-1); % Magnitude is a factor > 0
+            mags(c,f) = 1/2^(length(freqs)-f); % Magnitude is a factor > 0
         end
     end   
 end
