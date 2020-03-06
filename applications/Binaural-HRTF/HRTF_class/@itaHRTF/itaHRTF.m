@@ -229,7 +229,7 @@ classdef  itaHRTF < itaAudio
         function EarSide = get.EarSide(this)
             EarSide = this.mEarSide;
             if numel(this.mEarSide)~=this.dimensions
-                EarSide = repmat(['L'; 'R'],this.dirCoord.nPoints, 1);
+                EarSide = repmat(['L'; 'R'],this.nDirections, 1);
             end
         end
         
