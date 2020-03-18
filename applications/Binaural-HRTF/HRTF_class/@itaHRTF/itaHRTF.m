@@ -969,8 +969,8 @@ classdef  itaHRTF < itaAudio
                     pLeftFiltered = pLeft(usedBins, :);
                     pRightFiltered = pRight(usedBins, :);
                     
-                    pLeftIntegral = sum( abs(pLeftFiltered).^2 );
-                    pRightIntegral = sum( abs(pRightFiltered).^2 );
+                    pLeftIntegral = sum( abs(pLeftFiltered).^2, 1 );
+                    pRightIntegral = sum( abs(pRightFiltered).^2, 1 );
                     
                     ILD = 10*log10( pLeftIntegral ./ pRightIntegral );
                     
