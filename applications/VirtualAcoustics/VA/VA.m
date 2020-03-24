@@ -202,7 +202,7 @@ classdef VA < handle
             % - 1 = Connected and ready for usage.
             % - 2 = Connected, but server has failure.
             %
-            if this.handle==0, error('Not connected.'); end; 
+            if this.handle==0, error('Not connected.'); end
             state = VAMatlab('get_server_state', this.handle);
         end
 		
@@ -417,7 +417,7 @@ classdef VA < handle
 		% 	valid [logical scalar] True, if path at core side valid
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[valid] = VAMatlab('add_search_path', this.handle, path);
 	end
@@ -435,7 +435,7 @@ classdef VA < handle
 		% 	ret [struct-1x1] Struct containing the return values
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[ret] = VAMatlab('call_module', this.handle, module,mstruct);
 	end
@@ -453,7 +453,7 @@ classdef VA < handle
 		% 	material_id [double-1x1] Material identifier
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('material_name','var'), material_name = ''; end
 		[material_id] = VAMatlab('create_acoustic_material_from_file', this.handle, file_path,material_name);
@@ -472,7 +472,7 @@ classdef VA < handle
 		% 	directivityID [integer-1x1] Directivity ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('name','var'), name = ''; end
 		[directivityID] = VAMatlab('create_directivity_from_file', this.handle, filename,name);
@@ -491,7 +491,7 @@ classdef VA < handle
 		% 	directivityID [integer-1x1] Directivity ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('name','var'), name = ''; end
 		[directivityID] = VAMatlab('create_directivity_from_parameters', this.handle, directivity_args,name);
@@ -510,10 +510,29 @@ classdef VA < handle
 		% 	geo_mesh_id [double-1x1] Geometry mesh identifier
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('geo_mesh_name','var'), geo_mesh_name = ''; end
 		[geo_mesh_id] = VAMatlab('create_geometry_mesh_from_file', this.handle, file_path,geo_mesh_name);
+	end
+
+	function [scene_id] = create_scene(this, params,scene_name)
+		% Creates a scene from a file resource
+		%
+		% Parameters:
+		%
+		% 	params [string] Parameter struct
+		% 	scene_name [string] Scene name (optional, default: '')
+		%
+		% Return values:
+		%
+		% 	scene_id [string] Scene identifier
+		%
+
+		if this.handle==0, error('Not connected.'); end
+
+		if ~exist('scene_name','var'), scene_name = ''; end
+		[scene_id] = VAMatlab('create_scene', this.handle, params,scene_name);
 	end
 
 	function [signalSourceID] = create_signal_source_buffer_from_file(this, filename,name)
@@ -529,7 +548,7 @@ classdef VA < handle
 		% 	signalSourceID [string] Signal source ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('name','var'), name = ''; end
 		[signalSourceID] = VAMatlab('create_signal_source_buffer_from_file', this.handle, filename,name);
@@ -548,7 +567,7 @@ classdef VA < handle
 		% 	signalSourceID [string] Signal source ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('name','var'), name = ''; end
 		[signalSourceID] = VAMatlab('create_signal_source_buffer_from_parameters', this.handle, params,name);
@@ -567,7 +586,7 @@ classdef VA < handle
 		% 	signalSourceID [string] Signal source ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('name','var'), name = ''; end
 		[signalSourceID] = VAMatlab('create_signal_source_engine', this.handle, params,name);
@@ -587,10 +606,29 @@ classdef VA < handle
 		% 	signalSourceID [string] Signal source ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('name','var'), name = ''; end
 		[signalSourceID] = VAMatlab('create_signal_source_network_stream', this.handle, address,port,name);
+	end
+
+	function [signalSourceID] = create_signal_source_prototype_from_parameters(this, params,name)
+		% Creates a prototype signal source, provide 'class' parameter!
+		%
+		% Parameters:
+		%
+		% 	params [struct] Parameters
+		% 	name [string] Displayed name (optional, default: '')
+		%
+		% Return values:
+		%
+		% 	signalSourceID [string] Signal source ID
+		%
+
+		if this.handle==0, error('Not connected.'); end
+
+		if ~exist('name','var'), name = ''; end
+		[signalSourceID] = VAMatlab('create_signal_source_prototype_from_parameters', this.handle, params,name);
 	end
 
 	function [signalSourceID] = create_signal_source_sequencer(this, name)
@@ -605,7 +643,7 @@ classdef VA < handle
 		% 	signalSourceID [string] Signal source ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('name','var'), name = ''; end
 		[signalSourceID] = VAMatlab('create_signal_source_sequencer', this.handle, name);
@@ -623,7 +661,7 @@ classdef VA < handle
 		% 	signalSourceID [string] Signal source ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('name','var'), name = ''; end
 		[signalSourceID] = VAMatlab('create_signal_source_text_to_speech', this.handle, name);
@@ -641,7 +679,7 @@ classdef VA < handle
 		% 	id [integer-1x1] Sound receiver ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('name','var'), name = ''; end
 		[id] = VAMatlab('create_sound_receiver', this.handle, name);
@@ -660,7 +698,7 @@ classdef VA < handle
 		% 	id [integer-1x1] Sound receiver ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[id] = VAMatlab('create_sound_receiver_explicit_renderer', this.handle, renderer,name);
 	end
@@ -677,7 +715,7 @@ classdef VA < handle
 		% 	id [integer-1x1] Sound source ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('name','var'), name = ''; end
 		[id] = VAMatlab('create_sound_source', this.handle, name);
@@ -696,7 +734,7 @@ classdef VA < handle
 		% 	id [integer-1x1] Sound source ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[id] = VAMatlab('create_sound_source_explicit_renderer', this.handle, renderer,name);
 	end
@@ -713,7 +751,7 @@ classdef VA < handle
 		% 	success_flag [logical-1x1] Removal success
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[success_flag] = VAMatlab('delete_acoustic_material', this.handle, material_id);
 	end
@@ -730,7 +768,7 @@ classdef VA < handle
 		% 	result [logical-1x1] Directivity freed?
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[result] = VAMatlab('delete_directivity', this.handle, directivityID);
 	end
@@ -747,7 +785,7 @@ classdef VA < handle
 		% 	success_flag [logical-1x1] Removal success
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[success_flag] = VAMatlab('delete_geometry_mesh', this.handle, geo_mesh_id);
 	end
@@ -764,7 +802,7 @@ classdef VA < handle
 		% 	result [logical-1x1] Signal source deleted?
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[result] = VAMatlab('delete_signal_source', this.handle, signalSourceID);
 	end
@@ -781,7 +819,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('delete_sound_receiver', this.handle, soundreceiverID);
 	end
@@ -798,7 +836,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('delete_sound_source', this.handle, soundSourceID);
 	end
@@ -816,7 +854,7 @@ classdef VA < handle
 		% 	params [mstruct] Parameters
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[params] = VAMatlab('get_acoustic_magerial_parameters', this.handle, material_id,args);
 	end
@@ -833,7 +871,7 @@ classdef VA < handle
 		% 	soundreceiverID [integer-1x1] Sound receiver ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[soundreceiverID] = VAMatlab('get_active_sound_receiver', this.handle);
 	end
@@ -850,7 +888,7 @@ classdef VA < handle
 		% 	clk [double-1x1] Core clock time (unit: seconds)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[clk] = VAMatlab('get_core_clock', this.handle);
 	end
@@ -867,7 +905,7 @@ classdef VA < handle
 		% 	info [struct-1x1] Information struct (name, filename, resolution, etc.)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[info] = VAMatlab('get_directivity_info', this.handle, directivityID);
 	end
@@ -884,7 +922,7 @@ classdef VA < handle
 		% 	info [cell-array of struct-1x1] Information structs (name, filename, resolution, etc.)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[info] = VAMatlab('get_directivity_infos', this.handle);
 	end
@@ -901,7 +939,7 @@ classdef VA < handle
 		% 	result [logical-1x1] Enabled flag
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[result] = VAMatlab('get_geometry_mesh_enabled', this.handle, geo_mesh_id);
 	end
@@ -919,7 +957,7 @@ classdef VA < handle
 		% 	params [mstruct] Parameters
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[params] = VAMatlab('get_geometry_mesh_parameters', this.handle, geo_mesh_id,args);
 	end
@@ -936,7 +974,7 @@ classdef VA < handle
 		% 	auralizationMode [string] Auralization mode
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[auralizationMode] = VAMatlab('get_global_auralization_mode', this.handle);
 	end
@@ -953,7 +991,7 @@ classdef VA < handle
 		% 	shift_speed [double-1x1] Relative humidity [Percent]
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[shift_speed] = VAMatlab('get_homogeneous_medium_relative_humidity', this.handle);
 	end
@@ -970,7 +1008,7 @@ classdef VA < handle
 		% 	params [mstruct] Parameters
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[params] = VAMatlab('get_homogeneous_medium_shift_parameters', this.handle, args);
 	end
@@ -987,7 +1025,7 @@ classdef VA < handle
 		% 	shift_speed [double-3x1] Shift speed vector [m/s]
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[shift_speed] = VAMatlab('get_homogeneous_medium_shift_speed', this.handle);
 	end
@@ -1004,7 +1042,7 @@ classdef VA < handle
 		% 	sound_speed [double-1x1] Sound speed [m/s]
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[sound_speed] = VAMatlab('get_homogeneous_medium_sound_speed', this.handle);
 	end
@@ -1021,7 +1059,7 @@ classdef VA < handle
 		% 	static_pressure [double-1x1] Static pressure [Pa]
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[static_pressure] = VAMatlab('get_homogeneous_medium_static_pressure', this.handle);
 	end
@@ -1038,7 +1076,7 @@ classdef VA < handle
 		% 	temperature [double-1x1] Temperature [degree Celsius]
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[temperature] = VAMatlab('get_homogeneous_medium_temperature', this.handle);
 	end
@@ -1055,7 +1093,7 @@ classdef VA < handle
 		% 	gain [double-1x1] Input gain (amplification factor >=0)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[gain] = VAMatlab('get_input_gain', this.handle);
 	end
@@ -1072,7 +1110,7 @@ classdef VA < handle
 		% 	result [logical-1x1] Inputs muted?
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[result] = VAMatlab('get_input_muted', this.handle);
 	end
@@ -1089,7 +1127,7 @@ classdef VA < handle
 		% 	modules [cell-array of struct-1x1] Module informations (names, descriptions, etc.)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[modules] = VAMatlab('get_modules', this.handle);
 	end
@@ -1106,7 +1144,7 @@ classdef VA < handle
 		% 	gain [double-1x1] Output gain (amplification factor >=0)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[gain] = VAMatlab('get_output_gain', this.handle);
 	end
@@ -1123,7 +1161,7 @@ classdef VA < handle
 		% 	result [logical-1x1] Output muted?
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[result] = VAMatlab('get_output_muted', this.handle);
 	end
@@ -1140,7 +1178,7 @@ classdef VA < handle
 		% 	renderers [cell-array of struct-1x1] Renderer infos (names, descriptions, etc.)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('bFilterEnabled','var'), bFilterEnabled = 1; end
 		[renderers] = VAMatlab('get_rendering_modules', this.handle, bFilterEnabled);
@@ -1158,7 +1196,7 @@ classdef VA < handle
 		% 	auralization_mode [string] Auralization mode as string
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[auralization_mode] = VAMatlab('get_rendering_module_auralization_mode', this.handle, sModuleID);
 	end
@@ -1175,7 +1213,7 @@ classdef VA < handle
 		% 	dGain [double-1x1] Gain (scalar)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[dGain] = VAMatlab('get_rendering_module_gain', this.handle, sModuleID);
 	end
@@ -1192,7 +1230,7 @@ classdef VA < handle
 		% 	bMuted [logical-1x1] true if muted, false if unmuted
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[bMuted] = VAMatlab('get_rendering_module_muted', this.handle, sModuleID);
 	end
@@ -1210,7 +1248,7 @@ classdef VA < handle
 		% 	params [mstruct] Parameters
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[params] = VAMatlab('get_rendering_module_parameters', this.handle, sModuleID,args);
 	end
@@ -1227,7 +1265,7 @@ classdef VA < handle
 		% 	reproductionmodules [cell-array of struct-1x1] Reproduction module infos (names, descriptions, etc.)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('bFilterEnabled','var'), bFilterEnabled = 1; end
 		[reproductionmodules] = VAMatlab('get_reproduction_modules', this.handle, bFilterEnabled);
@@ -1245,7 +1283,7 @@ classdef VA < handle
 		% 	dGain [double-1x1] Gain (scalar)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[dGain] = VAMatlab('get_reproduction_module_gain', this.handle, sModuleID);
 	end
@@ -1262,7 +1300,7 @@ classdef VA < handle
 		% 	bMuted [logical-1x1] true if muted, false if unmuted
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[bMuted] = VAMatlab('get_reproduction_module_muted', this.handle, sModuleID);
 	end
@@ -1280,7 +1318,7 @@ classdef VA < handle
 		% 	params [mstruct] Parameters
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[params] = VAMatlab('get_reproduction_module_parameters', this.handle, sModuleID,args);
 	end
@@ -1297,7 +1335,7 @@ classdef VA < handle
 		% 	addr [string] Server address
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[addr] = VAMatlab('get_server_address', this.handle);
 	end
@@ -1314,7 +1352,7 @@ classdef VA < handle
 		% 	isLooping [logical-1x1] Looping enabled/disabled
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[isLooping] = VAMatlab('get_signal_source_buffer_looping', this.handle, signalSourceID);
 	end
@@ -1331,7 +1369,7 @@ classdef VA < handle
 		% 	playState [string] Playback state
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[playState] = VAMatlab('get_signal_source_buffer_playback_state', this.handle, signalSourceID);
 	end
@@ -1348,7 +1386,7 @@ classdef VA < handle
 		% 	info [struct-1x1] Information structs (id, name, type, etc.)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[info] = VAMatlab('get_signal_source_info', this.handle, signalSourceID);
 	end
@@ -1365,7 +1403,7 @@ classdef VA < handle
 		% 	info [cell-array of struct-1x1] Information structs (id, name, type, etc.)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[info] = VAMatlab('get_signal_source_infos', this.handle);
 	end
@@ -1383,7 +1421,7 @@ classdef VA < handle
 		% 	params [mstruct] Parameters
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[params] = VAMatlab('get_signal_source_parameters', this.handle, ID,args);
 	end
@@ -1400,7 +1438,7 @@ classdef VA < handle
 		% 	ids [integer-1xN] Vector containing the IDs
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[ids] = VAMatlab('get_sound_portal_ids', this.handle);
 	end
@@ -1417,7 +1455,7 @@ classdef VA < handle
 		% 	name [string] Displayed name
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[name] = VAMatlab('get_sound_portal_name', this.handle, portalID);
 	end
@@ -1434,7 +1472,7 @@ classdef VA < handle
 		% 	auralizationMode [string] Auralization mode
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[auralizationMode] = VAMatlab('get_sound_receiver_auralization_mode', this.handle, soundreceiverID);
 	end
@@ -1451,7 +1489,7 @@ classdef VA < handle
 		% 	directivityID [integer-1x1] Directivity ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[directivityID] = VAMatlab('get_sound_receiver_directivity', this.handle, soundreceiverID);
 	end
@@ -1468,7 +1506,7 @@ classdef VA < handle
 		% 	orient [double-4] Rotation angles [w,x,y,z]
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[orient] = VAMatlab('get_sound_receiver_head_above_torso_orientation', this.handle, soundreceiverID);
 	end
@@ -1485,7 +1523,7 @@ classdef VA < handle
 		% 	ids [integer-1xN] Vector containing the IDs
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[ids] = VAMatlab('get_sound_receiver_ids', this.handle);
 	end
@@ -1502,7 +1540,7 @@ classdef VA < handle
 		% 	name [string] Displayed name
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[name] = VAMatlab('get_sound_receiver_name', this.handle, soundreceiverID);
 	end
@@ -1519,7 +1557,7 @@ classdef VA < handle
 		% 	orient [double-4] Rotation angles [w,x,y,z]
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[orient] = VAMatlab('get_sound_receiver_orientation', this.handle, soundreceiverID);
 	end
@@ -1537,7 +1575,7 @@ classdef VA < handle
 		% 	up [double-3] Up vector
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[view,up] = VAMatlab('get_sound_receiver_orientation_view_up', this.handle, soundreceiverID);
 	end
@@ -1555,7 +1593,7 @@ classdef VA < handle
 		% 	params [mstruct] Parameters
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[params] = VAMatlab('get_sound_receiver_parameters', this.handle, ID,args);
 	end
@@ -1573,7 +1611,7 @@ classdef VA < handle
 		% 	quat [double-4] Rotation quaternion [w,x,y,z]
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[pos,quat] = VAMatlab('get_sound_receiver_pose', this.handle, soundreceiverID);
 	end
@@ -1590,7 +1628,7 @@ classdef VA < handle
 		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[pos] = VAMatlab('get_sound_receiver_position', this.handle, soundreceiverID);
 	end
@@ -1607,7 +1645,7 @@ classdef VA < handle
 		% 	view [double-4] Rotation quaternion [w,x,y,z]
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[view] = VAMatlab('get_sound_receiver_real_world_head_above_torso_orientation', this.handle, soundreceiverID);
 	end
@@ -1626,7 +1664,7 @@ classdef VA < handle
 		% 	up [double-3] Up vector
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[pos,view,up] = VAMatlab('get_sound_receiver_real_world_head_position_orientation_view_up', this.handle, soundreceiverID);
 	end
@@ -1643,7 +1681,7 @@ classdef VA < handle
 		% 	auralizationMode [string] Auralization mode
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[auralizationMode] = VAMatlab('get_sound_source_auralization_mode', this.handle, soundSourceID);
 	end
@@ -1660,7 +1698,7 @@ classdef VA < handle
 		% 	directivityID [integer-1x1] Directivity ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[directivityID] = VAMatlab('get_sound_source_directivity', this.handle, soundSourceID);
 	end
@@ -1677,7 +1715,7 @@ classdef VA < handle
 		% 	ids [integer-1xN] Vector containing the IDs
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[ids] = VAMatlab('get_sound_source_ids', this.handle);
 	end
@@ -1694,7 +1732,7 @@ classdef VA < handle
 		% 	result [logical-1x1] Muted?
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[result] = VAMatlab('get_sound_source_muted', this.handle, soundSourceID);
 	end
@@ -1711,7 +1749,7 @@ classdef VA < handle
 		% 	name [string] Displayed name
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[name] = VAMatlab('get_sound_source_name', this.handle, soundSourceID);
 	end
@@ -1728,7 +1766,7 @@ classdef VA < handle
 		% 	orient [double-4] Rotation as quaternion (w,x,y,z)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[orient] = VAMatlab('get_sound_source_orientation', this.handle, soundSourceID);
 	end
@@ -1746,7 +1784,7 @@ classdef VA < handle
 		% 	up [double-3] Up vector (length: 1)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[view,up] = VAMatlab('get_sound_source_orientation_view_up', this.handle, soundSourceID);
 	end
@@ -1764,7 +1802,7 @@ classdef VA < handle
 		% 	params [mstruct] Parameters
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[params] = VAMatlab('get_sound_source_parameters', this.handle, ID,args);
 	end
@@ -1782,7 +1820,7 @@ classdef VA < handle
 		% 	orient [double-4] Rotation quaternion (w,x,y,z)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[pos,orient] = VAMatlab('get_sound_source_pose', this.handle, soundSourceID);
 	end
@@ -1799,7 +1837,7 @@ classdef VA < handle
 		% 	pos [double-3] Position vector [x,y,z] (unit: meters)
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[pos] = VAMatlab('get_sound_source_position', this.handle, soundSourceID);
 	end
@@ -1816,7 +1854,7 @@ classdef VA < handle
 		% 	signalSourceID [string] Signal source ID
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[signalSourceID] = VAMatlab('get_sound_source_signal_source', this.handle, soundSourceID);
 	end
@@ -1833,7 +1871,7 @@ classdef VA < handle
 		% 	volume [double-1x1] Sound source power
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[volume] = VAMatlab('get_sound_source_sound_power', this.handle, soundSourceID);
 	end
@@ -1850,7 +1888,7 @@ classdef VA < handle
 		% 	result [logical-1x1] true, if within locked (synchronized) scene modification
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[result] = VAMatlab('get_update_locked', this.handle);
 	end
@@ -1867,7 +1905,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('lock_update', this.handle);
 	end
@@ -1884,7 +1922,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('remove_sound_source_signal_source', this.handle, ID);
 	end
@@ -1901,7 +1939,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('reset', this.handle);
 	end
@@ -1919,7 +1957,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_acoustic_magerial_parameters', this.handle, material_id,params);
 	end
@@ -1936,7 +1974,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_active_sound_receiver', this.handle, soundreceiverID);
 	end
@@ -1953,7 +1991,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_core_clock', this.handle, clk);
 	end
@@ -1971,7 +2009,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		if ~exist('enabled','var'), enabled = 1; end
 		VAMatlab('set_geometry_mesh_enabled', this.handle, geo_mesh_id,enabled);
@@ -1990,7 +2028,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_geometry_mesh_parameters', this.handle, geo_mesh_id,params);
 	end
@@ -2007,7 +2045,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_global_auralization_mode', this.handle, auralizationMode);
 	end
@@ -2024,7 +2062,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_homogeneous_medium_relative_humidity', this.handle, shift_speed);
 	end
@@ -2041,7 +2079,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_homogeneous_medium_shift_parameters', this.handle, params);
 	end
@@ -2058,7 +2096,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_homogeneous_medium_shift_speed', this.handle, shift_speed);
 	end
@@ -2075,7 +2113,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_homogeneous_medium_sound_speed', this.handle, sound_speed);
 	end
@@ -2092,7 +2130,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_homogeneous_medium_static_pressure', this.handle, static_pressure);
 	end
@@ -2109,7 +2147,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_homogeneous_medium_temperature', this.handle, temperature);
 	end
@@ -2126,7 +2164,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_input_gain', this.handle, gain);
 	end
@@ -2143,7 +2181,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_input_muted', this.handle, muted);
 	end
@@ -2160,7 +2198,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_output_gain', this.handle, gain);
 	end
@@ -2177,7 +2215,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_output_muted', this.handle, muted);
 	end
@@ -2195,7 +2233,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_rendering_module_auralization_mode', this.handle, sModuleID,am_str);
 	end
@@ -2213,7 +2251,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_rendering_module_gain', this.handle, sModuleID,dGain);
 	end
@@ -2231,7 +2269,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_rendering_module_muted', this.handle, sModuleID,bMuted);
 	end
@@ -2249,7 +2287,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_rendering_module_parameters', this.handle, sModuleID,params);
 	end
@@ -2267,7 +2305,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_reproduction_module_gain', this.handle, sModuleID,dGain);
 	end
@@ -2285,7 +2323,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_reproduction_module_muted', this.handle, sModuleID,bMuted);
 	end
@@ -2303,7 +2341,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_reproduction_module_parameters', this.handle, sModuleID,params);
 	end
@@ -2321,7 +2359,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_signal_source_buffer_looping', this.handle, signalSourceID,isLooping);
 	end
@@ -2339,7 +2377,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_signal_source_buffer_playback_action', this.handle, signalSourceID,playAction);
 	end
@@ -2357,7 +2395,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_signal_source_buffer_playback_position', this.handle, signalSourceID,playPosition);
 	end
@@ -2375,7 +2413,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_signal_source_parameters', this.handle, ID,params);
 	end
@@ -2393,7 +2431,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_portal_name', this.handle, portalID,name);
 	end
@@ -2411,7 +2449,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_auralization_mode', this.handle, soundreceiverID,auralizationMode);
 	end
@@ -2429,7 +2467,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_directivity', this.handle, soundreceiverID,directivityID);
 	end
@@ -2447,7 +2485,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_head_above_torso_orientation', this.handle, soundreceiverID,orient);
 	end
@@ -2465,7 +2503,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_name', this.handle, soundreceiverID,name);
 	end
@@ -2483,7 +2521,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_orientation', this.handle, soundreceiverID,orient);
 	end
@@ -2502,7 +2540,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_orientation_view_up', this.handle, soundreceiverID,view,up);
 	end
@@ -2520,7 +2558,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_parameters', this.handle, ID,params);
 	end
@@ -2539,7 +2577,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_pose', this.handle, soundreceiverID,pos,quat);
 	end
@@ -2557,7 +2595,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_position', this.handle, soundreceiverID,pos);
 	end
@@ -2575,7 +2613,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_real_world_head_above_torso_orientation', this.handle, soundreceiverID,pos);
 	end
@@ -2595,7 +2633,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_receiver_real_world_position_orientation_view_up', this.handle, soundreceiverID,pos,view,up);
 	end
@@ -2613,7 +2651,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_auralization_mode', this.handle, soundSourceID,auralizationMode);
 	end
@@ -2631,7 +2669,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_directivity', this.handle, soundSourceID,directivityID);
 	end
@@ -2649,7 +2687,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_muted', this.handle, soundSourceID,muted);
 	end
@@ -2667,7 +2705,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_name', this.handle, soundSourceID,name);
 	end
@@ -2685,7 +2723,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_orientation', this.handle, soundSourceID,orient);
 	end
@@ -2704,7 +2742,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_orientation_view_up', this.handle, soundSourceID,view,up);
 	end
@@ -2722,7 +2760,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_parameters', this.handle, ID,params);
 	end
@@ -2741,7 +2779,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_pose', this.handle, soundSourceID,pos,orient);
 	end
@@ -2759,7 +2797,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_position', this.handle, id,pos);
 	end
@@ -2777,7 +2815,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_signal_source', this.handle, soundSourceID,signalSourceID);
 	end
@@ -2795,7 +2833,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_sound_source_sound_power', this.handle, soundSourceID,soundpower);
 	end
@@ -2812,7 +2850,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('set_timer', this.handle, period);
 	end
@@ -2829,7 +2867,7 @@ classdef VA < handle
 		% 	newStateID [integer-1x1] 
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		[newStateID] = VAMatlab('unlock_update', this.handle);
 	end
@@ -2846,7 +2884,7 @@ classdef VA < handle
 		% 	None
 		%
 
-		if this.handle==0, error('Not connected.'); end;
+		if this.handle==0, error('Not connected.'); end
 
 		VAMatlab('wait_for_timer', this.handle);
 	end

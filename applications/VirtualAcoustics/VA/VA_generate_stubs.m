@@ -65,7 +65,7 @@ function [output] = VA_generate_stubs()
         code = [code sprintf('\t\t%%\n\n')];
 
         % Matlab code that checks that a connection is established
-        code = [code sprintf('\t\tif this.handle==0, error(''Not connected.''); end;\n\n')];
+        code = [code sprintf('\t\tif this.handle==0, error(''Not connected.''); end\n\n')];
         
         % Matlab code for default values in optional input parameters
         for j=1:ninargs
