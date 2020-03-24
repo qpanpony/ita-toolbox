@@ -23,6 +23,27 @@ classdef itaComsolMesh < itaComsolNode
         supportedSizeNodeProperties = {'hmax', 'hmin', 'hgrad', 'hcurve', 'hnarrow'};
     end
     
+    %% Properties
+    methods
+        function nNodes = GetNumberOfNodes(obj)
+            %Runs active mesh and returns number of nodes
+            meshNode = obj.activeNode;
+            assert(~isempty(meshNode), 'No mesh found.')
+            
+            meshNode.run();
+            nNodes = meshNode.getNumVertex();
+        end
+        
+        function coords = GetNodeCoordinates(obj)
+            %Runs active mesh and returns coordinates of its nodes
+            meshNode = obj.activeNode;
+            assert(~isempty(meshNode), 'No mesh found.')
+            
+            meshNode.run();
+            coords = itaCoordinates( meshNode.getVertex()' );
+        end
+    end
+    
     %% Size Nodes
     methods
         function sizeNode = GetMainSizeNode(obj)

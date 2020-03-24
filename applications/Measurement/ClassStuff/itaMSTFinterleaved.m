@@ -636,7 +636,8 @@ classdef itaMSTFinterleaved < itaMSTF
                 % jri: changed default output behaviour to multi instance 
                 %      this is done to have a consistent behaviour with
                 %      each use case of the class
-                timeData = reshape(data.timeData(1:nSamplesWait*this.repetitions*nOutputChannels, :) , nSamplesWait, data.nChannels*this.repetitions*nOutputChannels);                
+                timeData = reshape(data.timeData(1:nSamplesWait*this.repetitions*nOutputChannels, :),...
+                    nSamplesWait, data.nChannels*this.repetitions*nOutputChannels);                
                 if (nOutputChannels > 1)
                    resultsMI = itaAudio(1,nOutputChannels);
                    for index = 1:nOutputChannels
@@ -680,6 +681,7 @@ classdef itaMSTFinterleaved < itaMSTF
                     final_response = ita_extend_dat(final_response, data.nSamples, 'symmetric');
                     currentData = ita_divide_spk(data,final_response,'regularization', this.freqRange).';
                 else
+                    %force time domain object
                     currentData = data.';
                 end
                 

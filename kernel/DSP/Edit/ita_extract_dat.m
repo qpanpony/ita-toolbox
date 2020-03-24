@@ -50,11 +50,24 @@ else
 end
 
 if max(size(asData)) > 1
-   for idx = 1:numel(asData)
-      result(idx) = ita_extract_dat(asData(idx),varargin(2:end));
-      varargout{1} = result;
-      return;
-   end
+    for idx = 1:numel(asData)
+        % MMT: this seems to be the easiest way to make this work
+        if isnumeric(varargin{2})
+            optionStr = num2str(varargin{2});
+        else
+            optionStr = ['''' varargin{2} ''''];
+        end
+        for iVar = 3:numel(varargin)
+            if isnumeric(varargin{iVar})
+                optionStr = [optionStr ',' num2str(varargin{iVar})]; %#ok<*AGROW>
+            else
+                optionStr = [optionStr ',''' varargin{iVar} ''''];
+            end
+        end
+        eval(['result(idx) = ita_extract_dat(asData(idx),' optionStr ');']);
+    end
+    varargout{1} = result;
+    return;
 end
     
     

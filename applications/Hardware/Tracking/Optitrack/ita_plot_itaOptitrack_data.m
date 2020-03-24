@@ -50,13 +50,13 @@ for idx=1:size(LogData,2)
     xlabel('Time in [sec]')
     ylabel('Orientation in [deg]')
     grid on
-    legend('Roll','Pitch','Yaw')
     axis tight
     
     % plot time cursor
     minvalOri = min([LogData(jdx).orientation.roll_deg; LogData(jdx).orientation.pitch_deg; LogData(jdx).orientation.yaw_deg]);
     maxvalOri = max([LogData(jdx).orientation.roll_deg; LogData(jdx).orientation.pitch_deg; LogData(jdx).orientation.yaw_deg]);
     hl1(idx) = line([0 0],[minvalOri maxvalOri],'color',[.5 .5 .5]);
+    legend('Roll','Pitch','Yaw','Current Time Frame')
     
     % initial vu animation
     subplot(size(LogData,2),numColumns,numColumns*(idx-1)+2);
@@ -74,7 +74,7 @@ for idx=1:size(LogData,2)
     
     axis([-r r -r r -r r])
     view([-1 1 1])
-    zoom(1.1)
+%     zoom(1.1)
     
     hold on
     
