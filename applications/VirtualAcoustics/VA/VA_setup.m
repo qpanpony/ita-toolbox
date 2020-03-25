@@ -258,7 +258,6 @@ if ~isempty( current_natnet_dir )
 end
 
 
-
 function [ found, va_component_dir ] = find_VA_Component( va_search_dir, component, recursive )
 found = false;
 va_component_dir = '';
