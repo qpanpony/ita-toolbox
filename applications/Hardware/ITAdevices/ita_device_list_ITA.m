@@ -346,6 +346,8 @@ device(end+1,:) = { 'GRAS Mic 1/4 40BF SN113028','0.0035 V/Pa','none',1};
 device(end+1,:) = { 'GRAS Mic 1/4 40BF SN141768','0.0033 V/Pa','none',1};
 device(end+1,:) = { 'GRAS Mic 1/4 40BP SN20033','0.00158 V/Pa','none',1};
 
+device(end+1,:) = { 'GRAS Mic 1/2 40HL SN192584','0.9373 V/Pa','none',1};
+
 device(end+1,:) = { 'Laser Doppler Vibrometer','1 V s/m','vibrometer',0};
 
 device(end+1,:) = { 'F8200 SN75','4.11e-3 V/N','force',1};
