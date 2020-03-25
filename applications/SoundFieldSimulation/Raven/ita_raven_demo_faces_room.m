@@ -10,7 +10,7 @@
 % </ITA-Toolbox>
 
 %% project settings
-projectName = 'my_6_faces';
+projectName = 'my_Fan_shape';
 
 h1=10; h2 = 4;
 w1=14; w2 =24;
@@ -47,6 +47,9 @@ for iMat=1:nM
     rpf.setMaterial(rpf.getRoomMaterialNames{iMat},myAbsorp,myScatter);
 end
 
+%% Check: Plane normals should point to the inner side of the room
+rpf.model.plotModel([], [1 2 3], 0,1)
+axis equal
 %% set simulation parameters
 rpf.setGenerateRIR(1);
 rpf.setGenerateBRIR(1);
@@ -64,9 +67,9 @@ rpf.plotSphereEnergy();
 RIR = rpf.getMonauralImpulseResponseItaAudio;
 RIR.ptd;
 T30 = rpf.getT30;
-
+%%
 figure;
 semilogx(rpf.freqVectorOct,T30','LineWidth',1.5,'Marker','x');
 grid on;ylabel('T30 in s');xlabel('Frequency in Hz');
-title('T30 of two shoebox rooms');xlim([20 20000]);
+title('T30 of a Fan shape room');xlim([20 20000]);
 
