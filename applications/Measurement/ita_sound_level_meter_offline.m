@@ -49,7 +49,7 @@ nOverlap     = round(blockSize*sArgs.overlap);
 windowFunc   = @hann;
 winRMS       = windowFunc(blockSize+1);
 winRMS       = rms(winRMS(1:end-1));
-exp_alpha    = exponential_smoothing_alpha(sArgs.tc,blockSize,nOverlap,samplingRate);
+exp_alpha    = 1 - exp(-1./sArgs.tc.*(blockSize-nOverlap)./samplingRate);
 
 
 %% octave-band and weighting filter
@@ -81,7 +81,7 @@ for iCh = 1:input.nChannels
     res(1,:,iCh) = weighting.freq.'.*rms(tmp(1)).^2;
     % go through all blocks and get rms in each band
     for iBlock = 2:nBlocks
-        res(iBlock,:,iCh) = exponential_smoothing(weighting.freq.'.*rms(tmp(iBlock)).^2,res(iBlock-1,:,iCh),exp_alpha);
+        res(iBlock,:,iCh) = (1-exp_alpha).*res(iBlock-1,:,iCh) + exp_alpha.*weighting.freq.'.*rms(tmp(iBlock)).^2;
         wb.inc();
     end
 end
@@ -105,24 +105,6 @@ varargout(1) = {res};
 end %end function
 
 %% subfunctions
-function alpha = exponential_smoothing_alpha(tc,blockSize,nOverlap,samplingRate)
-% calculate alpha depending on time constant and block size
-%   tc is the low-pass filter time constant in seconds
-%   block size in samples
-%   n_overlap is the number of overlapping samples between blocks
-%   sampling rate in samples/second
-
-alpha = 1 - exp(-1./tc.*(blockSize-nOverlap)./samplingRate);
-end
-
-function currentInput = exponential_smoothing(currentInput,lastInput,alpha)
-% apply exponential averaging
-
-if alpha < 1 && ~isempty(lastInput)
-    currentInput = (1-alpha).*lastInput + alpha.*currentInput;
-end
-end
-
 function [B,Beff] = statistical_filter_bandwidth(fc,BW,filterOrder)
 
 % Ref: Davy, The statistical bandwidth of Butterworth filters, JSV, 1987
