@@ -25,7 +25,7 @@ function [ varargout ] = ita_time_window( varargin )
 %       dc (false) - dc correction after m�ller (bma)
 %
 %   Example:
-%      sweep  = ita_generate('expsweep',[2 22000],44100,16);
+%      sweep  = ita_generate_sweep('freqRange',[2 22000]);
 %      result = ita_time_window(sweep,[2,1, 19,20],@hann,'time')
 %        a left sided Hamming window is applied to the sweep between 1 and
 %        2 seconds. The order of the interval is 2,1 and not 1,2. This is

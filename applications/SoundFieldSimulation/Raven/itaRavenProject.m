@@ -842,7 +842,7 @@ classdef itaRavenProject < handle
 
         %------------------------------------------------------------------
         function [outputFilePath] = setModelToFaces(obj,points,faces,materials)
-            % setModelToSArbitrary
+            % setModelToFaces
             % creates a room model using points and faces and automatically 
             % sets the model of the current project to the so defined room.
             % The room has one material assigned to each face (mat1 ..
@@ -875,7 +875,17 @@ classdef itaRavenProject < handle
                 % if model wasn't stored in RavenModels folder, save it in
                 % the folder of the current rpf file.
                 outputFilePath = [ fileparts(obj.ravenProjectFile) '\' outputFileName ];
-            end            
+            end
+            
+            fn = floor(size(points,2)/4); % first element of a three elements point
+            
+            if size(points,2)>3
+                idx = (points(:,1));
+            else
+                idx=1:size(points,1);
+            end
+
+            
             fid = fopen(outputFilePath,'w');
             fprintf(fid,'AC3Db\n');
             
@@ -895,7 +905,7 @@ classdef itaRavenProject < handle
                 fprintf(fid,['numvert ' num2str(nP) '\n']);
                 
                 for iP=1:nP
-                fprintf(fid,[sprintf('%1.4f %1.4f %1.4f',points(faces{iW}(iP+1),:)) '\n']);
+                fprintf(fid,[sprintf('%1.4f %1.4f %1.4f',points(faces{iW}(iP+1)==idx,fn+(1:3))) '\n']);
                 end
                 
                 fprintf(fid,'numsurf 1\n');
@@ -991,7 +1001,7 @@ classdef itaRavenProject < handle
             quiver3(spos(:,1),spos(:,2),spos(:,3),sview(:,1),sview(:,2),sview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
             % plot view/up vectors (red) of receivers
-%             quiver3(rpos(:,1),rpos(:,2),rpos(:,3),rview(:,1),rview(:,2),rview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
+            quiver3(rpos(:,1),rpos(:,2),rpos(:,3),rview(:,1),rview(:,2),rview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
             
             % plot up vectors (green) of sources and receivers (currently
