@@ -927,8 +927,7 @@ classdef itaRavenProject < handle
         end
 
         %------------------------------------------------------------------
-        
-        function plotModel(obj, tgtAxes, comp2axesMapping, wireframe)
+        function figureHandle=plotModel(obj, tgtAxes, comp2axesMapping, wireframe)
             if isempty(obj.modelFileList)
                 return;
             end
@@ -985,16 +984,22 @@ classdef itaRavenProject < handle
             spos = spos(:, comp2axesMapping).*repmat(invertAxes,size(spos,1),1);
             sview = obj.getSourceViewVectors;
             sview = sview(:, comp2axesMapping).*repmat(invertAxes,size(sview,1),1);
+            sup = obj.getSourceUpVectors;
+            sup = sup(:, comp2axesMapping).*repmat(invertAxes,size(sup,1),1);
+
             snames = obj.getSourceNames;
             
             rpos = obj.getReceiverPosition;
             rpos = rpos(:, comp2axesMapping).*repmat(invertAxes,size(rpos,1),1);
             rview = obj.getReceiverViewVectors;
             rview = rview(:, comp2axesMapping).*repmat(invertAxes,size(rview,1),1);
+            rup = obj.getReceiverUpVectors;
+            rup = rup(:, comp2axesMapping).*repmat(invertAxes,size(rup,1),1);
             rnames = obj.getReceiverNames;
             
             % plot source and receivers
             plot3(spos(:,1),spos(:,2),spos(:,3),'marker','o','markersize',9,'linestyle','none','linewidth',1.5)
+%             hold on; view(0,90);
             plot3(rpos(:,1),rpos(:,2),rpos(:,3),'marker','x','markersize',9,'linestyle','none','linewidth',1.5)
             
             % plot view vectors (red) of sources
@@ -1004,18 +1009,17 @@ classdef itaRavenProject < handle
             quiver3(rpos(:,1),rpos(:,2),rpos(:,3),rview(:,1),rview(:,2),rview(:,3),0,'color','r','maxheadsize',1.5,'linewidth',1.5);
             
             
-            % plot up vectors (green) of sources and receivers (currently
-            % deactivated)
-            %             sup = obj.getSourceUpVectors;
-            %             quiver3(spos(:,3),spos(:,1),spos(:,2),0.5*sup(:,3),0.5*sup(:,1),0.5*sup(:,2),'color','g','maxheadsize',1.5,'linewidth',1.5);
-            %
-            %             rup = obj.getReceiverUpVectors;
-            %             quiver3(rpos(:,3),rpos(:,1),rpos(:,2),0.5*rup(:,3),0.5*rup(:,1),0.5*rup(:,2),'color','g','maxheadsize',1.5,'linewidth',1.5);
+            % plot up vectors (green) of sources and receivers )
+             quiver3(spos(:,1),spos(:,2),spos(:,3),0.5*sup(:,1),0.5*sup(:,2),0.5*sup(:,3),0,'color','g','maxheadsize',1.5,'linewidth',1.5);
+            
+             quiver3(rpos(:,1),rpos(:,2),rpos(:,3),0.5*rup(:,1),0.5*rup(:,2),0.5*rup(:,3),0,'color','g','maxheadsize',1.5,'linewidth',1.5);
             
             
             % plot names
-            text(spos(:,1)+0.2,spos(:,2),spos(:,3),snames)
-            text(rpos(:,1)+0.2,rpos(:,2),rpos(:,3),rnames)
+            text(spos(:,1)-0.2,spos(:,2),spos(:,3),snames,'FontName','Times','FontSize',20,'HorizontalAlignment','right')
+            text(rpos(:,1)+0.2,rpos(:,2),rpos(:,3),rnames,'FontName','Times','FontSize',20)
+            
+            figureHandle=gca;
         end
         
         %------------------------------------------------------------------
@@ -1153,7 +1157,7 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
-        function plotMaterialsScattering(obj, exportPlot, fileType)
+        function averageRoomScattering = plotMaterialsScattering(obj, exportPlot, fileType)
             
             if nargin < 2
                 exportPlot = false;
@@ -1177,13 +1181,18 @@ classdef itaRavenProject < handle
             currentMaterial.freqVector = freqVector;
             currentMaterial.freqData = [];
             
+            averageRoomScattering = zeros(1,31);
+            
             for i=1:numberMaterials
                 [absorp scatter ] = obj.getMaterial(allMaterials{i});
                 currentMaterial.freqData = [ currentMaterial.freqData scatter' ];
                 currentSurfaceArea = obj.getSurfaceAreaOfMaterial(allMaterials{i});
                 allMaterials{i} = strrep(allMaterials{i},'_',' ');
                 allMaterials{i} = [ allMaterials{i} ' (S = ' num2str(currentSurfaceArea,'%5.2f') ' m² )'];
+                averageRoomScattering = averageRoomScattering + (scatter)*currentSurfaceArea;
             end
+            
+            averageRoomScattering = averageRoomScattering / obj.getRoomSurfaceArea;
             
             currentMaterial.channelNames = allMaterials;
             currentMaterial.allowDBPlot = false;
@@ -1337,7 +1346,7 @@ classdef itaRavenProject < handle
         %------------------------------------------------------------------
         function setAccelerationType(obj, accelerationType)
             obj.accelerationType = accelerationType;
-            obj.rpf_ini.SetValues('Global', 'accelerationType', accelerationType);
+            obj.rpf_ini.SetValues('Global', 'AccelerationType', accelerationType);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
         end
         
@@ -4102,7 +4111,6 @@ classdef itaRavenProject < handle
             alphas_alt = (A+equivalentAirAbsorptionArea)/S;
             
             alphas_neu = abs(1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:)));
-            %             alphas_neu = 1 - (1 - alphas_alt(:)).^(thisReverbTime(:) ./ targetReverbTime(:));
             
             absorptionFactors = alphas_neu(:) ./ alphas_alt(:);
             absorptionFactors(isnan(absorptionFactors)) = 1;
@@ -4772,6 +4780,7 @@ classdef itaRavenProject < handle
         
         %------------------------------------------------------------------
         function loadPerformanceData(obj, info_file, fileIndex)
+            % NOTE: Only works for BSP (AccelerationType=0)
             % reads ravens performance data which is stored in the info files
             i = fileIndex;
             
