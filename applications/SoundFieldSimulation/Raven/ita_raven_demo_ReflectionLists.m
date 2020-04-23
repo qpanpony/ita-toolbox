@@ -1,7 +1,7 @@
 %% RAVEN simulation: Example for exporting reflection lists and wallhit logs
 
 % Author: las@akustik.rwth-aachen.de
-% date:     2020/04/10
+% date:     2020/04/21
 %
 % <ITA-Toolbox>
 % This file is part of the application Raven for the ITA-Toolbox. All rights reserved.
@@ -41,7 +41,7 @@ end
 rpf.setSourcePositions([7 1.7 -1.5]);
 
 %% set simulation parameters
-% Export plane wave lists (these are the reflections which are inserted
+% Export plane wave lists 
 rpf.setExportPlaneWaveList(1); 
 % These are the reflections which are inserted to the resulting RIRs.
 

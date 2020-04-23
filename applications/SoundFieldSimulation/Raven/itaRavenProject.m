@@ -1076,7 +1076,7 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
-        function plotMaterialsAbsorption(obj, exportPlot, fileType)
+        function plotMaterialsAbsorption(obj, exportPlot, fileType, outputPath)
             
             if nargin < 2
                 exportPlot = false;
@@ -1086,6 +1086,16 @@ classdef itaRavenProject < handle
                 fileType='png';
             end
             
+            if nargin < 4
+                outputPath= obj.pathResults;
+            end
+            
+            % strip final slash or backslash
+            if ( strcmp(outputPath(end),'\') ||  strcmp(outputPath(end),'/') )
+                outputPath = outputPath(1:end-1);
+            end
+                
+                
             freqVector = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 500 630 800 1000 1250 1600 2000 2500 3150 4000 5000 6300 8000 10000 12500 16000 20000];
             freqLabel3rdVisual = { '', '', '31.5 Hz', '', '', '' '', '  ', '  125 Hz', ' ', ' ', ...
                 '', ' ', ' ', '  500 Hz', ' ', '  ', '', '', ' ', '   2 kHz', ...
@@ -1138,8 +1148,8 @@ classdef itaRavenProject < handle
                 [pathstr,name,ext] = fileparts(obj.ravenProjectFile);
                 dateTimeStr = datestr(now,30);
                 dateTimeStr = strrep(dateTimeStr,'T','_');
-                fileNamePNG = [ obj.pathResults '\Absorption_' name '_' dateTimeStr '.png'];
-                fileNamePDF = [ obj.pathResults '\Absorption_' name '_' dateTimeStr '.pdf'];
+                fileNamePNG = [ outputPath '\Absorption_' name '_' dateTimeStr '.png'];
+                fileNamePDF = [ outputPath '\Absorption_' name '_' dateTimeStr '.pdf'];
                 set(gcf,'units','normalized','outerposition',[0 0 1 1]);
                 set(gcf,'PaperUnits','inches','PaperPosition',1.34*[0 0 8 5]);
                 
@@ -1157,7 +1167,7 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
-        function averageRoomScattering = plotMaterialsScattering(obj, exportPlot, fileType)
+        function averageRoomScattering = plotMaterialsScattering(obj, exportPlot, fileType, outputPath)
             
             if nargin < 2
                 exportPlot = false;
@@ -1166,6 +1176,16 @@ classdef itaRavenProject < handle
             if nargin < 3
                 fileType='png';
             end
+            
+            if nargin < 4
+                outputPath= obj.pathResults;
+            end
+            
+            % strip final slash or backslash
+            if ( strcmp(outputPath(end),'\') ||  strcmp(outputPath(end),'/') )
+                outputPath = outputPath(1:end-1);
+            end
+            
             
             freqVector = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 500 630 800 1000 1250 1600 2000 2500 3150 4000 5000 6300 8000 10000 12500 16000 20000];
             freqLabel3rdVisual = { '', '', '31.5 Hz', '', '', '' '', '  ', '  125 Hz', ' ', ' ', ...
@@ -1224,8 +1244,8 @@ classdef itaRavenProject < handle
                 [pathstr,name,ext] = fileparts(obj.ravenProjectFile);
                 dateTimeStr = datestr(now,30);
                 dateTimeStr = strrep(dateTimeStr,'T','_');
-                fileNamePNG = [ obj.pathResults '\Scattering_' name '_' dateTimeStr '.png'];
-                fileNamePDF = [ obj.pathResults '\Scattering_' name '_' dateTimeStr '.pdf'];
+                fileNamePNG = [ outputPath '\Scattering_' name '_' dateTimeStr '.png'];
+                fileNamePDF = [ outputPath '\Scattering_' name '_' dateTimeStr '.pdf'];
                 set(gcf,'units','normalized','outerposition',[0 0 1 1]);
                 set(gcf,'PaperUnits','inches','PaperPosition',1.34*[0 0 8 5]);
                 
