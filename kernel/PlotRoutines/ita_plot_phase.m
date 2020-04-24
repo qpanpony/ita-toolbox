@@ -123,6 +123,10 @@ end
 if sArgs.hold
     nPlots = numel(get(sArgs.axes_handle,'Children'));
     co=get(sArgs.axes_handle,'ColorOrder');
+    if nPlots > size(co,1) %pdi:bugfix for a lot of channels %sl:bugfix for bugfix
+       exceed = nPlots/size(co,1);
+       co = repmat(co,ceil(exceed),1);
+    end
     set(sArgs.axes_handle,'ColorOrder',co([(nPlots+1):end 1:nPlots],:));
 end
 
@@ -135,6 +139,11 @@ if ~sArgs.linfreq
     end
 else
     lnh = plot(bin_vector,plotData,'LineWidth',sArgs.linewidth);
+end
+if sArgs.linfreq %SL: bugfix
+    set(sArgs.axes_handle,'XScale','linear');
+else
+    set(sArgs.axes_handle,'XScale','log');
 end
 axh = get(fgh,'CurrentAxes');
 setappdata(axh,'ChannelHandles',lnh);

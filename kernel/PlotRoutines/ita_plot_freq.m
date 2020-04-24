@@ -160,8 +160,9 @@ end
 if sArgs.hold
     nPlots = numel(get(sArgs.axes_handle,'Children'));
     co = get(sArgs.axes_handle,'ColorOrder');
-    if nPlots > size(co,1) %pdi:bugfix for a lot of channels
-       co = repmat(co,2,1);
+    if nPlots > size(co,1) %pdi:bugfix for a lot of channels %sl:bugfix for bugfix
+       exceed = nPlots/size(co,1);
+       co = repmat(co,ceil(exceed),1);
     end
     set(sArgs.axes_handle,'ColorOrder',co([(nPlots+1):end 1:nPlots],:));
 end
