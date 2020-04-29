@@ -330,7 +330,7 @@ device(end+1,:) = { 'NONE','1 ','none',0};
 device(end+1,:) = { 'UNKNOWN','1 ','none',1};
 device(end+1,:) = { 'empty','1 V/1','group',1};
 
-device(end+1,:) = { 'BK mic 1/4 4190 SN 2522103','0.047 V/Pa','bk_pressure',1};
+device(end+1,:) = { 'BK mic 1/2 4190 SN 2522103','0.047 V/Pa','bk_pressure',1};
 
 device(end+1,:) = { 'BK Mic 1/2 4190 G1064','0.051367 V/Pa','bk_pressure',1};
 device(end+1,:) = { 'BK Mic 1/2 4190 SN2152127','0.0558 V/Pa','bk_pressure',1};
