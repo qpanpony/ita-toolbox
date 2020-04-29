@@ -24,14 +24,15 @@ function [results,shift,shCoeffs,epsilon] = ita_HRTFarc_pp_process_spherical(dat
     n = ita_sph_linear2degreeorder(1:nSH).';
     D = I .* diag(1 + n.*(n+1));
 
-
+    shCoeffs = complex(nan(nSH,data.nBins)); 
     
      
-%      wb = itaWaitbar(length(data.freqVector),'SH Transformation');
+    wb = itaWaitbar(length(data.freqVector),'SH Transformation');
     tmpFreq = data.freqVector;
     tmpFreqData = data.freqData;
     newPhiData = 0:360/(options.repetitions+1):359;
     for index = 1:length(tmpFreq)
+        wb.inc;
         tmpCoords = fullCoords;
         tmpOptions = options;
 %         tmpData = data;
@@ -79,7 +80,7 @@ function [results,shift,shCoeffs,epsilon] = ita_HRTFarc_pp_process_spherical(dat
         shCoeffs(:,index)              =  nominator\ denominatorMatrix * freqData.';
 
     end
-   
+    wb.delete
     %% reconstruction
     if isempty(options.reconstructSampling)
         newSampling = ita_sph_sampling_equiangular(37,72,'theta_type','[]');

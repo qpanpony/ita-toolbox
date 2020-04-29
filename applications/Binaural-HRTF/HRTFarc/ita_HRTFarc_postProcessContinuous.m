@@ -115,6 +115,7 @@ options.repetitions = diff(firstAndLastNeededRepetition);
 
 % to crop, a new measurement setup is created
 obj = itaMSTFinterleaved;
+obj.samplingRate = data.samplingRate;
 obj.inputChannels = 1:3;
 obj.outputChannels = 1:nOutputChannels;
 obj.repetitions = repetitions;
@@ -260,7 +261,9 @@ end
 % calculate ITD and shift to 0 -- search for "ITD == 0"
 [centerPoint,itdData] = ita_HRTFarc_pp_itdInterpolate(results_split,fullCoords,options);
 if itdData.error > 0.01
-    disp('warning: itd match does not look good. something is wrong in either the data, or the itd method');
+    disp('warning: ITD match does not look good. something is wrong in either the data, or the ITD method');
+    figure;
+    plot(itdData.xData,itdData.data)
 end
 options.itdCenterCorrection = centerPoint;
 fullCoords.phi_deg = fullCoords.phi_deg -centerPoint;
@@ -303,6 +306,6 @@ function triggerTimeOut = triggerTime(dataMotor)
     
     %plot peak locations for debug: peakfind(dataMotor)
     
-    [~,triggerTimeOut] = findpeaks(dataMotor.timeData,dataMotor.samplingRate,'MinPeakDistance',1,'MinPeakHeight',0.95*max(abs(dataMotor.timeData)));
+    [~,triggerTimeOut] = findpeaks(abs(dataMotor.timeData),dataMotor.samplingRate,'MinPeakDistance',1,'MinPeakHeight',0.75*max(abs(dataMotor.timeData)));
     
 end
