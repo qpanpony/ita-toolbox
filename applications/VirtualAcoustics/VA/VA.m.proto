@@ -1,0 +1,421 @@
+classdef VA < handle
+    %VA Remote network interface to VA (Virtual Acoustics), the real-time 
+    %auralization framework.
+	%
+	% Find the VA applications, documentation and examples here: http://www.virtualacoustics.org
+    %
+    %   This class realizes a remote connection to a VA real-time
+    %   auralization server and implements the full VA core interface
+    %   in Matlab. You can connect to to the server
+    %   and control all of its features to perform real-time
+    %   auralization, including integrated live tracking if an OptiTrack tracker is at hand.
+    %
+    %   See also: VA_example_simple, VA_example_tracked_sound_receiver,
+    %   VA_example_generic_path_renderer, VA_example_random_numbers
+    %   VA_example_generic_path_renderer, VA_example_random_numbers
+    %
+    %   Quick usage:
+    %
+    %   - Create an interface and connect to the server running on the
+    %     same computer (localhost)
+    %
+    %     va = VA;
+    %     va.connect;
+    %
+    %     If the connection is established, you can start controlling VA via the interface.
+    %	  For instance create an move a sound source:
+    %
+    %     sourceID = va.create_sound_source( 'My Matlab virtual sound source' )
+	%	  va.set_sound_source_position( sourceID, [ 0 0 0 ] );
+    %
+    %     When everything is done, do not forget to close the connection.
+    %     You can call disconnect on the instance or simply clear it:
+    %
+    %     clear va
+    %
+    %
+    
+    properties(Hidden = true, Access = private)
+        handle = int32(0); % Connection handle
+                
+        % Connection defaults
+        DEFAULT_SERVER_PORT = 12340;
+    end
+    
+    methods(Static)
+        
+        function [ ok ] = check_for_mex_file()
+            % Checks if VAMatlab executable can be found.
+            if ~exist( 'VAMatlab', 'file' )
+                disp( 'Matlab binding for VA not found, starting VA setup routine' )
+                
+                % file dialog
+                VA_setup()
+                
+                % Re-check
+                ok = exist( 'VAMatlab', 'file' ) > 0;
+            else
+                ok = true;
+            end
+        end
+        
+        function [version] = get_version()
+            % Return the version of the VA Matlab interface
+            %
+            % Parameters:
+            %
+            % 	None
+            %
+            % Return values:
+            %
+            % 	version  [string]  Version string
+            
+            if ~VA.check_for_mex_file()
+                error( 'Matlab binding for VA requires VAMatlab executable.' );
+            end
+
+            version = VAMatlab('get_version');
+        end
+        
+         function [] = set_verbose_mode(mode)
+            % Sets the verbose level of the VA Matlab interface
+            %
+            % Parameters:
+            %
+            % 	mode  [string]   Verbose mode ('quiet'|'normal')
+            %
+            % Return values:
+            %
+            % 	None
+            %
+            % Remarks:
+            %
+            % - If you do not want any messages from the extension
+            %   set the verbose mode to 'quiet'
+            %
+            
+            if ~VA.check_for_mex_file()
+                error( 'Matlab binding for VA requires VAMatlab executable.' );
+            end
+
+            VAMatlab('set_verbose_mode', mode);
+        end
+		
+    end
+
+    methods
+        function this = VA(addressstring)
+            % Initialization constructor. Initiiates a new connection.
+            %
+            % Parameters:
+            %
+            % 	addressstring  [string]   Hostname or IP address and port of the
+            %                             server string (name:port), optional
+            %
+            % Return values:
+            %
+            % 	None
+            %
+            % Remarks:
+            %
+            % - You can leave the argument 'address' undefined, in order
+            %   to create an clear, unconnected instance and connect to
+            %   a server later using the method 'connect'
+            % - Example: core = VA;
+            %            core = VA('localhost:12340');
+            %
+            
+            if ~VA.check_for_mex_file()
+                error( 'Matlab binding for VA requires VAMatlab executable.' );
+            end
+        
+            if (nargin > 0)
+                this.connect(addressstring)
+            end
+        end
+        
+        function delete(this)
+            % Destructor. Automatically disconnects an existing connection.
+            this.disconnect
+        end 
+       
+        function [connected] = get_connected(this)
+            % Returns if a connection to a server is established
+           connected = VAMatlab('get_connected', this.handle);
+        end
+        
+        function connect(this, addressstring)
+            % Connects to a server
+            %
+            % Parameters:
+            %
+            % 	addressstring  [string]   Hostname or IP address and port of the
+            %                             server string (name:port), optional
+            %
+            % Return values:
+            %
+            % 	None
+            %
+            % Remarks:
+            %
+            % - An error occurs if the instance is already connected
+            % - Example: core.connect('localhost:12340')
+            %
+            if this.handle~=0
+				error('Already connected. Close the existing connection first.'); 
+			end 
+            
+			if nargin == 2
+				if isempty(addressstring) 
+					error('Server address must not be empty.');
+				end
+			else
+				addressstring = 'localhost';
+			end
+            
+            this.handle = VAMatlab('connect', addressstring);
+        end
+        
+        function disconnect(this)
+            % Disconnects from a server
+            VAMatlab('disconnect', this.handle)
+            this.handle = int32(0);
+        end
+           
+        function [state] = get_server_state(this)
+            % Returns the state of the connected server
+            %
+            % Use this function to check whether the server is
+            % running fine and does not have any problems.
+            %
+            % Parameters:
+            %
+            % 	None
+            %
+            % Return values:
+            %
+            % 	state [integer-1x1] Server stat
+            %
+            % States:
+            % 
+            % - 0 = Connected, but server not configured. Failure.
+            % - 1 = Connected and ready for usage.
+            % - 2 = Connected, but server has failure.
+            %
+            if this.handle==0, error('Not connected.'); end
+            state = VAMatlab('get_server_state', this.handle);
+        end
+		
+		function shutdown_server(this)
+            % Attempts to shut down the remote server
+            %
+            % Server shutdown may be prohibited by the server configuration.
+			% Shutting donw the server from client side is meant for cases
+			% when the server is called by a script to run e.g. a simulation
+			% while the rendering output is recorded. The export is triggered
+			% when the core is finalized (or shut down).
+            %
+            % Parameters:
+            %
+            % 	None
+            %
+            % Return values:
+            %
+            % 	None
+            %
+			VAMatlab( 'call_module', this.handle, 'VACore', struct( 'shutdown', true ) );
+		end
+        
+        function connect_tracker( this, remote_ip, local_ip )
+            % Connects to a local NatNet tracking server
+            % 
+            % The server will update a virtual sound receiver for real-time 
+            % sound synthesis and the real world sound receiver position for
+            % those sound reproductions that need this information, like  
+            % Crosstalk-Cancellation.
+            %
+            % See also set_tracked_sound_receiver.
+            %
+            % Parameters (optional):
+            %
+            % 	remote_ip [char]	Remote ip address
+            % 	local_ip [char]		Local ip address
+            %
+
+			if( nargin == 1 )
+				remote_ip = '127.0.0.1';
+				local_ip = '127.0.0.1';
+			end
+
+            VAMatlab( 'connect_tracker', this.handle, remote_ip, local_ip );
+        end
+        
+        function [connected] = get_tracker_connected( this )
+            % Returns true, if tracker is connected
+            connected = VAMatlab( 'get_tracker_connected', this.handle );
+        end
+        
+        function disconnect_tracker( this )
+            % Disconnects from the NatNet tracking server
+            VAMatlab( 'disconnect_tracker', this.handle )
+        end
+        
+		% -- Tracked sound receiver -- %
+		
+        function set_tracked_sound_receiver( this, sound_receiver_id )
+            % Connects a VA sound receiver with the tracked sound receiver rigid body
+            %
+            % Parameters:
+            %
+            % 	sound_receiver_id  [integer-1x1]   VA sound receiver id
+            %
+            VAMatlab( 'set_tracked_sound_receiver', this.handle, sound_receiver_id );
+        end
+        
+        function set_tracked_sound_receiver_head_rigid_body_index( this, index )
+            % Sets the index of the rigid body to be tracked for sound receiver (default is 1)
+            VAMatlab( 'set_tracked_sound_receiver_head_rigid_body_index', this.handle, index )
+        end
+        
+        function set_tracked_sound_receiver_torso_rigid_body_index( this, index )
+            % Sets the index of the rigid body to be tracked for sound receiver's absolute torso orientation (default is 1)
+            VAMatlab( 'set_tracked_sound_receiver_torso_rigid_body_index', this.handle, index )
+        end
+        
+        function set_tracked_sound_receiver_head_rigid_body_translation( this, translation )
+            % Sets the pivot point translation for the tracked sound receiver rigid body
+			%
+			% Parameters:
+			%
+			%	translation [double-3x1]	Translation in local coordinate system of rigid body [m]
+			%
+            VAMatlab( 'set_tracked_sound_receiver_head_rigid_body_translation', this.handle, translation )
+        end
+        
+        function set_tracked_sound_receiver_head_rigid_body_rotation( this, rotation )
+            % Sets the rotation of orientation for the tracked sound receiver rigid body
+			%
+			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
+			%
+			% Parameters:
+			%
+			%	rotation [quaternion]	Rotation of rigid body
+			%
+            VAMatlab( 'set_tracked_sound_receiver_head_rigid_body_rotation', this.handle, rotation )
+        end
+		
+		% -- Tracked real-world sound receiver -- %
+		
+        function set_tracked_real_world_sound_receiver( this, sound_receiver_id )
+            % Connects a VA real-world sound receiver with the tracked real-world rigid body
+            %
+            % Parameters:
+            %
+            % 	sound_receiver_id  [integer-1x1]   VA real-world sound receiver id
+            %
+            VAMatlab( 'set_tracked_real_world_sound_receiver', this.handle, sound_receiver_id );
+        end
+		
+        function set_tracked_real_world_sound_receiver_head_rigid_body_index( this, index )
+            % Sets the index of the rigid body to be tracked for real-world sound receiver (default is 1)
+            VAMatlab( 'set_tracked_real_world_sound_receiver_head_rigid_body_index', this.handle, index )
+        end
+		
+        function set_tracked_real_world_sound_receiver_torso_rigid_body_index( this, index )
+            % Sets the index of the rigid body to be tracked for real-world sound receiver' torso (default is 1)
+            VAMatlab( 'set_tracked_real_world_sound_receiver_torso_rigid_body_index', this.handle, index )
+        end
+        
+        function set_tracked_real_world_sound_receiver_head_rb_trans( this, translation )
+            % Sets the pivot point translation for the tracked real-world sound receiver rigid body
+			%
+			% Parameters:
+			%
+			%	translation [double-3x1]	Translation in local coordinate system of rigid body [m]
+			%
+            VAMatlab( 'set_tracked_real_world_sound_receiver_head_rigid_body_translation', this.handle, translation )
+        end
+        
+        function set_tracked_real_world_sound_receiver_head_rb_rotation( this, rotation )
+            % Sets the rotation of orientation for the tracked real-world sound receiver rigid body
+			%
+			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
+			%
+			% Parameters:
+			%
+			%	rotation [quaternion]	Rotation of rigid body
+			%
+            VAMatlab( 'set_tracked_real_world_sound_receiver_head_rigid_body_rotation', this.handle, rotation )
+        end
+		        
+		% -- Tracked source -- %
+		
+        function set_tracked_sound_source( this, source_id )
+            % Connects a VA source with the tracked source rigid body
+            %
+            % Parameters:
+            %
+            % 	source_id  [integer-1x1]   VA source id
+            %
+            VAMatlab( 'set_tracked_sound_source', this.handle, source_id );
+        end
+		
+        function set_tracked_sound_source_rigid_body_index( this, index )
+            % Sets the index of the rigid body to be tracked for source (default is 1)
+            VAMatlab( 'set_tracked_sound_source_rigid_body_index', this.handle, index )
+        end
+        
+        function set_tracked_sound_source_rigid_body_translation( this, translation )
+            % Sets the pivot point translation for the tracked source rigid body
+			%
+			% Parameters:
+			%
+			%	translation [double-3x1]	Translation in local coordinate system of rigid body [m]
+			%
+            VAMatlab( 'set_tracked_sound_source_rigid_body_translation', this.handle, translation )
+        end
+        
+        function set_tracked_sound_source_rigid_body_rotation( this, rotation )
+            % Sets the rotation of orientation for the tracked source rigid body
+			%
+			% Given rotation has to be a Matlab quaternion type (order: w(real), i, j, k)
+			%
+			% Parameters:
+			%
+			%	rotation [quaternion]	Rotation of rigid body
+			%
+            VAMatlab( 'set_tracked_sound_source_rigid_body_rotation', this.handle, rotation )
+        end
+		
+        function get_tracker_info( this )
+            % Returns the tracker configuration state
+			%
+            VAMatlab( 'get_tracker_info', this.handle )
+        end
+		
+		%% --= Deprecated methods =--
+		
+        function id = create_directivity( this, filepath )
+            % Creates a directivity from file [DEPRECATED]
+			
+			warning( 'This method is marked as deprecated and will be removed in a future version. Please use ''create_directivity_from_file'' instead.' )
+            id = this.create_directivity_from_file( filepath );
+        end
+		
+        
+        %% --= Functions =--
+        
+        ###STUBCODE###
+        
+        function display(this)
+            % TODO: Define nice behaviour
+%             if this.handle
+%                 fprintf('Connection established to server ''%s''\n', this.get_server_address())
+%             else
+%                 fprintf('Not connected\n');
+%             end
+        end
+        
+    end
+
+end

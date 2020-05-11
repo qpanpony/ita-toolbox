@@ -61,6 +61,28 @@ else
     end
 end
 
+%% Create a custom startup file to set the correct path at startup
+str_to_startup = 'addpath(pathdef())';
+full_str_to_startup = strcat('disp(''Loading ita_toolbox_path from local pathdef.'')\n', str_to_startup);
+startup_file_user = fullfile(upath, 'startup.m');
+
+if exist(startup_file_user, 'file')
+    % check if a startup file exists and append userpath if necessary
+    str_contains = fileread(startup_file_user);
+    if ~contains(str_contains, str_to_startup)
+        fileID = fopen(startup_file_user, 'a');
+        fprintf(fileID, strcat('\n', full_str_to_startup));
+    end
+else
+    % if startup does not exist create and add pathdef from userpath
+    fileID = fopen(startup_file_user, 'w');
+    fprintf(fileID, full_str_to_startup);
+    fclose(fileID);
+end
+
+
+
+%% Return path
 if nargout
     outpathStr = [];
     prefixToolboxIdx = strfind(fullpath,prefixToolbox);

@@ -1,5 +1,4 @@
 classdef itaOptitrack < handle
-    
     % class itaOptitrack
     %
     %   Constructs an itaOptitrack object to communicate with a NatNet server 
@@ -28,7 +27,7 @@ classdef itaOptitrack < handle
     %                        default command port is '1510' (and can be changed
     %                        in Motive's Advanced Network options) [string].
     %
-    %   Destructor:  Optitrack_obj.destroy():
+    %   Destructor:  Optitrack_obj.delete():
     %                Delete Optitrack_obj.
     %
     %   To establish a connection to a NatNet server application on 'localhost', 
@@ -71,29 +70,29 @@ classdef itaOptitrack < handle
     %           'savePath'   path to save file containing logged data [string]
     %           'saveName'   name of file containing logged data [string]
     %
-    %           Contents of Optitrack_obj.info [struct]:
-    %                        .CaptureStartTime  start time of data logging [string]
-    %                        .NatNetVersion     version of used NatNet SDK [string]
-    %                        .TakeName          name of recording take (if specified 
-    %                                           during .startLogging) [string]
-    %                        .CaptureFrameRate  tracker rate in Hz [double]
-    %                        .TotalFrames       number of recorded frames [double]
-    %                        .CoordinateSpace   used coordinate space [string]
+    %       Optitrack_obj.info [struct] contains:
+    %           .CaptureStartTime  start time of data logging [string]
+    %           .NatNetVersion     version of used NatNet SDK [string]
+    %           .TakeName          name of recording take (if specified 
+    %                              during .startLogging) [string]
+    %           .CaptureFrameRate  tracker rate in Hz [double]
+    %           .TotalFrames       number of recorded frames [double]
+    %           .CoordinateSpace   used coordinate space [string]
     %
-    %           Contents of Optitrack_obj.data [1 x numRigidBodies struct]:
-    %                        .frameID           IDs of all tracked frames [numFrames x 1 double]
-    %                        .frameTime         time stamps of all tracked frames [numFrames x 1 double]
-    %                        .rigigBodyID       ID of rigid body [double]
-    %                        .rigidBodyName     name of rigid body [string]
-    %                        .position          position of rigid body [itaCoordinates with numFrames points]
-    %                        .orientation       position of rigid body [itaOrientation with numFrames points]
-    %                        .meanError         mean error of marker distances between the rigid body definition 
-    %                                           and the tracked rigid body [numFrames x 1 double]
-    %                        .isTracked         tracked/un-tracked [numFrames x 1 logical]
-    %                        .nMarkers          number of markers associated with rigid body [1 x 1 double]
-    %                        .droppedFrameID    IDs of dropped frames [numDroppedFrames x 1 double]
-    %                        .droppedFrameTime  time stamps of dropped frames [numDroppedFrames x 1 double]
-    %                        .calibratedData    data is adjusted by offset vector calculated during .calibrate (only for first rigid body) [logical]
+    %       Optitrack_obj.data [1 x numRigidBodies struct] contains:
+    %           .frameID           IDs of all tracked frames [numFrames x 1 double]
+    %           .frameTime         time stamps of all tracked frames [numFrames x 1 double]
+    %           .rigigBodyID       ID of rigid body [double]
+    %           .rigidBodyName     name of rigid body [string]
+    %           .position          position of rigid body [itaCoordinates with numFrames points]
+    %           .orientation       position of rigid body [itaOrientation with numFrames points]
+    %           .meanError         mean error of marker distances between the rigid body definition 
+    %                              and the tracked rigid body [numFrames x 1 double]
+    %           .isTracked         tracked/un-tracked [numFrames x 1 logical]
+    %           .nMarkers          number of markers associated with rigid body [1 x 1 double]
+    %           .droppedFrameID    IDs of dropped frames [numDroppedFrames x 1 double]
+    %           .droppedFrameTime  time stamps of dropped frames [numDroppedFrames x 1 double]
+    %           .calibratedData    data is adjusted by offset vector calculated during .calibrate (only for first rigid body) [logical]
     %
     %       Optitrack_obj.stopLogging(options)
     %           Stop logging tracker data
@@ -102,13 +101,16 @@ classdef itaOptitrack < handle
     %           Plot routine to visualize position and orientation over time
     %           'stepSize'              only display every stepSize frame
     %                                   (default: 7) [double]
+    %           
+    %           Note: Use the function ita_plot_itaOptitrack_data for plotting 
+    %                 stored logging data after using .startLogging and 'autoSave'.
     %
     %       Optitrack_obj.calibrate(options)
     %           Calculate offset of a head-mounted rigid body to the center
     %           of the interaural axis (procedure description: see below).
     %           'useCalibration'        apply calibration data in
     %                                   consecutive measurements (optional, default: [], user will be asked) [logical]
-    %           'calibPenOffset'        calibration pen: vector norm in meters measured from the volume centre point 
+    %           'calibPenOffset'        calibration pen: vector norm in meters measured from the volume center point 
     %                                   of the marker set to the tip of the calibration pen [double]
     %           'countdownDuration'     duration of countdown in seconds during calibration procedure [double]
     %           'savePathCalibration'   path to save Optitrack_obj.dataCalibration / .infoCalibration 
@@ -121,11 +123,28 @@ classdef itaOptitrack < handle
     %           'loadPathCalibration'   path to Optitrack_obj.calibrationData .mat file to be loaded [string]
     %           'loadNameCalibration'   file name of .mat file to be loaded [string]
     % 
-    %       Optitrack_obj.dataCalibration contains calibration data measured during .calibrate
-    %       Optitrack_obj.infoCalibration contains info about the calibration data.
+    %       Optitrack_obj.dataCalibration (calibration data as measured during .calibrate)
+    %           .head                   position (itaCoordinates) and orientation (itaOrientation) 
+    %                                   of head-mounted marker set
+    %           .leftPenTip             position (itaCoordinates) and orientation (itaOrientation) 
+    %                                   of offset-corrected left pen marker set
+    %           .rightPenTip            position (itaCoordinates in [m]) and orientation (itaOrientation) 
+    %                                   of offset-corrected right pen marker set
+    %           .headToLeftPenTip       vector norm measured from the volume center point 
+    %                                   of the head-mounted marker set to the offset-corrected tip of the   
+    %                                   left calibration pen (itaCoordinates) 
+    %           .headToRightPenTip      vector norm measured from the volume center point 
+    %                                   of the head-mounted marker set to the offset-corrected tip of the   
+    %                                   right calibration pen (itaCoordinates) 
+    %           .headToEarAxisCenter    vector norm measured from the volume center point 
+    %                                   of the head-mounted marker set to the center of the 
+    %                                   line connecting the tips of the calibration pens 
+    %                                   (e.g., ear axis midpoint) (itaCoordinates)
+    %               
+    %       Optitrack_obj.infoCalibration contains information about the calibration data (see .dataCalibration)
     %
-    %    The following useful commands are available to communicate with Optitrack's Motive
-    %    software via Matlab/NatNet (see p.14 of NatNet User's Guide)
+    %    The following useful commands are available to communicate with Optitrack's software Motive
+    %    via Matlab/NatNet (see p.14 of NatNet's User Guide)
     %
     %       Syntax:
     %       Optitrack_obj.theClient.SendMessageAndWait('<Command>, <Parameter>')
@@ -152,7 +171,7 @@ classdef itaOptitrack < handle
     %       Optitrack_obj.connect('ip','127.0.0.1')
     %       Optitrack_obj.startLogging('recMethod',0,'recTime',0.5)
     %       Optitrack_obj.disconnect();
-    %       Optitrack_obj.destroy();
+    %       Optitrack_obj.delete();
     %
     %	Example 2: create+autoconnect (without given host IP), log tracking
     %              data (recMethod 1), destroy
@@ -160,7 +179,7 @@ classdef itaOptitrack < handle
     %       Optitrack_obj.startLogging('recMethod',1,'savePath',pwd,'saveName','testtake')
     %       java.util.concurrent.locks.LockSupport.parkNanos(0.5*10^9);
     %       Optitrack_obj.stopLogging
-    %       Optitrack_obj.destroy();
+    %       Optitrack_obj.delete();
     %
     %	Example 3: create+autoconnect (with given host IP), set take name,
     %              start/stop logging ~0.5s of tracking data in Motive, destroy
@@ -169,7 +188,7 @@ classdef itaOptitrack < handle
     %       Optitrack_obj.theClient.SendMessageAndWait('StartRecording');
     %       java.util.concurrent.locks.LockSupport.parkNanos(0.5*10^9);
     %       Optitrack_obj.theClient.SendMessageAndWait('StopRecording');
-    %       Optitrack_obj.destroy();
+    %       Optitrack_obj.delete();
     %
     % Optitrack_obj.calibrate: Description of the calibration procedure
     % This calibration method relies on 3 rigid bodies (define in Motive):
@@ -188,7 +207,7 @@ classdef itaOptitrack < handle
     %        2) A dialog window with countdown appears. You now have 
     %        Optitrack_obj.countdownDuration seconds to place the two tips 
     %        of the calibration pens at the user's ear entrances of each ear. 
-    %        The vector norm in meters measured from the volume centre point 
+    %        The vector norm in meters measured from the volume center point 
     %        of the calibration pen's marker set to the tip of the calibration 
     %        pen (default: 0.12 m) is already included in this procedure.
     %
@@ -205,8 +224,11 @@ classdef itaOptitrack < handle
     % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
     % </ITA-Toolbox>
     %
+    % Feel free to improve this class by solving the TODOs in the code.
+    %
     % See also: itaOrientation, itaCoordinates, quaternion, ita_quat2rpy, 
     %           ita_quat2vu, ita_rpy2quat, ita_rpy2vu, ita_vu2quat, ita_vu2rpy
+    %           ita_plot_itaOptitrack_data
     
     properties (Constant, Hidden)
         stopped          = 0;
@@ -239,7 +261,7 @@ classdef itaOptitrack < handle
     properties(SetAccess = 'public', GetAccess = 'public')
         recMethod        = 0;     % recording method, 0: record data for recTime seconds (default), 1: record data without time limitation (stop via Optitrack_obj.stopTracking) [double]
         recTime          = 1;     % preferred logging time in sec (default: 1, only for recMethod 0) [double]
-        autoSave         = false;  % save tracked data to pwd or to 'savePath' if defined [logical]
+        autoSave         = false;  % save tracked data to pwd or to 'savePath' if set to true [logical]
         savePath         = [];    % path to save file containing logged data [string]
         saveName         = [];    % name of file containing logged data [string]
 
@@ -257,27 +279,32 @@ classdef itaOptitrack < handle
         saveNameCalibration = []; % name of saved .mat file (optional) [string]
         loadPathCalibration = []; % path to Optitrack_obj.calibrationData .mat file to be loaded [string]
         loadNameCalibration = []; % file name of .mat file to be loaded [string]
+        
     end
     
     properties(SetAccess = 'private', GetAccess = 'private')
-        dllPath          = fullfile(ita_toolbox_path,'applications/Hardware/Tracking/Optitrack/NatNetSDK'); % path to itaOptitrack
+        dllPath          = fullfile(ita_toolbox_path,'applications/Hardware/Tracking/Optitrack/NatNetSDK'); % path to itaOptitrack [string]
         timerData        = [];    % Matlab timer handle
-        singleShot       = 0;     % only log 1 frame of tracking data (e.g. for geometric measurement purposes)
-        correctRowIdx    = 1;     % idx to fill up Optitrack_obj.rigidBodyLogData.data ignoring duplicate frames
-        autoconnect      = 0;     % autoconnect after constructing class object
-        useCalibration   = [];    % apply calibration on tracking data of following measurements
+        singleShot       = 0;     % only log 1 frame of tracking data (e.g. for geometric measurement purposes) [logical]
+        correctRowIdx    = 1;     % idx to fill up Optitrack_obj.rigidBodyLogData.data ignoring duplicate frames [double]
+        autoconnect      = 0;     % autoconnect after constructing class object [logical]
+        useCalibration   = 0;    % apply calibration on tracking data of following measurements [logical]
         tempRigidBodyLogData = []; % temporal rigidBodyLogData
         lastFrameTime    = [];    % most recent frame of data time
         lastFrameID      = [];    % most recent frame of data ID
-        numFrames        = [];    % number of frames of tracking data to be saved according to recTime (only for recMethod 1)
+        numFrames        = [];    % number of frames of tracking data to be saved according to recTime (only for recMethod 1) [double]
         rigidBodyLogData = [];    % logged tracking data
-        calibPenOffset   = 0.12;  % vector norm in meters measured from the volume centre point of the marker set to the tip of the calibration pen [double]
-
+        calibPenOffset   = 0.12;  % vector norm in meters measured from the volume center point of the marker set to the tip of the calibration pen [double]
+        measRodOffset    = 1.045; % vector norm in meters measured from the volume center point of the marker set to the tip of the measurement rod [double]
+                                  % Note: Marker set / rigid body of measurement rod must be named 'MeasRod' and oriented towards positive
+                                  % y-axis when creating the rigid body in Motive
+        
 %         rigidBodyLogDataMLF = []; % logged tracking data decoded from MLF
     end
     
     properties(SetAccess = 'public', GetAccess = 'public', Hidden = true)
         debugInfo        = 0;     % print additional info (e.g. duplicate frames)
+        applyMeasRodOffset = true; % correct logged data of rigid body 'MeasRod' by multipling measRodOffset with negative up vector of measurement rod marker set (named 'MeasRod' in Motive)
     end
     
     properties(Dependent = true, Hidden = true)
@@ -296,7 +323,7 @@ classdef itaOptitrack < handle
             Optitrack_obj.port        = char(sArgs.port);
             
             % Check if NatNet dll's are existing
-            if ~exist(Optitrack_obj.dllPath,'dir')
+            if isempty( which( 'NatNetML.dll' ) )
                 
                 % download NatNet version
                 url = 'http://s3.amazonaws.com/naturalpoint/software/NatNetSDK/NatNet_SDK_2.10.zip';
@@ -329,13 +356,29 @@ classdef itaOptitrack < handle
                 delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10\NatNetSDK\Samples\Matlab\quaternion.m'))
                 delete(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10\NatNetSDK\Samples\Matlab\quaternion-license.txt'))
                 
+                if strcmpi( computer('arch'), 'win64' )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetML.dll') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetLib.lib') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetLibStatic.lib') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/NatNetLib.dll') )
+                    rmdir( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/Samples'),'s' )
+                    addpath( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64' ) )
+                else
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetML.dll') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetLib.lib') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetLibStatic.lib') )
+                    delete( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetLib.dll') )
+                    rmdir( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/Samples'),'s' )
+                    addpath( fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib' ) )
+                end
+                
                 fprintf( '[itaOptitrack] NatNet SDK 2.10 has been successfully downloaded.\n' );
 
             end
             
-            NET.addAssembly(fullfile(Optitrack_obj.dllPath,'NatNet_SDK_2.10/NatNetSDK/lib/x64/NatNetML.dll'));
+            NET.addAssembly( which( 'NatNetML.dll' ) );
             
-            % Create an instance of a NatNet client
+            % Create instance of NatNet client
             Optitrack_obj.theClient     = NatNetML.NatNetClientML(0); % Input = iConnectionType: 0 = Multicast, 1 = Unicast
             version                     = Optitrack_obj.theClient.NatNetVersion();
             fprintf( '[itaOptitrack] Initialization succeeded.\n' );
@@ -352,8 +395,7 @@ classdef itaOptitrack < handle
         
         %% DESTRUCTOR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         function destroy(Optitrack_obj)
-            delete(Optitrack_obj);
-            warning('[itaOptitrack] Method .destroy will be changed to Method .delete in future versions');
+            error('[itaOptitrack] Method deprecated. Please use .delete.');
         end
         function delete(Optitrack_obj)
             % delete Optitrack_obj (invalid handle remains -> clear('Optitrack_obj'))
@@ -375,7 +417,7 @@ classdef itaOptitrack < handle
         %%
         function connect(Optitrack_obj, varargin)
         % connect to a NatNet server application (optionally pass host ip address [string])    
-            if Optitrack_obj.isConnected == false;
+            if Optitrack_obj.isConnected == false
                 
                 % parse input arguments
                 sArgs              = struct('ip',Optitrack_obj.ip,'port',Optitrack_obj.port);
@@ -695,7 +737,7 @@ classdef itaOptitrack < handle
                         for idx = 1:Optitrack_obj.numRigidBodies %TODO: implement without for loop
                             if idx==1
                                 tmpNatNetVersion                        = num2str(int32(Optitrack_obj.theClient.NatNetVersion));
-                                Optitrack_obj.info.NatNetVersion        = strrep(tmpNatNetVersion, '  ', '.');
+                                Optitrack_obj.info.NatNetVersion        = strrep(tmpNatNetVersion, '   ', '.');
                                 Optitrack_obj.info.TakeName             = Optitrack_obj.saveName;
                                 Optitrack_obj.info.CaptureFrameRate     = Optitrack_obj.frameRate;
                                 Optitrack_obj.info.TotalFrames          = numel(Optitrack_obj.rigidBodyLogData.data(:,1,1));
@@ -746,10 +788,18 @@ classdef itaOptitrack < handle
                                     Optitrack_obj.rigidBodyLogData.info.calibratedData = false;
                                 end
                             end
+                            
+                            % apply calibration rod translation offset measRodOffset on rigid body called 'MeasRod'
+                            if Optitrack_obj.applyMeasRodOffset
+                                if strcmp(Optitrack_obj.data(idx).rigidBodyName, 'MeasRod')                            
+                                    Optitrack_obj.data(idx).position.cart = Optitrack_obj.data(idx).position.cart + Optitrack_obj.measRodOffset*(-Optitrack_obj.data(idx).orientation.up);
+                                end
+                            end
 
                             % interpolate mean error
                             if ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
                                 try
+                                    % TODO: Use quaternion interpolation instead of PCHIP
                                     Optitrack_obj.data(idx).meanError   = interp1(1:sum(~isnan(Optitrack_obj.rigidBodyLogData.data(:,11,idx))),...
                                     Optitrack_obj.rigidBodyLogData.data(~isnan(Optitrack_obj.rigidBodyLogData.data(:,11,idx)),11,idx),1:Optitrack_obj.info.TotalFrames,'PCHIP');
                                 catch e
@@ -759,6 +809,11 @@ classdef itaOptitrack < handle
                             end
 
                             Optitrack_obj.data(idx).isTracked   = Optitrack_obj.rigidBodyLogData.data(:,12,idx);
+                            if Optitrack_obj.singleShot % check if frame was tracked during single shot measurement
+                                if ~Optitrack_obj.data(idx).isTracked && Optitrack_obj.singleShot
+                                    fprintf('[\b[itaOptitrack] Single shot frame of marker set ''%s'' was not tracked and potentially contains useless data.]\b\n',Optitrack_obj.data(idx).rigidBodyName);
+                                end
+                            end
                             Optitrack_obj.data(idx).nMarkers    = Optitrack_obj.rigidBodyLogData.data(:,13,idx);
 
                             if ~isempty(Optitrack_obj.rigidBodyLogData.droppedFrames)
@@ -768,11 +823,11 @@ classdef itaOptitrack < handle
                                 Optitrack_obj.data(idx).droppedFrameTime = Optitrack_obj.rigidBodyLogData.droppedFrames(:,2);
                             end
 
-                            if Optitrack_obj.data(idx).rigidBodyID == 1; % set calibratedData flag
+                            if Optitrack_obj.data(idx).rigidBodyID == 1 % set calibratedData flag
                                 Optitrack_obj.data(idx).calibratedData = Optitrack_obj.rigidBodyLogData.info.calibratedData;
                             else
                                 Optitrack_obj.data(idx).calibratedData = false;
-                            end;
+                            end
                         end
 
                         % save data and info
@@ -1002,12 +1057,14 @@ classdef itaOptitrack < handle
                            trackedData(index) =  Optitrack_obj.data(index).isTracked;
                         end
                         Optitrack_obj.infoCalibration.isTracked = trackedData;
-                        Optitrack_obj.infoCalibration.TakeName = fullfile(Optitrack_obj.savePathCalibration,Optitrack_obj.saveNameCalibration);
+                        if ~isempty(Optitrack_obj.savePathCalibration)&&~isempty(Optitrack_obj.saveNameCalibration)
+                            Optitrack_obj.infoCalibration.TakeName = fullfile(Optitrack_obj.savePathCalibration,Optitrack_obj.saveNameCalibration);
+                        end
                         
                         % calculate offset
                         Optitrack_obj.dataCalibration.head.position    = itaCoordinates( Optitrack_obj.rigidBodyLogData.data(1,4:6,1) );
                         Optitrack_obj.dataCalibration.head.orientation = itaOrientation( Optitrack_obj.rigidBodyLogData.data(1,7:10,1) );
-                        % integrate offset of calibration pen, i.e. vector norm in meters measured from the volume centre point 
+                        % integrate offset of calibration pen, i.e. vector norm in meters measured from the volume center point 
                         %        of the calibration pen's marker set to the tip of the calibration pen
                         leftPenTip.orientation = itaOrientation( Optitrack_obj.rigidBodyLogData.data(1,7:10,2) );
                         leftPenTip.position    = itaCoordinates( Optitrack_obj.rigidBodyLogData.data(1,4:6,2) );
@@ -1027,7 +1084,7 @@ classdef itaOptitrack < handle
                         Optitrack_obj.dataCalibration.headToEarAxisCenter.position = itaCoordinates(headToEarAxisCenter);
                         
                         % ask user if calibration data should be applied (if Optitrack_obj.useCalibration is not already set to true)
-                        if isempty(Optitrack_obj.useCalibration)
+                        if Optitrack_obj.useCalibration
                             calmsgbox2 = questdlg('Would you like to apply calibration data in following measurements?','[itaOptitrack]','Yes','No','No');
                             
                             if strcmp(calmsgbox2,'Yes')
@@ -1038,7 +1095,7 @@ classdef itaOptitrack < handle
                                 fprintf('[\b[itaOptitrack.calibrate] Calibration data will be ignored in following measurements.]\b\n')
                             end
                             
-                        elseif Optitrack_obj.useCalibration==true
+                        elseif Optitrack_obj.useCalibration
                             % Optitrack_obj.useCalibration is already set to true
                             fprintf('[\b[itaOptitrack.calibrate] Calibration data will be applied on tracking data in following measurements.]\b\n')
                         end
@@ -1106,7 +1163,7 @@ classdef itaOptitrack < handle
         
         try
             tmp = load(fullfile(Optitrack_obj.loadPathCalibration,...
-                Optitrack_obj.loadNameCalibration));
+            Optitrack_obj.loadNameCalibration));
             
             Optitrack_obj.dataCalibration = tmp.calibrationData;
             Optitrack_obj.infoCalibration = tmp.calibrationInfo;
@@ -1157,19 +1214,19 @@ classdef itaOptitrack < handle
             % display info about dropped or duplicate frames
             if(frameID ~= Optitrack_obj.lastFrameID) || Optitrack_obj.singleShot 
                 if (frameID - Optitrack_obj.lastFrameID)==2
-                    if Optitrack_obj.debugInfo;
+                    if Optitrack_obj.debugInfo
                         fprintf('[\b[itaOptitrack] Dropped frame! FrameID: %5d\tFrameTime: %0.3f]\b\n', frameID, frameTime);
 %                     else
 %                         fprintf('[\b[itaOptitrack] Dropped frame!]\b\n')
-                    end;
+                    end
                     Optitrack_obj.rigidBodyLogData.droppedFrames = [Optitrack_obj.rigidBodyLogData.droppedFrames; double(frameID-1), Optitrack_obj.lastFrameTime+1/Optitrack_obj.frameRate];
                 elseif (frameID - Optitrack_obj.lastFrameID)>2
-                    if Optitrack_obj.debugInfo;
+                    if Optitrack_obj.debugInfo
                         fprintf('[\b[itaOptitrack] Multiple dropped frames! FrameID: %5d to %5d\tFrameTime: %0.3f to %0.3f]\b\n', Optitrack_obj.lastFrameID+1, frameID-1, ...
                             Optitrack_obj.lastFrameTime+1/Optitrack_obj.frameRate, frameTime-1/Optitrack_obj.frameRate:frameTime-1/Optitrack_obj.frameRate);
 %                     else
 %                         fprintf('[\b[itaOptitrack] Multiple dropped frames!]\b\n')
-                    end;
+                    end
                     Optitrack_obj.rigidBodyLogData.droppedFrames = [Optitrack_obj.rigidBodyLogData.droppedFrames; double(Optitrack_obj.lastFrameID+1:frameID-1)', ...
                         ( double(frameTime)-(double(frameID) - double(Optitrack_obj.lastFrameID) - 1)/Optitrack_obj.frameRate:1/Optitrack_obj.frameRate:frameTime-1/Optitrack_obj.frameRate )'];
                 end
@@ -1232,10 +1289,6 @@ classdef itaOptitrack < handle
             set(pushButtonHandle, 'String', sprintf('Calibrate (%d)',Optitrack_obj.countdownDuration-numTasksExecuted));
         end
         
-    end
-    
-    methods(Static)
-        output = plot(this,varargin);
     end
     
 end

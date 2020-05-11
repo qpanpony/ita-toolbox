@@ -7,13 +7,6 @@ function MS = ita_measurement_chain_output_calibration(MS,input_chain_number,ele
 % You can find the license for this m-file in the application folder. 
 % </ITA-Toolbox>
 
-
-if ~exist('old_sens','var')
-    old_sens_str = '';
-else
-    old_sens_str = [' {old: ' num2str(old_sens) '}'];
-end
-
 sensFactor = 1;
 thisFuncStr = [upper(mfilename) '::'];
 % for ele_idx = 1:length(MS.outputMeasurementChain)
@@ -25,6 +18,17 @@ if MC.elements(ele_idx).calibrated ~= -1
     pListExtra = {};
     
     MCE = MC.elements(ele_idx);
+    
+    if ~exist('old_sens','var')
+        old_sens_str = '';
+    else
+        if ~isnan(double(old_sens)) && isfinite(double(old_sens))
+            old_sens_str = [' {old: ' num2str(old_sens) '; change: ' num2str(round(20.*log10(double(MCE.sensitivity)/double(old_sens)),3)) 'dB}'];
+        else
+            old_sens_str = [' {old: ' num2str(old_sens) '; change: N/A}'];
+        end
+    end
+    
      if any(strfind(lower(MCE.name),'robo')) || any(strfind(lower(MCE.type),'robo')) || ...
             any(strfind(lower(MCE.name),'modulita')) || any(strfind(lower(MCE.type),'modulita')) || ...
             any(strfind(lower(MCE.name),'aurelio')) || any(strfind(lower(MCE.type),'aurelio'))

@@ -204,13 +204,32 @@ classdef  itaHRTF < itaAudio
         end
         
         function dirCoord = get.dirCoord(this)
-            dirCoord = this.channelCoordinates.n(1:2:this.dimensions);
+            %get channel Coordinates from one ear, default L
+            earSideUsed = 'L';
+            
+            %check if HRTF has left and right ears
+            nLeftEarChannels = sum(this.EarSide == 'L');
+            nRightEarChannels = sum(this.EarSide == 'R');
+            
+            
+            if nLeftEarChannels ~= nRightEarChannels && all([nLeftEarChannels nRightEarChannels]~=0)
+                %unequal number of channels left and right but both present
+                % -> warn user 
+                ita_verbose_info('Unequal number of channels for left and right ear, using left.')  
+            end    
+            if nLeftEarChannels == 0
+                % when HRTF only has right ear channels -> use right
+                earSideUsed = 'R';
+            end
+                        
+            %get Coordinates for specified ear side
+            dirCoord = this.channelCoordinates.n(this.EarSide==earSideUsed);
         end
         
         function EarSide = get.EarSide(this)
             EarSide = this.mEarSide;
             if numel(this.mEarSide)~=this.dimensions
-                EarSide = repmat(['L'; 'R'],this.dirCoord.nPoints, 1);
+                EarSide = repmat(['L'; 'R'],this.nDirections, 1);
             end
         end
         
@@ -408,6 +427,7 @@ classdef  itaHRTF < itaAudio
                 end
                 
                 metadata = DAFFv17('getMetadata', handleDaff);
+                DAFFv17('close', handleDaff);
                 
             catch
                 disp( 'Could not read DAFF file right away, falling back to old version and retrying ...' );
@@ -448,6 +468,8 @@ classdef  itaHRTF < itaAudio
                     coordDaff(iDir,:) = DAFFv15( 'getRecordCoords', handleDaff, 'data', iDir )';
                     counter= counter+2;
                 end
+                
+                DAFFv15('close', handleDaff);
             end
             
             % Proceed (version independent)
@@ -906,6 +928,62 @@ classdef  itaHRTF < itaAudio
                 % end line
             end
             
+            %% ILD
+            
+            function varargout = ILD(this, varargin)
+                %Calculates the ILD either for each distinct frequency or
+                %by integrating between two frequencies.
+                %
+                %   Option (default):
+                %   filter ('wideband'):    'wideband', [fMin fMax], 'none'
+                %   
+                %   Reference:
+                %   Bosun Xie. Head-Related Transfer Function and Virtual
+                %   Auditory Display. J. Ross Publishing, USA, 2nd edition, 2013.
+                %   Equation 3.23, page 91
+                sArgs  = struct('filter' , 'wideband' );
+                sArgs   = ita_parse_arguments(sArgs,varargin);
+                
+                assert( isempty(sArgs.filter) || ischar(sArgs.filter) ||...
+                    isnumeric(sArgs.filter) && numel(sArgs.filter) == 2, ...
+                    'Invalid datatype for filter option.')
+                
+                if numel(this.theta_Unique)>1
+                    ita_verbose_info(' More than one elevation in this object!', 0);
+                    %this = this.sphericalSlice('theta_deg',90);
+                end
+                
+                if ischar(sArgs.filter) && strcmp(sArgs.filter, 'wideband') %wideband average
+                    sArgs.filter = [this.freqVector(2) this.freqVector(end)];
+                end
+                
+                pLeft = this.freqData(:,this.EarSide == 'L');
+                pRight = this.freqData(:,this.EarSide == 'R');
+                if isnumeric(sArgs.filter) %average
+                    usedBins = ( this.freq2index(sArgs.filter(1)):this.freq2index(sArgs.filter(2)) )';
+                    if any( usedBins == 1 )
+                        ita_verbose_info('itaHRTF: Excluding invalid bin (f=0Hz) for ITD calculation (phase_delay method)', 2)
+                    end
+                    usedBins( usedBins <= 1 ) = [];
+                    
+                    pLeftFiltered = pLeft(usedBins, :);
+                    pRightFiltered = pRight(usedBins, :);
+                    
+                    pLeftIntegral = sum( abs(pLeftFiltered).^2, 1 );
+                    pRightIntegral = sum( abs(pRightFiltered).^2, 1 );
+                    
+                    ILD = 10*log10( pLeftIntegral ./ pRightIntegral );
+                    
+                else % frequency dependent
+                    ILD = 20*log10(abs( pLeft ./ pRight ));
+                end
+                
+                varargout{1} = ILD;
+                if nargout == 2
+                    varargout{2} = rad2deg(this.phi_Unique('stable'));
+                end
+            end
+            
             %% Ramonas' Functions
             
             function varargout = ITD(varargin)
@@ -940,22 +1018,31 @@ classdef  itaHRTF < itaAudio
                         thisC = ita_time_shift(this,tau(idxMin)-this.trackLength/3,'time');
                         
                         if ischar(sArgs.filter) % frequency dependent
-                            p1 = thisC.freqData(:,1:2:thisC.dimensions);
-                            p2 = thisC.freqData(:,2:2:thisC.dimensions);
+                            pLeft = thisC.freqData(:,thisC.EarSide == 'L');
+                            pRight = thisC.freqData(:,thisC.EarSide == 'R');
                             
-                            phase1 = unwrap(angle(p1));
-                            phase2 = unwrap(angle(p2));
-                            phasenDiff = phase1 - phase2;
+                            phaseLeft = unwrap(angle(pLeft));
+                            phaseRight = unwrap(angle(pRight));
+                            phasenDiff = phaseLeft - phaseRight;
                             
-                            ITD = phasenDiff./(2*pi*repmat(thisC.freqVector,1,size(phase1,2)));
+                            ITD = phasenDiff./(2*pi*repmat(thisC.freqVector,1,size(phaseLeft,2)));
                         else % averaged
-                            usedBins = thisC.freq2index(sArgs.filter(1)):thisC.freq2index(sArgs.filter(2));
-                            phase = unwrap(angle(thisC.freqData(3:end,:)));
-                            freqVector = thisC.freqVector;
-                            t0_freq = bsxfun(@rdivide, phase,2*pi*freqVector(3:end));
-                            t0_freq = t0_freq(~isnan(t0_freq(:,1)),:);
-                            t0_mean = mean(t0_freq(3+usedBins,:)); %mean is smoother than max; lower freq smooths also the result
-                            ITD =  t0_mean(thisC.EarSide == 'L') - t0_mean(thisC.EarSide == 'R');
+                            usedBins = ( thisC.freq2index(sArgs.filter(1)):thisC.freq2index(sArgs.filter(2)) )';
+                            
+                            %Remove invalid indices including the one for f=0Hz
+                            if any( usedBins == 1 )
+                                ita_verbose_info('itaHRTF: Excluding invalid bin (f=0Hz) for ITD calculation (phase_delay method)', 2)
+                            end
+                            usedBins( usedBins <= 1 ) = [];
+                            
+                            phase = unwrap(angle(thisC.freqData(usedBins,:)));
+                            freqVector = thisC.freqVector(usedBins);
+                            
+                            phaseDelay = bsxfun(@rdivide, phase,2*pi*freqVector);
+                            phaseDelay = phaseDelay(~isnan(phaseDelay(:,1)),:);
+                            phaseDelayMean = mean(phaseDelay); %mean is smoother than max; lower freq smooths also the result
+                            
+                            ITD =  phaseDelayMean(thisC.EarSide == 'L') - phaseDelayMean(thisC.EarSide == 'R');
                         end
                     case 'xcorr'
                         % .....................................................

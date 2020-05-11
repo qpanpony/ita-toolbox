@@ -44,11 +44,11 @@ end
 
 theta_start_deg = rad2deg( min( itaHRTF_obj.channelCoordinates.theta ) );
 theta_end_deg = rad2deg( max( itaHRTF_obj.channelCoordinates.theta ) );
-theta_num_elements = size( unique( itaHRTF_obj.channelCoordinates.theta ), 1 );
+theta_num_elements = size( uniquetol( itaHRTF_obj.channelCoordinates.theta ), 1 );
 
 phi_start_deg = rad2deg( min( mod( itaHRTF_obj.channelCoordinates.phi, 2*pi ) ) );
 phi_end_deg = rad2deg( max( mod( itaHRTF_obj.channelCoordinates.phi, 2*pi ) ) );
-phi_num_elements = size( unique( itaHRTF_obj.channelCoordinates.phi ), 1 );
+phi_num_elements = size( uniquetol( itaHRTF_obj.channelCoordinates.phi ), 1 );
 
 assert( phi_num_elements ~= 0 );
 alphares = ( phi_end_deg - phi_start_deg ) / phi_num_elements; % phi end does not cover entire circle in this case

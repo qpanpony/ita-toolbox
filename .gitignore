@@ -24,7 +24,12 @@ Thumbs.db
 svnaccess
 *.lib
 *.exp
-itaRaven.ini
 *.daff
-/external_packages/sofa
+*.mph
+sh.exe.stackdump
+itaRaven.ini
+itaComsol.ini
+itaReceiver.ini
+/external_packages/sofa/sofa
 /applications/Hardware/Tracking/Optitrack/NatNetSDK
+

@@ -330,7 +330,7 @@ device(end+1,:) = { 'NONE','1 ','none',0};
 device(end+1,:) = { 'UNKNOWN','1 ','none',1};
 device(end+1,:) = { 'empty','1 V/1','group',1};
 
-device(end+1,:) = { 'BK mic 1/4 4190 SN 2522103','0.047 V/Pa','bk_pressure',1};
+device(end+1,:) = { 'BK mic 1/2 4190 SN 2522103','0.047 V/Pa','bk_pressure',1};
 
 device(end+1,:) = { 'BK Mic 1/2 4190 G1064','0.051367 V/Pa','bk_pressure',1};
 device(end+1,:) = { 'BK Mic 1/2 4190 SN2152127','0.0558 V/Pa','bk_pressure',1};
@@ -345,6 +345,8 @@ device(end+1,:) = { 'GRAS Mic 1/4 40BF SN113026','0.0034 V/Pa','none',1};
 device(end+1,:) = { 'GRAS Mic 1/4 40BF SN113028','0.0035 V/Pa','none',1};
 device(end+1,:) = { 'GRAS Mic 1/4 40BF SN141768','0.0033 V/Pa','none',1};
 device(end+1,:) = { 'GRAS Mic 1/4 40BP SN20033','0.00158 V/Pa','none',1};
+
+device(end+1,:) = { 'GRAS Mic 1/2 40HL SN192584','0.9373 V/Pa','none',1};
 
 device(end+1,:) = { 'Laser Doppler Vibrometer','1 V s/m','vibrometer',0};
 

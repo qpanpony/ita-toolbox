@@ -13,18 +13,13 @@ function  weights = ita_vbap_pan(pos_LS,pos_VS,varargin)
 % Author: Michael Kohnen -- Email: mko@akustik.rwth-aachen.de
 % Former author: Bruno Masiero -- Email: bma@akustik.rwth-aachen.de
 % Created:  13-Jun-2011
-% Last modified: 04-May-2017
+% Last modified: 10-july-2019
 %$ENDHELP$
 
 %% Preliminary tests
-% if pos_LS.isPlane
-%     Number_of_active_loudspeakers = 2; %Extended Stereo
-% else
-Number_of_active_loudspeakers = 3;
-% end
-opts.dim=3;         % Zwei oder Dreidimensionales panning, standard ist 3
 opts.distanceloss = true;
-opts.normalizationGain=1/3;
+opts.normalizationGain=1;
+opts.minimumDistance=0.25;
 opts=ita_parse_arguments(opts,varargin);
 
 % Init
@@ -34,6 +29,14 @@ if pos_VS.r == 0
     error('No direction for Virtual Source was given!')
 end
 
+pos_VS.r( pos_VS.r<opts.minimumDistance ) = opts.minimumDistance;
+
+origDistances = pos_VS.r;
+
+pos_VS.r=mean(pos_LS.r);
+
+
+
 %% Find the closest loudspeakers
 % Calculate the distance of each loudspeaker to the virtual source with the
 % help of the itaCoordinate overloaded function itaCoordinate.r.
@@ -41,7 +44,7 @@ end
 aux = pos_LS - pos_VS;
 dist = aux.r;
 [junk,index] = sort(dist,'ascend');
-index = index(1:Number_of_active_loudspeakers);
+index = index(1:3);
 
 active_loudspeakers = pos_LS.n(index);
 
@@ -56,6 +59,6 @@ for idx = 1:pos_VS.nPoints
     g = p*pinv(L);
     % Re-normalize
     g = abs(g)/norm(g);
-    weights(idx,index) = (g./pos_VS.r(idx).*pos_LS.r(index)').*1/3;
+    weights(idx,index) = (g./origDistances(idx).*pos_LS.r(index)');
 end
 

@@ -38,7 +38,7 @@ function varargout = ita_roomacoustics_reverberation_time(varargin)
 
 %% Initialization
 narginchk(1,24);
-sArgs      = struct('pos1_ir','itaAudio','shift', true,'calcEdc',true, 'freqRange', ita_preferences('freqRange'), 'bandsPerOctave', ita_preferences('bandsperoctave'), 'intersectionTime', 'itaResult', 'lateRevEstimation', 'itaResult', 'noiseRMS',  'itaResult', 'edcMethod', 'cutWithCorrection', 'plot', false, 'EDT', false,  'T10', false, 'T15', false, 'T20', false, 'T25', false, 'T30', false, 'T40', false,  'T50', false, 'T60', false );
+sArgs      = struct('pos1_ir','itaAudio','shift', true,'calcEdc',true, 'freqRange', ita_preferences('freqRange'), 'bandsPerOctave', ita_preferences('bandsperoctave'), 'intersectionTime', 'itaResult', 'lateRevEstimation', 'itaResult', 'noiseRMS',  'itaResult', 'edcMethod', 'cutWithCorrection', 'plot', false, 'EDT', false, 'LDT', false,  'T10', false, 'T15', false, 'T20', false, 'T25', false, 'T30', false, 'T40', false,  'T50', false, 'T60', false );
 [ir,sArgs] = ita_parse_arguments(sArgs,varargin);
 
 %% Calculation of decay curve - SCHROEDER backwards time integration
@@ -54,13 +54,13 @@ else
 end
 
 
-parNameCell =               {'EDT'  'T10'  'T15'  'T20'  'T25'  'T30'  'T40'  'T50'  'T60'};
-parameters = struct('high', {   0     -5     -5     -5     -5     -5     -5     -5     -5 }, ...
-                    'low',  { -10    -15    -20    -25    -30    -35    -45    -55    -65 }, ...
+parNameCell =               {'EDT'  'LDT' 'T10'  'T15'  'T20'  'T25'  'T30'  'T40'  'T50'  'T60'};
+parameters = struct('high', {   0    -25   -5     -5     -5     -5     -5     -5     -5     -5 }, ...
+                    'low',  { -10    -35  -15    -20    -25    -30    -35    -45    -55    -65 }, ...
                     'name',  parNameCell     );
 
 
-par2calc = [ sArgs.EDT  sArgs.T10 sArgs.T15 sArgs.T20 sArgs.T25 sArgs.T30 sArgs.T40 sArgs.T50 sArgs.T60 ].';
+par2calc = [ sArgs.EDT  sArgs.LDT sArgs.T10 sArgs.T15 sArgs.T20 sArgs.T25 sArgs.T30 sArgs.T40 sArgs.T50 sArgs.T60 ].';
 
 if ~any(par2calc) % if no input parameter => selection of Parameters according to ita_roomacoustics_parameters()
     par2calc    = cell2mat(ita_roomacoustics_parameters(parNameCell{:}));

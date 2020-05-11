@@ -103,10 +103,7 @@ else
     set(axh,'YLim',sort([abs_min abs_max]));
 end
 
-%% Sets both x and y axis limits
-if ~isempty(options.axis)
-    axis(axh,options.axis);
-end
+
 
 %% background color
 if ita_preferences('blackbackground')~=0 %%saves time
@@ -216,6 +213,11 @@ if ~isempty(data.plotAxesProperties)
     catch EM
         ita_verbose_info(['Error using plotAxesProperties: ' EM.message], 1)
     end;
+end
+
+%% Sets both x and y axis limits
+if ~isempty(options.axis)
+    axis(axh,options.axis);
 end
 
 %% Legend or no Legend, that's the ... pdi: moved after setting the data
