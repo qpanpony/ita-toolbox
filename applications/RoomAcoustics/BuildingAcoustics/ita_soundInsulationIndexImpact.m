@@ -30,13 +30,16 @@ if strcmpi(sArgs.type,'iso') % Reference curve and frequencies according to ISO 
         error([upper(mfilename) ':wrong input for bandsperoctave']);
     end
 elseif strcmpi(sArgs.type,'astm') % Reference curve and frequencies according to ASTM E989
-    outputStr = 'IIC';
     roundingFactor = 1;
+    outputStr = 'IIC (HIIC)';
     deficiencyLimit = 8;
     sArgs.bandsperoctave = 3;
     freq = [100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000,2500,3150].';
     refCurve = [2 2 2 2 2 2 1 0 -1 -2 -3 -6 -9 -12 -15 -18].';
     refSurf = 32;
+    % for high-frequency rating
+    refCurveIIC = refCurve(7:end); 
+    refSurfHIIC = 20;
 else
     error([upper(mfilename) ':wrong input for type']);
 end
@@ -64,20 +67,38 @@ impactInsulationClass = max(ceil(NISPL-refCurve));
 delta = max(0,NISPL - (refCurve + impactInsulationClass));
 counter = 0; % stopping criterion
 % shift reference curve until limits are reached
-
-while sum(delta) <= refSurf && all(delta <= deficiencyLimit) && counter < 1e3
-    impactInsulationClass = impactInsulationClass - dbStep;
-    delta = max(0,NISPL - (refCurve + impactInsulationClass));
-    counter = counter+1;
+if strcmpi(sArgs.type,'astm')
+    while sum(delta) <= refSurf && all(delta <= deficiencyLimit) && counter < 1e3
+        impactInsulationClass = impactInsulationClass - dbStep;
+        delta = max(0,NISPL - (refCurve + impactInsulationClass));
+        counter = counter+1;
+    end
+    impactInsulationClass = impactInsulationClass + dbStep;
+    impactInsulationClass = 110 - impactInsulationClass;
+    % high-frequency rating
+    NISPL_HIIC = NISPL(7:end);
+    counter = 0;
+    impactInsulationClassH = max(ceil(NISPL_HIIC-refCurveIIC));
+    deltaHIIC = max(0,NISPL_HIIC - (refCurveIIC + impactInsulationClassH));
+    while sum(deltaHIIC) <= refSurfHIIC && counter < 1e3
+        impactInsulationClassH = impactInsulationClassH - dbStep;
+        deltaHIIC = max(0,NISPL_HIIC - (refCurveIIC + impactInsulationClassH));
+        counter = counter+1;
+    end
+    impactInsulationClassH = impactInsulationClassH + dbStep;
+    impactInsulationClassH = 110 - impactInsulationClassH;
+else
+    while sum(delta) <= refSurf && all(delta <= deficiencyLimit) && counter < 1e3
+        impactInsulationClass = impactInsulationClass - dbStep;
+        delta = max(0,NISPL - (refCurve + impactInsulationClass));
+        counter = counter+1;
+    end
+    impactInsulationClass = impactInsulationClass + dbStep;
 end
-impactInsulationClass = impactInsulationClass + dbStep;
+
 delta = max(0,NISPL - (refCurve + impactInsulationClass));
 deficiencies = itaResult(delta,freq,'freq')*itaValue(1,'dB');
 deficiencies.allowDBPlot = false;
-
-if strcmpi(sArgs.type,'astm')
-    impactInsulationClass = 110 - impactInsulationClass;
-end
 
 %% adaptation term for ISO
 if strcmpi(sArgs.type,'iso')
@@ -108,7 +129,7 @@ if sArgs.createPlot
     if strcmpi(sArgs.type,'iso')
         singleNumberString = [outputStr ' = ' num2str(impactInsulationClass) ' (' num2str(C(1)) ',' num2str(C(2)) ') dB'];
     else
-        singleNumberString = [outputStr ' = ' num2str(impactInsulationClass) 'dB'];
+        singleNumberString = [outputStr ' = ' num2str(impactInsulationClass) ' (' num2str(impactInsulationClassH) ') dB'];
     end
     legend({'Normalized Impact Sound Pressure Levels','Shifted reference curve',singleNumberString,['Deficiencies (sum: ' num2str(sum(deficiencies.freq)) 'dB, max: ' num2str(maxDef) 'dB at ' num2str(deficiencies.freqVector(maxIdx)) 'Hz)']});
     xlim([min(freq) max(freq)]);
@@ -122,7 +143,12 @@ if nargout >= 2
     if nargout >= 3
         varargout{3} = deficiencies;
         if nargout >= 4
-            varargout{4} = C;
+            if strcmpi(sArgs.type,'astm')
+                varargout{4} = impactInsulationClassH;
+            else
+                varargout{4} = C;
+            end
+            
         end
     end
 end
