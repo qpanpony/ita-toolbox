@@ -389,17 +389,22 @@ classdef itaMSPlaybackRecord < itaMSRecord
         function set.outputVoltage(this,value)
             if numel(this.outputChannels) ~= 1
                 ita_verbose_info('Multiple output channels, selecting the one with maximum gain',0);
-                [dummy,idx] = max(double(this.outputMeasurementChain.hw_ch(this.outputChannels).sensitivity('loudspeaker')));
+                [~, idx] = max(double(this.outputMeasurementChain.hw_ch(this.outputChannels).sensitivity('loudspeaker')));
                 omc = this.outputMeasurementChain.hw_ch(this.outputChannels(idx));
             else
                 omc = this.outputMeasurementChain.hw_ch(this.outputChannels);
             end
             if ~omc.calibrated || omc.sensitivity.value == 1
-                ita_verbose_info('The outputMeasurementChain is not calibrated, this makes no sense then',1);
-                ita_verbose_info('Leaving outputamplification unchanged',0);
+                ita_verbose_info('Output measurement chain not calibrated, leaving outputVoltage unchanged',0);
             else
-                outSens = omc.sensitivity('loudspeaker');
-                this.outputamplification = 20*log10(abs(double(value/(max(this.raw_excitation.rms)*outSens))));
+                outSens = double(omc.sensitivity('loudspeaker'));
+                max_rms_output_voltage = (max(this.raw_excitation.rms)*outSens);
+                required_digital_gain = value/max_rms_output_voltage;
+                if round(required_digital_gain, 4) > 1
+                    ita_verbose_info(['Given RMS output voltage too high, the maximum voltage with the current setup is ', num2str(max_rms_output_voltage), ' V. Leaving outputVoltage unchanged'], 0)
+                else
+                    this.outputamplification = 20*log10(required_digital_gain);
+                end
             end
         end
         
