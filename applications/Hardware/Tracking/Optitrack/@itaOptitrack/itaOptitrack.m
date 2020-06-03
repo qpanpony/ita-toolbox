@@ -295,7 +295,7 @@ classdef itaOptitrack < handle
         numFrames        = [];    % number of frames of tracking data to be saved according to recTime (only for recMethod 1) [double]
         rigidBodyLogData = [];    % logged tracking data
         calibPenOffset   = 0.12;  % vector norm in meters measured from the volume center point of the marker set to the tip of the calibration pen [double]
-        measRodOffset    = 1.045; % vector norm in meters measured from the volume center point of the marker set to the tip of the measurement rod [double]
+        measRodOffset    = 0.742; % vector norm in meters measured from the volume center point of the marker set to the tip of the measurement rod [double]
                                   % Note: Marker set / rigid body of measurement rod must be named 'MeasRod' and oriented towards positive
                                   % y-axis when creating the rigid body in Motive
         
