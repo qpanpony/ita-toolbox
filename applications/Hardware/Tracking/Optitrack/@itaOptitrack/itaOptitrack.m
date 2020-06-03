@@ -424,8 +424,7 @@ classdef itaOptitrack < handle
                 display('[itaOptitrack] Connecting to OptiTrack Server...')
                 
                 % set host ip address ('127.0.0.1' (localhost) per default)
-                if isempty(varargin)
-                    Optitrack_obj.ip = java.net.InetAddress.getLoopbackAddress.getHostAddress;
+                if strcmp(sArgs.ip,'127.0.0.1')
                     fprintf('[itaOptitrack] No specific host IP address given. Host IP address is set to %s (''localhost'', port %s)\n', char(Optitrack_obj.ip), Optitrack_obj.port)
                 else
                     fprintf('[itaOptitrack] Host IP address: %s (port %s) \n', char(Optitrack_obj.ip), char(Optitrack_obj.port))
