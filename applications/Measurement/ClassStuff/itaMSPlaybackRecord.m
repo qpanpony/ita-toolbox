@@ -35,6 +35,8 @@ classdef itaMSPlaybackRecord < itaMSRecord
         outputamplification_lin % Linear factor from dBFS 'outputamplification' for multiplication
         final_excitation        % Excitation including compensation of relative output sensitivites/spectra - number of channels equal outputMC
         outputVoltage           % used to set outputamplification for a calibrated output chain
+        outputVoltageRMS
+        outputVoltagePeak
     end
     
     properties (Hidden = false, Transient = true, AbortSet = true, SetObservable = true)
@@ -385,6 +387,32 @@ classdef itaMSPlaybackRecord < itaMSRecord
             % decrease output amplification
             plus(this,-value);
         end
+
+
+        function set.outputVoltageRMS(this, value)
+            
+            rms_excitation_voltage = max(this.raw_excitation.rms);
+            this.set_outputamplification_from_voltage(value, rms_excitation_voltage)
+            
+        end
+
+
+        function set.outputVoltagePeak(this, value)
+
+            peak_excitation_voltage = max(max(this.raw_excitation.timeData));
+            this.set_outputamplification_from_voltage(value, peak_excitation_voltage)
+
+        end
+
+
+        function res = get.outputVoltageRMS(this)
+            res = 0;
+        end
+
+        function res =get.outputVoltagePeak(this)
+            res = 0;
+        end
+
         
         function set.outputVoltage(this,value)
             if numel(this.outputChannels) ~= 1
@@ -589,6 +617,29 @@ classdef itaMSPlaybackRecord < itaMSRecord
     
     %% Hidden methods
     methods(Hidden = true)
+
+        function set_outputamplification_from_voltage(this, value, amplitude_excitation)
+            if numel(this.outputChannels) ~= 1
+                ita_verbose_info('Multiple output channels, selecting the one with maximum gain',0);
+                [~, idx] = max(double(this.outputMeasurementChain.hw_ch(this.outputChannels).sensitivity('loudspeaker')));
+                omc = this.outputMeasurementChain.hw_ch(this.outputChannels(idx));
+            else
+                omc = this.outputMeasurementChain.hw_ch(this.outputChannels);
+            end
+            if ~omc.calibrated || omc.sensitivity.value == 1
+                ita_verbose_info('Output measurement chain not calibrated, leaving output voltage unchanged',0);
+            else
+                outSens = double(omc.sensitivity('loudspeaker'));
+                max_output_voltage = amplitude_excitation * outSens;
+                required_digital_gain = value/max_output_voltage;
+                if round(required_digital_gain, 4) > 1
+                    ita_verbose_info(['Given output voltage too high, the maximum voltage with the current setup is ', num2str(max_output_voltage), ' V. Leaving output voltage unchanged'], 0)
+                else
+                    this.outputamplification = 20*log10(required_digital_gain);
+                end
+            end
+        end
+
         
         function display(this)
             % Begin Display Start Line
