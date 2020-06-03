@@ -85,8 +85,9 @@ for idx = 1:input.nChannels
             sampleStart(idx) = 1;
         end
        
-        %my way
-         idx6dBaboveThreshold = find(abs_dat(1:sampleStart(idx)) > sArgs.threshold + 6);
+        % Check if oscillations exist before the last value below threshold
+        % If so, these are part of the RIR and need to be considered.
+        idx6dBaboveThreshold = find(abs_dat(1:sampleStart(idx)) > sArgs.threshold + 6);
         if ~isempty(idx6dBaboveThreshold)
              tmp = find(abs_dat(1:idx6dBaboveThreshold(1)) < sArgs.threshold, 1 ,'last');
              if isempty(tmp) % without this if, the function would generate an error, if the oscillation persists until the first sample
