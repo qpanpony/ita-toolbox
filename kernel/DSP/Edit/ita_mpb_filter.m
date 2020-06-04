@@ -478,7 +478,7 @@ if spk_filter.nChannels == 1
 elseif data.nChannels == 1
     result          = data;
     result.freqData = bsxfun(@times, spk_filter.freqData, data.freqData);
-    
+    result.channelUnits = repmat(data.channelUnits,result.nChannels,1);
     strMat = [num2str(Filter.CenterFreq(:)) repmat(' Hz', length(Filter.CenterFreq), 1)];
     result.channelNames = mat2cell(strMat, ones(1, size(strMat,1)), size(strMat,2));
 else  % TODO: auch schneller
