@@ -288,7 +288,7 @@ classdef itaOptitrack < handle
         singleShot       = 0;     % only log 1 frame of tracking data (e.g. for geometric measurement purposes) [logical]
         correctRowIdx    = 1;     % idx to fill up Optitrack_obj.rigidBodyLogData.data ignoring duplicate frames [double]
         autoconnect      = 0;     % autoconnect after constructing class object [logical]
-        useCalibration   = 0;    % apply calibration on tracking data of following measurements [logical]
+        useCalibration   = [];    % apply calibration on tracking data of following measurements [logical], []...question dialog, 0...do not use calibration, 1...use calibration
         tempRigidBodyLogData = []; % temporal rigidBodyLogData
         lastFrameTime    = [];    % most recent frame of data time
         lastFrameID      = [];    % most recent frame of data ID
@@ -1072,7 +1072,7 @@ classdef itaOptitrack < handle
                         Optitrack_obj.dataCalibration.headToEarAxisCenter.position = itaCoordinates(headToEarAxisCenter);
                         
                         % ask user if calibration data should be applied (if Optitrack_obj.useCalibration is not already set to true)
-                        if Optitrack_obj.useCalibration
+                        if isempty(Optitrack_obj.useCalibration)
                             calmsgbox2 = questdlg('Would you like to apply calibration data in following measurements?','[itaOptitrack]','Yes','No','No');
                             
                             if strcmp(calmsgbox2,'Yes')
