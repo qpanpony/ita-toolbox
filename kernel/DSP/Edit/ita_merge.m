@@ -60,5 +60,23 @@ elseif isempty(varargin{1})
     varargout{1} = varargin{2};
     return
 end
-varargout{1} = merge(varargin{:});
+
+% selecting the dimension to merge over
+if( nargin == 2 && isa(varargin{end},'double') )
+    dim = varargin{end};
+    obj = varargin{1};
+    nDim = ndims(obj);
+    % build selection vector
+    vec = 1 : nDim;
+    vec(dim) = [];
+    vec = [dim, vec];
+    objPerm = permute(obj,vec);
+    for idx = 1:size(obj,dim)
+        objTmp = objPerm(idx,:);
+        objs(idx) = merge(objTmp);
+    end
+    varargout{1} = objs;
+else
+    varargout{1} = merge(varargin{:});
+end
 
