@@ -64,7 +64,7 @@ rpf.run
 %% plot results
 
 rpf.plotSphereEnergy();
-RIR = rpf.getMonauralImpulseResponseItaAudio;
+RIR = rpf.getImpulseResponseItaAudio;
 RIR.ptd;
 T30 = rpf.getT30;
 %%
