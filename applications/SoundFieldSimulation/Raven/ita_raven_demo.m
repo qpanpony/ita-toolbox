@@ -65,7 +65,7 @@ rpf.run;
 
 %% Ergebnisse abholen
 % get room impulse responses
-mono_ir = rpf.getMonauralImpulseResponseItaAudio();     % rpf.getMonauralImpulseResponse() without ITA-Toolbox
+mono_ir = rpf.getImpulseResponseItaAudio();    % rpf.rpf.getImpulseResponse() without ITA-Toolbox
 binaural = rpf.getBinauralImpulseResponseItaAudio();
 reverb_time = rpf.getT30();
 

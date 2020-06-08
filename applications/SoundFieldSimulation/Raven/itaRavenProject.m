@@ -184,9 +184,9 @@ classdef itaRavenProject < handle
         uniformReceiverGridZ = []
         
         % RESULTS %
-        monauralIR = []
-        monauralIR_IS = []
-        monauralIR_RT = []
+        monoIR = []
+        monoIR_IS = []
+        monoIR_RT = []
         binauralIR = []
         binauralIR_IS = []
         binauralIR_RT = []
@@ -236,16 +236,14 @@ classdef itaRavenProject < handle
                 obj.raven_ini = IniConfig();
                 obj.raven_ini.ReadFile(obj.ravenIniFile);
                 obj.ravenExe         = obj.raven_ini.GetValues('Global', 'PathRavenExe', obj.ravenExe);
-                if (exist(obj.ravenExe,'file'))
+                if (ischar(obj.ravenExe) && exist(obj.ravenExe,'file'))
                     obj.raven_ini.WriteFile(obj.ravenIniFile);
                 end
             end
             
             if (~exist(obj.ravenExe,'file'))
-                
-                % neither the default raven console or the path in
-                % itaRaven.ini was not found, try to locate
-                % RavenConsole
+                % neither the default relative raven console path nor the path in
+                % itaRaven.ini was found, try to locate RavenConsole
                 locatedRavenExe = which(obj.ravenExe(10:end));
                 
                 % try default raven exe path after instalation
@@ -260,6 +258,7 @@ classdef itaRavenProject < handle
                     
                     if exist(defaultInstallationPathRavenExe,'file')
                         locatedRavenExe = defaultInstallationPathRavenExe;
+                        obj.ravenExe = defaultInstallationPathRavenExe;
                     end
                 end
                 
@@ -271,10 +270,14 @@ classdef itaRavenProject < handle
                     disp('Individual licenses for academic purposes are available on request.');
                     disp('Please contact: las@akustik.rwth-aachen.de');
                     
-                    [ selectedRavenExe, selectedRavenPath] = uigetfile('*.exe',' No raven binary was found! Please select path to RavenConsole.exe');
-                    obj.ravenExe = [ selectedRavenPath selectedRavenExe];
-                else
-                    obj.ravenExe = locatedRavenExe;
+                    [ selectedRavenExe, selectedRavenPath] = uigetfile('*.exe',' No RAVEN binary was found! Please select path to RavenConsole.exe');
+                    
+                    if (ischar(selectedRavenExe)&& ischar(selectedRavenPath))
+                        obj.ravenExe = [ selectedRavenPath selectedRavenExe];
+                    else
+                        warning('WARNING: RAVEN binary path was set to default, but binary was not found. Please specify the correct path in itaRaven.ini');
+                        obj.ravenExe = defaultInstallationPathRavenExe;
+                    end
                     
                 end
                 
@@ -303,10 +306,10 @@ classdef itaRavenProject < handle
             obj.deleteResultsInRavenFolder();
         end
         
-                %------------------------------------------------------------------
+        %------------------------------------------------------------------
         function setRavenIniPath(obj, newPath)
-                obj.ravenIniFile = newPath;
-           end
+            obj.ravenIniFile = newPath;
+        end
         
         %------------------------------------------------------------------
         function copyProjectToNewRPFFile(obj, newPath)
@@ -512,7 +515,7 @@ classdef itaRavenProject < handle
                 %                 system([obj.ravenExe ' "' obj.ravenProjectFile '" >> ' obj.ravenLogFile]);
                 
                 if (~exist(obj.ravenExe,'file'))
-                    error('[itaRaven]: Error: Cannot find Raven binary file!');
+                    error('[itaRaven]: Error: Cannot find Raven binary file! Please check itaRaven.ini file!');
                 end
                 
                 prevPath = pwd;
@@ -839,11 +842,11 @@ classdef itaRavenProject < handle
             obj.setModel(outputFilePath);
             
         end
-
+        
         %------------------------------------------------------------------
         function [outputFilePath] = setModelToFaces(obj,points,faces,materials)
             % setModelToFaces
-            % creates a room model using points and faces and automatically 
+            % creates a room model using points and faces and automatically
             % sets the model of the current project to the so defined room.
             % The room has one material assigned to each face (mat1 ..
             % mat6), which can be set using
@@ -856,7 +859,7 @@ classdef itaRavenProject < handle
             %
             % Input:
             %   points (matrix Nx3 in meters, columns represnt x, y, and z)
-            %   faces (cell array, faces are defined pointing to the rows 
+            %   faces (cell array, faces are defined pointing to the rows
             % of matrix points) the first element points the material
             %   materials (cell array) This array does not necesarlly match
             % the number of surfaces
@@ -884,12 +887,12 @@ classdef itaRavenProject < handle
             else
                 idx=1:size(points,1);
             end
-
+            
             
             fid = fopen(outputFilePath,'w');
             fprintf(fid,'AC3Db\n');
             
-            for iW=1:nW 
+            for iW=1:nW
                 fprintf(fid,['MATERIAL "' materials{faces{iW}(1)} '" rgb ' num2str(0.0) ' ' num2str(0.0) ' ' num2str(0.9/nW*iW) ' amb 0.2 0.2 0.2  emis 0 0 0  spec 0.2 0.2 0.2  shi 128  trans 0 \n']);
             end
             
@@ -905,7 +908,7 @@ classdef itaRavenProject < handle
                 fprintf(fid,['numvert ' num2str(nP) '\n']);
                 
                 for iP=1:nP
-                fprintf(fid,[sprintf('%1.4f %1.4f %1.4f',points(faces{iW}(iP+1)==idx,fn+(1:3))) '\n']);
+                    fprintf(fid,[sprintf('%1.4f %1.4f %1.4f',points(faces{iW}(iP+1)==idx,fn+(1:3))) '\n']);
                 end
                 
                 fprintf(fid,'numsurf 1\n');
@@ -925,7 +928,7 @@ classdef itaRavenProject < handle
             obj.setModel(outputFilePath);
             
         end
-
+        
         %------------------------------------------------------------------
         function figureHandle=plotModel(obj, tgtAxes, comp2axesMapping, wireframe)
             if isempty(obj.modelFileList)
@@ -986,7 +989,7 @@ classdef itaRavenProject < handle
             sview = sview(:, comp2axesMapping).*repmat(invertAxes,size(sview,1),1);
             sup = obj.getSourceUpVectors;
             sup = sup(:, comp2axesMapping).*repmat(invertAxes,size(sup,1),1);
-
+            
             snames = obj.getSourceNames;
             
             rpos = obj.getReceiverPosition;
@@ -999,7 +1002,7 @@ classdef itaRavenProject < handle
             
             % plot source and receivers
             plot3(spos(:,1),spos(:,2),spos(:,3),'marker','o','markersize',9,'linestyle','none','linewidth',1.5)
-%             hold on; view(0,90);
+            %             hold on; view(0,90);
             plot3(rpos(:,1),rpos(:,2),rpos(:,3),'marker','x','markersize',9,'linestyle','none','linewidth',1.5)
             
             % plot view vectors (red) of sources
@@ -1010,9 +1013,9 @@ classdef itaRavenProject < handle
             
             
             % plot up vectors (green) of sources and receivers )
-             quiver3(spos(:,1),spos(:,2),spos(:,3),0.5*sup(:,1),0.5*sup(:,2),0.5*sup(:,3),0,'color','g','maxheadsize',1.5,'linewidth',1.5);
+            quiver3(spos(:,1),spos(:,2),spos(:,3),0.5*sup(:,1),0.5*sup(:,2),0.5*sup(:,3),0,'color','g','maxheadsize',1.5,'linewidth',1.5);
             
-             quiver3(rpos(:,1),rpos(:,2),rpos(:,3),0.5*rup(:,1),0.5*rup(:,2),0.5*rup(:,3),0,'color','g','maxheadsize',1.5,'linewidth',1.5);
+            quiver3(rpos(:,1),rpos(:,2),rpos(:,3),0.5*rup(:,1),0.5*rup(:,2),0.5*rup(:,3),0,'color','g','maxheadsize',1.5,'linewidth',1.5);
             
             
             % plot names
@@ -1094,8 +1097,8 @@ classdef itaRavenProject < handle
             if ( strcmp(outputPath(end),'\') ||  strcmp(outputPath(end),'/') )
                 outputPath = outputPath(1:end-1);
             end
-                
-                
+            
+            
             freqVector = [20 25 31.5 40 50 63 80 100 125 160 200 250 315 400 500 630 800 1000 1250 1600 2000 2500 3150 4000 5000 6300 8000 10000 12500 16000 20000];
             freqLabel3rdVisual = { '', '', '31.5 Hz', '', '', '' '', '  ', '  125 Hz', ' ', ' ', ...
                 '', ' ', ' ', '  500 Hz', ' ', '  ', '', '', ' ', '   2 kHz', ...
@@ -1506,7 +1509,7 @@ classdef itaRavenProject < handle
             %      Set the RAVEN source directivity database path. Here all
             %      directivities (.daff files) should be located
             %
-            %      To generate new files, check out opendaff in the 
+            %      To generate new files, check out opendaff in the
             %      \applications\VirtualAcoustics\openDAFF\
             %
             %      RAVEN currently only supports OpenDAFFv1.5 files
@@ -2254,105 +2257,105 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
-        function monauralIR = getMonauralImpulseResponse(obj)
-            if isempty(obj.monauralIR)
-                error('No monaural impulse response present.');
+        function monoIR = getImpulseResponse(obj)
+            if isempty(obj.monoIR)
+                error('No mono room impulse response present.');
             end
             
-            if numel(obj.monauralIR) > 1
-                monauralIR = obj.monauralIR;
+            if numel(obj.monoIR) > 1
+                monoIR = obj.monoIR;
             else
-                monauralIR = obj.monauralIR{1,1};
+                monoIR = obj.monoIR{1,1};
             end
         end
         
         %------------------------------------------------------------------
-        function monauralIRitaAudio = getMonauralImpulseResponseItaAudio(obj)
-            if isempty(obj.monauralIR)
-                error('No monaural impulse response present.');
+        function monoIRitaAudio = getImpulseResponseItaAudio(obj)
+            if isempty(obj.monoIR)
+                error('No mono room impulse response present.');
             end
             
-            monauralIRitaAudio = itaAudio(size(obj.monauralIR));
+            monoIRitaAudio = itaAudio(size(obj.monoIR));
             
-            for iSrc = 1 : size(obj.monauralIR, 1)
-                for iRec = 1 : size(obj.monauralIR, 2)
-                    monauralIRitaAudio(iSrc,iRec).timeData = obj.monauralIR{iSrc,iRec};
-                    monauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
-                    monauralIRitaAudio(iSrc,iRec).signalType = 'energy';
-                    monauralIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
+            for iSrc = 1 : size(obj.monoIR, 1)
+                for iRec = 1 : size(obj.monoIR, 2)
+                    monoIRitaAudio(iSrc,iRec).timeData = obj.monoIR{iSrc,iRec};
+                    monoIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
+                    monoIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    monoIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
                     %Make sure number of samples is even
-                    if mod(monauralIRitaAudio(iSrc,iRec).nSamples,2)==1
-                        monauralIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    if mod(monoIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        monoIRitaAudio(iSrc,iRec).timeData(end, :) = [];
                     end
                 end
             end
         end
         
         %------------------------------------------------------------------
-        function monauralIR_IS = getMonauralImpulseResponseImageSources(obj)
-            if isempty(obj.monauralIR_IS)
-                error('No monaural image source impulse response present.');
+        function monoIR_IS = getImpulseResponseImageSources(obj)
+            if isempty(obj.monoIR_IS)
+                error('No mono image source impulse response present.');
             end
             
-            if numel(obj.monauralIR_IS) > 1
-                monauralIR_IS = obj.monauralIR_IS;
+            if numel(obj.monoIR_IS) > 1
+                monoIR_IS = obj.monoIR_IS;
             else
-                monauralIR_IS = obj.monauralIR_IS{1,1};
+                monoIR_IS = obj.monoIR_IS{1,1};
             end
         end
         
         %------------------------------------------------------------------
-        function monauralIR_RT = getMonauralImpulseResponseRayTracing(obj)
-            if isempty(obj.monauralIR_RT)
-                error('No monaural ray tracing impulse response present.');
+        function monoIR_RT = getImpulseResponseRayTracing(obj)
+            if isempty(obj.monoIR_RT)
+                error('No mono ray tracing impulse response present.');
             end
             
-            if numel(obj.monauralIR_RT) > 1
-                monauralIR_RT = obj.monauralIR_RT;
+            if numel(obj.monoIR_RT) > 1
+                monoIR_RT = obj.monoIR_RT;
             else
-                monauralIR_RT = obj.monauralIR_RT{1,1};
+                monoIR_RT = obj.monoIR_RT{1,1};
             end
         end
         
         %------------------------------------------------------------------
-        function monauralIRitaAudio = getMonauralImpulseResponseImageSourcesItaAudio(obj)
-            if isempty(obj.monauralIR_IS)
-                error('No monaural image source impulse response present.');
+        function monoIRitaAudio = getImpulseResponseImageSourcesItaAudio(obj)
+            if isempty(obj.monoIR_IS)
+                error('No mono image source impulse response present.');
             end
             
-            monauralIRitaAudio = itaAudio(size(obj.monauralIR_IS));
+            monoIRitaAudio = itaAudio(size(obj.monoIR_IS));
             
-            for iSrc = 1 : size(obj.monauralIR_IS, 1)
-                for iRec = 1 : size(obj.monauralIR_IS, 2)
-                    monauralIRitaAudio(iSrc,iRec).timeData = obj.monauralIR_IS{iSrc,iRec};
-                    monauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
-                    monauralIRitaAudio(iSrc,iRec).signalType = 'energy';
-                    monauralIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
+            for iSrc = 1 : size(obj.monoIR_IS, 1)
+                for iRec = 1 : size(obj.monoIR_IS, 2)
+                    monoIRitaAudio(iSrc,iRec).timeData = obj.monoIR_IS{iSrc,iRec};
+                    monoIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
+                    monoIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    monoIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
                     %Make sure number of samples is even
-                    if mod(monauralIRitaAudio(iSrc,iRec).nSamples,2)==1
-                        monauralIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    if mod(monoIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        monoIRitaAudio(iSrc,iRec).timeData(end, :) = [];
                     end
                 end
             end
         end
         
         %------------------------------------------------------------------
-        function monauralIRitaAudio = getMonauralImpulseResponseRayTracingItaAudio(obj)
-            if isempty(obj.monauralIR_RT)
-                error('No monaural ray tracing impulse response present.');
+        function monoIRitaAudio = getImpulseResponseRayTracingItaAudio(obj)
+            if isempty(obj.monoIR_RT)
+                error('No mono ray tracing impulse response present.');
             end
             
-            monauralIRitaAudio = itaAudio(size(obj.monauralIR_RT));
+            monoIRitaAudio = itaAudio(size(obj.monoIR_RT));
             
-            for iSrc = 1 : size(obj.monauralIR_RT, 1)
-                for iRec = 1 : size(obj.monauralIR_RT, 2)
-                    monauralIRitaAudio(iSrc,iRec).timeData = obj.monauralIR_RT{iSrc,iRec};
-                    monauralIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
-                    monauralIRitaAudio(iSrc,iRec).signalType = 'energy';
-                    monauralIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
+            for iSrc = 1 : size(obj.monoIR_RT, 1)
+                for iRec = 1 : size(obj.monoIR_RT, 2)
+                    monoIRitaAudio(iSrc,iRec).timeData = obj.monoIR_RT{iSrc,iRec};
+                    monoIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
+                    monoIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    monoIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
                     %Make sure number of samples is even
-                    if mod(monauralIRitaAudio(iSrc,iRec).nSamples,2)==1
-                        monauralIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    if mod(monoIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        monoIRitaAudio(iSrc,iRec).timeData(end, :) = [];
                     end
                 end
             end
@@ -3955,6 +3958,24 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
+        function T20 = getT20(obj, averageOverReceivers, averageOverFrequencies, afterDIN, sourceID)
+            if nargin < 2
+                averageOverReceivers = 0;
+            end
+            if nargin < 3
+                averageOverFrequencies = 0;
+            end
+            if nargin < 4
+                afterDIN = 0;
+            end
+            if nargin < 5
+                sourceID = 0;
+            end
+            
+            T20 = obj.getRT(averageOverReceivers, averageOverFrequencies, afterDIN, -5, -25, sourceID);
+        end
+        
+        %------------------------------------------------------------------
         function T30 = getT30(obj, averageOverReceivers, averageOverFrequencies, afterDIN, sourceID)
             if nargin < 2
                 averageOverReceivers = 0;
@@ -3973,9 +3994,25 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
-        function T30 = getRT(obj, averageOverReceivers, averageOverFrequencies, afterDIN, from_dB, to_dB, sourceID)
-            % getT30(averageOverReceivers, averageOverFrequencies, afterDIN, from_dB, to_dB, sourceID)
+        function T60 = getT60(obj, averageOverReceivers, averageOverFrequencies, afterDIN, sourceID)
+            if nargin < 2
+                averageOverReceivers = 0;
+            end
+            if nargin < 3
+                averageOverFrequencies = 0;
+            end
+            if nargin < 4
+                afterDIN = 0;
+            end
+            if nargin < 5
+                sourceID = 0;
+            end
             
+            T60 = obj.getRT(averageOverReceivers, averageOverFrequencies, afterDIN, -5, -65, sourceID);
+        end
+        
+        %------------------------------------------------------------------
+        function RT = getRT(obj, averageOverReceivers, averageOverFrequencies, afterDIN, from_dB, to_dB, sourceID)
             if nargin < 2
                 averageOverReceivers = 0;
             end
@@ -4003,7 +4040,7 @@ classdef itaRavenProject < handle
             
             % get number of frequency bands
             numFrequencyBands = size(obj.histogram{find(~cellfun(@isempty, obj.histogram), 1)}.data, 2);
-            T30 = cell(size(obj.histogram,2),1);   % T30{1..numReceivers}(1..numFrequencyBands)
+            RT = cell(size(obj.histogram,2),1);   % T30{1..numReceivers}(1..numFrequencyBands)
             
             for iRec = 1 : size(obj.histogram, 2)
                 if ~isempty(obj.histogram{sourceID+1,iRec})
@@ -4023,25 +4060,25 @@ classdef itaRavenProject < handle
                     end
                     
                     % reverberation times
-                    T30{iRec} = -60 ./ slope;
+                    RT{iRec} = -60 ./ slope;
                 else
-                    T30{iRec} = [];
+                    RT{iRec} = [];
                 end
             end
             
             if averageOverReceivers
-                T30 = obj.averageOverReceivers(T30);
+                RT = obj.averageOverReceivers(RT);
             end
             
             if averageOverFrequencies
                 if nargin < 4
                     afterDIN = 0;
                 end
-                T30 = obj.averageAfterDIN(T30, afterDIN);
+                RT = obj.averageAfterDIN(RT, afterDIN);
             end
             
-            if (numel(T30) == 1) && iscell(T30)
-                T30 = T30{1};
+            if (numel(RT) == 1) && iscell(RT)
+                RT = RT{1};
             end
         end
         
@@ -4480,14 +4517,14 @@ classdef itaRavenProject < handle
             end
             
             % check if simulation was already run
-            if isempty(obj.monauralIR)
+            if isempty(obj.monoIR)
                 obj.run();
             else
                 disp('Using results from last simulation run.');
             end
             
-            disp('get monaural impulse response');
-            rir = obj.getMonauralImpulseResponseItaAudio();
+            disp('get mono room impulse response');
+            rir = obj.getImpulseResponseItaAudio();
             
             % merge IRs of multiple receivers into 1 multichannel itaAudio
             if iscell(rir)
@@ -4591,7 +4628,7 @@ classdef itaRavenProject < handle
                 obj.run();
                 
                 disp('get monaural impulse response');
-                rir = obj.getMonauralImpulseResponseItaAudio();
+                rir = obj.getImpulseResponseItaAudio();
                 
                 % merge IRs of multiple receivers into 1 multichannel itaAudio
                 if numel(rir) > 1
@@ -4616,7 +4653,7 @@ classdef itaRavenProject < handle
         %------------------------------------------------------------------
         function T30 = getT30_fromImpulseResponse(obj)
             
-            IRs = obj.getMonauralImpulseResponseItaAudio();
+            IRs = obj.getImpulseResponseItaAudio();
             
             for i = 1 : numel(IRs)
                 if ~isempty(IRs{i})
@@ -5167,11 +5204,11 @@ classdef itaRavenProject < handle
             end
             
             if isempty(obj.histogram)
-                if ~isempty(obj.monauralIR)
+                if ~isempty(obj.monoIR)
                     disp('Calculating energy from impulse response.');
-                    sphereEnergy = zeros(size(obj.monauralIR,2), 1);
-                    for i = 1 : size(obj.monauralIR,2)
-                        sphereEnergy(i) = 10*log10( sum(obj.monauralIR{sourceID+1,i}.^2) );
+                    sphereEnergy = zeros(size(obj.monoIR,2), 1);
+                    for i = 1 : size(obj.monoIR,2)
+                        sphereEnergy(i) = 10*log10( sum(obj.monoIR{sourceID+1,i}.^2) );
                     end
                 else
                     error(sprintf('No histogram present.\nHINT: This error message might occur due to a corrupted SketchUp export.\nIf you are sure that the histogram is set, you could try to export your room model and raven project file again.')); %#ok
@@ -5290,11 +5327,11 @@ classdef itaRavenProject < handle
             end
             
             if isempty(obj.histogram)
-                if ~isempty(obj.monauralIR)
+                if ~isempty(obj.monoIR)
                     disp('Calculating energy from impulse response.');
-                    surfaceEnergy = zeros(size(obj.monauralIR,2), 1);
-                    for i = 1 : size(obj.monauralIR,2)
-                        surfaceEnergy(i) = 10*log10( sum(obj.monauralIR{sourceID+1,i}.^2) );
+                    surfaceEnergy = zeros(size(obj.monoIR,2), 1);
+                    for i = 1 : size(obj.monoIR,2)
+                        surfaceEnergy(i) = 10*log10( sum(obj.monoIR{sourceID+1,i}.^2) );
                     end
                 else
                     error(sprintf('No histogram present.\nHINT: This error message might occur due to a corrupted SketchUp export.\nIf you are sure that the histogram is set, you could try to export your room model and raven project file again.')); %#ok
@@ -5325,11 +5362,11 @@ classdef itaRavenProject < handle
             end
             
             if isempty(obj.histogram)
-                if ~isempty(obj.monauralIR)
+                if ~isempty(obj.monoIR)
                     disp('Calculating energy from impulse response.');
-                    surfaceEnergy = zeros(size(obj.monauralIR,2), 1);
-                    for i = 1 : size(obj.monauralIR,2)
-                        surfaceEnergy(i) = sum(obj.monauralIR{sourceID+1,i}.^2);
+                    surfaceEnergy = zeros(size(obj.monoIR,2), 1);
+                    for i = 1 : size(obj.monoIR,2)
+                        surfaceEnergy(i) = sum(obj.monoIR{sourceID+1,i}.^2);
                     end
                 else
                     error(sprintf('No histogram present.\nHINT: This error message might occur due to a corrupted SketchUp export.\nIf you are sure that the histogram is set, you could try to export your room model and raven project file again.')); %#ok
@@ -5380,13 +5417,13 @@ classdef itaRavenProject < handle
             
             numTimeSteps = 0;
             if isempty(obj.histogram)
-                if ~isempty(obj.monauralIR)
+                if ~isempty(obj.monoIR)
                     disp('Calculating energy from impulse response.');
-                    numTimeSteps = size(obj.monauralIR{find(~cellfun(@isempty, obj.monauralIR), 1)}, 1);
-                    sphereEnergy = zeros(size(obj.monauralIR,2), numTimeSteps);
-                    for i_sphere = 1 : size(obj.monauralIR,2)
+                    numTimeSteps = size(obj.monoIR{find(~cellfun(@isempty, obj.monoIR), 1)}, 1);
+                    sphereEnergy = zeros(size(obj.monoIR,2), numTimeSteps);
+                    for i_sphere = 1 : size(obj.monoIR,2)
                         for i_sample = 1 : numTimeSteps
-                            sphereEnergy(i_sphere, i_sample) = 10*log10(obj.monauralIR{sourceID+1,i}(i_sample)^2  + eps);
+                            sphereEnergy(i_sphere, i_sample) = 10*log10(obj.monoIR{sourceID+1,i}(i_sample)^2  + eps);
                         end
                     end
                 else
@@ -5507,6 +5544,116 @@ classdef itaRavenProject < handle
             obj.gatherResults();
             obj.setOutputPath(oldPath);
         end
+        
+                %------------------------------------------------------------------
+        function monoIR = getMonauralImpulseResponse(obj)
+            if isempty(obj.monoIR)
+                error('No mono room impulse response present.');
+            end
+            
+            if numel(obj.monoIR) > 1
+                monoIR = obj.monoIR;
+            else
+                monoIR = obj.monoIR{1,1};
+            end
+        end
+        
+        %------------------------------------------------------------------
+        function monoIRitaAudio = getMonauralImpulseResponseItaAudio(obj)
+            if isempty(obj.monoIR)
+                error('No mono room impulse response present.');
+            end
+            
+            monoIRitaAudio = itaAudio(size(obj.monoIR));
+            
+            for iSrc = 1 : size(obj.monoIR, 1)
+                for iRec = 1 : size(obj.monoIR, 2)
+                    monoIRitaAudio(iSrc,iRec).timeData = obj.monoIR{iSrc,iRec};
+                    monoIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
+                    monoIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    monoIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
+                    %Make sure number of samples is even
+                    if mod(monoIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        monoIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    end
+                end
+            end
+        end
+        
+        %------------------------------------------------------------------
+        function monoIR_IS = getMonauralImpulseResponseImageSources(obj)
+            if isempty(obj.monoIR_IS)
+                error('No mono image source impulse response present.');
+            end
+            
+            if numel(obj.monoIR_IS) > 1
+                monoIR_IS = obj.monoIR_IS;
+            else
+                monoIR_IS = obj.monoIR_IS{1,1};
+            end
+        end
+        
+        %------------------------------------------------------------------
+        function monoIR_RT = getMonauralImpulseResponseRayTracing(obj)
+            if isempty(obj.monoIR_RT)
+                error('No mono ray tracing impulse response present.');
+            end
+            
+            if numel(obj.monoIR_RT) > 1
+                monoIR_RT = obj.monoIR_RT;
+            else
+                monoIR_RT = obj.monoIR_RT{1,1};
+            end
+        end
+        
+        %------------------------------------------------------------------
+        function monoIRitaAudio = getMonauralImpulseResponseImageSourcesItaAudio(obj)
+            if isempty(obj.monoIR_IS)
+                error('No mono image source impulse response present.');
+            end
+            
+            monoIRitaAudio = itaAudio(size(obj.monoIR_IS));
+            
+            for iSrc = 1 : size(obj.monoIR_IS, 1)
+                for iRec = 1 : size(obj.monoIR_IS, 2)
+                    monoIRitaAudio(iSrc,iRec).timeData = obj.monoIR_IS{iSrc,iRec};
+                    monoIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
+                    monoIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    monoIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
+                    %Make sure number of samples is even
+                    if mod(monoIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        monoIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    end
+                end
+            end
+        end
+        
+        %------------------------------------------------------------------
+        function monoIRitaAudio = getMonauralImpulseResponseRayTracingItaAudio(obj)
+            if isempty(obj.monoIR_RT)
+                error('No mono ray tracing impulse response present.');
+            end
+            
+            monoIRitaAudio = itaAudio(size(obj.monoIR_RT));
+            
+            for iSrc = 1 : size(obj.monoIR_RT, 1)
+                for iRec = 1 : size(obj.monoIR_RT, 2)
+                    monoIRitaAudio(iSrc,iRec).timeData = obj.monoIR_RT{iSrc,iRec};
+                    monoIRitaAudio(iSrc,iRec).samplingRate = obj.sampleRate;
+                    monoIRitaAudio(iSrc,iRec).signalType = 'energy';
+                    monoIRitaAudio(iSrc,iRec).channelNames{1} = obj.receiverNames{iRec};
+                    %Make sure number of samples is even
+                    if mod(monoIRitaAudio(iSrc,iRec).nSamples,2)==1
+                        monoIRitaAudio(iSrc,iRec).timeData(end, :) = [];
+                    end
+                end
+            end
+        end
+        
+        
+        
+        
+        
     end
     
     %---------------------- PRIVATE METHODS ------------------------------%
@@ -5524,13 +5671,13 @@ classdef itaRavenProject < handle
                 ir_files_RT = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\RIR_RT', 'PrimarySource', 'Receiver'}, '.wav');
                 
                 % read the wave files back from disk
-                obj.monauralIR = obj.loadWaveFile(ir_files);
-                obj.monauralIR_IS = obj.loadWaveFile(ir_files_IS);
-                obj.monauralIR_RT = obj.loadWaveFile(ir_files_RT);
+                obj.monoIR = obj.loadWaveFile(ir_files);
+                obj.monoIR_IS = obj.loadWaveFile(ir_files_IS);
+                obj.monoIR_RT = obj.loadWaveFile(ir_files_RT);
             else
-                obj.monauralIR = [];
-                obj.monauralIR_IS = [];
-                obj.monauralIR_RT = [];
+                obj.monoIR = [];
+                obj.monoIR_IS = [];
+                obj.monoIR_RT = [];
             end
             if obj.generateBRIR
                 ir_files = obj.scan_output_folder(fullfile(obj.pathResults, obj.projectTag), {'\BRIR_Combined', 'PrimarySource', 'Receiver'}, '.wav');

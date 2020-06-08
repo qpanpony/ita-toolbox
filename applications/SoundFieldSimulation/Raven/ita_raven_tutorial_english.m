@@ -51,7 +51,7 @@ rpf.setSourceDirectivity('KH_O100_Oli_5x5_3rd_relativiert_auf_azi0_ele0.daff');
 rpf.run;
 %% read out
 
-mono_ir = rpf.getMonauralImpulseResponseItaAudio();     % or rpf.getMonauralImpulseResponse() without ITA-Toolbox
+mono_ir = rpf.getImpulseResponseItaAudio();   
 binaural = rpf.getBinauralImpulseResponseItaAudio();
 reverb_time = rpf.getT30();
 %% Plot --> ITA-Toolbox...
