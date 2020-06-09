@@ -2,7 +2,7 @@
 %  OpenDAFF
 %
 
-function [ metadata ] = daffv17_add_metadata(metadata, keyname, datatype, value)
+function [ metadata ] = daffv17_add_metadata( metadata, keyname, datatype, value, override )
 %DAFF_METADATA_ADDKEY Adds another key to a DAFF metadata struct
 %   TODO:
 %   ITAToolbox schauen
@@ -15,11 +15,15 @@ function [ metadata ] = daffv17_add_metadata(metadata, keyname, datatype, value)
     
     if (~ischar(keyname)), error(['[' mfilename '] Key name must be a string']); end;
     
+    if nargin < 5
+        override = false;
+    end
+    
     % Keynames are case-insensitive (convert to upper case)
     keyname = upper(keyname);
-    
+        
     % Test wheather a key of the given name already exists
-    if any(strcmp({metadata(:).name}, keyname))
+    if any(strcmp({metadata(:).name}, keyname)) && ~override
         error(['[' mfilename '] Key ''' keyname ''' already exists']);
     end
     
