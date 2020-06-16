@@ -1493,8 +1493,10 @@ classdef itaRavenProject < handle
                 obj.sourceDirectivity   = directivity;
             else
                 obj.sourceDirectivityString = directivity;
-                obj.sourceDirectivity   = textscan(obj.sourceDirectivityString, '%s', 'Delimiter', ',');
-                obj.sourceDirectivity   = obj.sourceDirectivity{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rückgängig gemacht
+                if ~isempty(directivity)
+                    obj.sourceDirectivity   = textscan(obj.sourceDirectivityString, '%s', 'Delimiter', ',');
+                    obj.sourceDirectivity   = obj.sourceDirectivity{1}; % textscan liefert cell array in nochmal einer zelle, diese doppelkapselung wird hier rückgängig gemacht
+                end
             end
             obj.rpf_ini.SetValues('PrimarySources', 'sourceDirectivity', obj.sourceDirectivityString);
             obj.rpf_ini.WriteFile(obj.ravenProjectFile);
