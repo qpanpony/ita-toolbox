@@ -8,6 +8,8 @@ assert( numel( receiver_pos ) == 3 )
 
 %% Calculations
 
+% Based on a line-plane intersection
+
 source_receiver_vec = receiver_pos - source_pos;
 source_receiver_dir = source_receiver_vec / norm( source_receiver_vec );
 aperture_dir = obj.aperture_direction / norm( obj.aperture_direction );
@@ -22,13 +24,11 @@ aux_plane_vec = cross( source_receiver_dir, aperture_dir );
 aux_plane_dir = aux_plane_vec / norm( aux_plane_vec );
 aux_plane_normal = cross( source_receiver_dir, aux_plane_dir );
 
-
 % Determine intersection of line (aperture) and auxiliary plane
-
-lambda_divisor = ( -1 ) * dot( aux_plane_normal, aperture_dir );
+lambda_divisor = dot( aux_plane_normal, aperture_dir );
 assert( lambda_divisor ~= 0 )
-
-lambda = dot( aux_plane_normal, obj.location ) / lambda_divisor;
+d = dot( aux_plane_normal, obj.location ); % Distance to origin
+lambda = ( d - dot( aux_plane_normal, obj.location ) ) / lambda_divisor;
 aperture_point = obj.location + lambda * aperture_dir;
 
 end

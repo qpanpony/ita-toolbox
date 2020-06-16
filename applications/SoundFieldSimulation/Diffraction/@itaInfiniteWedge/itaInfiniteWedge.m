@@ -173,8 +173,9 @@ classdef itaInfiniteWedge
         
         function aperture_point = get_aperture_point( obj, source_pos, receiver_pos )
             % GET_APERTURE_POINT Returns approximated aperture point on wedge
-            warning 'Aperture cannot be analytically determined, using approximation. See also get_aperture_point_far_field.'
-            aperture_point = obj.approx_aperture_point( source_pos, receiver_pos );
+            %warning 'Aperture cannot be analytically determined, using approximation. See also get_aperture_point_far_field.'
+            %aperture_point = obj.approx_aperture_point( source_pos, receiver_pos );
+            aperture_point = obj.get_aperture_point_far_field( source_pos, receiver_pos );
         end
         
         function obj = set.boundary_condition( obj, bc )

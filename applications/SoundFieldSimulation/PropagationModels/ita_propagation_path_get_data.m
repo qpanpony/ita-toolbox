@@ -123,7 +123,7 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
             plot3(ap_point3(1),ap_point3(2),ap_point3(3),'.b') %point which should be predicted from aperture point method
             plot3(ap_point4(1),ap_point4(2),ap_point4(3),'.g') %point which should be predicted from aperture point method
             %}
-            aperture_point = w.get_aperture_point2( source_pos, target_pos );
+            aperture_point = w.get_aperture_point( source_pos, target_pos );
             if ~w.point_on_aperture( aperture_point )
                 warning('Invalid path, aperture point calculated not on the aperture');
                 valid = false;
@@ -167,7 +167,7 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
                 continue
             end
 
-            aperture_point = w.get_aperture_point2( source_pos, target_pos );
+            aperture_point = w.get_aperture_point( source_pos, target_pos );
             if ~w.point_on_aperture( aperture_point )
                 warning('Invalid path, aperture point calculated not on the aperture');
                 valid = false;
