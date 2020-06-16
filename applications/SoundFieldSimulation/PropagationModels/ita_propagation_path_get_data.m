@@ -19,12 +19,12 @@ pd = pp.propagation_anchors;
 N = numel( pd );
 
 record_paths = 0;
-if( nargin == 4 ) %if option is set, return path data
+if( nargin == 4 ) % if option is set, return path data
     if( strcmp( varargin, 'record_paths' ) == 1 )
         varargout{1} = zeros(N,3);
         if( isa( pd, 'struct' ) )
-            varargout{1}(1,:) = pd(1).interaction_point(1:3);
-            varargout{1}(N,:) = pd(N).interaction_point(1:3);
+            varargout{1}(1,:) = pd(1).interaction_point(1:3);  % source point
+            varargout{1}(N,:) = pd(N).interaction_point(1:3);  % receiver point 
         else
             varargout{1}(1,:) = pd{1}.interaction_point(1:3);
             varargout{1}(N,:) = pd{N}.interaction_point(1:3);
@@ -38,8 +38,8 @@ elseif( nargin > 4 )
 end
 
 if N < 1
-    error('Only one interaction point given') % No path constructable
-elseif N == 2 %direct sound
+    error( 'Only one interaction point given' ) % No path constructable
+elseif N == 2 % direct sound
     source = pd( 1 );
     receiver = pd( 2 );
     total_distance = norm( receiver.interaction_point - source.interaction_point );  
@@ -95,34 +95,7 @@ for i = 2:N-1 %start from 2, first entry is always source, -1 as receiver always
                 valid = false;
                 continue
             end
-            %{
-            plot3([w.aperture_start_point(1),w.aperture_end_point(1)],[w.aperture_start_point(2),w.aperture_end_point(2)],[w.aperture_start_point(3),w.aperture_end_point(3)])
-            plot3([eff_source_pos(1),path_data{i}.interaction_point(1)],[eff_source_pos(2),path_data{i}.interaction_point(2)],[eff_source_pos(3),path_data{i}.interaction_point(3)])
-            plot3([eff_receiver_pos(1),path_data{i}.interaction_point(1)],[eff_receiver_pos(2),path_data{i}.interaction_point(2)],[eff_receiver_pos(3),path_data{i}.interaction_point(3)])
-            %}
-            %{
-            smallest_dist = 1000000;
-            n0 = 10000; %number of iterations
-            its = norm(w.aperture_start_point - w.aperture_end_point) / norm(w.aperture_direction); %number of aperture directions along aperture
-            for it = 0:n0
-                point_on_ap = w.aperture_start_point + (it*its/n0)*w.aperture_direction;
-                source_length = norm( point_on_ap - source_pos );
-                receiver_length = norm( eff_receiver_pos - point_on_ap );
-                total_dist = source_length + receiver_length;
-                if( total_dist < smallest_dist )
-                    smallest_dist = total_dist;
-                    ap_point = point_on_ap;
-                end
-            end
-            plot3(ap_point(1),ap_point(2),ap_point(3),'.k') %true closest point
-
-            ap_point2 = w.get_aperture_point( source_pos, receiver_pos );
-            ap_point3 = w.get_aperture_point( eff_source_pos, eff_receiver_pos );
-            ap_point4 = w.get_aperture_point2( source_pos, receiver_pos );
-            plot3(ap_point2(1),ap_point2(2),ap_point2(3),'.r') %point which should be predicted from aperture point method
-            plot3(ap_point3(1),ap_point3(2),ap_point3(3),'.b') %point which should be predicted from aperture point method
-            plot3(ap_point4(1),ap_point4(2),ap_point4(3),'.g') %point which should be predicted from aperture point method
-            %}
+           
             aperture_point = w.get_aperture_point( source_pos, target_pos );
             if ~w.point_on_aperture( aperture_point )
                 warning('Invalid path, aperture point calculated not on the aperture');
@@ -200,18 +173,14 @@ end
 
 %% Determine DSP coefficients / path data
 
-frequency_mags = frequency_mags .* (1 - ita_atmospheric_absorption_factor( f, total_distance )); %flter contribution from atmospheric absorption
-    
+frequency_mags = frequency_mags .* ( 1 - ita_atmospheric_absorption_factor( f, total_distance ) ); % filter contribution from atmospheric absorption
+
+delay = total_distance / c;    
+
 if( number_of_diff == 0 ) %if there was no diffraction in path, apply 1/r distance law for gain
     gain = 1 / total_distance;
 elseif( mod(number_of_diff,2) == 1 ) %correct for phase of diffracted paths for an odd number of diffractions
     gain = gain * -1;
 end
-
-segment_distance = norm( a_next.interaction_point - a_curr.interaction_point );
-total_distance = total_distance + segment_distance;
-delay = total_distance / c;
-
-%drawnow % can be removed?
 
 end
