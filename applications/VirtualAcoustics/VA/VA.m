@@ -516,6 +516,25 @@ classdef VA < handle
 		[geo_mesh_id] = VAMatlab('create_geometry_mesh_from_file', this.handle, file_path,geo_mesh_name);
 	end
 
+	function [scene_id] = create_scene(this, params,scene_name)
+		% Creates a scene from a file resource
+		%
+		% Parameters:
+		%
+		% 	params [string] Parameter struct
+		% 	scene_name [string] Scene name (optional, default: '')
+		%
+		% Return values:
+		%
+		% 	scene_id [string] Scene identifier
+		%
+
+		if this.handle==0, error('Not connected.'); end
+
+		if ~exist('scene_name','var'), scene_name = ''; end
+		[scene_id] = VAMatlab('create_scene', this.handle, params,scene_name);
+	end
+
 	function [signalSourceID] = create_signal_source_buffer_from_file(this, filename,name)
 		% Creates a signal source which plays an audiofile
 		%

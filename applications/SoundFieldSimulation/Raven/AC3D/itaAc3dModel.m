@@ -236,11 +236,17 @@ classdef itaAc3dModel
         end  % function readAc3DModelFile()
         
         
-        function plotModel(obj, axes2Plot, component2axesMapping, wireframe)
+        function plotModel(obj, axes2Plot, component2axesMapping, wireframe,plotnormals)
             
             % colors = [ 1.0 0.0 0.0 0.5 0.5 0.0 0.5 0.5 1.0 1.0 0.0 0.5 0.0 0.5 1.0 0.1 0.3 0.5 0.7 0.9;
             %     0.0 1.0 0.0 0.5 0.0 0.5 0.5 1.0 0.5 0.5 1.0 0.0 0.5 1.0 0.0 0.1 0.3 0.5 0.7 0.9;
             %     0.0 0.0 1.0 0.0 0.5 0.5 1.0 0.5 0.5 0.0 0.5 1.0 1.0 0.5 0.5 0.1 0.3 0.5 0.7 0.9  ];
+            
+            if nargin < 5
+                plotnormals = 0;
+            end
+
+
             
             if nargin < 4
                 wireframe = 0;
@@ -288,6 +294,22 @@ classdef itaAc3dModel
                         obj.nodes(polyNodes,component2axesMapping(3)) * invertAxes(3), ...
                         [0.5 0.5 0.5], ...
                         'FaceAlpha', obj.transparency );
+                    if plotnormals
+                        node1=[obj.nodes(polyNodes(1),component2axesMapping(1)) * invertAxes(1), ...
+                            obj.nodes(polyNodes(1),component2axesMapping(2)) * invertAxes(2), ...
+                            obj.nodes(polyNodes(1),component2axesMapping(3)) * invertAxes(3)];
+                        node2=[obj.nodes(polyNodes(2),component2axesMapping(1)) * invertAxes(1), ...
+                            obj.nodes(polyNodes(2),component2axesMapping(2)) * invertAxes(2), ...
+                            obj.nodes(polyNodes(2),component2axesMapping(3)) * invertAxes(3)];
+                        node3=[obj.nodes(polyNodes(3),component2axesMapping(1)) * invertAxes(1), ...
+                            obj.nodes(polyNodes(3),component2axesMapping(2)) * invertAxes(2), ...
+                            obj.nodes(polyNodes(3),component2axesMapping(3)) * invertAxes(3)];
+                        normal = cross(node1 - node2, node3 - node2);
+                        U=normal/norm(normal);
+                        B0=mean(obj.nodes(polyNodes,component2axesMapping).*invertAxes,1);
+                        quiver3(B0(1),B0(2),B0(3),plotnormals*U(1),plotnormals*U(2),plotnormals*U(3),3);
+                        plot3(B0(1),B0(2),B0(3),'s');                        
+                    end
                 end
 
                 % Plot Boundary Groups
@@ -303,7 +325,8 @@ classdef itaAc3dModel
 %                 alpha( gca, obj.transparency );
             end
             
-%              axis(ax, 'off');
+              axis(ax, 'off');
+
              axis(ax, 'equal');
             
         end

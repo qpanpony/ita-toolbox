@@ -5,7 +5,7 @@ function [ freqs, mags, metadata ] = dfConvertFromDAFFv15MS( alpha, beta, h )
     % if you want to transform magnitudes into amplitudes
     %mags = 10.^( DAFFv15( 'getRecordByIndex', h, record_index ) ./ 10 );
     % else
-    mags = DAFFv15( 'getRecordByIndex', h, record_index );
+    mags = abs( DAFFv15( 'getRecordByIndex', h, record_index ) );
     
     props = DAFFv15( 'getProperties', h );
     freqs = props.freqs;

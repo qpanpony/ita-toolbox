@@ -3,9 +3,6 @@ function varargout = plot(this, varargin)
 % 
 % % options: 'stepSize' ... only display every stepSize frame during animation [double]
 %
-% Author:  Florian Pausch, fpa@akustik.rwth-aachen.d
-% Version: 2016-07-07
-%
 % <ITA-Toolbox>
 % This file is part of the ITA-Toolbox. Some rights reserved.
 % You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder.
@@ -43,13 +40,13 @@ for idx=1:this.numRigidBodies
     xlabel('Time in [sec]')
     ylabel('Orientation in [deg]')
     grid on
-    legend('Roll','Pitch','Yaw')
-    axis tight
+    axis square
     
     % plot time cursor
     minvalOri = min([this.data(idx).orientation.roll_deg; this.data(idx).orientation.pitch_deg; this.data(idx).orientation.yaw_deg]);
     maxvalOri = max([this.data(idx).orientation.roll_deg; this.data(idx).orientation.pitch_deg; this.data(idx).orientation.yaw_deg]);
     hl1(idx) = line([0 0],[minvalOri maxvalOri],'color',[.5 .5 .5]);
+    legend('Roll','Pitch','Yaw','Current Time Frame')
     
     % initial vu animation
     subplot(this.numRigidBodies,numColumns,numColumns*(idx-1)+2);
@@ -64,11 +61,11 @@ for idx=1:this.numRigidBodies
     s=surface(x,y,z,'FaceColor', 'none','EdgeColor',lightGrey);
     alpha(s,0.3)
     hold on
-    
+        
     axis([-r r -r r -r r])
     view([-1 1 1])
-    zoom(1.1)
-    
+    axis vis3d
+
     hold on
     
     qFig1(idx)=quiver3(0,0,0,vu(1,1,idx),vu(1,3,idx),vu(1,2,idx),'color','r','maxheadsize',.5,'linewidth',5);
@@ -90,8 +87,7 @@ for idx=1:this.numRigidBodies
     xlabel('Time in [sec]')
     ylabel('Position in [m]')
     grid on
-    legend('X','Y','Z')
-    axis tight
+    axis square
     
     % plot time cursor
     xmin=min(this.data(idx).position.x); xmax=max(this.data(idx).position.x);
@@ -100,6 +96,7 @@ for idx=1:this.numRigidBodies
     minvalPos = min([xmin;ymin;zmin]);
     maxvalPos = max([xmax;ymax;zmax]);
     hl2(idx) = line([0 0],[minvalPos maxvalPos],'color',[.5 .5 .5]);
+    legend('Roll','Pitch','Yaw','Current Time Frame')
     
     % initial position animation
     subplot(this.numRigidBodies,numColumns,numColumns*(idx-1)+4);
@@ -113,6 +110,7 @@ for idx=1:this.numRigidBodies
     pFigt4(idx)=text(xmin-0.25,ymin,zmin-0.25,sprintf('y=%.3f m',round(this.data(idx).position.y(1)*1000)/1000));
     xlabel('x')
     zlabel('z')
+    axis square
 
 end
 

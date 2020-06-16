@@ -35,7 +35,11 @@ freq_data_linear = phase_by_delay .* spreading_loss;
 
 for m = 1 : N
 
-    anchor = propagation_path.propagation_anchors{ m };
+    if N > 2
+        anchor = propagation_path.propagation_anchors{ m };
+    else
+        anchor = propagation_path.propagation_anchors( m );
+    end
     assert( strcmpi( anchor.class, 'propagation_anchor' ) )
     
     assert( isfield( anchor, 'anchor_type' ) )
@@ -44,9 +48,17 @@ for m = 1 : N
         case { 'source', 'emitter', 'receiver', 'sensor' }
             
             if m == N
-                target_pos = propagation_path.propagation_anchors{ N - 1 }.interaction_point;
+                if N > 2
+                            target_pos = propagation_path.propagation_anchors{ N - 1 }.interaction_point;
+                else
+                            target_pos = propagation_path.propagation_anchors( N - 1 ).interaction_point;
+                end
             else
-                target_pos = propagation_path.propagation_anchors{ m + 1 }.interaction_point;
+                if N > 2
+                    target_pos = propagation_path.propagation_anchors{ m + 1 }.interaction_point;
+                else
+                    target_pos = propagation_path.propagation_anchors( m + 1 ).interaction_point;
+                end
             end
 
             target_position = target_pos - anchor.interaction_point; % Outgoing direction vector

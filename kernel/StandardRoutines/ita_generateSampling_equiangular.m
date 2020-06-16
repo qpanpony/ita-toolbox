@@ -1,10 +1,4 @@
-function s = ita_generateSampling_equiangular(az,el)
-
-% <ITA-Toolbox>
-% This file is part of the ITA-Toolbox. Some rights reserved. 
-% You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder. 
-% </ITA-Toolbox>
-
+function samplingCoords = ita_generateSampling_equiangular(az,el)
 
 % equiangular sampling in MF style
 %
@@ -17,6 +11,11 @@ function s = ita_generateSampling_equiangular(az,el)
 %       s = ita_generateSampling_equiangular(0:5:355,0:5:180)
 %                % as above, long syntax
 
+% <ITA-Toolbox>
+% This file is part of the ITA-Toolbox. Some rights reserved. 
+% You can find the license for this m-file in the license.txt file in the ITA-Toolbox folder. 
+% </ITA-Toolbox>
+
 
 if numel(az) == 1 && numel(el) == 1
     az = 0:az:(360-0.1);
@@ -25,7 +24,10 @@ end
 
 [AZ,EL] = meshgrid(az,el);
 
-s = itaCoordinates(numel(AZ));
-s.r = 1;
-s.theta = EL(:) *pi/180;
-s.phi = AZ(:) *pi/180;
+samplingCoords = itaCoordinates(numel(AZ));
+samplingCoords.r = 1;
+samplingCoords.theta = EL(:) *pi/180;
+samplingCoords.phi = AZ(:) *pi/180;
+
+
+samplingCoords.weights = ita_spherical_weights_equiangular(samplingCoords);

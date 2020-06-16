@@ -20,9 +20,6 @@ function [] = daffv17_convert_from_daffv15( daffv15_input_file_path, daffv17_out
         metadata_v17 = additional_metadata_v17;
     end
     
-    metadata_v17 = daffv17_add_metadata( metadata_v17, 'Converter', 'String', 'Converted from DAFF version 1.5' );
-    metadata_v17 = daffv17_add_metadata( metadata_v17, 'Date of conversion', 'String', date );
-    
     metadata_v15 = DAFFv15( 'getMetadata', h );
    
     metadata_field_names = fieldnames( metadata_v15 );
@@ -33,10 +30,12 @@ function [] = daffv17_convert_from_daffv15( daffv15_input_file_path, daffv17_out
            if isnumeric( val )
                val = num2str( val );
            end
-           metadata_v17 = daffv17_add_metadata( metadata_v17, key, 'String', val );
+           metadata_v17 = daffv17_add_metadata( metadata_v17, key, 'String', val, false );
        end
     end
-   
+       
+    metadata_v17 = daffv17_add_metadata( metadata_v17, 'Converter', 'String', 'Converted from DAFF version 1.5', true );
+    metadata_v17 = daffv17_add_metadata( metadata_v17, 'Date of conversion', 'String', date, true );
     
     switch( props.contentType )
     case { 'ms', 'mps', 'ps' }

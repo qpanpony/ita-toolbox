@@ -76,25 +76,32 @@ obj.repetitions = repetitions; % 18 repetitions
 % this data is used to determine the exact measurement speed and the time
 % points where the arc is at defined positions
 dataMotor = data_raw.ch(options.ttChannel);
-dataMotor.timeData = dataMotor.timeData*0.9; 
+motorTime =  triggerTime(dataMotor);
 
-dataMotor.timeData = reshape(dataMotor.timeData,length(dataMotor.timeData)/2,2);
-dataMotor.timeData(:,2) = fliplr(dataMotor.timeData(:,2).' ).';
-
-motorPoints = ita_start_IR(dataMotor);
-
-[~,tmp] = max(dataMotor.timeData);
-
-if any(abs(tmp - motorPoints) > 250)
-    disp('Something is wrong with the motorPoint detection');
-    disp('Using max values - Handle with care');
-    motorPoints = tmp;
+%triggerTime only triggers on positive edge
+if numel(motorTime) ~= 2
+    error('could not find two switch positions in motor data. please take a look')
 end
 
-motorTime = motorPoints/dataMotor.samplingRate;
-% the second motor time gets one tracklength to correct for the cut in half
-motorTime(2) = dataMotor.trackLength - motorTime(2);
-motorTime(2) = motorTime(2) + dataMotor.trackLength;
+% dataMotor.timeData = dataMotor.timeData*0.9; 
+% 
+% dataMotor.timeData = reshape(dataMotor.timeData,length(dataMotor.timeData)/2,2);
+% dataMotor.timeData(:,2) = fliplr(dataMotor.timeData(:,2).' ).';
+% 
+% motorPoints = ita_start_IR(dataMotor);
+% 
+% [~,tmp] = max(dataMotor.timeData);
+% 
+% if any(abs(tmp - motorPoints) > 250)
+%     disp('Something is wrong with the motorPoint detection');
+%     disp('Using max values - Handle with care');
+%     motorPoints = tmp;
+% end
+% 
+% motorTime = motorPoints/dataMotor.samplingRate;
+% % the second motor time gets one tracklength to correct for the cut in half
+% motorTime(2) = dataMotor.trackLength - motorTime(2);
+% motorTime(2) = motorTime(2) + dataMotor.trackLength;
 
 % get the first and last sweep repetition (globally)
 exactStartAndEndRepetition = motorTime/options.twait/nOutputChannels;
@@ -287,4 +294,15 @@ for index = 1:length(result)
     end    
 end
 
+end
+
+function triggerTimeOut = triggerTime(dataMotor)
+    %% find location of first positive edge in motor data and avoid ringing!
+    % looks for positive peaks, taking the first one within a 1 secong 
+    % with a magnitude > 0.95 max value in timeData - helps with bouncing
+    
+    %plot peak locations for debug: peakfind(dataMotor)
+    
+    [~,triggerTimeOut] = findpeaks(dataMotor.timeData,dataMotor.samplingRate,'MinPeakDistance',1,'MinPeakHeight',0.95*max(abs(dataMotor.timeData)));
+    
 end
