@@ -1917,7 +1917,8 @@ classdef itaRavenProject < handle
         end
         
         %------------------------------------------------------------------
-        function setFilterLength(obj, filter_length)    % filter length parameter needed in [ms]
+        function setFilterLength(obj, filter_length)    
+            % set filter length in ms
             if filter_length < 3
                 filter_length = filter_length * 1000;
                 filter_length = fix(filter_length);
