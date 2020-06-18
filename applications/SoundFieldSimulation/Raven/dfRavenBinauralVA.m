@@ -12,7 +12,7 @@ function [ data, samplerate, metadata ] = dfRavenBinauralVA( alpha, beta, rpf )
     rpf.setReceiverUpVectors( ita_matlab2openGL( up.cart ) );
 
     rpf.run();
-    brir = rpf.getBinauralImpulseResponseItaAudio;
+    brir = rpf.getBinauralImpulseResponseImageSourcesItaAudio;  % only early reflections are requested, use rpf.getBinauralImpulseResponseItaAudio if you want to get the full impulse response (and adjust the filter length in your rpf accordingly)
     
     n_residual = mod( brir.nSamples, 4 );
     data = [ brir.timeData', zeros( brir.nChannels, n_residual ) ];

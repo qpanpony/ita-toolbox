@@ -1,10 +1,11 @@
 %% RAVEN head rotiation simulation & Auralization with VirtualAcoustics
 %
-% Author:   Henry Andrew / Lukas Aspöck 
+% Author:   Henry Andrew / Lukas Aspöck / Jonas Stienen
 % Contact:  las@akustik.rwth-aachen.de
 % date:     2019/06/19
 %
-% Example to simulate head rotation in a classroom and store it in a DAFF file
+% Example to simulate head rotation in a classroom and store it in a DAFF
+% file (in this example file, only early reflections)
 % For auralization, use VA's binaural free field renderer and set the HRIR database 
 % to the simulated BRIR database 
 % 
@@ -17,12 +18,12 @@
 
 %--------------------------------User Settings-----------------------------
 % Modify path if RAVEN was not installed in the default location
-ravenBasePath = 'D:\Users\stienen\dev\ITASuite\RAVEN\RavenProjects\TestShoeboxRoom\';
+ravenBasePath = 'C:\ITASoftware\Raven\';
 
-raven_project_filename = [ ravenBasePath 'TestShoeboxRoom.rpf'];%'Shoebox_room.rpf'; %raven project file of room
-source_directivity_filename = [ ravenBasePath 'SourceDirectivity/Cardioid.v17.ms.daff'];  %path to raven database emtries
-receiver_directivity_filename = [ ravenBasePath 'HRTF\ITA_Artificial_Head_5x5_44kHz_192_win15_shifted90.v17.ir.daff'];
-out_file_prefix = 'TestShoebox';
+raven_project_filename = [ ravenBasePath 'RavenInput\Classroom\Classroom.rpf'];%'Shoebox_room.rpf'; %raven project file of room
+source_directivity_filename =  [ ravenBasePath 'RavenDatabase\DirectivityDatabase\Singer_2011_FWE_TLE_norm.daff'];  %path to raven database emtries
+receiver_directivity_filename = [ ravenBasePath 'RavenDatabase\HRTF\2017_FABIAN_HATO-0_HRIR_LAS_D170_1x1_128_norm_sampleShift10.v15.daff'];
+out_file_prefix = 'Classroom';
 source_position = [7.0000    1.7000   -4.0000]; %NOTE, make sure these are inside the room!
 receiver_position = [3 1.7 -4]; %NOTE: in openGL coordinated (used by RAVEN) the "up/down" direction is the second element, and the third element is different from matlab coordinates by a factor of -1
 
@@ -38,7 +39,7 @@ automatic_rotate_sim = true; %set to true to automatically rotate the room, or f
 
 %loads data from a raven project. Incudes lots of methods to calculate things/ extract data etc
 rpf = itaRavenProject(raven_project_filename);
-rpf.setModel([ ravenBasePath 'RoomModels\TestShoebox.ac']);
+rpf.setModel([ ravenBasePath 'RavenModels\Classroom\Classroom_empty.ac']);
 
 DAFF17FileName = [out_file_prefix '_' num2str(azimuthResolution) 'x' num2str(elevationResolution) '.v17.ir.daff'];
     
@@ -55,7 +56,9 @@ if( simulate_room )
     rpf.setSourceDirectivity(source_directivity_filename);
     rpf.setSourceViewVectors([-1 0 0]);
     rpf.setSourceUpVectors([0 1 0]);
-    rpf.setFilterLength(1100);
+    rpf.setFilterLength(100);   % early reflections only
+    rpf.setSimulationTypeIS(1);
+    rpf.setSimulationTypeRT(0);
     
     
     additional_metadata = daffv17_add_metadata( [], 'Web resource', 'String', 'http://www.opendaff.org' );

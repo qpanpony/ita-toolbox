@@ -54,7 +54,9 @@ if( simulate_room )
     rpf.setSourceViewVectors([-1 0 0]);
     rpf.setSourceUpVectors([0 1 0]);
     rpf.setFilterLength(1100);
-       
+    rpf.setSimulationTypeIS(1);
+    rpf.setSimulationTypeRT(1);   
+    
     %------------------------Create receiver orientations----------------------
     
     %generates set of coordiates for a sphere in struct with azimuthal and elevation resolution as stated above
