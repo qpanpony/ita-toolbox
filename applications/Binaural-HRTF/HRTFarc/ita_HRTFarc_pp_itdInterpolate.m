@@ -18,7 +18,8 @@ function [centerPoint,returnData] = ita_HRTFarc_pp_itdInterpolate(results_split,
         options.exactSearchSlice = 1;                                   % only allow one exact elevation in slice
     end
     slice = hrtf.sphericalSlice('theta_deg',90,options.exactSearchSlice);
-    % make sure coords are identical for L and R
+    % make sure coords are identical for L and R 
+    % (sdo: should be unnecessary but for some reason, sometimes not --> TODO: check!)
     slice.channelCoordinates.phi_deg(2:2:slice.nChannels) = slice.channelCoordinates.phi_deg(1:2:slice.nChannels);
     % set elevation to a single height - necessary when applying elevation correction
     slice.channelCoordinates.theta_deg = slice.channelCoordinates.theta_deg(1);
