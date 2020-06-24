@@ -31,9 +31,9 @@ classdef itaRavenProject < handle
     % Author:           Soenke Pelzer (spe@akustik.rwth-aachen.de)
     %                   Lukas Aspöck (las@akustik.rwth-aachen.de)
     %
-    % Version:        0.2
+    % Version:        0.3
     % First release:  01.11.10
-    % Last revision:  11.07.18
+    % Last revision:  24.06.20
     % Copyright:      Institute of Technical Acoustics, RWTH Aachen University
     %
     
@@ -4630,7 +4630,7 @@ classdef itaRavenProject < handle
                 disp('repeat simulation for validation');
                 obj.run();
                 
-                disp('get monaural impulse response');
+                disp('get mono room impulse response');
                 rir = obj.getImpulseResponseItaAudio();
                 
                 % merge IRs of multiple receivers into 1 multichannel itaAudio
