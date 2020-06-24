@@ -3,7 +3,7 @@ function [ freq_data_linear ] = ita_propagation_diffraction( anchor, effective_s
 %of the edge diffraction for certain model and given effective in/out positions 
 %sampling rate and fft degree (defaults to fs = 44100 and fft_degree = 15)
 %
-
+    
 if nargin < 3
    error 'You are missing several input argument'
 end
@@ -52,6 +52,7 @@ if( abs( cross(n1, n2) ) < itaInfiniteWedge.set_get_geo_eps )
 else
     w = itaInfiniteWedge( n1, n2, loc );
 end
+
 
 % Legacy
 if size( effective_source_position, 1 ) == 4
