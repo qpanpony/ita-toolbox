@@ -2,6 +2,8 @@ function [ linear_freq_data ] = tf_directivity( obj, anchor, wave_front_directio
 %TF_DIRECTIVITY Returns the directivity transfer function for an anchor and
 %a target (incoming or outgoing wave front direction relative (not in world coordinates!) to anchor point)
 
+assert( isa( anchor, 'struct' ) )
+
 linear_freq_data = ones( obj.num_bins, 1 );
 
 if ~isfield( anchor, 'directivity_id' )
@@ -13,7 +15,8 @@ if ~isfield( obj.directivity_db, anchor.directivity_id )
     return
 end
 
-directivity_data = obj.directivity_db.( anchor.directivity_id );
+directivity_data = obj.directivity_db.( anchor.directivity_id ).data;
+delay_samples = obj.directivity_db.( anchor.directivity_id ).delay_samples;
 
 if isa( directivity_data, 'DAFF' )
 
@@ -21,13 +24,14 @@ if isa( directivity_data, 'DAFF' )
     v = wave_front_direction( 1:3 ) / norm( wave_front_direction( 1:3 ) );
     q_target = quaternion.rotateutov( [ 1 0 0 ], v );
     q_combined = q_target * conj( q_object );
-    euler_angles = q_combined.EulerAngles( 'zxy' );
-    azi_deg = rad2deg( euler_angles( 1 ) );
-    ele_deg = rad2deg( euler_angles( 2 ) );
+    euler_angles = q_combined.EulerAngles( 'ZYX' );
+    azi_deg = rad2deg( real( euler_angles( 1 ) ) )
+    ele_deg = rad2deg( real( euler_angles( 2 ) ) )
     idx = directivity_data.nearest_neighbour_index( azi_deg, ele_deg );
     
     if strcmpi( directivity_data.properties.contentType, 'ir' )
         directivity_ir = directivity_data.record_by_index( idx )';
+        %directivity_ir_shifted = circshift( directivity_ir, numel( directivity_ir ) - floor( delay_samples ) );
         directivity_dft = fft( directivity_ir, obj.num_bins * 2 - 1 ); % odd DFT length
         directivity_hdft = directivity_dft( 1:( ceil( obj.num_bins ) ) );
         linear_freq_data = directivity_hdft;

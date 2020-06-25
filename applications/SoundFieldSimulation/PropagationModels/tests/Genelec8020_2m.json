@@ -1,0 +1,87 @@
+{
+
+	"class" : "PropagationPathList",
+
+	"identifier" : "",
+
+	"propagation_paths" : 
+
+		{
+
+			"class" : "propagation_path",
+
+			"identifier" : "",
+			
+
+			"propagation_anchors" : [
+
+				{
+
+					"name" : "Genelec 8020 loudspeaker",
+
+					"directivity_id" : "Genelec8020",
+			
+					"orientation" : [
+
+						0,
+
+						0,
+
+						0,
+						
+						1
+
+					],
+
+					"class" : "propagation_anchor",
+
+					"anchor_type" : "emitter",
+
+					"interaction_point" : [
+
+						2,
+
+						0,
+
+						0
+
+					]
+
+				},
+
+				{
+
+					"name" : "test receiver",
+
+					"orientation" : [
+
+						1,
+
+						0,
+
+						0,
+
+						0
+
+					],
+
+					"class" : "propagation_anchor",
+
+					"anchor_type" : "sensor",
+
+					"interaction_point" : [
+
+						0,
+
+						0,
+
+						0
+
+					]
+
+				}
+
+			]
+
+		}
+}

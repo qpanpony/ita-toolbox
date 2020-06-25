@@ -30,6 +30,12 @@ classdef DAFF < handle
             end
         end
         
+        function delete( obj )
+            if obj.daffhandle
+                close( obj );
+            end
+        end
+        
         function open( obj, filepath )
 			% Opens a DAFF file
              obj.daffhandle = DAFFv17( 'open', filepath );
@@ -38,6 +44,7 @@ classdef DAFF < handle
         function close( obj )
 			% Closes the DAFF file
 			DAFFv17( 'close', obj.daffhandle )
+            obj.daffhandle = [];
         end
         
         function set_data_view( obj )

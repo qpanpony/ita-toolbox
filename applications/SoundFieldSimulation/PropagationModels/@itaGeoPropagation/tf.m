@@ -24,7 +24,7 @@ incident_spreading_loss_applied = false;
 
 for m = 1 : N
     
-    if N > 2
+    if isa( pp.propagation_anchors, 'cell' )
         anchor = pp.propagation_anchors{ m };
     else
         anchor = pp.propagation_anchors( m );
@@ -37,7 +37,7 @@ for m = 1 : N
         case { 'source', 'emitter', 'receiver', 'sensor' }
             
             if m == N
-                if N > 2
+                if isa( pp.propagation_anchors, 'cell' )
                     target_pos = pp.propagation_anchors{ m - 1 }.interaction_point;
                 else
                     target_pos = pp.propagation_anchors( m - 1 ).interaction_point;
@@ -54,7 +54,7 @@ for m = 1 : N
                 end
                 
             else
-                if N > 2
+                if isa( pp.propagation_anchors, 'cell' )
                     target_pos = pp.propagation_anchors{ m + 1 }.interaction_point;
                 else
                     target_pos = pp.propagation_anchors( m + 1 ).interaction_point;
@@ -89,7 +89,7 @@ for m = 1 : N
             if m == 1 || m == N
                 error( 'Detected a diffraction at beginning or end of propagation path.' )
             end
-                        
+
             source_pos = pp.propagation_anchors{ m - 1 }.interaction_point;
             target_pos = pp.propagation_anchors{ m + 1 }.interaction_point;
             

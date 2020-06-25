@@ -15,13 +15,25 @@ end
 
 assert( numel( propagation_path.propagation_anchors ) >= anchor_idx );
 
-last_segment_vec = propagation_path.propagation_anchors{ anchor_idx - 1 }.interaction_point - propagation_path.propagation_anchors{ anchor_idx }.interaction_point;
+if isa( propagation_path.propagation_anchors, 'cell' )
+    last_segment_vec = propagation_path.propagation_anchors{ anchor_idx - 1 }.interaction_point - propagation_path.propagation_anchors{ anchor_idx }.interaction_point;
+else
+    last_segment_vec = propagation_path.propagation_anchors( anchor_idx - 1 ).interaction_point - propagation_path.propagation_anchors( anchor_idx ).interaction_point;
+end
 distance = norm( last_segment_vec );
 
 for m = anchor_idx : -1 : 2
-    anchor = propagation_path.propagation_anchors{ m - 1 };
+    if isa( propagation_path.propagation_anchors, 'cell' )
+        anchor = propagation_path.propagation_anchors{ m - 1 };
+    else
+        anchor = propagation_path.propagation_anchors( m - 1 );
+    end
     if strcmpi( anchor.anchor_type, 'specular_reflection' )
-        current_segment_vec = propagation_path.propagation_anchors{ m - 2 }.interaction_point - anchor.interaction_point;
+        if isa( propagation_path.propagation_anchors, 'cell' )
+            current_segment_vec = propagation_path.propagation_anchors{ m - 2 }.interaction_point - anchor.interaction_point;
+        else
+            current_segment_vec = propagation_path.propagation_anchors( m - 2 ).interaction_point - anchor.interaction_point;
+        end
         distance = distance + norm( current_segment_vec );
     else
         break

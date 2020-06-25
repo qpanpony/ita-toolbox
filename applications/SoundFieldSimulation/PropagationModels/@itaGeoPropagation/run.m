@@ -1,7 +1,7 @@
 function [ freq_data_linear ] = run( obj )
 %RUN Calculates the transfer function (tf) of the superimposed (geometrical) propagation path in frequency domain
 
-freq_data_linear = ones( obj.num_bins, 1 );
+freq_data_linear = zeros( obj.num_bins, 1 );
 
 % Iterate over propagation paths, calculate transfer function and sum up
 for n = 1:numel( obj.pps )
