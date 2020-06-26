@@ -5,8 +5,12 @@ function [ directivity_id ] = load_directivity( obj, directivity_path, directivi
 if nargin >= 3
    directivity_id = directivity_id_user;
 end
+
 if nargin < 4
    delay_samples = 0;
+   delay_samples_autodetect = true;
+else
+   delay_samples_autodetect = false;
 end
 
 if strcmpi( directivity_file_ext, '.daff' )
@@ -17,7 +21,7 @@ if strcmpi( directivity_file_ext, '.daff' )
     mddata = obj.directivity_db.( directivity_id ).data.metadata;
     for m = 1:numel( mddata )
         mditem = mddata( m );
-        if strcmpi( mditem.name, 'delay_samples' )
+        if strcmpi( mditem.name, 'delay_samples' ) && delay_samples_autodetect
             delay_samples = mditem.value;
         end
     end

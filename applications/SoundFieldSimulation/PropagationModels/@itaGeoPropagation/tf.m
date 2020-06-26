@@ -107,7 +107,7 @@ for m = 1 : N
             if ~incident_spreading_loss_applied
                 phase_by_delay = obj.phase_delay( effective_source_distance );
                 spreading_loss = ita_propagation_spreading_loss( distance, 'spherical' );
-                freq_data_linear = phase_by_delay .* spreading_loss;
+                freq_data_linear = freq_data_linear .* phase_by_delay .* spreading_loss;
                 incident_spreading_loss_applied = true;
             end
             
