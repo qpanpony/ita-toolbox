@@ -18,13 +18,17 @@ if strcmpi( directivity_file_ext, '.daff' )
     % DAFF
     
     obj.directivity_db.( directivity_id ).data = DAFF( directivity_path );
-    mddata = obj.directivity_db.( directivity_id ).data.metadata;
-    for m = 1:numel( mddata )
-        mditem = mddata( m );
-        if strcmpi( mditem.name, 'delay_samples' ) && delay_samples_autodetect
-            delay_samples = mditem.value;
+    
+    if delay_samples_autodetect
+        mddata = obj.directivity_db.( directivity_id ).data.metadata;
+        for m = 1:numel( mddata )
+            mditem = mddata( m );
+            if strcmpi( mditem.name, 'delay_samples' )
+                delay_samples = mditem.value;
+            end
         end
     end
+    
     obj.directivity_db.( directivity_id ).delay_samples = delay_samples;
     
 else
@@ -32,5 +36,7 @@ else
     error( 'Could not load directivity, unrecognized file extension "%s"', directivity_file_ext )
     
 end
+
+obj.directivity_db.( directivity_id ).eq_type = 'none';
 
 end

@@ -7,6 +7,7 @@ classdef itaGeoPropagation < handle
         fs = 44100;
         c = 341.0;
         diffraction_model = 'utd';
+        sim_prop = struct();
     end
     
    properties (Access = protected)
@@ -27,7 +28,12 @@ classdef itaGeoPropagation < handle
            end           
            if nargin >= 2
                 obj.n = num_bins;            
-           end           
+           end
+           
+           obj.sim_prop.diffraction = true;
+           obj.sim_prop.reflection = true;
+           obj.sim_prop.directivity = true;
+           
         end
         
         function fs = get.fs( obj )

@@ -15,8 +15,8 @@ if ~isfield( obj.directivity_db, anchor.directivity_id )
     return
 end
 
-directivity_data = obj.directivity_db.( anchor.directivity_id ).data;
-delay_samples = obj.directivity_db.( anchor.directivity_id ).delay_samples;
+directivity_t = obj.directivity_db.( anchor.directivity_id );
+directivity_data = directivity_t.data;
 
 if isa( directivity_data, 'DAFF' )
 
@@ -30,19 +30,26 @@ if isa( directivity_data, 'DAFF' )
     idx = directivity_data.nearest_neighbour_index( azi_deg, ele_deg );
     
     if strcmpi( directivity_data.properties.contentType, 'ir' )
+        
         directivity_ir = directivity_data.record_by_index( idx )';
-        assert( numel( directivity_ir ) > delay_samples );
-        
         directivity_dft = fft( directivity_ir, obj.num_bins * 2 - 1 ); % odd DFT length
+        directivity_hdft = directivity_dft( 1:( ceil( obj.num_bins ) ) );
         
-        dirac_delay = zeros( numel( directivity_ir ), 1 );
-        dirac_delay( ceil( delay_samples ) ) = 1;        
-        directivity_dft_group_delay = fft( dirac_delay, obj.num_bins * 2 - 1 ); % odd DFT length
+        if any( strcmpi( directivity_t.eq_type, { 'custom', 'front' } ) )
+            linear_freq_data = directivity_hdft .* directivity_t.eq_filter;
+        elseif strcmpi( directivity_t.eq_type, { 'gain' } )
+            linear_freq_data = directivity_hdft .* directivity_t.eq_gain;
+        elseif strcmpi( directivity_t.eq_type, { 'delay' } )
+            phase_by_delay = [ 1; exp( -1i .* 2 * pi * obj.freq_vec( 2:end ) * directivity_t.eq_delay ) ];
+            linear_freq_data = directivity_hdft ./ phase_by_delay;
+        elseif strcmpi( directivity_t.eq_type, { 'none' } )
+            linear_freq_data = directivity_hdft;    
+        else
+            warning 'Unknown equalization for directivity, using untouched data instead'
+            linear_freq_data = directivity_hdft;
+        end
         
-        directivity_dft_compensated = directivity_dft ./ directivity_dft_group_delay;
-                
-        directivity_hdft = directivity_dft_compensated( 1:( ceil( obj.num_bins ) ) );
-        linear_freq_data = directivity_hdft;
+        
     else
         warning( 'Unrecognized DAFF content type "%s" of directivity with id "%s"', directivity_data.properties.contentType, anchor.directivity_id )
     end

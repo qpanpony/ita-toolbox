@@ -13,10 +13,10 @@ end
 linear_freq_data = ones( obj.num_bins, 1 );
 
 % Assemble wedge
-n1 = anchor.main_wedge_face_normal( 1:3 )';
-n2 = anchor.opposite_wedge_face_normal( 1:3 )';
-loc = anchor.vertex_start( 1:3 )';
-endPt = anchor.vertex_end( 1:3 )';
+n1 = anchor.main_wedge_face_normal( 1:3 );
+n2 = anchor.opposite_wedge_face_normal( 1:3 );
+loc = anchor.vertex_start( 1:3 );
+endPt = anchor.vertex_end( 1:3 );
 len = norm( endPt - loc );
 aperture_dir = ( endPt - loc ) / len;
 
@@ -47,7 +47,14 @@ end
 switch( diffraction_model )
     case 'utd'
         
+        % Includes spreading loss after diffraction, but not phase shift
         linear_freq_data = obj.tf_diffraction_utd( w, effective_source_position, effective_receiver_position );
+                
+        apex_point = w.get_aperture_point( effective_source_position( 1:3 )', effective_receiver_position( 1:3 )' );
+        eff_receiver_distance = norm( apex_point - effective_receiver_position );
+        phase_delay_after_diffr = obj.phase_delay( eff_receiver_distance );
+        
+        linear_freq_data = linear_freq_data .* phase_delay_after_diffr;
         
     case 'maekawa'
         
@@ -62,9 +69,9 @@ switch( diffraction_model )
         apex_point = w.get_aperture_point( effective_source_position( 1:3 )', effective_receiver_position( 1:3 )' );
         eff_source_distance = norm( apex_point - effective_source_position );
         spreading_loss = ita_propagation_spreading_loss( eff_source_distance );
-        phase_delay = obj.phase_delay( eff_source_distance );
+        phase_delay_after_diffr = obj.phase_delay( eff_source_distance );
         
-        normilization_tf = spreading_loss * phase_delay;
+        normilization_tf = spreading_loss * phase_delay_after_diffr;
         
         linear_freq_data = diffraction_hdft ./ normilization_tf;
         
