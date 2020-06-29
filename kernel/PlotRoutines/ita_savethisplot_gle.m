@@ -1031,28 +1031,32 @@ else
             gle_line_style = 1;
     end
 end
-% marker.
-switch marker
-    case '+'
-        gle_marker = 'plus';
-    case '*'
-        gle_marker = 'asterisk';
-    case 'o'
-        gle_marker = 'wcircle';
-    case 'x'
-        gle_marker = 'cross';
-    case {'^','v'}
-        gle_marker = 'wtriangle';
-    case 's'
-        gle_marker = 'wsquare';
-    case 'd'
-        gle_marker = 'wdiamond';
-    case '.'
-        gle_marker = 'dot';
-    case 'none'
-        gle_marker = '';
-    otherwise
-        gle_marker = marker;
+% marker
+if ~isempty(marker)
+    switch marker
+        case '+'
+            gle_marker = 'plus';
+        case '*'
+            gle_marker = 'asterisk';
+        case 'o'
+            gle_marker = 'wcircle';
+        case 'x'
+            gle_marker = 'cross';
+        case {'^','v'}
+            gle_marker = 'wtriangle';
+        case 's'
+            gle_marker = 'wsquare';
+        case 'd'
+            gle_marker = 'wdiamond';
+        case '.'
+            gle_marker = 'dot';
+        case 'none'
+            gle_marker = '';
+        otherwise
+            gle_marker = marker;
+    end
+else
+    gle_marker = '';
 end
 
 % Add key if present
