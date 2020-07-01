@@ -2,12 +2,18 @@ function r = ita_propagation_path_length( pps )
 %ITA_PROPAGATION_PATH_LENGTH Calculates the path length of all paths in
 %propagation path list
 
+N = numel( pps );
+r = zeros( N, 1 );
+
+if N == 0
+    warning 'Got an empty path list, cannot calculate any path lengths'
+    return
+end
+
 if ~isfield( pps, 'propagation_anchors' ) % not a list but only one path
     error( 'Need a propagation path or path list' )
 end
 
-N = numel( pps );
-r = zeros( N, 1 );
 
 for n = 1:N
 

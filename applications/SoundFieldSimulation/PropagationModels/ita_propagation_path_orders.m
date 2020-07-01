@@ -1,5 +1,5 @@
-function [ reflection_order, diffraction_order ] = ita_propagation_get_orders( pp )
-% ita_propagation_get_orders Returns the reflection and diffraction order
+function [ reflection_order, diffraction_order ] = ita_propagation_path_orders( pp )
+% ita_propagation_path_orders Returns the reflection and diffraction order
 % of the path.
 
 reflection_order = 0;
