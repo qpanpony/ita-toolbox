@@ -83,7 +83,12 @@ function D = get_diffr_coeff( wedge, k, alpha_d, alpha_i, rho, r, theta_i, n )
         s = -1;
     end
     
-    prefactor = -exp( -1i * pi / 4 ) ./ ( 2 * n * sqrt( 2* pi * k ) .* sin( theta_i ) );
+    if sin( theta_i ) ~= 0
+        prefactor = -exp( -1i * pi / 4 ) ./ ( 2 * n * sqrt( 2* pi * k ) .* sin( theta_i ) );
+    else
+        prefactor = 1; % Don't allo Inf as prefactor value, othersise we might get NaNs in output
+        assert( L == 0 ) % L should be zero in any case then
+    end
 
     D = prefactor .* ( term1 + term2 + s * ( term3 + term4 ) );
 end
