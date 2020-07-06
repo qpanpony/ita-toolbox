@@ -1,10 +1,11 @@
 %% RAVEN head rotiation simulation & Auralization with VirtualAcoustics
 %
-% Author:   Henry Andrew / Lukas Aspöck 
+% Author:   Henry Andrew / Lukas Aspöck / Jonas Stienen
 % Contact:  las@akustik.rwth-aachen.de
 % date:     2019/06/19
 %
-% Example to simulate head rotation in a classroom and store it in a DAFF file
+% Example to simulate head rotation in a classroom and store it in a DAFF
+% file (in this example file, only early reflections)
 % For auralization, use VA's binaural free field renderer and set the HRIR database 
 % to the simulated BRIR database 
 % 
@@ -40,6 +41,8 @@ automatic_rotate_sim = true; %set to true to automatically rotate the room, or f
 rpf = itaRavenProject(raven_project_filename);
 rpf.setModel([ ravenBasePath 'RavenModels\Classroom\Classroom_empty.ac']);
 
+DAFF17FileName = [out_file_prefix '_' num2str(azimuthResolution) 'x' num2str(elevationResolution) '.v17.ir.daff'];
+    
 if( simulate_room )
     % ------------------------Load the raven project file----------------------
     
@@ -53,82 +56,26 @@ if( simulate_room )
     rpf.setSourceDirectivity(source_directivity_filename);
     rpf.setSourceViewVectors([-1 0 0]);
     rpf.setSourceUpVectors([0 1 0]);
-    rpf.setFilterLength(1100);
+    rpf.setFilterLength(100);   % early reflections only
     rpf.setSimulationTypeIS(1);
-    rpf.setSimulationTypeRT(1);   
-    
-    %------------------------Create receiver orientations----------------------
-    
-    %generates set of coordiates for a sphere in struct with azimuthal and elevation resolution as stated above
-    mySphereView = ita_generateSampling_equiangular(azimuthResolution,elevationResolution);
-    
-    mySphereUp = mySphereView;
-    mySphereUp.theta = mySphereUp.theta - pi/2;
-    mySphereView.cart=mySphereView.cart(:,[1 3 2]);
-    mySphereUp.cart=mySphereUp.cart(:,[1 3 2]);
-    
-    %-----------------------------Main simulation loop-------------------------
-    myBRIRs=itaAudio(1,mySphereView.nPoints); %matrix where the simulation data will be stored
-    
-    for iRec=1:mySphereView.nPoints
-        
-        % set RAVEN receiver names, position and orientations
-        rpf.setReceiverNames([ 'receiver' num2str(iRec-1) ]);
-        
-        rpf.setReceiverPositions(receiver_position);
-        
-        rpf.setReceiverViewVectors(mySphereView.cart(iRec,:));
-        rpf.setReceiverUpVectors(mySphereUp.cart(iRec,:));
-        
-        % run raven simulation
-        rpf.run; %calculate the Impulse Response for this orientation
-        
-        %save the impulse response for this orientation to myBRIR indexed with the current loop counter
-        myBRIRs(iRec) = rpf.getBinauralImpulseResponseItaAudio;
-        disp(['########### FINISHED ' num2str(iRec) ' of ' num2str(mySphereView.nPoints) ' ###########']); %display progress
-        
-    end
-    
-    %save some workspace variables as a matlab file
-    save([out_file_prefix num2str(azimuthResolution) 'x' num2str(elevationResolution) '.mat'],'myBRIRs','rpf','azimuthResolution','elevationResolution');
+    rpf.setSimulationTypeRT(0);
     
     
-    %---------------------------------Create daff------------------------------
-    DAFF15FileName = [out_file_prefix num2str(azimuthResolution) 'x' num2str(elevationResolution) '.v15.daff'];
-    
-    % create new daff dataset
-    dataset = daffv15_create_dataset('alphares', azimuthResolution, ...
-        'betares', elevationResolution, ...
-        'alpharange', [0 360], ...
-        'betarange', [0 180], ...
-        'channels', 2);
-    
-    dataset.channelLabels = {'Left' 'Right'};
-    dataset.samplerate = 44100;
-    dataset.metadata.dataOrigin = raven_project_filename;
-    dataset.metadata.url = 'http://http://www.akustik.rwth-aachen.de/';
-    
-    %populate DAFF dataset with calculated BRIR info
-    for iDataSet=1:dataset.numrecords
-        
-        alpha = dataset.records{iDataSet}.alpha; %get angles of this entry in DAFF dataset
-        beta = dataset.records{iDataSet}.beta;
-        
-        %find the calculated data for this angle combination (alpha/ beta)
-        currentData = 10*myBRIRs((alpha/dataset.alphares)*dataset.betapoints+(beta/dataset.betares)+1).timeData;
-        
-        dataset.records{iDataSet}.data = currentData(1:44100,:)'; %copy data over to DAFF dataset, only first second
-        
-    end
-    
-    %  Write the DAFF file
-    daffv15_write('filename', DAFF15FileName, ...
-        'content', 'IR', ...
-        'dataset', dataset, 'verbose');
-    DAFF17FileName = strrep(DAFF15FileName,'v15','v17');
     additional_metadata = daffv17_add_metadata( [], 'Web resource', 'String', 'http://www.opendaff.org' );
     additional_metadata = daffv17_add_metadata( additional_metadata, 'DELAY_SAMPLES', 'Float', '0' );
-    daffv17_convert_from_daffv15( DAFF15FileName, DAFF17FileName,additional_metadata );
+    
+    daffv17_write(  'filename', DAFF17FileName, ...
+        'content', 'IR', ...
+        'alphares', azimuthResolution, ...
+        'betares', elevationResolution, ...
+        'alpharange', [ 0 360 ], ...
+        'betarange', [ 0 180 ], ...
+        'channels', 2, ...
+        'metadata', additional_metadata, ...
+        'datafunc', @dfRavenBinauralVA, ...
+        'orient', [ 0 0 0 ], ...
+        'userdata', rpf );    
+    
 end
 
 %% Connect to VA server
@@ -153,14 +100,13 @@ va.set_signal_source_buffer_looping( X, true );
 
 % Create a virtual sound source and set a position
 S = va.create_sound_source( 'itaVA_Source' );
-va.set_sound_source_position( S, [ 1 0 0 ] ) % Note: This position is only important for the head rotation. Actual sound source position is encoded in the BRIRs
+va.set_sound_source_position( S, [ 0 0 -1 ] ) % Note: This position is only important for the head rotation. Actual sound source position is encoded in the BRIRs
 
 % Create a listener with a HRTF and position him
 L = va.create_sound_receiver( 'itaVA_Listener' );
 va.set_sound_receiver_position( L, [ 0 0 0 ] )
 
-in_daff_filename = [out_file_prefix num2str(azimuthResolution) 'x' num2str(elevationResolution) '.v17.daff'];
-H = va.create_directivity( in_daff_filename );
+H = va.create_directivity( DAFF17FileName );
 
 va.set_sound_receiver_directivity( L, H );
 

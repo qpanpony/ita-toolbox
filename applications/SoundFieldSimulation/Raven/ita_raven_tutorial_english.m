@@ -26,7 +26,8 @@ rpf.setTemperature(21);
 rpf.setEnergyLoss(60);
 
 %% Choose output
-
+rpf.setSimulationTypeIS(1);
+rpf.setSimulationTypeRT(1);
 rpf.setGenerateRIR(1);         
 rpf.setGenerateBRIR(1);
 rpf.setExportHistogram(1);
@@ -51,13 +52,13 @@ rpf.setSourceDirectivity('KH_O100_Oli_5x5_3rd_relativiert_auf_azi0_ele0.daff');
 rpf.run;
 %% read out
 
-mono_ir = rpf.getMonauralImpulseResponseItaAudio();     % or rpf.getMonauralImpulseResponse() without ITA-Toolbox
+mono_ir = rpf.getImpulseResponseItaAudio();   
 binaural = rpf.getBinauralImpulseResponseItaAudio();
 reverb_time = rpf.getT30();
 %% Plot --> ITA-Toolbox...
 
 % plot in time- / frequency domain
-mono_ir.plot_time;      % plot monaural IR in the time domain
+mono_ir.plot_time;      % plot mono IR in the time domain
 binaural.plot_freq;     % plot binaural IR in the frequency domain
 
 %%plot energy

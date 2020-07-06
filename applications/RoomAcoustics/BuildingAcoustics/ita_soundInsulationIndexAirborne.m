@@ -63,7 +63,7 @@ if min(freqVector) > freq(1) || max(freqVector) < freq(end)
 end
 
 %% sound insulation index
-soundReduction = round(soundReduction/roundingFactor)*roundingFactor;
+soundReduction = round(soundReduction,-log10(roundingFactor));
 soundReductionIndex = min(floor(soundReduction-refCurve));
 delta = max(0,refCurve + soundReductionIndex - soundReduction);
 counter = 0; % stopping criterion

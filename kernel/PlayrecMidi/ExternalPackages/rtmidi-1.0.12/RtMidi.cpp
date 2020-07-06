@@ -39,7 +39,6 @@
 
 #include "RtMidi.h"
 #include <sstream>
-#include <iostream> // pdi
 
 
 //*********************************************************************//
@@ -630,9 +629,7 @@ void RtMidiOut :: initialize( const std::string& clientName )
 {
   // Set up our client.
   MIDIClientRef client;
-  std::cout << "before midiclient create" <<std::endl;
   OSStatus result = MIDIClientCreate( CFStringCreateWithCString( NULL, clientName.c_str(), kCFStringEncodingASCII ), NULL, NULL, &client );
-    std::cout << "after midiclient create" <<std::endl;
 
   if ( result != noErr ) {
     errorString_ = "RtMidiOut::initialize: error creating OS-X MIDI client object.";
@@ -728,9 +725,6 @@ void RtMidiOut :: openVirtualPort( std::string portName )
 
 RtMidiOut :: ~RtMidiOut()
 {
-                    std::cout << "destruktor" <<std::endl;
-
-    
   // Close a connection if it exists.
   closePort();
 

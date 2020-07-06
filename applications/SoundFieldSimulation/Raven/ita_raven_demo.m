@@ -34,7 +34,13 @@ rpf.setTemperature(21); %°C
 
 
 %% Define simulation outputs
-% create monaural room impulse response
+% activate image source simulation
+rpf.setSimulationTypeIS(1);
+
+% activate ray tracing simulation
+rpf.setSimulationTypeRT(1);
+
+% create mono room impulse response
 rpf.setGenerateRIR(1);
 
 % create binaural room impulse response
@@ -65,13 +71,13 @@ rpf.run;
 
 %% Ergebnisse abholen
 % get room impulse responses
-mono_ir = rpf.getMonauralImpulseResponseItaAudio();     % rpf.getMonauralImpulseResponse() without ITA-Toolbox
+mono_ir = rpf.getImpulseResponseItaAudio();    % rpf.rpf.getImpulseResponse() without ITA-Toolbox
 binaural = rpf.getBinauralImpulseResponseItaAudio();
 reverb_time = rpf.getT30();
 
 
 %% ITA-Toolbox......
-mono_ir.plot_time_dB;      % plot monaural RIR in time domain
+mono_ir.plot_time_dB;      % plot mono RIR in time domain
 binaural.plot_time_dB;     % plot binaural RIR in time domain
 
 %% Example: Include loudspeaer frequency response in RIR (for comparisons with measurements)
