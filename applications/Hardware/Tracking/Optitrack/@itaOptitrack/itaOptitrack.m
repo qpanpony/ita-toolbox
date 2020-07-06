@@ -774,7 +774,7 @@ classdef itaOptitrack < handle
 
                             % apply calibration data on first rigid body
                             if Optitrack_obj.data(idx).rigidBodyID == 1
-                                if Optitrack_obj.useCalibration
+                                if ~isempty(Optitrack_obj.useCalibration) && Optitrack_obj.useCalibration && Optitrack_obj.isCalibrated
                                     % get relative orientation change of head-mounted rigid body since calibration procedure by quaternion inversion
                                     oriChange =  Optitrack_obj.dataCalibration.head.orientation.quat.^-1 * Optitrack_obj.data(idx).orientation.quat;
 
@@ -851,7 +851,7 @@ classdef itaOptitrack < handle
                         end
                         
                     else
-                        fprintf('[itaOptitrack] Stoped logging of tracker data.\n')
+                        fprintf('[itaOptitrack] Stopped logging of tracker data.\n')
                     end
                     
                 else
