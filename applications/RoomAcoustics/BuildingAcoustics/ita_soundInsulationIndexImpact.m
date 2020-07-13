@@ -38,7 +38,7 @@ elseif strcmpi(sArgs.type,'astm') % Reference curve and frequencies according to
     refCurve = [2 2 2 2 2 2 1 0 -1 -2 -3 -6 -9 -12 -15 -18].';
     refSurf = 32;
     % for high-frequency rating
-    refCurveIIC = refCurve(7:end); 
+    refCurveIIC = refCurve(7:end);
     refSurfHIIC = 20;
 else
     error([upper(mfilename) ':wrong input for type']);
@@ -67,13 +67,17 @@ impactInsulationClass = max(ceil(NISPL-refCurve));
 delta = max(0,NISPL - (refCurve + impactInsulationClass));
 counter = 0; % stopping criterion
 % shift reference curve until limits are reached
+while sum(delta) <= refSurf && all(delta <= deficiencyLimit) && counter < 1e3
+    impactInsulationClass = impactInsulationClass - dbStep;
+    delta = max(0,NISPL - (refCurve + impactInsulationClass));
+    counter = counter+1;
+end
+impactInsulationClass = impactInsulationClass + dbStep;
+delta = max(0,NISPL - (refCurve + impactInsulationClass));
+deficiencies = itaResult(delta,freq,'freq')*itaValue(1,'dB');
+deficiencies.allowDBPlot = false;
+% different procedure for ASTM
 if strcmpi(sArgs.type,'astm')
-    while sum(delta) <= refSurf && all(delta <= deficiencyLimit) && counter < 1e3
-        impactInsulationClass = impactInsulationClass - dbStep;
-        delta = max(0,NISPL - (refCurve + impactInsulationClass));
-        counter = counter+1;
-    end
-    impactInsulationClass = impactInsulationClass + dbStep;
     impactInsulationClass = 110 - impactInsulationClass;
     % high-frequency rating
     NISPL_HIIC = NISPL(7:end);
@@ -87,18 +91,7 @@ if strcmpi(sArgs.type,'astm')
     end
     impactInsulationClassH = impactInsulationClassH + dbStep;
     impactInsulationClassH = 110 - impactInsulationClassH;
-else
-    while sum(delta) <= refSurf && all(delta <= deficiencyLimit) && counter < 1e3
-        impactInsulationClass = impactInsulationClass - dbStep;
-        delta = max(0,NISPL - (refCurve + impactInsulationClass));
-        counter = counter+1;
-    end
-    impactInsulationClass = impactInsulationClass + dbStep;
 end
-
-delta = max(0,NISPL - (refCurve + impactInsulationClass));
-deficiencies = itaResult(delta,freq,'freq')*itaValue(1,'dB');
-deficiencies.allowDBPlot = false;
 
 %% adaptation term for ISO
 if strcmpi(sArgs.type,'iso')
@@ -119,7 +112,6 @@ if sArgs.createPlot
         refCurve = refCurve + 110 - impactInsulationClass;
     else
         refCurve = refCurve + impactInsulationClass;
-        
     end
     plotResult = itaResult([[nan(sum(freqVector<min(freq)),1); 10.^((refCurve)./20); nan(sum(freqVector>max(freq)),1)], [ones(sum(freqVector<=500),1)*10.^(refCurve(freq == 500)./20); nan(sum(freqVector>500),1)]],freqVector,'freq');
     fgh = ita_plot_freq(data);
