@@ -26,9 +26,13 @@ for n = 1:N
     
     for m = 1 : M-1
         
-        prev_anchor_pos = propagation_path.propagation_anchors{ m }.interaction_point( 1:3 );
-        next_anchor_pos = propagation_path.propagation_anchors{ m + 1 }.interaction_point( 1:3 );
-        
+        if isa( propagation_path.propagation_anchors, 'cell' )
+            prev_anchor_pos = propagation_path.propagation_anchors{ m }.interaction_point( 1:3 );
+            next_anchor_pos = propagation_path.propagation_anchors{ m + 1 }.interaction_point( 1:3 );
+        else
+            prev_anchor_pos = propagation_path.propagation_anchors( m ).interaction_point( 1:3 );
+            next_anchor_pos = propagation_path.propagation_anchors( m + 1 ).interaction_point( 1:3 );
+        end
         r( n ) = r( n ) + norm( next_anchor_pos - prev_anchor_pos );
         
     end
