@@ -63,6 +63,8 @@ try
     [status,commitID] = system(sprintf('git merge-base %s HEAD',sArgs.branch));
     if status == 0
         commitID = strrep(commitID,'[\n\r]+','');
+        % bugfix for LF / newline not caught by \n\r
+        commitID = strrep(commitID,newline,'');
     else
         ita_verbose_info(sprintf('Git Hash Failed: %s',commitID), 1);
         commitID = '0';
