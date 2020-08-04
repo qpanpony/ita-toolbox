@@ -55,14 +55,15 @@ if ~isa(data,'itaSuper')
     end
 end
 freqVector = data.freqVector;
-NISPL = 20.*log10(interp1(freqVector,data.freqData(:,1),freq,'spline','extrap')) + 94;
+
+NISPL = 20.*log10(interp1(freqVector,data.freqData(:,1),freq,'spline','extrap')) + 93.98;
+NISPL = round(NISPL,-log10(roundingFactor));
 
 if min(freqVector) > freq(1) || max(freqVector) < freq(end)
     warning([upper(mfilename) ': Sound insulation data will be extrapolated']);
 end
 
 %% sound insulation index
-NISPL = round(NISPL/roundingFactor)*roundingFactor;
 impactInsulationClass = max(ceil(NISPL-refCurve));
 delta = max(0,NISPL - (refCurve + impactInsulationClass));
 counter = 0; % stopping criterion
@@ -95,9 +96,11 @@ end
 
 %% adaptation term for ISO
 if strcmpi(sArgs.type,'iso')
-    C = round(round((10.*log10(sum(data.freq2value(100,2500).^2))+93.98)/0.1)*0.1 - 15 - impactInsulationClass);
+    tmpData = round(10.*log10(data.freq2value(100,2500).^2) + 93.98,1);
+    C = round(10.*log10(sum(10.^(tmpData./10)))) - 15 - impactInsulationClass;
     if min(data.freqVector) <= 50 % if we have data
-        C_50 = round(round((10.*log10(sum(data.freq2value(50,2500).^2))+93.98)/0.1)*0.1 - 15 - impactInsulationClass);
+        tmpData = round(10.*log10(data.freq2value(50,2500).^2) + 93.98,1);
+        C_50 = round(10.*log10(sum(10.^(tmpData./10)))) - 15 - impactInsulationClass;
     else
         C_50 = nan;
     end
